@@ -1,0 +1,89 @@
+import dotenv from "dotenv";
+import { z } from "zod";
+
+dotenv.config();
+
+const booleanFromEnv = z.preprocess((val) => {
+    if (typeof val === "string") {
+        const s = val.trim().toLowerCase();
+        if (["1", "true", "yes", "y", "on"].includes(s)) return true;
+        if (["0", "false", "no", "n", "off", ""].includes(s)) return false;
+    }
+    return val;
+}, z.boolean());
+
+// #region Auth Schema
+
+const authCasdoorSchema = z.object({
+    AUTH_PROVIDER: z.literal("casdoor"),
+    AUTH_CASDOOR_ID: z.string(),
+    AUTH_CASDOOR_SECRET: z.string(),
+    AUTH_CASDOOR_ISSUER: z.string()
+});
+
+const authSchema = z.discriminatedUnion("AUTH_PROVIDER", [authCasdoorSchema]);
+
+// #endregion
+
+// #region Storage Schemas
+
+const storageS3Schema = z.object({
+    STORAGE_PROVIDER: z.literal("s3"),
+    S3_ENDPOINT: z.string(),
+    S3_BUCKET: z.string(),
+    S3_ACCESS_KEY: z.string(),
+    S3_SECRET_KEY: z.string()
+});
+
+const storageLocalSchema = z.object({
+    STORAGE_PROVIDER: z.literal("local"),
+    STORAGE_LOCAL_DIR: z.string()
+});
+
+const storageSchema = z.discriminatedUnion("STORAGE_PROVIDER", [
+    storageS3Schema,
+    storageLocalSchema
+]);
+
+// #endregion
+
+// #region base schema
+const baseSchema = z.object({
+    // app
+    NEXT_PUBLIC_APP_URL: z.string().default("http://localhost:3119"),
+    IS_LOCAL_APP: booleanFromEnv.default(false),
+    ENABLE_AUTH: booleanFromEnv.default(false),
+    // auth
+    NEXTAUTH_SECRET: z.string().min(32).max(255),
+    NEXTAUTH_URL: z.string().default("http://localhost:3119"),
+    // database
+    TYPEORM_CONNECTION: z.string()
+});
+
+const envSchemaBase = z.intersection(baseSchema, storageSchema);
+
+const envSchema = envSchemaBase.superRefine((data, ctx) => {
+    if (data.ENABLE_AUTH) {
+        const result = authSchema.safeParse(data);
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                ctx.addIssue(issue as any);
+            }
+        }
+    }
+});
+
+type EnvSchema = z.infer<typeof baseSchema> &
+    z.infer<typeof storageSchema> &
+    Partial<z.infer<typeof authSchema>>;
+
+let env: EnvSchema;
+
+try {
+    env = envSchema.parse(process.env);
+} catch (error) {
+    console.error(error);
+    process.exit(1);
+}
+
+export default env;

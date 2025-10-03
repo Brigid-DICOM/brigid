@@ -1,0 +1,149 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.99 0.005 60); /* 淺米色/奶油白 */
+  --foreground: oklch(0.15 0.015 60);  /* 深棕/紅棕色 */
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.6 0.18 55);       /* 橙紅色 */
+  --primary-foreground: oklch(0.985 0 0); /* 白色 */
+  --secondary: oklch(0.95 0.01 50);    
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.97 0.005 60);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.577 0.245 27.325); /* 深紅色 */
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* **新增的成功色 (Success): 暖綠色 ** */
+  --success: oklch(0.65 0.12 140);     /* 溫和的綠色 */
+  --success-foreground: oklch(0.15 0 0); /* 幾乎黑色 */
+  
+  /* **新增的警告色 (Warning): 琥珀黃 ** */
+  --warning: oklch(0.8 0.1 85);        /* 柔和的琥珀黃 */
+  --warning-foreground: oklch(0.15 0 0);  /* 幾乎黑色 */
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.6 0.18 55 / 0.5); /* Primary 的半透明版本 */
+  /* Chart 1: Primary 暖紅色 (來自火把) */
+  --chart-1: oklch(0.6 0.18 55); 
+  /* Chart 2: Success 暖綠色 (來自披風) */
+  --chart-2: oklch(0.65 0.12 140);
+  /* Chart 3: Warning 琥珀黃 (來自火焰基底) */
+  --chart-3: oklch(0.8 0.1 85);
+  /* Chart 4: Soft Brown/Gold 柔和棕色 (來自 Login 輪廓) */
+  --chart-4: oklch(0.55 0.1 75);
+  /* Chart 5: Cool Tone 對比藍色 (用於區分) */
+  --chart-5: oklch(0.65 0.1 245);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+.dark {
+  --background: oklch(0.1 0.01 60);   /* 深棕/紅棕色 (暗底) */
+  --foreground: oklch(0.985 0 0);     /* 亮白色 */
+  --card: oklch(0.15 0.01 60);        /* 略深的卡片背景 */
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0.01 60);      /* 彈窗背景 */
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.7 0.15 55);       /* 較亮的橙紅色 */
+  --primary-foreground: oklch(0.1 0 0); /* 深色文字 */
+  --secondary: oklch(0.2 0.01 60);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.2 0.01 60);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.25 0.01 60);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.704 0.191 22.216); /* 較亮的破壞紅 */
+  --destructive-foreground: oklch(0.1 0 0);
+  /* **新增的成功色 (Success): 暖綠色 (與 Light mode 色相一致，但更亮) ** */
+  --success: oklch(0.75 0.1 140);
+  --success-foreground: oklch(0.1 0 0);
+
+  /* **新增的警告色 (Warning): 琥珀黃 (與 Light mode 色相一致，但更亮) ** */
+  --warning: oklch(0.9 0.08 85);
+  --warning-foreground: oklch(0.1 0 0);
+  --border: oklch(0.3 0.01 60);
+  --input: oklch(0.3 0.01 60);
+  --ring: oklch(0.7 0.15 55 / 0.5); /* Primary 的半透明版本 */
+  /* Chart 1: Primary 亮暖紅色 */
+  --chart-1: oklch(0.7 0.15 55);
+  /* Chart 2: Success 亮暖綠色 */
+  --chart-2: oklch(0.75 0.1 140);
+  /* Chart 3: Warning 亮琥珀黃 */
+  --chart-3: oklch(0.9 0.08 85);
+  /* Chart 4: Soft Brown/Gold 亮柔和棕色 */
+  --chart-4: oklch(0.7 0.1 75);
+  /* Chart 5: Cool Tone 亮藍色 */
+  --chart-5: oklch(0.75 0.08 245);
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
