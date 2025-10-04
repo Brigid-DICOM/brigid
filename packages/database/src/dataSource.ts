@@ -2,6 +2,7 @@ import "reflect-metadata";
 import env from "@brigid/env";
 import { DataSource } from "typeorm";
 import { AccountEntity } from "./entities/account.entity";
+import { PersonNameEntity } from "./entities/personName.entity";
 import { SessionEntity } from "./entities/session.entity";
 import { UserEntity } from "./entities/user.entity";
 import { UserWorkspaceEntity } from "./entities/userWorkspace.entity";
@@ -18,7 +19,8 @@ export const AppDataSource = new DataSource({
         SessionEntity,
         VerificationTokenEntity,
         WorkspaceEntity,
-        UserWorkspaceEntity
+        UserWorkspaceEntity,
+        PersonNameEntity
     ],
     synchronize: env.IS_LOCAL_APP,
     migrations: migrations,
