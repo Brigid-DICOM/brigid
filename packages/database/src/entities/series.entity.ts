@@ -1,5 +1,6 @@
 import {
     Column,
+    CreateDateColumn,
     Entity,
     JoinColumn,
     ManyToOne,
@@ -10,7 +11,6 @@ import { DICOM_DELETE_STATUS } from "@/const/dicom";
 import type { DicomCodeSequenceEntity } from "./dicomCodeSequence.entity";
 import type { StudyEntity } from "./study.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
-import { CreateDateColumn } from "typeorm/browser";
 
 @Entity("series")
 export class SeriesEntity {
