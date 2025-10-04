@@ -15,6 +15,7 @@
     "@brigid/env": "workspace:*",
     "@electric-sql/pglite": "^0.3.10",
     "better-sqlite3": "^12.4.1",
+    "class-validator": "^0.14.2",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.27",
