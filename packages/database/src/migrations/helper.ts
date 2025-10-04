@@ -51,7 +51,7 @@ export function getNowColumn(queryRunner: QueryRunner, columnName: string = "cre
     if (isPostgres(queryRunner)) {
         return new TableColumn({
             name: columnName,
-            type: "timestamptz",
+            type: "timestamp",
             isNullable: false,
             default: "NOW()"
         });
