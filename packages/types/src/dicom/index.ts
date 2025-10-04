@@ -14,6 +14,8 @@ export type DicomValue =
 export type DicomElement = {
     vr: string;
     Value?: DicomValue;
+    BulkDataURI?: string;
+    InlineBinary?: string;
 };
 
 export type DicomTag = {
