@@ -95,7 +95,8 @@ export class CreatePatientTable1759574990455 implements MigrationInterface {
                 indices: [
                     {
                         name: "uq_patient",
-                        columnNames: ["dicomPatientId", "workspaceId"]
+                        columnNames: ["dicomPatientId", "workspaceId"],
+                        isUnique: true
                     }
                 ]
             }),

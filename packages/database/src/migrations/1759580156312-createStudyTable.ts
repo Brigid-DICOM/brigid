@@ -155,7 +155,8 @@ export class CreateStudyTable1759580156312 implements MigrationInterface {
                 indices: [
                     {
                         name: "uq_study",
-                        columnNames: ["dicomPatientId", "studyInstanceUid", "workspaceId"]
+                        columnNames: ["dicomPatientId", "studyInstanceUid", "workspaceId"],
+                        isUnique: true
                     }
                 ]
             }),
