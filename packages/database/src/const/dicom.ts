@@ -9,3 +9,10 @@ export const PATIENT_SEX = {
     "FEMALE": "F",
     "OTHER": "O",
 } as const;
+
+export const DICOM_INSTANCE_AVAILABILITY = {
+    "ONLINE": "ONLINE",
+    "NEARLINE": "NEARLINE",
+    "OFFLINE": "OFFLINE",
+    "UNAVAILABLE": "UNAVAILABLE",
+} as const;
