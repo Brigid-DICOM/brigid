@@ -5,3 +5,4 @@ export { CreatePatientTable1759574990455 } from "./1759574990455-createPatientTa
 export { CreateStudyTable1759580156312 } from "./1759580156312-createStudyTable";
 export { CreateDicomCodeSequenceTable1759584745322 } from "./1759584745322-createDicomCodeSequenceTable";
 export { CreateSeriesTable1759587216867 } from "./1759587216867-createSeriesTable";
+export { CreateInstanceTable1759646421554 } from "./1759646421554-createInstanceTable";
