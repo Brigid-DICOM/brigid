@@ -1,4 +1,5 @@
 import { type MigrationInterface, type QueryRunner, Table } from "typeorm";
+import { DICOM_DELETE_STATUS } from "../const/dicom";
 import { enableUuidExtension, getNowColumn, getUuidColumn, getUuidReferenceColumn } from "./helper";
 
 export class CreateStudyTable1759580156312 implements MigrationInterface {
@@ -113,7 +114,8 @@ export class CreateStudyTable1759580156312 implements MigrationInterface {
                     {
                         name: "deleteStatus",
                         type: "smallint",
-                        isNullable: false
+                        isNullable: false,
+                        default: DICOM_DELETE_STATUS.ACTIVE
                     },
                     {
                         name: "deletedAt",

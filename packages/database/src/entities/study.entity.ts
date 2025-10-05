@@ -9,7 +9,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
-import { DICOM_DELETE_STATUS, DICOM_INSTANCE_AVAILABILITY } from "@/const/dicom";
+import { DICOM_DELETE_STATUS, DICOM_INSTANCE_AVAILABILITY } from "../const/dicom";
 import type { PatientEntity } from "./patient.entity";
 import type { PersonNameEntity } from "./personName.entity";
 import type { WorkspaceEntity } from "./workspace.entity";

@@ -7,7 +7,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
-import { DICOM_DELETE_STATUS } from "@/const/dicom";
+import { DICOM_DELETE_STATUS } from "../const/dicom";
 import type { SeriesEntity } from "./series.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
 

@@ -1,5 +1,5 @@
 import { type MigrationInterface, type QueryRunner, Table } from "typeorm";
-import { DICOM_DELETE_STATUS } from "@/const/dicom";
+import { DICOM_DELETE_STATUS } from "../const/dicom";
 import { enableUuidExtension, getNowColumn, getUuidColumn, getUuidReferenceColumn } from "./helper";
 
 export class CreateInstanceTable1759646421554 implements MigrationInterface {
