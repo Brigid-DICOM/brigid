@@ -1,8 +1,11 @@
-import { AppDataSource } from "@brigid/database";
+import { AppDataSource } from "@brigid/database/src/dataSource";
 import { UserWorkspaceEntity } from "@brigid/database/src/entities/userWorkspace.entity";
 import { WorkspaceEntity } from "@brigid/database/src/entities/workspace.entity";
-import { Repository } from "typeorm";
+import type { Repository } from "typeorm";
+import { v5 as uuidV5 } from "uuid";
+import { NAMESPACE_FOR_UUID } from "../const/dicom.const";
 import { ROLE_PERMISSION_TEMPLATES } from "../const/workspace.const";
+import { UserService } from "./user.service";
 
 interface CreateWorkspaceParams {
     name: string;
@@ -108,5 +111,47 @@ export class WorkspaceService {
                 isDefault: false
             }
         };
+    }
+
+    async getWorkspaceById(workspaceId: string) {
+        return await this.workspaceRepository.findOne({
+            where: {
+                id: workspaceId
+            }
+        });
+    }
+
+    async getOrCreateSystemWorkspace() {
+        const SYSTEM_WORKSPACE_ID = uuidV5("brigid-system-workspace",NAMESPACE_FOR_UUID);
+        const userService = new UserService();
+        const systemUser = await userService.getGuestUser();
+
+        let workspace = await AppDataSource.getRepository(WorkspaceEntity).findOne({
+            where: {
+                id: SYSTEM_WORKSPACE_ID
+            }
+        });
+
+        if (!workspace) {
+            workspace = await this.workspaceRepository.save({
+                id: SYSTEM_WORKSPACE_ID,
+                name: "System Default Workspace",
+                ownerId: systemUser.id
+            });
+
+            await this.userWorkspaceRepository.save({
+                userId: systemUser.id,
+                workspaceId: workspace.id,
+                role: "owner",
+                permissions: ROLE_PERMISSION_TEMPLATES.owner,
+                isDefault: true
+            });
+        }
+
+        return workspace;
+    }
+
+    async getWorkspaceForGuestAccess() {
+        return await this.getOrCreateSystemWorkspace();
     }
 }

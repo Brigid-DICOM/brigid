@@ -28,10 +28,9 @@ function getAuthProvider() {
 }
 
 const app = new Hono().basePath("/api")
-.use("*", async (c, next) => {
+.use(async (c, next) => {
     if (!AppDataSource.isInitialized) {
         await AppDataSource.initialize();
-        console.log("Database initialized");
     }
 
     await next();
