@@ -36,34 +36,34 @@ export class InstanceEntity {
     sopInstanceUid!: string;
 
     @Column({ type: "date", comment: "0008,0022", nullable: true })
-    acquisitionDate!: string | null;
+    acquisitionDate?: string | null;
 
     @Column({ type: "decimal", precision: 12, scale: 6, comment: "0008,0030", nullable: true })
-    acquisitionDateTime!: string | null;
+    acquisitionDateTime?: string | null;
 
     @Column({ type: "date", comment: "0008,0023", nullable: true })
-    contentDate!: string | null;
+    contentDate?: string | null;
 
     @Column({ type: "decimal", precision: 12, scale: 6, comment: "0008,0033", nullable: true })
-    contentDateTime!: string | null;
+    contentDateTime?: string | null;
 
     @Column({ type: "int", comment: "0020,0013", nullable: true })
-    instanceNumber!: number | null;
+    instanceNumber?: number | null;
 
     @Column({ type: "int", comment: "0028,0008", nullable: true })
-    numberOfFrames!: number | null;
+    numberOfFrames?: number | null;
 
     @Column({ type: "varchar", comment: "0028,1050", length: 255, nullable: true })
-    windowCenter!: string | null;
+    windowCenter?: string | null;
 
     @Column({ type: "varchar", comment: "0028,1051", length: 255, nullable: true })
-    windowWidth!: string | null;
+    windowWidth?: string | null;
 
     @Column({ type: "varchar", comment: "0040,A491", length: 255, nullable: true })
-    completionFlag!: string | null;
+    completionFlag?: string | null;
 
     @Column({ type: "varchar", comment: "0040,A493", length: 255, nullable: true })
-    verificationFlag!: string | null;
+    verificationFlag?: string | null;
 
     @Column({ type: "smallint", default: DICOM_DELETE_STATUS.ACTIVE })
     deleteStatus!: number;
@@ -75,7 +75,7 @@ export class InstanceEntity {
     json!: string;
 
     @Column({ type: "varchar", length: 255, nullable: true })
-    hashSum!: string | null;
+    hashSum?: string | null;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt!: Date;

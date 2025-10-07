@@ -29,35 +29,35 @@ export class StudyEntity {
     characterSet!: string;
 
     @Column({ type: "date", comment: "0008,0020", nullable: true })
-    studyDate!: string | null;
+    studyDate?: string | null;
 
     @Column({ type: "decimal", precision: 12, scale: 6, comment: "0008,0030", nullable: true })
-    studyTime!: string | null;
+    studyTime?: string | null;
 
     @Column({ type: "varchar", length: 255, comment: "0008,0050" })
-    accessionNumber!: string | null;
+    accessionNumber?: string | null;
 
     @Column({ type: "varchar", length: 255, comment: "0008,0051", nullable: true })
     @IsIn(Object.values(DICOM_INSTANCE_AVAILABILITY))
-    instanceAvailability!: string | null;
+    instanceAvailability?: string | null;
 
     @Column({ type: "varchar", length: 32, comment: "0008,0201", nullable: true })
-    timezoneOffsetFromUTC!: string | null;
+    timezoneOffsetFromUTC?: string | null;
 
     @Column({ type: "varchar", length: 4000, comment: "0008,1030", nullable: true })
-    studyDescription!: string | null;
+    studyDescription?: string | null;
 
-    @Column({ type: "varchar", length: 255, comment: "0020,000D", nullable: true })
-    studyInstanceUid!: string | null;
+    @Column({ type: "varchar", length: 255, comment: "0020,000D" })
+    studyInstanceUid!: string;
 
     @Column({ type: "varchar", length: 255, comment: "0020,0010", nullable: true })
-    studyId!: string | null;
+    studyId?: string | null;
 
     @Column({ type: "int", comment: "0020,1206", nullable: true })
-    numberOfStudyRelatedSeries!: number | null;
+    numberOfStudyRelatedSeries?: number | null;
 
     @Column({ type: "int", comment: "0020,1208", nullable: true })
-    numberOfStudyRelatedInstances!: number | null;
+    numberOfStudyRelatedInstances?: number | null;
 
     @Column({ type: "smallint", default: DICOM_DELETE_STATUS.ACTIVE })
     deleteStatus!: number; // 0: active, 1: recycled, 2: deleted
@@ -74,7 +74,7 @@ export class StudyEntity {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt!: Date;
 
-    @Column({ type: "varchar", length: 255 })
+    @Column({ type: "varchar" })
     patientId!: string;
 
     @Column({ type: "varchar", comment: "0008,0090" })
@@ -83,7 +83,7 @@ export class StudyEntity {
     @Column({  type: "varchar" })
     workspaceId!: string;
 
-    @OneToOne("person_name", "id", { nullable: true })
+    @OneToOne("person_name", "id", { nullable: true, cascade: true })
     @JoinColumn({ name: "referringPhysicianNameId", referencedColumnName: "id"})
     referringPhysicianName!: PersonNameEntity | null;
 
@@ -91,6 +91,7 @@ export class StudyEntity {
     @JoinColumn({ name: "workspaceId", referencedColumnName: "id" })
     workspace!: WorkspaceEntity;
 
+    // 不加入 cascade: true，建議使用 patient id 連結 patient
     @ManyToOne("patient", "studies", { onDelete: "CASCADE" })
     @JoinColumn({ name: "patientId", referencedColumnName: "id" })
     patient!: PatientEntity;

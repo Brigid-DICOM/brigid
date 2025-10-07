@@ -69,7 +69,7 @@ export class CreateSeriesTable1759587216867 implements MigrationInterface {
                         name: "seriesDescription",
                         type: "varchar",
                         length: "4000",
-                        isNullable: false,
+                        isNullable: true,
                         comment: "0008,103E"
                     },
                     {

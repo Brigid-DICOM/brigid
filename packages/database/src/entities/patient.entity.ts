@@ -60,7 +60,7 @@ export class PatientEntity {
     @Column({ type: "varchar" })
     workspaceId!: string;
 
-    @OneToOne("person_name", "id", { nullable: true })
+    @OneToOne("person_name", "id", { nullable: true, cascade: true })
     @JoinColumn({ name: "patientNameId", referencedColumnName: "id" })
     patientName!: PersonNameEntity | null;
 
