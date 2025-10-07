@@ -9,6 +9,7 @@ import {
 import { transformer } from "../utils/transformer";
 import type { AccountEntity } from "./account.entity";
 import type { SessionEntity } from "./session.entity";
+import type { UserWorkspaceEntity } from "./userWorkspace.entity";
 
 @Entity("user")
 export class UserEntity {
@@ -27,10 +28,10 @@ export class UserEntity {
     @Column({ type: "varchar", nullable: true })
     image!: string | null;
 
-    @CreateDateColumn({ type: "timestamptz" })
+    @CreateDateColumn({ type: "timestamp" })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamptz" })
+    @UpdateDateColumn({ type: "timestamp" })
     updatedAt!: Date;
 
     @OneToMany("account", "userId")
@@ -38,4 +39,7 @@ export class UserEntity {
 
     @OneToMany("session", "userId")
     sessions!: SessionEntity[];
+
+    @OneToMany("user_workspace", "userId")
+    userWorkspaces!: UserWorkspaceEntity[];
 }

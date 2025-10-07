@@ -32,10 +32,10 @@ export class UserWorkspaceEntity {
     @Column({ type: "int", default: 0 })
     permissions!: number;
 
-    @CreateDateColumn({ type: "timestamptz" })
+    @CreateDateColumn({ type: "timestamp" })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamptz" })
+    @UpdateDateColumn({ type: "timestamp" })
     updatedAt!: Date;
 
     @ManyToOne("user", "user_workspace", { onDelete: "CASCADE" })
