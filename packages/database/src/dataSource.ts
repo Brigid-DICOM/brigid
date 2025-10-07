@@ -2,6 +2,7 @@ import "reflect-metadata";
 import env from "@brigid/env";
 import { DataSource } from "typeorm";
 import { AccountEntity } from "./entities/account.entity";
+import { DicomCodeSequenceEntity } from "./entities/dicomCodeSequence.entity";
 import { InstanceEntity } from "./entities/instance.entity";
 import { PatientEntity } from "./entities/patient.entity";
 import { PersonNameEntity } from "./entities/personName.entity";
@@ -28,7 +29,8 @@ export const AppDataSource = new DataSource({
         PatientEntity,
         StudyEntity,
         SeriesEntity,
-        InstanceEntity
+        InstanceEntity,
+        DicomCodeSequenceEntity
     ],
     synchronize: env.IS_LOCAL_APP,
     migrations: migrations,
