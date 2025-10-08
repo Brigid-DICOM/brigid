@@ -1,5 +1,7 @@
 import type { StatusCode as HttpStatusCode } from "hono/utils/http-status";
 import { DICOM_STATUS } from "@/server/const/dicomStatus";
+import type { MultipartFile } from "@/server/types/file";
+import { DicomFileSaver } from "../utils/dicom/dicomFileSaver";
 import { DicomJsonUtils } from "../utils/dicom/dicomJsonUtils";
 import { parseFromFilename } from "./dicom/dicomJsonParser";
 import { StowRsResponseMessage } from "./stowRsResponseMessage";
@@ -9,34 +11,44 @@ export class StowRsService {
     private readonly httpStatusCode: HttpStatusCode;
 
     constructor(private readonly workspaceId: string) {
-        this.stowRsResponseMessage = new StowRsResponseMessage(this.workspaceId);
+        this.stowRsResponseMessage = new StowRsResponseMessage(
+            this.workspaceId
+        );
         this.httpStatusCode = 200;
     }
 
-    async storeDicomFile(file: {
-        originalFilename: string;
-        filename: string;
-    }) {
+    async storeDicomFile(file: MultipartFile) {
         try {
             const dicomJson = await this.getDicomJson(file.filename);
             const dicomJsonUtils = new DicomJsonUtils(dicomJson);
 
+            const {
+                studyInstanceUid,
+                seriesInstanceUid,
+                sopInstanceUid,
+                sopClassUid
+            } = dicomJsonUtils.getUidCollection();
+
+            // store/upload dicom file to storage
+            const dicomFileSaver = new DicomFileSaver(dicomJsonUtils, this.workspaceId);
+            const { storedFilePath } = await dicomFileSaver.saveDicomFileToStorage(file);
+            await dicomFileSaver.saveToDb(storedFilePath);
+
             this.stowRsResponseMessage.addSuccessSopInstance({
-                studyInstanceUid: dicomJsonUtils.getUidCollection().studyInstanceUid as string,
-                seriesInstanceUid: dicomJsonUtils.getUidCollection().seriesInstanceUid as string,
-                sopInstanceUid: dicomJsonUtils.getUidCollection().sopInstanceUid as string,
-                sopClassUid: dicomJsonUtils.getUidCollection().sopClassUid as string
+                studyInstanceUid: studyInstanceUid,
+                seriesInstanceUid: seriesInstanceUid,
+                sopInstanceUid: sopInstanceUid,
+                sopClassUid: sopClassUid,
             });
-        } catch(error) {
-            this.stowRsResponseMessage.addOtherFailureReason(DICOM_STATUS.ProcessingFailure.toString());
+        } catch (error) {
+            this.stowRsResponseMessage.addOtherFailureReason(
+                DICOM_STATUS.ProcessingFailure.toString()
+            );
             console.error("Failed to store DICOM file", error);
         }
     }
 
-    async storeDicomFiles(files: {
-        originalFilename: string;
-        filename: string;
-    }[]) {
+    async storeDicomFiles(files: MultipartFile[]) {
         for (const file of files) {
             await this.storeDicomFile(file);
         }

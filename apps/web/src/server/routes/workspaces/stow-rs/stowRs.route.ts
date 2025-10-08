@@ -1,11 +1,13 @@
-import fs from "node:fs";
+import path from "node:path";
 import { parseMultipartRequest } from "@remix-run/multipart-parser";
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import { describeRoute, validator as zValidator } from "hono-openapi";
-import tmp from "tmp";
+import { describeRoute, validator as zValidator, resolver } from "hono-openapi";
 import { z } from "zod";
+import { verifyWorkspaceExists } from "@/server/middlewares/workspace.middleware";
 import { StowRsService } from "@/server/services/stowRs.service";
+import { StowRsResponseMessageSchema } from "@/server/types/dicom";
+import type { MultipartFile } from "@/server/types/file";
 
 const stowRsRoute = new Hono()
 .post(
@@ -37,28 +39,33 @@ const stowRsRoute = new Hono()
         },
         responses: {
             200: {
-                description: "The DICOM instance stored successfully"
+                description: "The DICOM instance stored successfully",
+                content: {
+                    "application/json": {
+                        schema: resolver(StowRsResponseMessageSchema)
+                    }
+                }
             }
         }
     }),
+    verifyWorkspaceExists,
     zValidator("param", z.object({
         workspaceId: z.string().describe("The ID of the workspace")
     })),
     async (c) => {
         const workspaceId = c.req.param("workspaceId");
 
-        const files: {
-            originalFilename: string;
-            filename: string;
-        }[] = [];
+        const files: MultipartFile[] = [];
 
-        for await (const part of parseMultipartRequest(c.req.raw)) {
-            const tempFile = tmp.fileSync();
-            console.log("tempFile", tempFile);
-            await fs.promises.writeFile(tempFile.name, part.bytes);
+        for await (const part of parseMultipartRequest(c.req.raw, { maxFileSize: 6 * 1024 * 1024 * 1024 })) {
+            if (!part.filename) {
+                throw new Error("File name is required");
+            }
+
             files.push({
-                originalFilename: part.filename || tempFile.name,
-                filename: tempFile.name,
+                originalFilename: part.originalFilename || path.basename(part.filename),
+                filename: part.filename,
+                size: part.size
             });
         }
 
