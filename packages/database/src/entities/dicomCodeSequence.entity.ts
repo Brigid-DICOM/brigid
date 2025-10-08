@@ -11,10 +11,10 @@ export class DicomCodeSequenceEntity {
     codeValue!: string;
 
     @Column({ type: "varchar", length: 255, comment: "0008,0102", nullable: true })
-    codingSchemeDesignator!: string;
+    codingSchemeDesignator?: string | null;
 
     @Column({ type: "varchar", length: 255, comment: "0008,0103", nullable: true })
-    codingSchemeVersion!: string;
+    codingSchemeVersion?: string | null;
 
     @Column({ type: "varchar", length: 255, comment: "0008,0104" })
     codeMeaning!: string;
