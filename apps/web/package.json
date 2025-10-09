@@ -12,6 +12,8 @@
   "dependencies": {
     "@auth/core": "^0.40.0",
     "@auth/typeorm-adapter": "^2.10.0",
+    "@aws-sdk/client-s3": "^3.901.0",
+    "@aws-sdk/lib-storage": "^3.905.0",
     "@brigid/database": "workspace:^",
     "@brigid/env": "workspace:*",
     "@brigid/types": "workspace:^",

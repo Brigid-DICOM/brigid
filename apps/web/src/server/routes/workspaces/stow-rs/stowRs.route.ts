@@ -2,7 +2,7 @@ import path from "node:path";
 import { parseMultipartRequest } from "@remix-run/multipart-parser";
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import { describeRoute, validator as zValidator, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { verifyWorkspaceExists } from "@/server/middlewares/workspace.middleware";
 import { StowRsService } from "@/server/services/stowRs.service";
@@ -65,7 +65,8 @@ const stowRsRoute = new Hono()
             files.push({
                 originalFilename: part.originalFilename || path.basename(part.filename),
                 filename: part.filename,
-                size: part.size
+                size: part.size,
+                mediaType: part.mediaType || "application/dicom"
             });
         }
 

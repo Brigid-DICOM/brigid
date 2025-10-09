@@ -59,12 +59,13 @@ const baseSchema = z.object({
     // database
     TYPEORM_CONNECTION: z.string(),
     // dicom
-    DICOM_STORAGE_FILEPATH: z.string().optional().default("/dicom/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm")
+    DICOM_STORAGE_FILEPATH: z.string().optional().default("/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm")
     .refine(
         (val) => 
             (val.includes("{0020000D}") || val.includes("{0020000D,hash}")) && 
             (val.includes("{0020000E}") || val.includes("{0020000E,hash}")) && 
-            (val.includes("{00080018}") || val.includes("{00080018,hash}")),
+            (val.includes("{00080018}") || val.includes("{00080018,hash}")) &&
+            (val.includes("{workspaceId}")) || (val.includes("{workspaceId,hash}")),
         {
             message: "DICOM_STORAGE_FILEPATH must contain 0020000D, 0020000E, and 00080018"
         }

@@ -4,7 +4,6 @@ import { PatientService } from "@/server/services/patient.service";
 import { SeriesService } from "@/server/services/series.service";
 import { StudyService } from "@/server/services/study.service";
 import type { MultipartFile } from "@/server/types/file";
-import type { LocalStorageProvider } from "../storage/localStorageProvider";
 import { getStorageProvider } from "../storage/storageFactory";
 import {
     toInstanceDbEntity,
@@ -26,8 +25,8 @@ export class DicomFileSaver {
 
     async saveDicomFileToStorage(file: MultipartFile) {
         // save to storage
-        const filePath = this.dicomJsonUtils.getFilePath();
-        const storageProvider = getStorageProvider() as LocalStorageProvider;
+        const filePath = this.dicomJsonUtils.getFilePath({ workspaceId: this.workspaceId });
+        const storageProvider = getStorageProvider();
         const { filePath: storedFilePath } = await storageProvider.uploadFile(
             file,
             filePath

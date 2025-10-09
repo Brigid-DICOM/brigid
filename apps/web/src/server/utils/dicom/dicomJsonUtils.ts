@@ -105,14 +105,27 @@ export class DicomJsonUtils {
      * - ggggeeee: DICOM tag (8位16進制)
      * - hash: 將tag值進行hash處理
      *
-     * @param pathPattern - 路徑 pattern，預設使用環境變數 DICOM_STORAGE_FILEPATH
+     * @param options.pathPattern - 路徑 pattern，預設使用環境變數 DICOM_STORAGE_FILEPATH
+     * @param options.workspaceId - 工作空間 ID
      */
-    getFilePath(pathPattern?: string) {
-        const pattern = pathPattern || env.DICOM_STORAGE_FILEPATH;
+    getFilePath(options: { pathPattern?: string, workspaceId?: string }) {
+        const pattern = options.pathPattern || env.DICOM_STORAGE_FILEPATH;
+        const workspaceRegex = /\{workspaceId(?:,(hash))?\}/gi;
+        const withWorkspace = pattern.replace(
+            workspaceRegex,
+            (match: string, shouldHash?: string) => {
+                if (!options.workspaceId) {
+                    logger.warn("workspaceId not provided for path pattern");
+                    return match;
+                }
+
+                return shouldHash ? createHash(options.workspaceId) : options.workspaceId;
+            }
+        )
 
         const regex = /\{([0-9A-Fa-f]{8})(?:,(hash))?\}/g;
 
-        return pattern.replace(
+        return withWorkspace.replace(
             regex,
             (match: string, tagHex: string, shouldHash: string) => {
                 const tagValue = this.dicomJson[tagHex]?.Value?.[0] as
@@ -133,29 +146,42 @@ export class DicomJsonUtils {
         );
     }
 
-    getStudyPath(pathPattern?: string) {
-        return this.getPathUntilTag("0020000D", pathPattern);
+    getStudyPath(options: { pathPattern?: string, workspaceId?: string }) {
+        return this.getPathUntilTag({ tagHex: "0020000D", ...options });
     }
 
-    getSeriesPath(pathPattern?: string) {
-        return this.getPathUntilTag("0020000E", pathPattern);
+    getSeriesPath(options: { pathPattern?: string, workspaceId?: string }) {
+        return this.getPathUntilTag({ tagHex: "0020000E", ...options });
     }
 
-    private getPathUntilTag(tagHex: string, pathPattern?: string) {
-        const pattern = pathPattern || env.DICOM_STORAGE_FILEPATH;
+    private getPathUntilTag(options: { tagHex: string, pathPattern?: string, workspaceId?: string }) {
+        const pattern = options.pathPattern || env.DICOM_STORAGE_FILEPATH;
 
         const hasLeadingSlash = pattern.startsWith("/");
         const segments = pattern.split("/").filter((s) => s.length > 0);
 
         // Parse {ggggeeee} or {ggggeeee,hash}
         const placeholderRegex = /\{([0-9A-Fa-f]{8})(?:,(hash))?\}/g;
+        const workspaceRegex = /\{workspaceId(?:,(hash))?\}/gi;
 
-        const stopOnTagRegex = new RegExp(`\\{(${tagHex})(?:,(hash))?\\}`, "i");
+        const stopOnTagRegex = new RegExp(`\\{(${options.tagHex})(?:,(hash))?\\}`, "i");
 
         const out: string[] = [];
 
         for (const segment of segments) {
-            const replaced = segment.replace(
+            const segWithWorkspace = segment.replace(
+                workspaceRegex,
+                (match: string, shouldHash?: string) => {
+                    if (!options.workspaceId) {
+                        logger.warn("workspaceId not provided for path pattern");
+                        return match;
+                    }
+
+                    return shouldHash ? createHash(options.workspaceId) : options.workspaceId;
+                }
+            );
+
+            const replaced = segWithWorkspace.replace(
                 placeholderRegex,
                 (match: string, foundTagHex: string, shouldHash: string) => {
                     const tagValue = this.dicomJson[foundTagHex]?.Value?.[0] as

@@ -129,7 +129,7 @@ export const toStudyDbEntity = (
     const study = new StudyEntity();
     study.workspaceId = workspaceId;
     study.patientId = patientId;
-    study.studyPath = dicomJsonUtils.getFilePath();
+    study.studyPath = dicomJsonUtils.getFilePath({ workspaceId });
     const dicomPatientId = dicomJsonUtils.getValue<string>(
         DICOM_TAG_KEYWORD_REGISTRY.PatientID.tag
     );
@@ -200,7 +200,7 @@ export const toSeriesDbEntity = (
 
     series.localStudyId = studyId;
     series.workspaceId = workspaceId;
-    series.seriesPath = dicomJsonUtils.getFilePath();
+    series.seriesPath = dicomJsonUtils.getFilePath({ workspaceId });
     const studyInstanceUid = dicomJsonUtils.getValue<string>(
         DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag
     );
@@ -273,7 +273,7 @@ export const toInstanceDbEntity = async (
 ) => {
     const instance = new InstanceEntity();
 
-    instance.instancePath = dicomJsonUtils.getFilePath();
+    instance.instancePath = dicomJsonUtils.getFilePath({ workspaceId });
     instance.workspaceId = workspaceId;
     instance.localSeriesId = seriesId;
 

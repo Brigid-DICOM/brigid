@@ -1,6 +1,6 @@
 import { createReadStream, createWriteStream, promises as fsPromise } from "node:fs";
 import { dirname, join } from "node:path";
-import { Readable, Transform } from "node:stream";
+import type { Readable } from "node:stream";
 import env from "@brigid/env";
 import type { MultipartFile } from "@/server/types/file";
 import { appLogger } from "../logger";
@@ -12,7 +12,7 @@ const logger = appLogger.child({
 
 export class LocalStorageProvider implements StorageProvider {
     private readonly storageDir: string;
-    private uploadFiles = new Map<string, Readable>();
+    private uploadingFiles = new Map<string, Readable>();
 
     constructor() {
         if (env.STORAGE_PROVIDER !== "local") {
@@ -43,7 +43,7 @@ export class LocalStorageProvider implements StorageProvider {
         await fsPromise.mkdir(fileDir, { recursive: true });
 
         const readableStream = createReadStream(file.filename);
-        this.uploadFiles.set(key, readableStream);
+        this.uploadingFiles.set(key, readableStream);
 
         try {
 
@@ -51,7 +51,7 @@ export class LocalStorageProvider implements StorageProvider {
             readableStream.pipe(writeStream);
             logger.info(`upload ${file.filename} to ${filePath} successfully`);
 
-            this.uploadFiles.delete(key);
+            this.uploadingFiles.delete(key);
 
             return { key, filePath };
         } catch(error) {
@@ -61,9 +61,9 @@ export class LocalStorageProvider implements StorageProvider {
     }
 
     async abortUpload(key: string) {
-        if (this.uploadFiles.has(key)) {
-            this.uploadFiles.get(key)?.destroy();
-            this.uploadFiles.delete(key);
+        if (this.uploadingFiles.has(key)) {
+            this.uploadingFiles.get(key)?.destroy();
+            this.uploadingFiles.delete(key);
 
             const filePath = await this.getFilePath(key);
 

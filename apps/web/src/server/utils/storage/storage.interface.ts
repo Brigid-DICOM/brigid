@@ -6,11 +6,17 @@ export interface DownloadResult {
     size?: number;
 }
 
+type UploadFileResult = {
+    key: string;
+    filePath: string;
+    [key: string]: any;
+};
+
 export interface StorageProvider {
     uploadFile(
         file: MultipartFile,
         key: string
-    ): Promise<unknown>;
+    ): Promise<UploadFileResult>;
 
     abortUpload(key: string): Promise<void>;
 
