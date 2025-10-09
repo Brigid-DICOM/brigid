@@ -73,9 +73,7 @@ const stowRsRoute = new Hono()
         const stowRsService = new StowRsService(workspaceId);
         const { message, httpStatusCode } = await stowRsService.storeDicomFiles(files);
 
-        return c.json({
-            message: message
-        }, httpStatusCode as ContentfulStatusCode);
+        return c.json(message, httpStatusCode as ContentfulStatusCode);
     }
 );
 
