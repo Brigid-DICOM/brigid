@@ -113,8 +113,6 @@ export const toPatientDbEntity = (
     );
     patient.workspaceId = workspaceId;
 
-    console.log(patient);
-
     return patient;
 };
 

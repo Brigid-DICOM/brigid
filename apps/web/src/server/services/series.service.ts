@@ -20,6 +20,7 @@ export class SeriesService {
                 seriesDescriptionCodeSequence: true
             },
             select: {
+                id: true,
                 seriesDescriptionCodeSequence: {
                     id: true
                 }

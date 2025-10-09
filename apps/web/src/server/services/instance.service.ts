@@ -16,6 +16,9 @@ export class InstanceService {
                 seriesInstanceUid: instanceEntity.seriesInstanceUid,
                 sopInstanceUid: instanceEntity.sopInstanceUid,
                 workspaceId: instanceEntity.workspaceId
+            },
+            select: {
+                id: true
             }
         });
         

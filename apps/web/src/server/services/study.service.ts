@@ -19,6 +19,7 @@ export class StudyService {
                 referringPhysicianName: true
             },
             select: {
+                id: true,
                 referringPhysicianName: {
                     id: true
                 }

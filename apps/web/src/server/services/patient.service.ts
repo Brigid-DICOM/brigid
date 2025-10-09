@@ -19,6 +19,7 @@ export class PatientService {
                 patientName: true
             },
             select: {
+                id: true,
                 patientName: {
                     id: true
                 }
