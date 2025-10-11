@@ -1,5 +1,10 @@
 // copy from https://github.com/dcmjs-org/dcmjs/blob/master/src/utilities/Message.js
 
+import { BufferListStream } from "bl";
+import type { ReadStream } from "fs";
+import multiStream from "multistream";
+import type { Readable } from "stream";
+
 /**
  * Converts a Uint8Array to a String.
  * @param arr - that should be converted
@@ -157,6 +162,40 @@ function multipartEncode(
     };
 }
 
+function multipartEncodeByStream(
+    datasets: { stream: ReadStream | Readable; size?: number, contentLocation?: string }[],
+    boundary = guid(), contentType = "application/dicom"
+) {
+    const body = [];
+
+    let startInfo = `--${boundary}\r\nContent-Type: ${contentType}\r\n`;
+
+    for (const dataset of datasets) {
+        if (dataset.size) {
+            startInfo += `Content-Length: ${dataset.size}\r\n`;
+        }
+        if (dataset.contentLocation) {
+            startInfo += `Content-Location: ${dataset.contentLocation}\r\n`;
+        }
+        body.push(new BufferListStream(`${startInfo}\r\n`));
+        body.push(dataset.stream);
+        body.push(new BufferListStream(`\r\n`));
+    }
+
+    body.push(new BufferListStream(`--${boundary}--`));
+    
+    const stream = new multiStream(body);
+    // @ts-expect-error
+    stream._items = body;
+    // @ts-expect-error
+    stream._raw = body;
+
+    return {
+        data: stream,
+        boundary
+    };
+}
+
 /**
  * Decode a Multipart encoded ArrayBuffer and return the components as an Array.
  *
@@ -259,6 +298,7 @@ const message = {
     uint8ArrayToString: uint8ArrayToString,
     stringToUint8Array: stringToUint8Array,
     multipartEncode: multipartEncode,
+    multipartEncodeByStream: multipartEncodeByStream,
     multipartDecode: multipartDecode,
     guid: guid
 };

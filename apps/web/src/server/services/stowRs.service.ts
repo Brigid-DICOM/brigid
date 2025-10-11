@@ -34,6 +34,8 @@ export class StowRsService {
             const { storedFilePath } = await dicomFileSaver.saveDicomFileToStorage(file);
             await dicomFileSaver.saveToDb(storedFilePath);
 
+            // TODO: 儲存 metadata 和 binary data
+
             this.stowRsResponseMessage.addSuccessSopInstance({
                 studyInstanceUid: studyInstanceUid,
                 seriesInstanceUid: seriesInstanceUid,

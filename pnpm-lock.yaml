@@ -24,6 +24,9 @@ importers:
 
   apps/web:
     dependencies:
+      7zip-min:
+        specifier: ^2.1.0
+        version: 2.1.0
       '@auth/core':
         specifier: ^0.40.0
         version: 0.40.0
@@ -63,6 +66,9 @@ importers:
       '@types/tmp':
         specifier: ^0.2.6
         version: 0.2.6
+      bl:
+        specifier: ^6.1.3
+        version: 6.1.3
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -90,6 +96,9 @@ importers:
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.1.0)
+      multistream:
+        specifier: ^4.1.0
+        version: 4.1.0
       next:
         specifier: 15.5.4
         version: 15.5.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -133,9 +142,15 @@ importers:
       '@types/formidable':
         specifier: ^3.4.5
         version: 3.4.5
+      '@types/fs-extra':
+        specifier: ^11.0.4
+        version: 11.0.4
       '@types/lodash':
         specifier: ^4.17.20
         version: 4.17.20
+      '@types/multistream':
+        specifier: ^4.1.3
+        version: 4.1.3
       '@types/node':
         specifier: ^20
         version: 20.19.19
@@ -216,6 +231,12 @@ importers:
   packages/types: {}
 
 packages:
+
+  7zip-bin@5.1.1:
+    resolution: {integrity: sha512-sAP4LldeWNz0lNzmTird3uWfFDWWTeg6V/MsmyyLR9X1idwKBWIgt/ZvinqQldJm3LecKEs1emkbquO6PCiLVQ==}
+
+  7zip-min@2.1.0:
+    resolution: {integrity: sha512-6uoMmPaasBQOyEuMIuNnASA6mF6ZfNmhsKdxJiEbtkHt9DkrJ0w1cZwyNdkDeOKjR2c5gOQAEkvMN3gyZ9MEBw==}
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -1264,11 +1285,20 @@ packages:
   '@types/formidable@3.4.5':
     resolution: {integrity: sha512-s7YPsNVfnsng5L8sKnG/Gbb2tiwwJTY1conOkJzTMRvJAlLFW1nEua+ADsJQu8N1c0oTHx9+d5nqg10WuT9gHQ==}
 
+  '@types/fs-extra@11.0.4':
+    resolution: {integrity: sha512-yTbItCNreRooED33qjunPthRcSjERP1r4MqCZc7wv0u2sUkzTFp45tgUfS5+r7FrZPdmCCNflLhVSP/o+SemsQ==}
+
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
+  '@types/jsonfile@6.1.4':
+    resolution: {integrity: sha512-D5qGUYwjvnNNextdU59/+fI+spnwtTFmyQP0h+PfIOSkNfpU6AOICUOkm4i0OnSk+NyjdPJrxCDro0sJsWlRpQ==}
+
   '@types/lodash@4.17.20':
     resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
+
+  '@types/multistream@4.1.3':
+    resolution: {integrity: sha512-t57vmDEJOZuC0M3IrZYfCd9wolTcr3ZTCGk1iwHNosvgBX+7/SMvCGcR8wP9lidpelBZQ12crSuINOxkk0azPA==}
 
   '@types/node@20.19.19':
     resolution: {integrity: sha512-pb1Uqj5WJP7wrcbLU7Ru4QtA0+3kAXrkutGiD26wUKzSMgNNaPARTUDQmElUXp64kh3cWdou3Q0C7qwwxqSFmg==}
@@ -1284,6 +1314,9 @@ packages:
   '@types/react@19.1.16':
     resolution: {integrity: sha512-WBM/nDbEZmDUORKnh5i1bTnAz6vTohUf9b8esSMu+b24+srbaxa04UbJgWx78CVfNXA20sNu0odEIluZDFdCog==}
 
+  '@types/readable-stream@4.0.21':
+    resolution: {integrity: sha512-19eKVv9tugr03IgfXlA9UVUVRbW6IuqRO5B92Dl4a6pT7K8uaGrNS0GkxiZD0BOk6PLuXl5FhWl//eX/pzYdTQ==}
+
   '@types/tmp@0.2.6':
     resolution: {integrity: sha512-chhaNf2oKHlRkDGt+tiKE2Z5aJ6qalm7Z9rlLdBwmOiAAf09YQvvoLXjWK4HWPF1xU/fqvMgfNfpVoBscA/tKA==}
 
@@ -1292,6 +1325,10 @@ packages:
 
   '@types/validator@13.15.3':
     resolution: {integrity: sha512-7bcUmDyS6PN3EuD9SlGGOxM77F8WLVsrwkxyWxKnxzmXoequ6c7741QBrANq6htVRGOITJ7z72mTP6Z4XyuG+Q==}
+
+  abort-controller@3.0.0:
+    resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
+    engines: {node: '>=6.5'}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -1339,6 +1376,9 @@ packages:
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
+
+  bl@6.1.3:
+    resolution: {integrity: sha512-nHB8B5roHlGX5TFsWeiQJijdddZIOHuv1eL2cM2kHnG3qR91CYLsysGe+CvxQfEd23EKD0eJf4lto0frTbddKA==}
 
   bowser@2.12.1:
     resolution: {integrity: sha512-z4rE2Gxh7tvshQ4hluIT7XcFrgLIQaw9X3A+kTTRdovCz5PMukm/0QC/BKSYPj3omF5Qfypn9O/c5kgpmvYUCw==}
@@ -1515,6 +1555,10 @@ packages:
 
   escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
+    engines: {node: '>=6'}
+
+  event-target-shim@5.0.1:
+    resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
     engines: {node: '>=6'}
 
   events@3.3.0:
@@ -1848,6 +1892,9 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
+  multistream@4.1.0:
+    resolution: {integrity: sha512-J1XDiAmmNpRCBfIWJv+n0ymC4ABcf/Pl+5YvC5B/D2f/2+8PtHvCNxMPKiQcZyi922Hq69J2YOpb1pTywfifyw==}
+
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -1982,6 +2029,10 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  process@0.11.10:
+    resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
+    engines: {node: '>= 0.6.0'}
+
   pump@3.0.3:
     resolution: {integrity: sha512-todwxLMY7/heScKmntwQG8CXVkWUOdYxIvY2s0VWAAMh/nd8SoYiRaKjlr7+iCs984f2P8zvrfWcDDYVb73NfA==}
 
@@ -2007,6 +2058,10 @@ packages:
   readable-stream@3.6.2:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
     engines: {node: '>= 6'}
+
+  readable-stream@4.7.0:
+    resolution: {integrity: sha512-oIGGmcpTLwPga8Bn6/Z75SVaH1z5dUut2ibSyAMVhmUggWpmDn2dapB0n7f8nwaSiRtepAsfJyfXIO5DCVAODg==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   reflect-metadata@0.2.2:
     resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
@@ -2322,6 +2377,12 @@ packages:
     resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
 
 snapshots:
+
+  7zip-bin@5.1.1: {}
+
+  7zip-min@2.1.0:
+    dependencies:
+      7zip-bin: 5.1.1
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -3576,9 +3637,22 @@ snapshots:
     dependencies:
       '@types/node': 20.19.19
 
+  '@types/fs-extra@11.0.4':
+    dependencies:
+      '@types/jsonfile': 6.1.4
+      '@types/node': 24.7.0
+
   '@types/json-schema@7.0.15': {}
 
+  '@types/jsonfile@6.1.4':
+    dependencies:
+      '@types/node': 24.7.0
+
   '@types/lodash@4.17.20': {}
+
+  '@types/multistream@4.1.3':
+    dependencies:
+      '@types/node': 24.7.0
 
   '@types/node@20.19.19':
     dependencies:
@@ -3596,11 +3670,19 @@ snapshots:
     dependencies:
       csstype: 3.1.3
 
+  '@types/readable-stream@4.0.21':
+    dependencies:
+      '@types/node': 24.7.0
+
   '@types/tmp@0.2.6': {}
 
   '@types/triple-beam@1.3.5': {}
 
   '@types/validator@13.15.3': {}
+
+  abort-controller@3.0.0:
+    dependencies:
+      event-target-shim: 5.0.1
 
   ansi-regex@5.0.1: {}
 
@@ -3640,6 +3722,13 @@ snapshots:
       buffer: 5.7.1
       inherits: 2.0.4
       readable-stream: 3.6.2
+
+  bl@6.1.3:
+    dependencies:
+      '@types/readable-stream': 4.0.21
+      buffer: 6.0.3
+      inherits: 2.0.4
+      readable-stream: 4.7.0
 
   bowser@2.12.1: {}
 
@@ -3826,6 +3915,8 @@ snapshots:
       '@esbuild/win32-x64': 0.25.10
 
   escalade@3.2.0: {}
+
+  event-target-shim@5.0.1: {}
 
   events@3.3.0: {}
 
@@ -4100,6 +4191,11 @@ snapshots:
 
   ms@2.1.3: {}
 
+  multistream@4.1.0:
+    dependencies:
+      once: 1.4.0
+      readable-stream: 3.6.2
+
   nanoid@3.3.11: {}
 
   napi-build-utils@2.0.0: {}
@@ -4234,6 +4330,8 @@ snapshots:
       tar-fs: 2.1.4
       tunnel-agent: 0.6.0
 
+  process@0.11.10: {}
+
   pump@3.0.3:
     dependencies:
       end-of-stream: 1.4.5
@@ -4265,6 +4363,14 @@ snapshots:
       inherits: 2.0.4
       string_decoder: 1.3.0
       util-deprecate: 1.0.2
+
+  readable-stream@4.7.0:
+    dependencies:
+      abort-controller: 3.0.0
+      buffer: 6.0.3
+      events: 3.3.0
+      process: 0.11.10
+      string_decoder: 1.3.0
 
   reflect-metadata@0.2.2: {}
 

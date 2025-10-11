@@ -28,4 +28,20 @@ export class InstanceService {
 
         return await this.entityManager.save(InstanceEntity, instanceEntity);
     }
+
+    async getInstanceByUid(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+        seriesInstanceUid: string;
+        sopInstanceUid: string;
+    }) {
+        return await this.entityManager.findOne(InstanceEntity, {
+            where: {
+                workspaceId: options.workspaceId,
+                studyInstanceUid: options.studyInstanceUid,
+                seriesInstanceUid: options.seriesInstanceUid,
+                sopInstanceUid: options.sopInstanceUid
+            }
+        });
+    }
 }

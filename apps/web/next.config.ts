@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
         ]
     },
     transpilePackages: ["@brigid/database", "@brigid/env", "@electric-sql/pglite"],
-    serverExternalPackages: ["raccoon-dcm4che-bridge", "hasha"],
+    serverExternalPackages: ["raccoon-dcm4che-bridge", "hasha", "7zip-min"],
     experimental: {
         serverSourceMaps: true
     }
