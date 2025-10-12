@@ -66,13 +66,10 @@ export class StowRsResponseMessage {
         sopInstanceUid,
         sopClassUid
     }: AddSuccessSopInstanceParams) {
-        if (this.message["00081190"].Value.length === 0) {
-            this.message["00081190"].Value.push(
-                `/workspaces/${this.workspaceId}` +
-                    `/studies/${studyInstanceUid}` +
-                    `/series/${seriesInstanceUid}` +
-                    `/instances/${sopInstanceUid}`
-            );
+        const studyUrl = `/workspaces/${this.workspaceId}` +
+            `/studies/${studyInstanceUid}`;
+        if (!this.message["00081190"].Value.includes(studyUrl)) {
+            this.message["00081190"].Value.push(studyUrl);
         }
 
         const sopInstanceReference = this.getSopInstanceReference({
@@ -80,7 +77,18 @@ export class StowRsResponseMessage {
             sopClassUid
         });
 
-        this.message["00081199"].Value.push(sopInstanceReference);
+        this.message["00081199"].Value.push({
+            ...sopInstanceReference, 
+            "00081190": {
+                vr: "UR",
+                Value: [
+                    `/workspaces/${this.workspaceId}` +
+                    `/studies/${studyInstanceUid}` +
+                    `/series/${seriesInstanceUid}` +
+                    `/instances/${sopInstanceUid}`
+                ]
+            }
+        });
     }
 
     addFailedSopInstance({
