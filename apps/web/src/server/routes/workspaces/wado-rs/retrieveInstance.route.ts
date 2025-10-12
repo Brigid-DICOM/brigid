@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { InstanceService } from "@/server/services/instance.service";
+import { wadoRsQueryParamSchema } from "@/server/types/dicom/wadoRs";
 import { MultipartHandler } from "./handlers/multipartHandler";
 import { ZipHandler } from "./handlers/zipHandler";
 
@@ -28,6 +29,7 @@ const retrieveInstanceRoute = new Hono().get(
                 .default('multipart/related; type="application/dicom"')
         })
     ),
+    zValidator("query", wadoRsQueryParamSchema),
     zValidator(
         "param",
         z.object({
