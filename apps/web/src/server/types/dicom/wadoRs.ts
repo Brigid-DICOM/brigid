@@ -18,19 +18,24 @@ export const wadoRsQueryParamSchema = z.object({
         const parts = v.split(",");
         if (parts.length === 2) {
             const [vw, vh] = parts.map(Number);
-            return Number.isNaN(vw) && Number.isNaN(vh) && vw > 0 && vh > 0;
+            return !Number.isNaN(vw) && !Number.isNaN(vh) && vw > 0 && vh > 0;
         }
 
         if (parts.length === 6) {
-            const [vw, vh, sx, sy, sw, sh] = parts.map(Number);
-            if (Number.isNaN(sx) || Number.isNaN(sy)) return false;
+            let [vw, vh, sx, sy, sw, sh] = parts.map(Number);
+            if (Number.isNaN(sw) || Number.isNaN(sh)) return false;
+
+            if (Number.isNaN(sx)) {
+                sx = 0;
+            }
+            if (Number.isNaN(sy)) {
+                sy = 0;
+            }
 
             return (
                 [vw, vh, sx, sy, sw, sh].every(v => !Number.isNaN(v)) &&
                 vw > 0 &&
-                vh > 0 &&
-                sw > 0 &&
-                sh > 0
+                vh > 0
             );
         }
 
