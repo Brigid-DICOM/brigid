@@ -168,9 +168,8 @@ function multipartEncodeByStream(
 ) {
     const body = [];
 
-    let startInfo = `--${boundary}\r\nContent-Type: ${contentType}\r\n`;
-
     for (const dataset of datasets) {
+        let startInfo = `--${boundary}\r\nContent-Type: ${contentType}\r\n`;
         if (dataset.size) {
             startInfo += `Content-Length: ${dataset.size}\r\n`;
         }
