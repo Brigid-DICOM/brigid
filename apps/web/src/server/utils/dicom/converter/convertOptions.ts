@@ -10,11 +10,21 @@ export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
 
     let resizeWidth: number | undefined;
     let resizeHeight: number | undefined;
+    let cropX: number | undefined;
+    let cropY: number | undefined;
+    let cropWidth: number | undefined;
+    let cropHeight: number | undefined;
     if (parsed.viewport) {
         const [vw, vh, sx, sy, sw, sh] = parsed.viewport.split(",").map(Number);
         resizeWidth = vw;
         resizeHeight = vh;
         // TODO: support sx, sy (point), sw, sh (size), If sw is a negative value, the image is flipped horizontally. If sh is a negative value, the image is flipped vertically.
+
+        cropX = sx || 0;
+        cropY = sy || 0;
+
+        cropWidth = sw || resizeWidth;
+        cropHeight = sh || resizeHeight;
     }
 
     return {
@@ -26,6 +36,12 @@ export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
         resize: resizeWidth && resizeHeight ? {
             width: resizeWidth,
             height: resizeHeight
+        } : undefined,
+        crop: cropX !== undefined && cropY !== undefined && cropWidth !== undefined && cropHeight !== undefined ? {
+            x: cropX,
+            y: cropY,
+            width: cropWidth,
+            height: cropHeight
         } : undefined
     }
 }

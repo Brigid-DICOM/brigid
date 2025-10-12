@@ -24,6 +24,12 @@ export type ConvertOptions = {
     resize?: {
         width?: number;
         height?: number;
-    }
+    },
+    crop?: {
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+    },
     profile?: "no" | "yes" | "srgb" | "adobergb" | "rommrgb";
 }

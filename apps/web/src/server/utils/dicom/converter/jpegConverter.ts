@@ -1,12 +1,14 @@
 import {
     createReadStream,
     createWriteStream,
-    ReadStream,
+    type ReadStream,
     statSync,
-    writeFileSync
+    writeFileSync,
 } from "node:fs";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
+import { ImageMagick, initializeImageMagick, MagickFormat, MagickGeometry } from "@imagemagick/magick-wasm"
 import type { ImageTranscodeParamClass } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/ImageTranscodeParam";
 import tmp from "tmp";
 import type {
@@ -24,9 +26,6 @@ export class JpegConverter implements DicomToImageConverter {
     ): Promise<ConvertResult> {
         const { Dcm2imageWrapper } = await import(
             "raccoon-dcm4che-bridge/src/dcm2img"
-        );
-        const { Transcoder$Format } = await import(
-            "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/Transcoder$Format"
         );
         const { DicomFileInputStream } = await import(
             "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/stream/DicomFileInputStream"
@@ -64,6 +63,9 @@ export class JpegConverter implements DicomToImageConverter {
                         imageTranscodeParam,
                         i
                     );
+
+                    await this.handleViewport(destFile, options);
+
                     frames.push({
                         stream: createReadStream(destFile),
                         index: i,
@@ -85,6 +87,8 @@ export class JpegConverter implements DicomToImageConverter {
                     1
                 );
                 
+                await this.handleViewport(destFile, options);
+
                 return {
                     frames: [
                         {
@@ -140,5 +144,52 @@ export class JpegConverter implements DicomToImageConverter {
             Transcoder$Format.JPEG
         );
         return imageTranscodeParam;
+    }
+
+    private async handleViewport(filename: string, options: ConvertOptions) {
+        const magickWasmPath = path.resolve("node_modules/@imagemagick/magick-wasm/dist/magick.wasm");
+        if (options.resize) {
+            const magickWasmBuffer = await readFile(magickWasmPath);
+            await initializeImageMagick(magickWasmBuffer);
+
+            const imageBuffer = await readFile(path.resolve(filename));
+
+            await ImageMagick.read(imageBuffer, MagickFormat.Jpeg, async (image) => {
+                if (options.resize?.width && options.resize?.height) {
+                    await image.resize(options.resize.width, options.resize.height);
+                }
+
+                if (options.crop) {
+                    console.log(options.crop);
+                    if ("x" in options.crop && "y" in options.crop && "width" in options.crop && "height" in options.crop) {
+                        let cropX = options.crop.x || 0;
+                        let cropY = options.crop.y || 0;
+                        let cropWidth = options.crop.width || 0;
+                        if (cropWidth && cropWidth < 0) {
+                            await image.flip();
+                            cropWidth = -cropWidth;
+                        }
+                        
+                        let cropHeight = options.crop.height || 0;
+                        if (cropHeight && cropHeight < 0) {
+                            await image.flop();
+                            cropHeight = -cropHeight;
+                        }
+
+
+                        await image.crop(new MagickGeometry(
+                            cropX,
+                            cropY,
+                            cropWidth,
+                            cropHeight
+                        ));
+                    }
+                }
+
+                await image.write(MagickFormat.Jpeg, async (data) => {
+                    return writeFileSync(filename, data);
+                });
+            });
+        }
     }
 }
