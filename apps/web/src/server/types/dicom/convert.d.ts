@@ -1,0 +1,29 @@
+import type { ReadStream } from "node:fs";
+
+export type OutputFormat = "jpeg" | "jp2" | "png";
+
+export type DicomSource =
+    | { kind: "filePath", path: string }
+    | { kind: "stream", stream: Readable };
+
+export type ConvertResult = {
+    contentType: OutputFormat;
+    frames: {
+        stream: ReadStream;
+        index: number;
+        size?: number;
+    }[];
+}
+
+export type ConvertOptions = {
+    quality?: number;
+    frameIndex?: number;
+    windowWidth?: number;
+    windowCenter?: number;
+    voiLutFunction?: "linear" | "linear-exact" | "sigmoid";
+    resize?: {
+        width?: number;
+        height?: number;
+    }
+    profile?: "no" | "yes" | "srgb" | "adobergb" | "rommrgb";
+}
