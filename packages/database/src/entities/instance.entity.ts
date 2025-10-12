@@ -38,7 +38,7 @@ export class InstanceEntity {
     @Column({ type: "date", comment: "0008,0022", nullable: true })
     acquisitionDate?: string | null;
 
-    @Column({ type: "decimal", precision: 12, scale: 6, comment: "0008,0030", nullable: true })
+    @Column({ type: "timestamp", comment: "0008,0030", nullable: true })
     acquisitionDateTime?: string | null;
 
     @Column({ type: "date", comment: "0008,0023", nullable: true })

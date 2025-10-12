@@ -35,4 +35,8 @@ export type ReferencedSopInstanceUid = {
 export type SopInstanceReference = {
     "00081150": ReferencedSopClassUid;
     "00081155": ReferencedSopInstanceUid;
+    "00081190"?: {
+        vr: "UR";
+        Value: string[];
+    }
 }

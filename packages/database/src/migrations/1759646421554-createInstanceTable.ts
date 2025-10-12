@@ -69,9 +69,7 @@ export class CreateInstanceTable1759646421554 implements MigrationInterface {
                     },
                     {
                         name: "acquisitionDateTime",
-                        type: "decimal",
-                        precision: 12,
-                        scale: 6,
+                        type: "timestamp",
                         isNullable: true,
                         comment: "0008,0030"
                     },
