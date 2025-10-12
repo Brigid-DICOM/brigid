@@ -137,10 +137,7 @@ export const toStudyDbEntity = (
     study.dicomPatientId = dicomPatientId;
     const characterSet = dicomJsonUtils.getValue<string>(
         DICOM_TAG_KEYWORD_REGISTRY.SpecificCharacterSet.tag
-    );
-    if (!characterSet) {
-        throw new Error("Character set is required");
-    }
+    ) || "ISO_IR 192";
     study.characterSet = characterSet;
     study.studyDate = dicomJsonUtils.getValue<string>(
         DICOM_TAG_KEYWORD_REGISTRY.StudyDate.tag
