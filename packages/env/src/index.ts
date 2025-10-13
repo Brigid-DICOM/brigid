@@ -69,7 +69,8 @@ const baseSchema = z.object({
         {
             message: "DICOM_STORAGE_FILEPATH must contain 0020000D, 0020000E, and 00080018"
         }
-    )
+    ),
+    QUERY_MAX_LIMIT: z.coerce.number().int().min(1).max(1000).default(100)
 });
 
 const envSchemaBase = z.intersection(baseSchema, storageSchema);

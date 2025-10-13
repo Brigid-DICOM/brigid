@@ -1,4 +1,5 @@
 import { AppDataSource } from "@brigid/database";
+import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import type { EntityManager } from "typeorm";
 
@@ -40,5 +41,40 @@ export class StudyService {
         }
         
         return await this.entityManager.save(StudyEntity, studyEntity);
+    }
+
+    async getStudyByUid(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+    }) {
+        return await this.entityManager.findOne(StudyEntity, {
+            where: { workspaceId: options.workspaceId, studyInstanceUid: options.studyInstanceUid }
+        });
+    }
+
+    async getStudyInstances(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+        limit: number;
+        offset: number;
+    }) {
+        const { workspaceId, studyInstanceUid, limit, offset } = options;
+        const [instances, total] = await this.entityManager.findAndCount(InstanceEntity, {
+            where: {
+                workspaceId: workspaceId,
+                studyInstanceUid: studyInstanceUid
+            },
+            skip: offset,
+            take: limit,
+            relations: {
+                series: true
+            }
+        });
+
+        return {
+            instances,
+            total,
+            hasNextPage: instances.length + offset < total,
+        }
     }
 }

@@ -3,7 +3,7 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { cleanupTempFiles } from "@/server/middlewares/cleanupTempFiles.middleware";
 import { InstanceService } from "@/server/services/instance.service";
-import { wadoRsQueryParamSchema } from "@/server/types/dicom/wadoRs";
+import { wadoRsHeaderSchema, wadoRsQueryParamSchema } from "@/server/types/dicom/wadoRs";
 import { MultipartHandler } from "./handlers/multipartHandler";
 import { ZipHandler } from "./handlers/zipHandler";
 
@@ -18,19 +18,7 @@ const retrieveInstanceRoute = new Hono()
     }),
     zValidator(
         "header",
-        z.object({
-            accept: z
-                .enum([
-                    "application/zip",
-                    'multipart/related; type="application/dicom"',
-                    'multipart/related; type="application/octet-stream"',
-                    'multipart/related; type="image/jpeg"',
-                    'multipart/related; type="image/jp2"',
-                    'multipart/related; type="image/png"',
-                    "*/*"
-                ])
-                .default('multipart/related; type="application/dicom"')
-        })
+        wadoRsHeaderSchema
     ),
     zValidator("query", wadoRsQueryParamSchema),
     zValidator(
