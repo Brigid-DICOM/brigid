@@ -45,11 +45,13 @@ export abstract class BaseConverter implements DicomToImageConverter {
         const { Tag } = await import(
             "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag"
         );
+        const tempFiles: string[] = [];
 
         if (source.kind !== "stream") {
             throw new Error("Not implemented");
         } else {
             const tmpFile = tmp.fileSync();
+            tempFiles.push(tmpFile.name);
 
             await pipeline(source.stream, createWriteStream(tmpFile.name));
 
@@ -75,6 +77,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 for (let i = 1; i <= numberOfFrames; i++) {
                     const destFile = `${tmpFile.name}.${i}.${this.getFileExtension()}`;
                     writeFileSync(destFile, "");
+                    tempFiles.push(destFile);
                     await Dcm2imageWrapper.dcm2Image(
                         tmpFile.name,
                         destFile,
@@ -93,11 +96,13 @@ export abstract class BaseConverter implements DicomToImageConverter {
 
                 return {
                     frames,
+                    tempFiles,
                     contentType: this.getMimeType() as OutputFormat,
                 };
             } else {
                 const destFile = `${tmpFile.name}.${this.getFileExtension()}`;
                 writeFileSync(destFile, "");
+                tempFiles.push(destFile);
                 await Dcm2imageWrapper.dcm2Image(
                     tmpFile.name,
                     destFile,
@@ -115,6 +120,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                             size: statSync(destFile).size,
                         },
                     ],
+                    tempFiles,
                     contentType: this.getMimeType() as OutputFormat,
                 };
             }

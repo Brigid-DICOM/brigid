@@ -18,6 +18,7 @@ export class ZipHandler implements WadoResponseHandler {
 
     async handle(c: Context, args: { instances: InstanceEntity[]; accept: string }) {
         const { instances } = args;
+        const tempFiles: string[] = [];
 
         const keys = instances.map(instance => instance.instancePath);
         if (!keys.every(key => key) || keys.length === 0) {
@@ -33,9 +34,7 @@ export class ZipHandler implements WadoResponseHandler {
         const workDir = join(tmp.dirSync().name, id);
         const zipTempFile = join(tmp.dirSync().name
         , `${id}.zip`);
-
-        c.set("zipWorkDir", workDir);
-        c.set("zipTempFile", zipTempFile);
+        tempFiles.push(zipTempFile);
 
         const storage = getStorageProvider();
 
@@ -50,6 +49,7 @@ export class ZipHandler implements WadoResponseHandler {
             );
 
             const destFile = join(workDir, rel);
+            tempFiles.push(destFile);
             const destFileDir = dirname(destFile);
             await fsE.ensureDir(destFileDir);
 
@@ -68,6 +68,8 @@ export class ZipHandler implements WadoResponseHandler {
 
         const zipFile = instances.length === 1 ? `${instances[0].sopInstanceUid}.zip` : `${instances[0].studyInstanceUid}.zip`;
         headers.set("Content-Disposition", `attachment; filename="${zipFile}"`);
+
+        c.set("tempFiles", tempFiles);
 
         // @ts-expect-error
         return new Response(zipStream, { status: 200, headers });
