@@ -40,5 +40,6 @@ export const wadoRsQueryParamSchema = z.object({
         }
 
         return false;
-    }).optional()
+    }).optional(),
+    frameNumber: z.coerce.number().int().min(1).optional()
 })

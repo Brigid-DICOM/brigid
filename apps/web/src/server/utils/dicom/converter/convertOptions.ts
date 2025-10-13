@@ -41,6 +41,7 @@ export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
             y: cropY,
             width: cropWidth,
             height: cropHeight
-        } : undefined
+        } : undefined,
+        frameNumber: parsed.frameNumber
     }
 }

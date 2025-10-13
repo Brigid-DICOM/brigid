@@ -87,7 +87,10 @@ export class MultipartHandler implements WadoResponseHandler {
 
         for (const instance of instances) {
             const key = instance.instancePath;
-            const convertOptions = toConvertOptions(c.req.query());
+            const convertOptions = toConvertOptions({
+                ...c.req.query(),
+                frameNumber: c.req.param("frameNumber") || c.req.query("frameNumber") || ""
+            });
             const { body } = await storage.downloadFile(key);
 
             const source: DicomSource = { kind: "stream", stream: body };

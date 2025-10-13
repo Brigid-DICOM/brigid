@@ -73,7 +73,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 index: number;
                 size?: number;
             }[] = [];
-            if (numberOfFrames > 1) {
+            if (numberOfFrames > 1 && !("frameNumber" in options)) {
                 for (let i = 1; i <= numberOfFrames; i++) {
                     const destFile = `${tmpFile.name}.${i}.${this.getFileExtension()}`;
                     writeFileSync(destFile, "");
@@ -107,7 +107,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                     tmpFile.name,
                     destFile,
                     imageTranscodeParam,
-                    1,
+                    options.frameNumber || 1,
                 );
 
                 await this.handleConvertOptions(destFile, options);
