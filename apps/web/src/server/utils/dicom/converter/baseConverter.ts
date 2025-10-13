@@ -1,6 +1,7 @@
-import { writeFileSync } from "node:fs";
+import { createReadStream, createWriteStream, type ReadStream, statSync, writeFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
 import {
     type IMagickImage,
     ImageMagick,
@@ -10,20 +11,115 @@ import {
 } from "@imagemagick/magick-wasm";
 import { join } from "desm";
 import type { ImageTranscodeParamClass } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/ImageTranscodeParam";
+import type { Transcoder$Format } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/Transcoder$Format";
+
+import tmp from "tmp";
 import type {
     ConvertOptions,
     ConvertResult,
-    DicomSource,
+    DicomSource,OutputFormat 
 } from "@/server/types/dicom/convert";
 import type { DicomToImageConverter } from "./covert.interface";
 
+
 export abstract class BaseConverter implements DicomToImageConverter {
-    public abstract convert(
+    
+    public abstract getMimeType(): string;
+    
+    protected abstract getTranscodeFormat(): Promise<Transcoder$Format>;
+    
+    protected abstract getMagickFormat(): MagickFormat;
+
+    protected abstract getFileExtension(): string;
+
+    async convert(
         source: DicomSource,
         options: ConvertOptions,
-    ): Promise<ConvertResult>;
+    ): Promise<ConvertResult> {
+        const { Dcm2imageWrapper } = await import(
+            "raccoon-dcm4che-bridge/src/dcm2img"
+        );
+        const { DicomFileInputStream } = await import(
+            "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/stream/DicomFileInputStream"
+        );
+        const { Tag } = await import(
+            "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag"
+        );
 
-    public abstract getMimeType(): string;
+        if (source.kind !== "stream") {
+            throw new Error("Not implemented");
+        } else {
+            const tmpFile = tmp.fileSync();
+
+            await pipeline(source.stream, createWriteStream(tmpFile.name));
+
+            const imageTranscodeParam =
+                await this.getImageTranscodeParam(options);
+
+            const dicomFileInputStream =
+                await DicomFileInputStream.newInstanceAsync(
+                    path.resolve(tmpFile.name),
+                );
+            const dataset = await dicomFileInputStream.readDataset();
+            const numberOfFramesStr = await dataset?.getString(
+                Tag.NumberOfFrames,
+            );
+            const numberOfFrames = parseInt(numberOfFramesStr || "1", 10);
+
+            const frames: {
+                stream: ReadStream;
+                index: number;
+                size?: number;
+            }[] = [];
+            if (numberOfFrames > 1) {
+                for (let i = 1; i <= numberOfFrames; i++) {
+                    const destFile = `${tmpFile.name}.${i}.${this.getFileExtension()}`;
+                    writeFileSync(destFile, "");
+                    await Dcm2imageWrapper.dcm2Image(
+                        tmpFile.name,
+                        destFile,
+                        imageTranscodeParam,
+                        i,
+                    );
+
+                    await this.handleConvertOptions(destFile, options);
+
+                    frames.push({
+                        stream: createReadStream(destFile),
+                        index: i,
+                        size: statSync(destFile).size,
+                    });
+                }
+
+                return {
+                    frames,
+                    contentType: this.getMimeType() as OutputFormat,
+                };
+            } else {
+                const destFile = `${tmpFile.name}.${this.getFileExtension()}`;
+                writeFileSync(destFile, "");
+                await Dcm2imageWrapper.dcm2Image(
+                    tmpFile.name,
+                    destFile,
+                    imageTranscodeParam,
+                    1,
+                );
+
+                await this.handleConvertOptions(destFile, options);
+
+                return {
+                    frames: [
+                        {
+                            stream: createReadStream(destFile),
+                            index: 1,
+                            size: statSync(destFile).size,
+                        },
+                    ],
+                    contentType: this.getMimeType() as OutputFormat,
+                };
+            }
+        }
+    }
 
     protected async getImageTranscodeParam(
         options: ConvertOptions,
@@ -36,9 +132,6 @@ export abstract class BaseConverter implements DicomToImageConverter {
         );
         const { LutShape } = await import(
             "raccoon-dcm4che-bridge/src/wrapper/org/weasis/opencv/op/lut/LutShape"
-        );
-        const { Transcoder$Format } = await import(
-            "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/Transcoder$Format"
         );
 
         const dicomImageReadParam = new DicomImageReadParam();
@@ -63,7 +156,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
 
         const imageTranscodeParam = new ImageTranscodeParam(
             dicomImageReadParam,
-            Transcoder$Format.JPEG,
+            await this.getTranscodeFormat(),
         );
         return imageTranscodeParam;
     }
@@ -82,7 +175,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
         const imageBuffer = await readFile(path.resolve(filename));
         await ImageMagick.read(
             imageBuffer,
-            MagickFormat.Jpeg,
+            this.getMagickFormat(),
             async (image) => {
                 await this.handleQuality(image, options);
                 await this.handleViewport(image, options);
