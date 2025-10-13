@@ -175,6 +175,7 @@ export class JpegConverter implements DicomToImageConverter {
             imageBuffer,
             MagickFormat.Jpeg,
             async (image) => {
+                await this.handleQuality(image, options);
                 await this.handleViewport(image, options);
                 await this.handleImageICCProfile(image, options);
 
@@ -183,6 +184,12 @@ export class JpegConverter implements DicomToImageConverter {
                 });
             },
         );
+    }
+
+    private async handleQuality(image: IMagickImage, options: ConvertOptions) {
+        if (options.quality) {
+            image.quality = options.quality;
+        }
     }
 
     private async handleViewport(image: IMagickImage, options: ConvertOptions) {
