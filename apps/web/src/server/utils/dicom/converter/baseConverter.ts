@@ -6,7 +6,7 @@ import {
     type IMagickImage,
     ImageMagick,
     initializeImageMagick,
-    MagickFormat,
+    type MagickFormat,
     MagickGeometry,
 } from "@imagemagick/magick-wasm";
 import { join } from "desm";
@@ -187,7 +187,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 await this.handleViewport(image, options);
                 await this.handleImageICCProfile(image, options);
 
-                await image.write(MagickFormat.Jpeg, async (data) => {
+                await image.write(this.getMagickFormat(), async (data) => {
                     return writeFileSync(path.resolve(filename), data);
                 });
             },
