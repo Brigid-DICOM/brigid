@@ -1,4 +1,5 @@
 import { AppDataSource } from "@brigid/database";
+import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { EntityManager } from "typeorm";
 
@@ -14,32 +15,81 @@ export class SeriesService {
             where: {
                 studyInstanceUid: seriesEntity.studyInstanceUid,
                 seriesInstanceUid: seriesEntity.seriesInstanceUid,
-                workspaceId: seriesEntity.workspaceId
+                workspaceId: seriesEntity.workspaceId,
             },
             relations: {
-                seriesDescriptionCodeSequence: true
+                seriesDescriptionCodeSequence: true,
             },
             select: {
                 id: true,
                 seriesDescriptionCodeSequence: {
-                    id: true
-                }
-            }
+                    id: true,
+                },
+            },
         });
 
         if (existingSeries) {
             seriesEntity.id = existingSeries.id;
-            
+
             if (
                 "seriesDescriptionCodeSequence" in seriesEntity &&
                 seriesEntity.seriesDescriptionCodeSequence &&
                 "id" in seriesEntity.seriesDescriptionCodeSequence &&
                 existingSeries.seriesDescriptionCodeSequence
             ) {
-                seriesEntity.seriesDescriptionCodeSequence.id = existingSeries.seriesDescriptionCodeSequence.id;
+                seriesEntity.seriesDescriptionCodeSequence.id =
+                    existingSeries.seriesDescriptionCodeSequence.id;
             }
         }
 
         return await this.entityManager.save(SeriesEntity, seriesEntity);
+    }
+
+    async getSeriesByUid(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+        seriesInstanceUid: string;
+    }) {
+        return await this.entityManager.findOne(SeriesEntity, {
+            where: {
+                workspaceId: options.workspaceId,
+                studyInstanceUid: options.studyInstanceUid,
+                seriesInstanceUid: options.seriesInstanceUid,
+            },
+        });
+    }
+
+    async getSeriesInstances(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+        seriesInstanceUid: string;
+        limit: number;
+        offset: number;
+    }) {
+        const {
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+            limit,
+            offset,
+        } = options;
+        const [instances, total] = await this.entityManager.findAndCount(
+            InstanceEntity,
+            {
+                where: {
+                    workspaceId: workspaceId,
+                    studyInstanceUid: studyInstanceUid,
+                    seriesInstanceUid: seriesInstanceUid,
+                },
+                skip: offset,
+                take: limit,
+            },
+        );
+
+        return {
+            instances,
+            total,
+            hasNextPage: instances.length + offset < total,
+        };
     }
 }

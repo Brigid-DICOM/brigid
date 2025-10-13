@@ -9,39 +9,42 @@ import {
     z
 } from "zod";
 import { cleanupTempFiles } from "@/server/middlewares/cleanupTempFiles.middleware";
-import { StudyService } from "@/server/services/study.service";
+import { SeriesService } from "@/server/services/series.service";
 import { wadoRsHeaderSchema, wadoRsQueryParamSchema } from "@/server/types/dicom/wadoRs";
 import { MultipartHandler } from "./handlers/multipartHandler";
 import { ZipHandler } from "./handlers/zipHandler";
 
-const retrieveStudyInstancesRoute = new Hono()
+const retrieveSeriesInstancesRoute = new Hono()
 .use(cleanupTempFiles)
 .get(
-    "/workspaces/:workspaceId/studies/:studyInstanceUid",
+    "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid",
     describeRoute({
-        description: "Retrieve DICOM study instances (WADO-RS), ref: [Retrieve Transaction Study Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-1)",
+        description: "Retrieve DICOM series instances (WADO-RS), ref: [Retrieve Transaction Series Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-1)",
         tags: ["WADO-RS"]
     }),
     zValidator("header", wadoRsHeaderSchema),
     zValidator("query", wadoRsQueryParamSchema),
     zValidator("param", z.object({
         workspaceId: z.string().describe("The ID of the workspace"),
-        studyInstanceUid: z.string().describe("The study instance UID")
+        studyInstanceUid: z.string().describe("The study instance UID"),
+        seriesInstanceUid: z.string().describe("The series instance UID")
     })),
     async (c) => {
         const workspaceId = c.req.param("workspaceId");
         const studyInstanceUid = c.req.param("studyInstanceUid");
+        const seriesInstanceUid = c.req.param("seriesInstanceUid");
         const { accept } = c.req.valid("header") as { accept: string };
 
-        const studyService = new StudyService();
-        const study = await studyService.getStudyByUid({
+        const seriesService = new SeriesService();
+        const series = await seriesService.getSeriesByUid({
             workspaceId,
-            studyInstanceUid
+            studyInstanceUid,
+            seriesInstanceUid
         });
-        if (!study) {
+        if (!series) {
             return c.json(
                 {
-                    message: "Study not found"
+                    message: "Series not found"
                 },
                 404
             );
@@ -50,18 +53,19 @@ const retrieveStudyInstancesRoute = new Hono()
         const limit = env.QUERY_MAX_LIMIT;
         let offset = 0;
         const instances: InstanceEntity[] = [];
-        let { instances: studyInstances, hasNextPage } = await studyService.getStudyInstances({
+        let { instances: seriesInstances, hasNextPage } = await seriesService.getSeriesInstances({
             workspaceId,
             studyInstanceUid,
+            seriesInstanceUid,
             limit,
             offset
         });
-        instances.push(...studyInstances);
+        instances.push(...seriesInstances);
 
         if (instances.length === 0) {
             return c.json(
                 {
-                    message: `Instances not found, study instance UID: ${studyInstanceUid}`
+                    message: `Instances not found, series instance UID: ${seriesInstanceUid}`
                 },
                 404
             );
@@ -69,9 +73,10 @@ const retrieveStudyInstancesRoute = new Hono()
 
         while (hasNextPage) {
             offset += limit;
-            const result = await studyService.getStudyInstances({
+            const result = await seriesService.getSeriesInstances({
                 workspaceId,
                 studyInstanceUid,
+                seriesInstanceUid,
                 limit,
                 offset
             });
@@ -99,4 +104,4 @@ const retrieveStudyInstancesRoute = new Hono()
     }
 );
 
-export default retrieveStudyInstancesRoute;
+export default retrieveSeriesInstancesRoute;
