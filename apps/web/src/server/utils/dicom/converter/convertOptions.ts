@@ -1,5 +1,5 @@
+import { wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
 import type { ConvertOptions } from "@/server/types/dicom/convert";
-import { wadoRsQueryParamSchema } from "@/server/types/dicom/wadoRs";
 
 export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
     const parsed = wadoRsQueryParamSchema.parse(qs);

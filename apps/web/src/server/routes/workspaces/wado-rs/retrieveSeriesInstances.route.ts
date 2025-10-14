@@ -9,8 +9,8 @@ import {
     z
 } from "zod";
 import { cleanupTempFiles } from "@/server/middlewares/cleanupTempFiles.middleware";
+import { wadoRsHeaderSchema, wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
 import { SeriesService } from "@/server/services/series.service";
-import { wadoRsHeaderSchema, wadoRsQueryParamSchema } from "@/server/types/dicom/wadoRs";
 import { MultipartHandler } from "./handlers/multipartHandler";
 import { ZipHandler } from "./handlers/zipHandler";
 
