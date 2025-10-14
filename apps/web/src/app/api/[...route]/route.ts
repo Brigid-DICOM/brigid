@@ -27,7 +27,7 @@ function getAuthProvider() {
     throw new Error("Invalid auth provider");
 }
 
-const app = new Hono().basePath("/api")
+export const app = new Hono().basePath("/api")
 .use(async (c, next) => {
     if (!AppDataSource.isInitialized) {
         await AppDataSource.initialize();

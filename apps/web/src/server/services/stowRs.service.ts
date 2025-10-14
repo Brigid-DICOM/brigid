@@ -47,6 +47,7 @@ export class StowRsService {
                 DICOM_STATUS.ProcessingFailure.toString()
             );
             console.error("Failed to store DICOM file", error);
+            throw error;
         }
     }
 

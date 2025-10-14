@@ -8,9 +8,13 @@ import { verifyWorkspaceExists } from "@/server/middlewares/workspace.middleware
 import { StowRsService } from "@/server/services/stowRs.service";
 import { StowRsResponseMessageSchema } from "@/server/types/dicom";
 import type { MultipartFile } from "@/server/types/file";
+import { appLogger } from "@/server/utils/logger";
 
-const stowRsRoute = new Hono()
-.post(
+const logger = appLogger.child({
+    module: "StowRsRoute",
+});
+
+const stowRsRoute = new Hono().post(
     "/workspaces/:workspaceId/studies",
     describeRoute({
         description: `Store DICOM instance (STOW-RS), ref: [Store Transaction](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.5)}`,
@@ -24,57 +28,74 @@ const stowRsRoute = new Hono()
                         properties: {
                             file: {
                                 type: "string",
-                                format: "binary"
-                            }
+                                format: "binary",
+                            },
                         },
-                        required: ["file"]
+                        required: ["file"],
                     },
                     encoding: {
-                        "file": {
-                            contentType: "application/dicom"
-                        }
-                    }
-                }
-            }
+                        file: {
+                            contentType: "application/dicom",
+                        },
+                    },
+                },
+            },
         },
         responses: {
             200: {
                 description: "The DICOM instance stored successfully",
                 content: {
                     "application/json": {
-                        schema: resolver(StowRsResponseMessageSchema)
-                    }
-                }
-            }
-        }
+                        schema: resolver(StowRsResponseMessageSchema),
+                    },
+                },
+            },
+        },
     }),
     verifyWorkspaceExists,
-    zValidator("param", z.object({
-        workspaceId: z.string().describe("The ID of the workspace")
-    })),
+    zValidator(
+        "param",
+        z.object({
+            workspaceId: z.string().describe("The ID of the workspace"),
+        }),
+    ),
     async (c) => {
         const workspaceId = c.req.param("workspaceId");
 
         const files: MultipartFile[] = [];
 
-        for await (const part of parseMultipartRequest(c.req.raw, { maxFileSize: 6 * 1024 * 1024 * 1024 })) {
+        for await (const part of parseMultipartRequest(c.req.raw, {
+            maxFileSize: 6 * 1024 * 1024 * 1024,
+        })) {
             if (!part.filename) {
                 throw new Error("File name is required");
             }
 
             files.push({
-                originalFilename: part.originalFilename || path.basename(part.filename),
+                originalFilename:
+                    part.originalFilename || path.basename(part.filename),
                 filename: part.filename,
                 size: part.size,
-                mediaType: part.mediaType || "application/dicom"
+                mediaType: part.mediaType || "application/dicom",
             });
         }
 
         const stowRsService = new StowRsService(workspaceId);
-        const { message, httpStatusCode } = await stowRsService.storeDicomFiles(files);
-
-        return c.json(message, httpStatusCode as ContentfulStatusCode);
-    }
+        try {
+            const { message, httpStatusCode } =
+                await stowRsService.storeDicomFiles(files);
+            return c.json(message, httpStatusCode as ContentfulStatusCode);
+        } catch (error) {
+            logger.error("Failed to store DICOM file", error);
+            return c.json(
+                {
+                    message: "Failed to store DICOM file",
+                    ok: false,
+                },
+                500,
+            );
+        }
+    },
 );
 
 export default stowRsRoute;

@@ -315,8 +315,6 @@ export abstract class BaseConverter implements DicomToImageConverter {
         const imageWidth = options.resize?.width || width;
         const imageHeight = options.resize?.height || height;
 
-        console.log("region", options.region);
-
         if (options.region) {
             const cropX = options.region.xmin * imageWidth;
             const cropY = options.region.ymin * imageHeight;
