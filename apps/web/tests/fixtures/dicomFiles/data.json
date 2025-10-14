@@ -1,0 +1,304 @@
+{
+    "1.3.6.1.4.1.14519.5.2.1.3023.4017.246199836259881483055596634768": {
+        "patientId": "TCGA-G4-6304",
+        "patientName": "TCGA-G4-6304",
+        "series": [
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.101062900156808513233428214720",
+                "modality": "OT",
+                "seriesDate": "19990417",
+                "seriesTime": "155512.000",
+                "seriesDescription": "Sec. Capture for KO: CT ABD, PELVIS W/O CONTRAST^",
+                "seriesNumber": "3001",
+                "instances": [
+                    {
+                        "instanceNumber": "6",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.7",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.146366877811836789535656349132",
+                        "file": "TCGA-G4-6304\\images\\1013.dcm"
+                    },
+                    {
+                        "instanceNumber": "5",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.7",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.649153066258520360958330163120",
+                        "file": "TCGA-G4-6304\\images\\1012.dcm"
+                    },
+                    {
+                        "instanceNumber": "3",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.7",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.260939066507668813638080004257",
+                        "file": "TCGA-G4-6304\\images\\1011.dcm"
+                    },
+                    {
+                        "instanceNumber": "2",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.7",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.335251174043400650861888918521",
+                        "file": "TCGA-G4-6304\\images\\1010.dcm"
+                    },
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.7",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.264182263062930512190712764093",
+                        "file": "TCGA-G4-6304\\images\\1009.dcm"
+                    }
+                ]
+            },
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.720525569168415113913096578859",
+                "modality": "CT",
+                "seriesDate": "",
+                "seriesTime": "",
+                "seriesDescription": "NON CONTRAST",
+                "seriesNumber": "2",
+                "instances": [
+                    {
+                        "instanceNumber": "79",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.273924524554282693820311392442",
+                        "file": "TCGA-G4-6304\\images\\1008.dcm"
+                    },
+                    {
+                        "instanceNumber": "73",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.189039900884967447533862295050",
+                        "file": "TCGA-G4-6304\\images\\1007.dcm"
+                    },
+                    {
+                        "instanceNumber": "39",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.169359094484670501503705681340",
+                        "file": "TCGA-G4-6304\\images\\1006.dcm"
+                    },
+                    {
+                        "instanceNumber": "31",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.190751073931432884782218376481",
+                        "file": "TCGA-G4-6304\\images\\1005.dcm"
+                    },
+                    {
+                        "instanceNumber": "16",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.231322363895128945026084682388",
+                        "file": "TCGA-G4-6304\\images\\1004.dcm"
+                    }
+                ]
+            },
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.307917739728461993052196639610",
+                "modality": "CT",
+                "seriesDate": "",
+                "seriesTime": "",
+                "seriesDescription": "LOCALIZER",
+                "seriesNumber": "1",
+                "instances": [
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.314375186917814049221126572944",
+                        "file": "TCGA-G4-6304\\images\\1003.dcm"
+                    },
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.651141679294473490768880697269",
+                        "file": "TCGA-G4-6304\\images\\1002.dcm"
+                    },
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.269606581400245985986698690481",
+                        "file": "TCGA-G4-6304\\images\\1001.dcm"
+                    },
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.3023.4017.272356498349872276284043913045",
+                        "file": "TCGA-G4-6304\\images\\1000.dcm"
+                    }
+                ]
+            }
+        ],
+        "studyDate": "19990416",
+        "studyTime": "170922.000000",
+        "accessionNumber": "3266660953883852"
+    },
+    "1.3.46.670589.45.1.1.4993912214784.1.5436.1538560373543": {
+        "patientId": "123456",
+        "patientName": "Philips^Amy",
+        "series": [
+            {
+                "seriesInstanceUid": "1.3.46.670589.45.1.1.4993912214784.1.5436.1538560606509.3",
+                "modality": "SM",
+                "seriesDate": "",
+                "seriesTime": "",
+                "seriesNumber": "1",
+                "instances": [
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.77.1.6",
+                        "sopInstanceUid": "1.3.6.1.4.1.5962.99.1.3002151337.1017604488.1540600476073.6.0",
+                        "file": "jpeg2000\\example-jpeg-2000.dcm"
+                    }
+                ]
+            }
+        ],
+        "studyDate": "20181003",
+        "studyTime": "095253",
+        "accessionNumber": "D18-1001"
+    },
+    "1.3.6.1.4.1.14519.5.2.1.7085.2626.192997540292073877946622133586": {
+        "patientId": "C3N-00953",
+        "patientName": "C3N-00953",
+        "series": [
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.328191285537072639441393834220",
+                "modality": "CT",
+                "seriesDate": "20100213",
+                "seriesTime": "154533.671",
+                "seriesDescription": "90 sec ABD  3.0  B31f",
+                "seriesNumber": "4",
+                "instances": [
+                    {
+                        "instanceNumber": "72",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.917173693042362721495240037775",
+                        "file": "C3N-00953\\images\\1010.dcm"
+                    },
+                    {
+                        "instanceNumber": "63",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.311102259757356392427970063677",
+                        "file": "C3N-00953\\images\\1009.dcm"
+                    },
+                    {
+                        "instanceNumber": "56",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.213400907861340806678714794308",
+                        "file": "C3N-00953\\images\\1008.dcm"
+                    },
+                    {
+                        "instanceNumber": "27",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.274294485605735573847178163457",
+                        "file": "C3N-00953\\images\\1007.dcm"
+                    },
+                    {
+                        "instanceNumber": "18",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.207018747936703760303203690719",
+                        "file": "C3N-00953\\images\\1006.dcm"
+                    }
+                ]
+            },
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.187580115709014280730997641712",
+                "modality": "CT",
+                "seriesDate": "20100213",
+                "seriesTime": "154114.906",
+                "seriesDescription": "ABD ROUTINE  3.0  B31f",
+                "seriesNumber": "2",
+                "instances": [
+                    {
+                        "instanceNumber": "76",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.321414117818571426973222514043",
+                        "file": "C3N-00953\\images\\1005.dcm"
+                    },
+                    {
+                        "instanceNumber": "51",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.171424488227777693822724251929",
+                        "file": "C3N-00953\\images\\1004.dcm"
+                    },
+                    {
+                        "instanceNumber": "44",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.331183406129824250741275752731",
+                        "file": "C3N-00953\\images\\1003.dcm"
+                    },
+                    {
+                        "instanceNumber": "114",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.105951284037251026782883400081",
+                        "file": "C3N-00953\\images\\1002.dcm"
+                    },
+                    {
+                        "instanceNumber": "111",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.217106578590152045405778705262",
+                        "file": "C3N-00953\\images\\1001.dcm"
+                    }
+                ]
+            },
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.831285735928731782652048570955",
+                "modality": "CT",
+                "seriesDate": "20100213",
+                "seriesTime": "153809.875",
+                "seriesDescription": "Topogram  1.0  T20s",
+                "seriesNumber": "1",
+                "instances": [
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.2",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.7085.2626.310894536700672302243471156028",
+                        "file": "C3N-00953\\images\\1000.dcm"
+                    }
+                ]
+            }
+        ],
+        "studyDate": "20100213",
+        "studyTime": "153809.875",
+        "accessionNumber": "2794663908550664"
+    },
+    "1.3.6.1.4.1.14519.5.2.1.2857.3273.184862055846930271614754681036": {
+        "patientId": "C3L-00277",
+        "patientName": "ChestXR^TwoViews",
+        "series": [
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.2857.3273.181092492540572112241403328675",
+                "modality": "DX",
+                "seriesDate": "19991220",
+                "seriesTime": "135244.000",
+                "seriesDescription": "Chest",
+                "seriesNumber": "5398",
+                "instances": [
+                    {
+                        "instanceNumber": "1",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.1.1",
+                        "sopInstanceUid": "1.3.6.1.4.1.14519.5.2.1.2857.3273.393987221165344252190796851776",
+                        "file": "C3L-00277\\images\\1000.dcm"
+                    }
+                ]
+            }
+        ],
+        "studyDate": "19991220",
+        "studyTime": "135238",
+        "accessionNumber": "5347639127757044"
+    },
+    "1.3.6.1.4.1.14519.5.2.1.314316487728501506587013300243937537423": {
+        "patientId": "GLIOMA01-i_03A6",
+        "patientName": "fuckyou",
+        "series": [
+            {
+                "seriesInstanceUid": "1.3.6.1.4.1.14519.5.2.1.62266640231940987006694557463549207147",
+                "modality": "MR",
+                "seriesDate": "20090721",
+                "seriesTime": "115236.137000",
+                "seriesDescription": "BRAIN/T1_TRANS+C",
+                "seriesNumber": "13",
+                "instances": [
+                    {
+                        "instanceNumber": "224",
+                        "sopClassUid": "1.2.840.10008.5.1.4.1.1.4",
+                        "sopInstanceUid": "1.2.276.0.7230010.3.1.4.2304755699.3648.1691733220.920",
+                        "file": "1-01-mod-vo"
+                    }
+                ]
+            }
+        ],
+        "studyDate": "20090721",
+        "studyTime": "110509.997000",
+        "accessionNumber": "5201212"
+    }
+}
