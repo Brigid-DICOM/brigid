@@ -1,4 +1,5 @@
 import { wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
+import { wadoUriQueryParamSchema } from "@/server/schemas/wadoUri";
 import type { ConvertOptions } from "@/server/types/dicom/convert";
 
 export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
@@ -17,7 +18,6 @@ export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
         const [vw, vh, sx, sy, sw, sh] = parsed.viewport.split(",").map(Number);
         resizeWidth = vw;
         resizeHeight = vh;
-        // TODO: support sx, sy (point), sw, sh (size), If sw is a negative value, the image is flipped horizontally. If sh is a negative value, the image is flipped vertically.
 
         cropX = sx || 0;
         cropY = sy || 0;
@@ -43,5 +43,55 @@ export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
             height: cropHeight
         } : undefined,
         frameNumber: parsed.frameNumber
+    }
+}
+
+export function wadoUriParamsToConvertOptions(qs: Record<string, string>): ConvertOptions {
+    const parsed = wadoUriQueryParamSchema.parse(qs);
+
+    let resizeWidth: number | undefined;
+    let resizeHeight: number | undefined;
+    let region: {
+        xmin: number;
+        ymin: number;
+        xmax: number;
+        ymax: number;
+    } | undefined;
+    let windowCenter: number | undefined;
+    let windowWidth: number | undefined;
+    if (parsed.row) {
+        resizeWidth = Number(parsed.row);
+    }
+    if (parsed.column) {
+        resizeHeight = Number(parsed.column);
+    }
+
+    if (parsed.region) {
+        const [xmin, ymin, xmax, ymax] = parsed.region.split(",").map(Number);
+        region = {
+            xmin: xmin,
+            ymin: ymin,
+            xmax: xmax,
+            ymax: ymax
+        };
+    }
+
+    if (parsed.windowCenter) {
+        windowCenter = Number(parsed.windowCenter);
+    }
+    if (parsed.windowWidth) {
+        windowWidth = Number(parsed.windowWidth);
+    }
+
+    return {
+        windowWidth,
+        windowCenter,
+        resize: resizeWidth && resizeHeight ? {
+            width: resizeWidth,
+            height: resizeHeight
+        } : undefined,
+        region,
+        frameNumber: parsed.frameNumber,
+        quality: parsed.imageQuality
     }
 }

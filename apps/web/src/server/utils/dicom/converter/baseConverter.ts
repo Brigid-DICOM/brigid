@@ -186,6 +186,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 await this.handleQuality(image, options);
                 await this.handleViewport(image, options);
                 await this.handleImageICCProfile(image, options);
+                await this.handleRegion(image, options, image.width, image.height);
 
                 await image.write(this.getMagickFormat(), async (data) => {
                     return writeFileSync(path.resolve(filename), data);
@@ -285,6 +286,26 @@ export abstract class BaseConverter implements DicomToImageConverter {
                     break;
                 }
             }
+        }
+    }
+
+    protected async handleRegion(
+        image: IMagickImage,
+        options: ConvertOptions,
+        width: number,
+        height: number,
+    ) {
+        const imageWidth = options.resize?.width || width;
+        const imageHeight = options.resize?.height || height;
+
+        console.log("region", options.region);
+
+        if (options.region) {
+            const cropX = options.region.xmin * imageWidth;
+            const cropY = options.region.ymin * imageHeight;
+            const cropWidth = (options.region.xmax - options.region.xmin) * imageWidth;
+            const cropHeight = (options.region.ymax - options.region.ymin) * imageHeight;
+            image.crop(new MagickGeometry(cropX, cropY, cropWidth, cropHeight));
         }
     }
 }

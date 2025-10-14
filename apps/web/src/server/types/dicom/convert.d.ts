@@ -33,4 +33,10 @@ export type ConvertOptions = {
         height?: number;
     },
     profile?: "no" | "yes" | "srgb" | "adobergb" | "rommrgb";
+    region?: {
+        xmin: number;
+        ymin: number;
+        xmax: number;
+        ymax: number;
+    };
 }
