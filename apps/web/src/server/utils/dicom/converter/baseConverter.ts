@@ -10,17 +10,21 @@ import {
     MagickGeometry,
 } from "@imagemagick/magick-wasm";
 import { join } from "desm";
+import fsE from "fs-extra";
 import type { ImageTranscodeParamClass } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/ImageTranscodeParam";
 import type { Transcoder$Format } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/Transcoder$Format";
-
 import tmp from "tmp";
 import type {
     ConvertOptions,
     ConvertResult,
     DicomSource,OutputFormat 
 } from "@/server/types/dicom/convert";
+import { appLogger } from "@/server/utils/logger";
 import type { DicomToImageConverter } from "./covert.interface";
 
+const logger = appLogger.child({
+    module: "BaseConverter"
+});
 
 export abstract class BaseConverter implements DicomToImageConverter {
     
@@ -45,13 +49,11 @@ export abstract class BaseConverter implements DicomToImageConverter {
         const { Tag } = await import(
             "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag"
         );
-        const tempFiles: string[] = [];
 
         if (source.kind !== "stream") {
             throw new Error("Not implemented");
         } else {
             const tmpFile = tmp.fileSync();
-            tempFiles.push(tmpFile.name);
 
             await pipeline(source.stream, createWriteStream(tmpFile.name));
 
@@ -77,7 +79,6 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 for (let i = 1; i <= numberOfFrames; i++) {
                     const destFile = `${tmpFile.name}.${i}.${this.getFileExtension()}`;
                     writeFileSync(destFile, "");
-                    tempFiles.push(destFile);
                     await Dcm2imageWrapper.dcm2Image(
                         tmpFile.name,
                         destFile,
@@ -86,9 +87,18 @@ export abstract class BaseConverter implements DicomToImageConverter {
                     );
 
                     await this.handleConvertOptions(destFile, options);
+                    const fileStream = createReadStream(destFile);
+                    fileStream.once("close", async () => {
+                        await fsE.remove(destFile);
+                        logger.info(`Deleted converted file successfully: ${destFile}`);
+                        
+                        fsE.remove(tmpFile.name).then(() => {
+                            logger.info(`Deleted temp file successfully: ${tmpFile.name}`);
+                        }).catch();
+                    });
 
                     frames.push({
-                        stream: createReadStream(destFile),
+                        stream: fileStream,
                         index: i,
                         size: statSync(destFile).size,
                     });
@@ -96,13 +106,11 @@ export abstract class BaseConverter implements DicomToImageConverter {
 
                 return {
                     frames,
-                    tempFiles,
                     contentType: this.getMimeType() as OutputFormat,
                 };
             } else {
                 const destFile = `${tmpFile.name}.${this.getFileExtension()}`;
                 writeFileSync(destFile, "");
-                tempFiles.push(destFile);
                 await Dcm2imageWrapper.dcm2Image(
                     tmpFile.name,
                     destFile,
@@ -112,15 +120,24 @@ export abstract class BaseConverter implements DicomToImageConverter {
 
                 await this.handleConvertOptions(destFile, options);
 
+                const fileStream = createReadStream(destFile);
+                fileStream.once("close", async () => {
+                    await fsE.remove(destFile);
+                    logger.info(`Deleted temp file successfully: ${destFile}`);
+                    try {
+                        await fsE.remove(tmpFile.name);
+                        logger.info(`Deleted temp file successfully: ${tmpFile.name}`);
+                    } catch {}
+                });
+
                 return {
                     frames: [
                         {
-                            stream: createReadStream(destFile),
+                            stream: fileStream,
                             index: 1,
                             size: statSync(destFile).size,
                         },
                     ],
-                    tempFiles,
                     contentType: this.getMimeType() as OutputFormat,
                 };
             }

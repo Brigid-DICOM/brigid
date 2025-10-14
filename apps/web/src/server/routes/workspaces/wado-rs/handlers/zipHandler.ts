@@ -8,8 +8,13 @@ import type { Context } from "hono";
 import tmp from "tmp";
 import { SevenZip } from "@/server/utils/7zip/sevenZip";
 import { createHash } from "@/server/utils/createHash";
+import { appLogger } from "@/server/utils/logger";
 import { getStorageProvider } from "@/server/utils/storage/storageFactory";
 import type { WadoResponseHandler } from "./wadoResponseHandler.interface";
+
+const logger = appLogger.child({
+    module: "ZipHandler"
+});
 
 export class ZipHandler implements WadoResponseHandler {
     canHandle(accept: string) {
@@ -18,7 +23,6 @@ export class ZipHandler implements WadoResponseHandler {
 
     async handle(c: Context, args: { instances: InstanceEntity[]; accept: string }) {
         const { instances } = args;
-        const tempFiles: string[] = [];
 
         const keys = instances.map(instance => instance.instancePath);
         if (!keys.every(key => key) || keys.length === 0) {
@@ -34,7 +38,6 @@ export class ZipHandler implements WadoResponseHandler {
         const workDir = join(tmp.dirSync().name, id);
         const zipTempFile = join(tmp.dirSync().name
         , `${id}.zip`);
-        tempFiles.push(zipTempFile);
 
         const storage = getStorageProvider();
 
@@ -49,7 +52,6 @@ export class ZipHandler implements WadoResponseHandler {
             );
 
             const destFile = join(workDir, rel);
-            tempFiles.push(destFile);
             const destFileDir = dirname(destFile);
             await fsE.ensureDir(destFileDir);
 
@@ -69,7 +71,10 @@ export class ZipHandler implements WadoResponseHandler {
         const zipFile = instances.length === 1 ? `${instances[0].sopInstanceUid}.zip` : `${instances[0].studyInstanceUid}.zip`;
         headers.set("Content-Disposition", `attachment; filename="${zipFile}"`);
 
-        c.set("tempFiles", tempFiles);
+        zipStream.once("close", async () => {
+            await fsE.remove(workDir);
+            logger.info(`Deleted zip temp work directory successfully: ${workDir}`);
+        });
 
         // @ts-expect-error
         return new Response(zipStream, { status: 200, headers });

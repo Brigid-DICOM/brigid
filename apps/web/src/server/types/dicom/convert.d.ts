@@ -13,7 +13,6 @@ export type ConvertResult = {
         index: number;
         size?: number;
     }[];
-    tempFiles: string[];
 }
 
 export type ConvertOptions = {
