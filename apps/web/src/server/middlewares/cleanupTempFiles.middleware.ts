@@ -23,11 +23,11 @@ export const cleanupTempFiles = createMiddleware(async (c, next) => {
     await next();
 
     const tempFiles = c.get("tempFiles") as string[] | undefined;
-    if (tempFiles) {
-        if (tempFiles.length > 0) {
-            await Promise.allSettled(
-                tempFiles.map((filePath) => deleteWithRetry(filePath)),
-            );
-        }
-    }
+    if (!tempFiles?.length) return;
+
+    setImmediate(() => {
+        void Promise.allSettled(
+            tempFiles.map((filePath) => deleteWithRetry(filePath)),
+        );
+    });
 });
