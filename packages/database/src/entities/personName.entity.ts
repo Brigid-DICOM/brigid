@@ -5,6 +5,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
+import { getDateTimeType } from "../utils/getDateTimeType";
 
 @Entity("person_name")
 export class PersonNameEntity {
@@ -20,9 +21,9 @@ export class PersonNameEntity {
     @Column({ type: "varchar", nullable: true })
     phonetic!: string | null;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 }

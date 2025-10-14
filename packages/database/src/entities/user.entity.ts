@@ -6,6 +6,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import { transformer } from "../utils/transformer";
 import type { AccountEntity } from "./account.entity";
 import type { SessionEntity } from "./session.entity";
@@ -28,10 +29,10 @@ export class UserEntity {
     @Column({ type: "varchar", nullable: true })
     image!: string | null;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @OneToMany("account", "userId")

@@ -8,6 +8,7 @@ import {
     UpdateDateColumn
 } from "typeorm";
 import { DICOM_DELETE_STATUS } from "../const/dicom";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { DicomCodeSequenceEntity } from "./dicomCodeSequence.entity";
 import type { StudyEntity } from "./study.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
@@ -50,16 +51,16 @@ export class SeriesEntity {
     @Column({ type: "smallint", default: DICOM_DELETE_STATUS.ACTIVE })
     deleteStatus!: number; // 0: active, 1: recycled, 2: deleted
 
-    @Column({ type: "timestamp", nullable: true })
+    @Column({ type: getDateTimeType(), nullable: true })
     deletedAt?: Date | null;
 
     @Column({ type: "text" })
     json!: string;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @Column({ type: "varchar", comment: "0008,103F", nullable: true })

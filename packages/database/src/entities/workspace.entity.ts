@@ -8,6 +8,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { UserEntity } from "./user.entity";
 import type { UserWorkspaceEntity } from "./userWorkspace.entity";
 
@@ -22,10 +23,10 @@ export class WorkspaceEntity {
     @Column({ type: "varchar" })
     ownerId!: string;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
    
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @ManyToOne("user", "workspaces", { onDelete: "CASCADE" })

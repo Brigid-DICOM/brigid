@@ -12,6 +12,7 @@ import {
     UpdateDateColumn
 } from "typeorm";
 import { PATIENT_SEX } from "../const/dicom";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { PersonNameEntity } from "./personName.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
 
@@ -51,10 +52,10 @@ export class PatientEntity {
     @Column({ type: "text" })
     json!: string;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @Column({ type: "varchar" })

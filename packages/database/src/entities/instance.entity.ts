@@ -8,9 +8,9 @@ import {
     UpdateDateColumn
 } from "typeorm";
 import { DICOM_DELETE_STATUS } from "../const/dicom";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { SeriesEntity } from "./series.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
-
 
 @Entity("instance")
 export class InstanceEntity {
@@ -38,7 +38,7 @@ export class InstanceEntity {
     @Column({ type: "date", comment: "0008,0022", nullable: true })
     acquisitionDate?: string | null;
 
-    @Column({ type: "timestamp", comment: "0008,0030", nullable: true })
+    @Column({ type: getDateTimeType(), comment: "0008,0030", nullable: true })
     acquisitionDateTime?: string | null;
 
     @Column({ type: "date", comment: "0008,0023", nullable: true })
@@ -68,7 +68,7 @@ export class InstanceEntity {
     @Column({ type: "smallint", default: DICOM_DELETE_STATUS.ACTIVE })
     deleteStatus!: number;
 
-    @Column({ type: "timestamp", nullable: true })
+    @Column({ type: getDateTimeType(), nullable: true })
     deletedAt!: Date | null;
 
     @Column({ type: "text" })
@@ -77,10 +77,10 @@ export class InstanceEntity {
     @Column({ type: "varchar", length: 255, nullable: true })
     hashSum?: string | null;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @Column({ type: "varchar" })

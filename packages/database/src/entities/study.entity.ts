@@ -10,6 +10,7 @@ import {
     UpdateDateColumn
 } from "typeorm";
 import { DICOM_DELETE_STATUS, DICOM_INSTANCE_AVAILABILITY } from "../const/dicom";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { PatientEntity } from "./patient.entity";
 import type { PersonNameEntity } from "./personName.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
@@ -62,23 +63,23 @@ export class StudyEntity {
     @Column({ type: "smallint", default: DICOM_DELETE_STATUS.ACTIVE })
     deleteStatus!: number; // 0: active, 1: recycled, 2: deleted
 
-    @Column({ type: "timestamp", nullable: true })
+    @Column({ type: getDateTimeType(), nullable: true })
     deletedAt!: Date | null;
 
     @Column({ type: "text" })
     json!: string;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
     
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @Column({ type: "varchar" })
     patientId!: string;
 
-    @Column({ type: "varchar", comment: "0008,0090" })
-    referringPhysicianNameId!: string | null;
+    @Column({ type: "varchar", comment: "0008,0090", nullable: true })
+    referringPhysicianNameId?: string | null;
 
     @Column({  type: "varchar" })
     workspaceId!: string;

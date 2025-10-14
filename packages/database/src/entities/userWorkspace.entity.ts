@@ -4,10 +4,10 @@ import {
     Entity,
     JoinColumn, 
     ManyToOne,
-    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { UserEntity } from "./user.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
 
@@ -32,10 +32,10 @@ export class UserWorkspaceEntity {
     @Column({ type: "int", default: 0 })
     permissions!: number;
 
-    @CreateDateColumn({ type: "timestamp" })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
-    @UpdateDateColumn({ type: "timestamp" })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @ManyToOne("user", "user_workspace", { onDelete: "CASCADE" })
