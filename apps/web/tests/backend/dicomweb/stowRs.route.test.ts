@@ -1,15 +1,14 @@
 import { createReadStream } from "node:fs";
 import path from "node:path";
-import { afterEach, beforeEach } from "node:test";
+import { beforeEach } from "node:test";
 import fsE from "fs-extra";
-import { testClient } from "hono/testing";
-import { DataSource } from "typeorm";
+import type { DataSource } from "typeorm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { app } from "@/app/api/[...route]/route";
-import stowRsRoute from "@/server/routes/workspaces/stow-rs/stowRs.route";
 import multipartMessage from "@/server/utils/multipartMessage";
 import { TestDatabaseManager } from "../../utils/testDatabaseManager";
 import { WORKSPACE_ID } from "../workspace.const";
+import { TestFileManager } from "../../utils/testFileManager";
 
 declare global {
     function setTestDataSource(dataSource: DataSource): void;
@@ -84,35 +83,16 @@ describe("STOW-RS Route", () => {
 
         it("should return 404 for non-existent workspace", async () => {
             // Arrange
-            const { data, boundary } = multipartMessage.multipartEncodeByStream(
-                [
-                    {
-                        stream: createReadStream(
-                            path.resolve(
-                                __dirname,
-                                "../../fixtures/dicomFiles/1-01-mod-vo"
-                            )
-                        ),
-                        contentLocation: "1-01-mod-vo"
-                    }
-                ],
-                undefined, // default to use guid boundary
-                "application/dicom"
-            );
+            const testFileManager = new TestFileManager();
             const nonExistentWorkspaceId = "non-existent-workspace-id";
 
             // Act
-            const response = await app.request(
-                `/api/workspaces/${nonExistentWorkspaceId}/studies`,
-                {
-                    method: "POST",
-                    //@ts-expect-error
-                    body: data,
-                    headers: new Headers({
-                        "Content-Type": `multipart/related; boundary=${boundary}`
-                    }),
-                    duplex: "half"
-                }
+
+            const response = await testFileManager.uploadTestFile(
+                path.resolve(
+                    __dirname,
+                    "../../fixtures/dicomFiles/1-01-mod-vo"
+                )
             );
 
             // Assert

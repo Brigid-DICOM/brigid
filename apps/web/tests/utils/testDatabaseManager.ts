@@ -56,10 +56,10 @@ export class TestDatabaseManager {
     }
 
     async clearDatabase() {
-        await this.dataSource.manager.delete(InstanceEntity, {});
-        await this.dataSource.manager.delete(SeriesEntity, {});
-        await this.dataSource.manager.delete(StudyEntity, {});
-        await this.dataSource.manager.delete(WorkspaceEntity, {});
+        await this.dataSource.manager.clear(InstanceEntity);
+        await this.dataSource.manager.clear(SeriesEntity);
+        await this.dataSource.manager.clear(StudyEntity);
+        await this.dataSource.manager.clear(WorkspaceEntity);
     }
 
     async getStudies(workspaceId: string) {
