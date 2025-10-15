@@ -46,13 +46,11 @@ export class MultipartHandler implements WadoResponseHandler {
             );
         }
 
-        
         const datasets: { 
             stream: ReadStream | Readable; 
             size?: number; 
             contentLocation?: string 
         }[] = [];
-        const tempFiles: string[] = [];
 
         if (!outputFormat) {
             for (const instance of instances) {
@@ -89,14 +87,13 @@ export class MultipartHandler implements WadoResponseHandler {
             const key = instance.instancePath;
             const convertOptions = toConvertOptions({
                 ...c.req.query(),
-                frameNumber: c.req.param("frameNumber") || c.req.query("frameNumber") || ""
+                frameNumber: c.req.param("frameNumber") || c.req.query("frameNumber") || "1"
             });
             const { body } = await storage.downloadFile(key);
 
             const source: DicomSource = { kind: "stream", stream: body };
 
             const result = await converter.convert(source, convertOptions);
-            tempFiles.push(...result.tempFiles);
 
             for (const frame of result.frames) {
                 datasets.push({
@@ -118,12 +115,10 @@ export class MultipartHandler implements WadoResponseHandler {
             acceptType
         );
 
-        c.set("tempFiles", tempFiles);
-
         // @ts-expect-error
         return new Response(multipart.data, {
             headers: {
-                "Content-Type": `multipart/related; boundary=${multipart.boundary}`
+                "Content-Type": `multipart/related; type="${acceptType}"; boundary=${multipart.boundary}`
             }
         });
     }

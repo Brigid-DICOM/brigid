@@ -56,7 +56,7 @@ export const wadoRsQueryParamSchema = z.object({
             return false;
         })
         .optional(),
-    frameNumber: z.coerce.number().int().min(1).optional(),
+    frameNumber: z.coerce.number().int().min(1).default(1).optional(),
 });
 
 export const wadoRsHeaderSchema = z.object({

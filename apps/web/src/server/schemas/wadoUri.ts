@@ -118,6 +118,7 @@ export const wadoUriQueryParamSchema = z.object({
         .number()
         .int()
         .min(1)
+        .default(1)
         .optional()
         .describe(
             "This parameter specifies a single Frame within a Multi-frame Image Instance",
