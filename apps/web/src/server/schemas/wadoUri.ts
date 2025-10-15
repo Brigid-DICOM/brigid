@@ -122,4 +122,23 @@ export const wadoUriQueryParamSchema = z.object({
         .describe(
             "This parameter specifies a single Frame within a Multi-frame Image Instance",
         ),
-});
+}).superRefine((input, ctx) => {
+    const windowCenterAbsent = input.windowCenter === undefined;
+    const windowWidthAbsent = input.windowWidth === undefined;
+
+    if (windowCenterAbsent && !windowWidthAbsent) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["windowCenter"],
+            message: "windowCenter is required when windowWidth is provided",
+        })
+    }
+
+    if (!windowCenterAbsent && windowWidthAbsent) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["windowWidth"],
+            message: "windowWidth is required when windowCenter is provided",
+        })
+    }
+})
