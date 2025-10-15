@@ -21,6 +21,7 @@ import type {
 } from "@/server/types/dicom/convert";
 import { appLogger } from "@/server/utils/logger";
 import type { DicomToImageConverter } from "./covert.interface";
+import { HTTPException } from "hono/http-exception";
 
 const logger = appLogger.child({
     module: "BaseConverter"
@@ -111,11 +112,17 @@ export abstract class BaseConverter implements DicomToImageConverter {
             } else {
                 const destFile = `${tmpFile.name}.${this.getFileExtension()}`;
                 writeFileSync(destFile, "");
+                const inputFrameNumber = options.frameNumber || 1;
+                if (inputFrameNumber > numberOfFrames) {
+                    throw new HTTPException(400, {
+                        message: "Invalid frame number"
+                    })
+                }
                 await Dcm2imageWrapper.dcm2Image(
                     tmpFile.name,
                     destFile,
                     imageTranscodeParam,
-                    options.frameNumber || 1,
+                    inputFrameNumber,
                 );
 
                 await this.handleConvertOptions(destFile, options);

@@ -82,7 +82,6 @@ export function wadoUriParamsToConvertOptions(qs: Record<string, string>): Conve
     if (parsed.windowWidth) {
         windowWidth = Number(parsed.windowWidth);
     }
-
     return {
         windowWidth,
         windowCenter,
