@@ -296,7 +296,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                             }
                         }
                     }
-                    
+
                     if (iccProfileBytes) {
                         image.setProfile("icc", iccProfileBytes);
                     }
@@ -327,6 +327,15 @@ export abstract class BaseConverter implements DicomToImageConverter {
                         ),
                     );
                     image.setProfile("icc", rommrgbProfile);
+                    break;
+                }
+                case "displayp3": {
+                    const displayp3Profile = await readFile(
+                        path.resolve(
+                            join(import.meta.url, "iccprofiles/Display-P3.icc"),
+                        ),
+                    );
+                    image.setProfile("icc", displayp3Profile);
                     break;
                 }
             }

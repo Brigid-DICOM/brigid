@@ -126,7 +126,7 @@ export const wadoUriQueryParamSchema = z.object({
     iccprofile: z
         .string()
         .default("no")
-        .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb"])),
+        .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb", "displayp3"])),
 }).superRefine((input, ctx) => {
     const windowCenterAbsent = input.windowCenter === undefined;
     const windowWidthAbsent = input.windowWidth === undefined;

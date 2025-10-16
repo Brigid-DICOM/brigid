@@ -31,7 +31,7 @@ export type ConvertOptions = {
         width?: number;
         height?: number;
     },
-    profile?: "no" | "yes" | "srgb" | "adobergb" | "rommrgb";
+    profile?: "no" | "yes" | "srgb" | "adobergb" | "rommrgb" | "displayp3";
     region?: {
         xmin: number;
         ymin: number;

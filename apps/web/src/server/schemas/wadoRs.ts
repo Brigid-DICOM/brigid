@@ -23,7 +23,7 @@ export const wadoRsQueryParamSchema = z.object({
     iccprofile: z
         .string()
         .default("no")
-        .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb"])),
+        .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb", "displayp3"])),
     viewport: z
         .string()
         .refine((v) => {
