@@ -11,6 +11,7 @@ import {
 } from "@imagemagick/magick-wasm";
 import { join } from "desm";
 import fsE from "fs-extra";
+import { HTTPException } from "hono/http-exception";
 import type { ImageTranscodeParamClass } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/ImageTranscodeParam";
 import type { Transcoder$Format } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/Transcoder$Format";
 import tmp from "tmp";
@@ -21,7 +22,6 @@ import type {
 } from "@/server/types/dicom/convert";
 import { appLogger } from "@/server/utils/logger";
 import type { DicomToImageConverter } from "./covert.interface";
-import { HTTPException } from "hono/http-exception";
 
 const logger = appLogger.child({
     module: "BaseConverter"
@@ -65,7 +65,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 await DicomFileInputStream.newInstanceAsync(
                     path.resolve(tmpFile.name),
                 );
-            const dataset = await dicomFileInputStream.readDataset();
+            const dataset = await dicomFileInputStream.readDataset(-1, Tag.PixelData);
             const numberOfFramesStr = await dataset?.getString(
                 Tag.NumberOfFrames,
             );
