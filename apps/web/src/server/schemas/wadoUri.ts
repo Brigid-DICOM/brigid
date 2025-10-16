@@ -123,6 +123,10 @@ export const wadoUriQueryParamSchema = z.object({
         .describe(
             "This parameter specifies a single Frame within a Multi-frame Image Instance",
         ),
+    iccprofile: z
+        .string()
+        .default("no")
+        .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb"])),
 }).superRefine((input, ctx) => {
     const windowCenterAbsent = input.windowCenter === undefined;
     const windowWidthAbsent = input.windowWidth === undefined;

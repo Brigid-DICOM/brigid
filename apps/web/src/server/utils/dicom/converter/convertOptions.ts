@@ -91,6 +91,7 @@ export function wadoUriParamsToConvertOptions(qs: Record<string, string>): Conve
         } : undefined,
         region,
         frameNumber: parsed.frameNumber,
-        quality: parsed.imageQuality
+        quality: parsed.imageQuality,
+        profile: parsed.iccprofile
     }
 }
