@@ -13,7 +13,11 @@ export default defineConfig({
         globals: true,
         include: [
             "tests/backend/**/*.test.ts"
-        ]
+        ],
+        globalSetup: [
+            path.resolve(__dirname, "./tests/backend/globalSetup.ts")
+        ],
+        fileParallelism: false
     }
 });
 
