@@ -12,6 +12,7 @@ import {
 import { join } from "desm";
 import fsE from "fs-extra";
 import { HTTPException } from "hono/http-exception";
+import type { AttributesClass} from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Attributes";
 import type { ImageTranscodeParamClass } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/ImageTranscodeParam";
 import type { Transcoder$Format } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/Transcoder$Format";
 import tmp from "tmp";
@@ -28,6 +29,8 @@ const logger = appLogger.child({
 });
 
 export abstract class BaseConverter implements DicomToImageConverter {
+
+    private dicomDataset: AttributesClass | null = null;
     
     public abstract getMimeType(): string;
     
@@ -65,8 +68,8 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 await DicomFileInputStream.newInstanceAsync(
                     path.resolve(tmpFile.name),
                 );
-            const dataset = await dicomFileInputStream.readDataset(-1, Tag.PixelData);
-            const numberOfFramesStr = await dataset?.getString(
+            this.dicomDataset = await dicomFileInputStream.readDataset(-1, Tag.PixelData);
+            const numberOfFramesStr = await this.dicomDataset?.getString(
                 Tag.NumberOfFrames,
             );
             const numberOfFrames = parseInt(numberOfFramesStr || "1", 10);
@@ -279,9 +282,26 @@ export abstract class BaseConverter implements DicomToImageConverter {
             switch (options.profile) {
                 case "no":
                     break;
-                case "yes":
-                    // TODO: implement
+                case "yes": {
+                    const { Tag } = await import(
+                        "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag"
+                    );
+                    let iccProfileBytes: Buffer | null = null;
+                    if (this.dicomDataset) {
+                        iccProfileBytes = await this.dicomDataset.getBytes(Tag.ICCProfile);
+                        if (!iccProfileBytes) {
+                            const opticalPath = await this.dicomDataset.getNestedDataset(Tag.OpticalPathSequence);
+                            if (opticalPath) {
+                                iccProfileBytes = await opticalPath.getBytes(Tag.ICCProfile);
+                            }
+                        }
+                    }
+                    
+                    if (iccProfileBytes) {
+                        image.setProfile("icc", iccProfileBytes);
+                    }
                     break;
+                }
                 case "srgb": {
                     const srgbProfile = await readFile(
                         path.resolve(
