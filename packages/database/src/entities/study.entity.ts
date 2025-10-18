@@ -5,7 +5,6 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
-    OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
@@ -84,7 +83,7 @@ export class StudyEntity {
     @Column({  type: "varchar" })
     workspaceId!: string;
 
-    @OneToOne("person_name", "id", { nullable: true, cascade: true })
+    @ManyToOne("person_name", "id", { nullable: true, cascade: true })
     @JoinColumn({ name: "referringPhysicianNameId", referencedColumnName: "id"})
     referringPhysicianName!: PersonNameEntity | null;
 
