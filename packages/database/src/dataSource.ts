@@ -14,6 +14,8 @@ import { UserWorkspaceEntity } from "./entities/userWorkspace.entity";
 import { VerificationTokenEntity } from "./entities/verificationToken.entity";
 import { WorkspaceEntity } from "./entities/workspace.entity";
 import * as migrations from "./migrations";
+import { InstanceSubscriber } from "./subscribers/instance.subscriber";
+import { SeriesSubscriber } from "./subscribers/series.subscriber";
 import { parseDataSourceConfig } from "./utils/parseDataSourceConfig";
 
 export const AppDataSource = new DataSource({
@@ -31,6 +33,10 @@ export const AppDataSource = new DataSource({
         SeriesEntity,
         InstanceEntity,
         DicomCodeSequenceEntity
+    ],
+    subscribers: [
+        SeriesSubscriber,
+        InstanceSubscriber,
     ],
     synchronize: env.IS_LOCAL_APP,
     migrations: migrations,
