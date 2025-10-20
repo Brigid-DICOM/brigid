@@ -3,7 +3,7 @@ import {
     EventSubscriber,
     type InsertEvent,
 } from "typeorm";
-import type { InstanceEntity } from "../entities/instance.entity";
+import { InstanceEntity } from "../entities/instance.entity";
 import { SeriesEntity } from "../entities/series.entity";
 import { StudyEntity } from "../entities/study.entity";
 
@@ -11,6 +11,10 @@ import { StudyEntity } from "../entities/study.entity";
 export class InstanceSubscriber
     implements EntitySubscriberInterface<InstanceEntity>
 {
+    listenTo() {
+        return InstanceEntity;
+    }
+
     async afterInsert(event: InsertEvent<InstanceEntity>): Promise<void> {
         const studyEntityRepository = event.manager.getRepository(StudyEntity);
 
