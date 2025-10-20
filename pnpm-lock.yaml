@@ -190,6 +190,9 @@ importers:
       '@brigid/env':
         specifier: workspace:*
         version: link:../env
+      '@brigid/types':
+        specifier: workspace:^
+        version: link:../types
       '@electric-sql/pglite':
         specifier: ^0.3.10
         version: 0.3.10
