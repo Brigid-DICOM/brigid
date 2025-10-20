@@ -1,6 +1,7 @@
 import { AppDataSource } from "@brigid/database";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
+import type { DicomTag } from "@brigid/types";
 import type { EntityManager } from "typeorm";
 
 export class SeriesService {
@@ -22,6 +23,7 @@ export class SeriesService {
             },
             select: {
                 id: true,
+                json: true,
                 seriesDescriptionCodeSequence: {
                     id: true,
                 },
@@ -40,6 +42,14 @@ export class SeriesService {
                 seriesEntity.seriesDescriptionCodeSequence.id =
                     existingSeries.seriesDescriptionCodeSequence.id;
             }
+
+            const existingSeriesJson = JSON.parse(existingSeries.json ?? "{}") as DicomTag;
+            const incomingSeriesJson = JSON.parse(seriesEntity.json ?? "{}") as DicomTag;
+
+            seriesEntity.json  = JSON.stringify({
+                ...existingSeriesJson,
+                ...incomingSeriesJson,
+            });
         }
 
         return await this.entityManager.save(SeriesEntity, seriesEntity);

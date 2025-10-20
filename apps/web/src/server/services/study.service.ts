@@ -1,6 +1,7 @@
 import { AppDataSource } from "@brigid/database";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
+import type { DicomTag } from "@brigid/types";
 import type { EntityManager } from "typeorm";
 
 export class StudyService {
@@ -21,6 +22,7 @@ export class StudyService {
             },
             select: {
                 id: true,
+                json: true,
                 referringPhysicianName: {
                     id: true
                 }
@@ -38,6 +40,14 @@ export class StudyService {
             ) {
                 studyEntity.referringPhysicianName.id = existingStudy.referringPhysicianName.id;
             }
+
+            const existingStudyJson = JSON.parse(existingStudy.json ?? "{}") as DicomTag;
+            const incomingStudyJson = JSON.parse(studyEntity.json ?? "{}") as DicomTag;
+
+            studyEntity.json  = JSON.stringify({
+                ...existingStudyJson,
+                ...incomingStudyJson,
+            });
         }
         
         return await this.entityManager.save(StudyEntity, studyEntity);

@@ -1,5 +1,6 @@
 import { AppDataSource } from "@brigid/database";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
+import type { DicomTag } from "@brigid/types";
 import type { EntityManager } from "typeorm";
 
 export class InstanceService {
@@ -18,12 +19,21 @@ export class InstanceService {
                 workspaceId: instanceEntity.workspaceId
             },
             select: {
-                id: true
+                id: true,
+                json: true
             }
         });
         
         if (existingInstance) {
             instanceEntity.id = existingInstance.id;
+
+            const existingInstanceJson = JSON.parse(existingInstance.json ?? "{}") as DicomTag;
+            const incomingInstanceJson = JSON.parse(instanceEntity.json ?? "{}") as DicomTag;
+
+            instanceEntity.json  = JSON.stringify({
+                ...existingInstanceJson,
+                ...incomingInstanceJson,
+            });
         }
 
         return await this.entityManager.save(InstanceEntity, instanceEntity);
