@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
     /* config options here */
     output: "standalone",
     outputFileTracingIncludes: {
+        "/api/**/*": [
+            "../../node_modules/java-bridge/**",
+            "../../node_modules/raccoon-dcm4che-bridge/**",
+        ],
         "*": [
             "public/**/*",
             ".next/static/**/*",
