@@ -10,6 +10,7 @@ import {
 import { DICOM_DELETE_STATUS } from "../const/dicom";
 import { getDateTimeType } from "../utils/getDateTimeType";
 import type { DicomCodeSequenceEntity } from "./dicomCodeSequence.entity";
+import type { SeriesRequestAttributesEntity } from "./seriesRequestAttributes.entity";
 import type { StudyEntity } from "./study.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
 
@@ -69,6 +70,9 @@ export class SeriesEntity {
     @Column({ type: "varchar", comment: "0008,103F", nullable: true })
     seriesDescriptionCodeSequenceId?: string | null;
 
+    @Column({ type: "varchar", comment: "0040,0275", nullable: true })
+    seriesRequestAttributesId?: string | null;
+
     @Column({ type: "varchar" })
     localStudyId!: string;
 
@@ -78,6 +82,10 @@ export class SeriesEntity {
     @ManyToOne("dicom_code_sequence", "series", { nullable: true, cascade: true })
     @JoinColumn({ name: "seriesDescriptionCodeSequenceId", referencedColumnName: "id" })
     seriesDescriptionCodeSequence!: DicomCodeSequenceEntity | null;
+
+    @ManyToOne("series_request_attributes", "series", { nullable: true, cascade: true })
+    @JoinColumn({ name: "seriesRequestAttributesId", referencedColumnName: "id" })
+    seriesRequestAttributes!: SeriesRequestAttributesEntity | null;
 
     @ManyToOne("study", "series")
     @JoinColumn({ name: "localStudyId", referencedColumnName: "id" })

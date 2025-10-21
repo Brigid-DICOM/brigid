@@ -7,6 +7,7 @@ import { InstanceEntity } from "./entities/instance.entity";
 import { PatientEntity } from "./entities/patient.entity";
 import { PersonNameEntity } from "./entities/personName.entity";
 import { SeriesEntity } from "./entities/series.entity";
+import { SeriesRequestAttributesEntity } from "./entities/seriesRequestAttributes.entity";
 import { SessionEntity } from "./entities/session.entity";
 import { StudyEntity } from "./entities/study.entity";
 import { UserEntity } from "./entities/user.entity";
@@ -32,7 +33,8 @@ export const AppDataSource = new DataSource({
         StudyEntity,
         SeriesEntity,
         InstanceEntity,
-        DicomCodeSequenceEntity
+        DicomCodeSequenceEntity,
+        SeriesRequestAttributesEntity
     ],
     subscribers: [
         SeriesSubscriber,

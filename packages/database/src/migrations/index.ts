@@ -9,3 +9,4 @@ export { CreateInstanceTable1759646421554 } from "./1759646421554-createInstance
 export { UpdateColumnsToPatientTable1759830246884 } from "./1759830246884-UpdateColumnsToPatientTable";
 export { AddNumberOfSeriesRelatedInstancesColumn1760864324156 } from "./1760864324156-addNumberOfSeriesRelatedInstancesColumn";
 export { AddDefaultToNumberOfStudyRelatedColumns1760864736567 } from "./1760864736567-addDefaultToNumberOfStudyRelatedColumns";
+export { AddSeriesRequestAttributesTable1761038228473 } from "./1761038228473-addSeriesRequestAttributesTable";
