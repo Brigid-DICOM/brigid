@@ -7,6 +7,7 @@ import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
 import { PersonNameEntity } from "@brigid/database/src/entities/personName.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
+import { SeriesRequestAttributesEntity } from "@brigid/database/src/entities/seriesRequestAttributes.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import type { DicomPersonName, DicomTag } from "@brigid/types";
 import { hashFile } from "hasha";
@@ -59,6 +60,34 @@ function extractCodeSequenceEntity(
     if (codingSchemeVersion) {
         entity.codingSchemeVersion = codingSchemeVersion as string;
     }
+
+    return entity;
+}
+
+function extractSeriesRequestAttributesEntity(
+    dicomJsonUtils: DicomJsonUtils
+): SeriesRequestAttributesEntity | null {
+    const sequence = dicomJsonUtils.getValue<DicomTag>(DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag);
+    if (!sequence) {
+        return null;
+    }
+
+    const item = sequence;
+
+    const entity = new SeriesRequestAttributesEntity();
+
+    entity.studyInstanceUid = item[DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag]?.Value?.[0] as string | undefined;
+    entity.accessionNumber = item[DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag]?.Value?.[0] as string | undefined;
+    
+    const issuerOfAccessionNumberSequence = item?.[DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag]?.Value?.[0] as DicomTag | undefined;
+    if (issuerOfAccessionNumberSequence) {
+        entity.accLocalNamespaceEntityId = issuerOfAccessionNumberSequence[DICOM_TAG_KEYWORD_REGISTRY.LocalNamespaceEntityID.tag]?.Value?.[0] as string | undefined;
+        entity.accUniversalEntityId = issuerOfAccessionNumberSequence[DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityID.tag]?.Value?.[0] as string | undefined;
+        entity.accUniversalEntityIdType = issuerOfAccessionNumberSequence[DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityIDType.tag]?.Value?.[0] as string | undefined;
+    }
+
+    entity.requestedProcedureId = item[DICOM_TAG_KEYWORD_REGISTRY.RequestedProcedureID.tag]?.Value?.[0] as string | undefined;
+    entity.scheduledProcedureStepId = item[DICOM_TAG_KEYWORD_REGISTRY.ScheduledProcedureStepID.tag]?.Value?.[0] as string | undefined;
 
     return entity;
 }
@@ -251,6 +280,11 @@ export const toSeriesDbEntity = (
     if (seriesDescriptionCodeSequenceEntity) {
         series.seriesDescriptionCodeSequence =
             seriesDescriptionCodeSequenceEntity;
+    }
+
+    const seriesRequestAttributesEntity = extractSeriesRequestAttributesEntity(dicomJsonUtils);
+    if (seriesRequestAttributesEntity) {
+        series.seriesRequestAttributes = seriesRequestAttributesEntity;
     }
 
     return series;

@@ -20,11 +20,15 @@ export class SeriesService {
             },
             relations: {
                 seriesDescriptionCodeSequence: true,
+                seriesRequestAttributes: true,
             },
             select: {
                 id: true,
                 json: true,
                 seriesDescriptionCodeSequence: {
+                    id: true,
+                },
+                seriesRequestAttributes: {
                     id: true,
                 },
             },
@@ -43,10 +47,24 @@ export class SeriesService {
                     existingSeries.seriesDescriptionCodeSequence.id;
             }
 
-            const existingSeriesJson = JSON.parse(existingSeries.json ?? "{}") as DicomTag;
-            const incomingSeriesJson = JSON.parse(seriesEntity.json ?? "{}") as DicomTag;
+            if (
+                "seriesRequestAttributes" in seriesEntity &&
+                seriesEntity.seriesRequestAttributes &&
+                "id" in seriesEntity.seriesRequestAttributes &&
+                existingSeries.seriesRequestAttributes
+            ) {
+                seriesEntity.seriesRequestAttributes.id =
+                    existingSeries.seriesRequestAttributes.id;
+            }
 
-            seriesEntity.json  = JSON.stringify({
+            const existingSeriesJson = JSON.parse(
+                existingSeries.json ?? "{}",
+            ) as DicomTag;
+            const incomingSeriesJson = JSON.parse(
+                seriesEntity.json ?? "{}",
+            ) as DicomTag;
+
+            seriesEntity.json = JSON.stringify({
                 ...existingSeriesJson,
                 ...incomingSeriesJson,
             });

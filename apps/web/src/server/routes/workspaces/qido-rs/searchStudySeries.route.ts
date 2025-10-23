@@ -1,0 +1,41 @@
+import { Hono } from "hono";
+import { describeRoute, validator as zValidator } from "hono-openapi";
+import { z } from "zod";
+import { verifyWorkspaceExists } from "@/server/middlewares/workspace.middleware";
+import { searchStudySeriesQueryParamSchema } from "@/server/schemas/searchStudySeriesSchema";
+import { DicomSearchSeriesQueryBuilder } from "@/server/services/qido-rs/dicomSearchSeriesQueryBuilder";
+
+
+const searchStudySeriesRoute = new Hono().get(
+    "/workspaces/:workspaceId/studies/:studyInstanceUid/series",
+    describeRoute({
+        description: 
+            "Search for DICOM study's series (QIDO-RS), ref: [Search Transaction](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.6)",
+        tags: ["QIDO-RS"]
+    }),
+    verifyWorkspaceExists,
+    zValidator("param", z.object({
+        workspaceId: z.string().describe("The ID of the workspace"),
+        studyInstanceUid: z.string().describe("The study instance UID"),
+    })),
+    zValidator("query", searchStudySeriesQueryParamSchema),
+    async (c) => {
+        const workspaceId = c.req.param("workspaceId");
+        const queryParams = c.req.query();
+        const queryBuilder = new DicomSearchSeriesQueryBuilder();
+
+        const series = await queryBuilder.execQuery({
+            workspaceId,
+            StudyInstanceUID: c.req.param("studyInstanceUid"),
+            ...queryParams,
+        });
+
+        if (series.length === 0) {
+            return c.body(null, 204);
+        }
+
+        return c.json(series.map((series) => JSON.parse(series.json)));
+    }
+);
+
+export default searchStudySeriesRoute;
