@@ -6,6 +6,7 @@ export enum QueryType {
     STRING = "string",
     DATE = "date",
     TIME = "time",
+    NUMBER = "number",
 }
 
 export interface FieldConfig {
