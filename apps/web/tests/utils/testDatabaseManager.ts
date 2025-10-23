@@ -5,6 +5,7 @@ import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
 import { PersonNameEntity } from "@brigid/database/src/entities/personName.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
+import { SeriesRequestAttributesEntity } from "@brigid/database/src/entities/seriesRequestAttributes.entity";
 import { SessionEntity } from "@brigid/database/src/entities/session.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { UserEntity } from "@brigid/database/src/entities/user.entity";
@@ -36,9 +37,10 @@ export class TestDatabaseManager {
                 SeriesEntity,
                 InstanceEntity,
                 DicomCodeSequenceEntity,
+                SeriesRequestAttributesEntity,
             ],
             synchronize: true,
-            logging: true,
+            logging: false,
             driver: SqliteDriver,
         });
     }
@@ -236,6 +238,29 @@ export class TestDatabaseManager {
             "00080031": { vr: "TM", Value: ["143500.000000"] },
             "0008103E": { vr: "LO", Value: ["Chest Arterial Phase"] },
             "00200011": { vr: "IS", Value: [1] },
+            "00400244": { vr: "DA", Value: ["20241017"] },
+            "00400245": { vr: "TM", Value: ["143500.000000"] },
+            "00400275": { 
+                vr: "SQ", 
+                Value: [
+                    {
+                        "0020000D": { vr: "UI", Value: [study1.studyInstanceUid] },
+                        "00080050": { vr: "SH", Value: ["REQACC001"] },
+                        "00080051": { 
+                            vr: "SQ", 
+                            Value: [
+                                {
+                                    "00400031": { vr: "LO", Value: ["Local Entity ID 1"] },
+                                    "00400032": { vr: "LO", Value: ["054453f4-805f-48f2-b5ca-120d64b809fb"] },
+                                    "00400033": { vr: "LO", Value: ["UUID"] },
+                                }
+                            ] 
+                        },
+                        "00401001": { vr: "SH", Value: ["SPS-1"] },
+                        "00400009": { vr: "SH", Value: ["RP-1"] },
+                    },
+                ]
+            },
         };
 
         const series1_1 = await manager.save(SeriesEntity, {
@@ -248,6 +273,17 @@ export class TestDatabaseManager {
             modality: "CT",
             seriesDescription: "Chest Arterial Phase",
             seriesNumber: 1,
+            performedProcedureStepStartDate: "20241017",
+            performedProcedureStepStartTime: "143500.000000",
+            seriesRequestAttributes: {
+                studyInstanceUid: study1.studyInstanceUid,
+                accessionNumber: "REQACC001",
+                accLocalNamespaceEntityId: "LOCAL_ENTITY_ID_1",
+                accUniversalEntityId: "054453f4-805f-48f2-b5ca-120d64b809fb",
+                accUniversalEntityIdType: "UUID",
+                requestedProcedureId: "RP-1",
+                scheduledProcedureStepId: "SPS-1",
+            },
             seriesPath: "/test/series1_1",
             json: JSON.stringify(series1_1Json),
         });
@@ -260,6 +296,29 @@ export class TestDatabaseManager {
             "00080031": { vr: "TM", Value: ["144000.000000"] },
             "0008103E": { vr: "LO", Value: ["Chest Venous Phase"] },
             "00200011": { vr: "IS", Value: [2] },
+            "00400244": { vr: "DA", Value: ["20241017"] },
+            "00400245": { vr: "TM", Value: ["144000.000000"] },
+            "00400275": { 
+                vr: "SQ", 
+                Value: [
+                    {
+                        "0020000D": { vr: "UI", Value: [study1.studyInstanceUid] },
+                        "00080050": { vr: "SH", Value: ["REQACC002"] },
+                        "00080051": { 
+                            vr: "SQ", 
+                            Value: [
+                                {
+                                    "00400031": { vr: "LO", Value: ["Local Entity ID 2"] },
+                                    "00400032": { vr: "LO", Value: ["2f6316f6-0d26-4f17-b5b4-0d296673da0c"] },
+                                    "00400033": { vr: "LO", Value: ["UUID"] },
+                                }
+                            ] 
+                        },
+                        "00401001": { vr: "SH", Value: ["SPS-2"] },
+                        "00400009": { vr: "SH", Value: ["RP-2"] },
+                    }
+                ]
+            },
         };
         const series1_2 = await manager.save(SeriesEntity, {
             workspaceId: workspace.id,
@@ -271,6 +330,17 @@ export class TestDatabaseManager {
             modality: "CT",
             seriesDescription: "Chest Venous Phase",
             seriesNumber: 2,
+            performedProcedureStepStartDate: "20241017",
+            performedProcedureStepStartTime: "144000.000000",
+            seriesRequestAttributes: {
+                studyInstanceUid: study1.studyInstanceUid,
+                accessionNumber: "REQACC002",
+                accLocalNamespaceEntityId: "LOCAL_ENTITY_ID_2",
+                accUniversalEntityId: "2f6316f6-0d26-4f17-b5b4-0d296673da0c",
+                accUniversalEntityIdType: "UUID",
+                requestedProcedureId: "RP-2",
+                scheduledProcedureStepId: "SPS-2",
+            },
             seriesPath: "/test/series1_2",
             json: JSON.stringify(series1_2Json),
         });
