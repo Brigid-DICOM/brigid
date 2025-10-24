@@ -45,7 +45,7 @@ export class InstanceEntity {
     contentDate?: string | null;
 
     @Column({ type: "decimal", precision: 12, scale: 6, comment: "0008,0033", nullable: true })
-    contentDateTime?: string | null;
+    contentTime?: string | null;
 
     @Column({ type: "int", comment: "0020,0013", nullable: true })
     instanceNumber?: number | null;
