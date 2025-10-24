@@ -179,5 +179,10 @@ export const INSTANCE_TAGS_TO_STORE = [
     DICOM_TAG_KEYWORD_REGISTRY.IconImageSequence.tag,
     DICOM_TAG_KEYWORD_REGISTRY.PresentationLUTShape.tag,
     DICOM_TAG_KEYWORD_REGISTRY.RealWorldValueMappingSequence.tag,
-    DICOM_TAG_KEYWORD_REGISTRY.ImageLaterality.tag
+    DICOM_TAG_KEYWORD_REGISTRY.ImageLaterality.tag,
+    // Instance Resources Search Response Payload
+    DICOM_TAG_KEYWORD_REGISTRY.Rows.tag,
+    DICOM_TAG_KEYWORD_REGISTRY.Columns.tag,
+    DICOM_TAG_KEYWORD_REGISTRY.BitsAllocated.tag,
+    DICOM_TAG_KEYWORD_REGISTRY.NumberOfFrames.tag,
 ];
