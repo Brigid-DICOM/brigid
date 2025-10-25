@@ -1,15 +1,13 @@
-import test from "node:test";
 import type { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { get } from "lodash";
 import type { DataSource } from "typeorm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { app } from "@/app/api/[...route]/route";
-import { DICOM_TAG_KEYWORD_REGISTRY } from "@/server/const/dicomTagKeywordRegistry";
 import { TestDatabaseManager } from "../../../utils/testDatabaseManager";
 import {
     keywordPathToTagPath,
-    SearchDicomTestOptions,
+    type SearchDicomTestOptions,
 } from "../../../utils/testUtils";
 import { WORKSPACE_ID } from "../../workspace.const";
 
@@ -119,7 +117,8 @@ describe("QIDO-RS Search Study Series Route", () => {
                 );
 
                 const series = await response.json();
-                expect(series[0]).toHaveProperty("0020000D"); // Series Instance UID
+                expect(series[0]).toHaveProperty("0020000D"); // Study Instance UID
+                expect(series[0]).toHaveProperty("0020000E"); // Series Instance UID
                 expect(series[0]).toHaveProperty("00080060"); // Modality
             });
         });
