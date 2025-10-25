@@ -431,7 +431,7 @@ export class TestDatabaseManager {
             json: JSON.stringify(instance1_1_1Json),
         });
 
-        const instance1_1_2Json = {
+        const instance1_2_1Json = {
             ...series1_2Json,
             "00080016": { vr: "UI", Value: ["1.2.840.113619.5.1"] },
             "00080018": { vr: "UI", Value: ["1.2.840.113619.5.1.2"] },
@@ -446,7 +446,7 @@ export class TestDatabaseManager {
             "0040A491": { vr: "CS", Value: ["COMPLETED"] },
             "0040A493": { vr: "CS", Value: ["VERIFIED"] },
         }
-        const instance1_1_2 = await manager.save(InstanceEntity, {
+        const instance1_2_1 = await manager.save(InstanceEntity, {
             workspaceId: workspace.id,
             localSeriesId: series1_2.id,
             instancePath: "/test/instance1_1_2",
@@ -465,7 +465,7 @@ export class TestDatabaseManager {
             windowWidth: "100",
             completionFlag: "COMPLETED",
             verificationFlag: "VERIFIED",
-            json: JSON.stringify(instance1_1_2Json),
+            json: JSON.stringify(instance1_2_1Json),
         });
 
         const instance2_1_1Json = {
@@ -549,7 +549,7 @@ export class TestDatabaseManager {
             referringPhysicians: [referringPhysician1],
             studies: [study1, study2, study3],
             series: [series1_1, series1_2, series2_1, series3_1],
-            instances: [instance1_1_1, instance1_1_2, instance2_1_1, instance3_1_1],
+            instances: [instance1_1_1, instance1_2_1, instance2_1_1, instance3_1_1],
         };
     }
 
