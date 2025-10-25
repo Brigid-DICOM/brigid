@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { DICOM_DELETE_STATUS } from "../const/dicom";
 import { getDateTimeType } from "../utils/getDateTimeType";
+import { transformer } from "../utils/transformer";
 import type { SeriesEntity } from "./series.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
 
@@ -38,7 +39,7 @@ export class InstanceEntity {
     @Column({ type: "date", comment: "0008,0022", nullable: true })
     acquisitionDate?: string | null;
 
-    @Column({ type: getDateTimeType(), comment: "0008,0030", nullable: true })
+    @Column({ type: "bigint", comment: "0008,0030", nullable: true, transformer: transformer.DT })
     acquisitionDateTime?: string | null;
 
     @Column({ type: "date", comment: "0008,0023", nullable: true })

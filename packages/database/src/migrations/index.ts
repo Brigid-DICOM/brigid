@@ -11,3 +11,4 @@ export { AddNumberOfSeriesRelatedInstancesColumn1760864324156 } from "./17608643
 export { AddDefaultToNumberOfStudyRelatedColumns1760864736567 } from "./1760864736567-addDefaultToNumberOfStudyRelatedColumns";
 export { AddSeriesRequestAttributesTable1761038228473 } from "./1761038228473-addSeriesRequestAttributesTable";
 export { RenameToContentTime1761293029642 } from "./1761293029642-renameToContentTime";
+export { ConvertAcquisitionDateTimeToBigint1761365623525 } from "./1761365623525-convertAcquisitionDateTimeToBigint";
