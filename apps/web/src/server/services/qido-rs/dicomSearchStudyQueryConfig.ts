@@ -7,6 +7,7 @@ export enum QueryType {
     DATE = "date",
     TIME = "time",
     NUMBER = "number",
+    DATETIME = "datetime",
 }
 
 export interface FieldConfig {

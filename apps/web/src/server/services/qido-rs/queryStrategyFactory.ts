@@ -1,4 +1,5 @@
 import { DateQueryStrategy } from "./dateQueryStrategy";
+import { DateTimeQueryStrategy } from "./dateTimeQueryStrategy";
 import { NumberQueryStrategy } from "./numberQueryStrategy";
 import type { QueryStrategy } from "./queryStrategy";
 import { StringQueryStrategy } from "./stringQueryStrategy";
@@ -9,6 +10,7 @@ const strategies = new Map<string, QueryStrategy>([
     ["date", new DateQueryStrategy()],
     ["time", new TimeQueryStrategy()],
     ["number", new NumberQueryStrategy()],
+    ["datetime", new DateTimeQueryStrategy()],
 ]);
 
 export const getQueryStrategy = (type: string): QueryStrategy => {
