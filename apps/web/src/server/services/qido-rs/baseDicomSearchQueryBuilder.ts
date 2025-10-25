@@ -1,5 +1,6 @@
 import { AppDataSource } from "@brigid/database";
 import type { EntityManager, ObjectLiteral, SelectQueryBuilder } from "typeorm";
+import type { InstanceFieldConfig } from "./dicomSearchInstanceQueryConfig";
 import type { SeriesFieldConfig } from "./dicomSearchSeriesQueryConfig";
 import type { FieldConfig } from "./dicomSearchStudyQueryConfig";
 import type { QueryDicomResult } from "./queryStrategy";
@@ -8,7 +9,7 @@ import { getQueryStrategy } from "./queryStrategyFactory";
 export abstract class BaseDicomSearchQueryBuilder<
     TEntity extends ObjectLiteral,
     TQueryParam extends Record<string, unknown>,
-    TFieldConfig extends FieldConfig | SeriesFieldConfig = FieldConfig
+    TFieldConfig extends FieldConfig | SeriesFieldConfig | InstanceFieldConfig = FieldConfig
 > {
 
     protected readonly entityManager: EntityManager;
