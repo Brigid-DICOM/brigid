@@ -1,5 +1,3 @@
-import type { SeriesEntity } from "@brigid/database/src/entities/series.entity";
-import type { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { get } from "lodash";
 import type { DataSource } from "typeorm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -17,7 +15,6 @@ declare global {
 
 describe("QIDO-RS Search Series Route", () => {
     let testDb: TestDatabaseManager;
-    let testStudies: StudyEntity[];
 
     beforeAll(async () => {
         testDb = new TestDatabaseManager();
@@ -31,9 +28,7 @@ describe("QIDO-RS Search Series Route", () => {
 
     beforeEach(async () => {
         await testDb.clearDatabase();
-
-        const seedData = await testDb.seedTestData();
-        testStudies = seedData.studies;
+        await testDb.seedTestData();
     });
 
     const itShouldSearchSeriesWith = (options: SearchDicomTestOptions) => {

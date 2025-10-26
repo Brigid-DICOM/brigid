@@ -1,4 +1,3 @@
-import type { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import type { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { get } from "lodash";
@@ -29,7 +28,6 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
     let testDb: TestDatabaseManager;
     let testStudies: StudyEntity[];
     let testSeries: SeriesEntity[];
-    let testInstances: InstanceEntity[];
 
     beforeAll(async () => {
         testDb = new TestDatabaseManager();
@@ -48,7 +46,6 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
         const seedData = await testDb.seedTestData();
         testStudies = seedData.studies;
         testSeries = seedData.series;
-        testInstances = seedData.instances;
     });
 
     const itShouldSearchStudySeriesInstancesWith = (options: SearchDicomTestOptions) => {
