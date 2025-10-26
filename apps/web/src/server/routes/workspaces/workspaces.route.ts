@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import searchSeriesRoute from "./qido-rs/searchSeries.route";
 import searchStudiesRoute from "./qido-rs/searchStudies.route";
 import searchStudySeriesRoute from "./qido-rs/searchStudySeries.route";
 import searchStudySeriesInstancesRoute from "./qido-rs/searchStudySeriesInstances.route";
@@ -16,7 +17,8 @@ const workspacesRoute = new Hono()
 .route("/", uriRetrieveInstanceRoute)
 .route("/", searchStudiesRoute)
 .route("/", searchStudySeriesRoute)
-.route("/", searchStudySeriesInstancesRoute);
+.route("/", searchStudySeriesInstancesRoute)
+.route("/", searchSeriesRoute);
 
 
 export default workspacesRoute;
