@@ -19,6 +19,24 @@ const nextConfig: NextConfig = {
         serverMinification: true,
         turbopackMinify: false
     },
+    async headers() {
+        if (process.env.NODE_ENV === "development") {
+            return [
+                {
+                    // matching all API routes
+                    source: "/api/:path*",
+                    headers: [
+                        // other headers omitted for brevity...
+                        { key: "Access-Control-Allow-Origin", value: "*" },
+                        { key: "Access-Control-Allow-Methods", value: "GET, HEAD, PUT, POST, DELETE, PATCH, OPTIONS" },
+                        { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+                        { key: "Access-Control-Allow-Credentials", value: "true" },
+                    ]
+                }
+            ]
+        }
+        return [];
+    }
 };
 
 export default nextConfig;
