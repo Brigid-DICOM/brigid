@@ -1,6 +1,6 @@
 import type { ReadStream } from "node:fs";
 
-export type OutputFormat = "jpeg" | "jp2" | "png";
+export type OutputFormat = "jpeg" | "jp2" | "png" | "raw";
 
 export type DicomSource =
     | { kind: "filePath", path: string }

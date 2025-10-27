@@ -1,0 +1,108 @@
+import type { ReadStream } from "node:fs";
+import env from "@brigid/env";
+import { Hono } from "hono";
+import {
+    describeRoute,
+    validator as zValidator
+} from "hono-openapi";
+import { z } from "zod";
+import { numberQuerySchema } from "@/server/schemas/numberQuerySchema";
+import { InstanceService } from "@/server/services/instance.service";
+import type { DicomSource } from "@/server/types/dicom/convert";
+import { getDicomToImageConverter } from "@/server/utils/dicom/converter/converterFactory";
+import { toConvertOptions } from "@/server/utils/dicom/converter/convertOptions";
+import multipartMessage from "@/server/utils/multipartMessage";
+import { getStorageProvider } from "@/server/utils/storage/storageFactory";
+
+
+const retrieveFramePixelDataRoute = new Hono()
+.get(
+    "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/frames/:frameNumbers",
+    describeRoute({
+        description: "Retrieve frame pixel data (WADO-RS), ref: [ Retrieve Transaction Pixel Data Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1.6-1)",
+        tags: ["WADO-RS"]
+    }),
+    zValidator(
+        "header",
+        z.object({
+            accept: z.enum([
+                "multipart/related; type=\"application/octet-stream\"",
+                "*/*"
+            ])
+        })
+    ),
+    zValidator("param", z.object({
+        workspaceId: z.string().describe("The ID of the workspace"),
+        studyInstanceUid: z.string().describe("The study instance UID"),
+        seriesInstanceUid: z.string().describe("The series instance UID"),
+        sopInstanceUid: z.string().describe("The sop instance UID"),
+        frameNumbers: numberQuerySchema.describe("a comma-separated list of Frame numbers, in ascending order, contained within an Instance.")
+    })),
+    async (c) => {
+        const { workspaceId, studyInstanceUid, seriesInstanceUid, sopInstanceUid, frameNumbers } = c.req.valid("param");
+
+        const instanceService = new InstanceService();
+        const instance = await instanceService.getInstanceByUid({
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid
+        });
+
+        if (!instance) {
+            return c.json(
+                {
+                    message: "Instance not found"
+                },
+                404
+            );
+        }
+
+        const storage = getStorageProvider();
+        const { body } = await storage.downloadFile(instance.instancePath);
+
+        const converter = getDicomToImageConverter("raw");
+        const results: {
+            stream: ReadStream;
+            size?: number;
+            contentLocation?: string
+        }[] = [];
+        const frames = frameNumbers.split(",").map(Number);
+
+        for (const frame of frames) {
+            const convertOptions = toConvertOptions({
+                ...c.req.query(),
+            });
+
+            convertOptions.frameNumber = frame;
+
+            const source: DicomSource = { kind: "stream", stream: body };
+            const result = await converter.convert(source, convertOptions);
+            results.push({
+                stream: result.frames[0].stream,
+                size: result.frames[0].size,
+                contentLocation: 
+                `${env.NEXT_PUBLIC_APP_URL}/api/workspaces/${instance.workspaceId}` + 
+                `/studies/${instance.studyInstanceUid}` +
+                `/series/${instance.seriesInstanceUid}` +
+                `/instances/${instance.sopInstanceUid}` +
+                `/frames/${frame}`
+            });
+        }
+
+        const multipart = multipartMessage.multipartEncodeByStream(
+            results,
+            undefined, // default to use guid boundary
+            "application/octet-stream"
+        );
+
+        // @ts-expect-error
+        return new Response(multipart.data, {
+            headers: {
+                "Content-Type": `multipart/related; type="application/octet-stream"; boundary=${multipart.boundary}`
+            }
+        });
+    }
+);
+
+export default retrieveFramePixelDataRoute;

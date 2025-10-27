@@ -3,6 +3,7 @@ import type { DicomToImageConverter } from "./covert.interface";
 import { Jp2Converter } from "./jp2Converter";
 import { JpegConverter } from "./jpegConverter";
 import { PngConverter } from "./pngConverter";
+import { RawConverter } from "./rawConverter";
 
 export function getDicomToImageConverter(format: OutputFormat): DicomToImageConverter {
     switch (format) {
@@ -12,6 +13,8 @@ export function getDicomToImageConverter(format: OutputFormat): DicomToImageConv
             return new Jp2Converter();
         case "png":
             return new PngConverter();
+        case "raw":
+            return new RawConverter();
         default:
             throw new Error(`Unsupported format: ${format}`);
     }

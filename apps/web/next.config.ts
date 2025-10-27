@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
         ]
     },
     transpilePackages: ["@brigid/env", "@electric-sql/pglite"],
-    serverExternalPackages: ["raccoon-dcm4che-bridge", "hasha", "7zip-min", "typeorm", "@brigid/database"],
+    serverExternalPackages: ["raccoon-dcm4che-bridge", "hasha", "7zip-min", "typeorm", "@brigid/database", "java-bridge"],
     experimental: {
         serverMinification: true,
         turbopackMinify: false
