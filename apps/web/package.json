@@ -42,7 +42,7 @@
     "multistream": "^4.1.0",
     "next": "15.5.4",
     "pg": "^8.16.3",
-    "raccoon-dcm4che-bridge": "^0.6.4",
+    "raccoon-dcm4che-bridge": "^0.7.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "sqlite3": "^5.1.7",

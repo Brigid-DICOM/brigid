@@ -118,8 +118,8 @@ importers:
         specifier: ^8.16.3
         version: 8.16.3
       raccoon-dcm4che-bridge:
-        specifier: ^0.6.4
-        version: 0.6.5
+        specifier: ^0.7.0
+        version: 0.7.0
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -2504,8 +2504,8 @@ packages:
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
 
-  raccoon-dcm4che-bridge@0.6.5:
-    resolution: {integrity: sha512-65YPghRLtsu3aefvynPSAddsE+udPg14nb96pHr7B43+GLhUJu3nwxckKsmxHygJCo4l48a8++rucm4t5TicMg==}
+  raccoon-dcm4che-bridge@0.7.0:
+    resolution: {integrity: sha512-/TEmxW3NshiEbIFBpu44dZ0SI8A20nfnObN3L+nrz8VAj5106QZHcEB/uMOaS+2DJ6Vl87q88p+4ItZTd9k2Xg==}
 
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
@@ -5450,7 +5450,7 @@ snapshots:
 
   quansync@0.2.11: {}
 
-  raccoon-dcm4che-bridge@0.6.5:
+  raccoon-dcm4che-bridge@0.7.0:
     dependencies:
       glob: 10.4.5
       java-bridge: 2.8.0
