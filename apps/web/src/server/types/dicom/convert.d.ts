@@ -17,7 +17,7 @@ export type ConvertResult = {
 
 export type ConvertOptions = {
     quality?: number;
-    frameNumber?: number;
+    frameNumber?: number | number[];
     windowWidth?: number;
     windowCenter?: number;
     voiLutFunction?: "linear" | "linear-exact" | "sigmoid";

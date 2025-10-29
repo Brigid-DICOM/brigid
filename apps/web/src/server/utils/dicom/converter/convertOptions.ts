@@ -42,7 +42,7 @@ export function toConvertOptions(qs: Record<string, string>): ConvertOptions {
             width: cropWidth,
             height: cropHeight
         } : undefined,
-        frameNumber: parsed.frameNumber
+        frameNumber: parsed.frameNumber?.split(",").map(Number)
     }
 }
 

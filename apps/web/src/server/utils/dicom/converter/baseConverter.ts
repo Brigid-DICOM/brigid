@@ -79,77 +79,62 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 index: number;
                 size?: number;
             }[] = [];
-            if (numberOfFrames > 1 && !("frameNumber" in options)) {
-                for (let i = 1; i <= numberOfFrames; i++) {
-                    const destFile = `${tmpFile.name}.${i}.${this.getFileExtension()}`;
-                    writeFileSync(destFile, "");
-                    await Dcm2imageWrapper.dcm2Image(
-                        tmpFile.name,
-                        destFile,
-                        imageTranscodeParam,
-                        i,
-                    );
 
-                    await this.handleConvertOptions(destFile, options);
-                    const fileStream = createReadStream(destFile);
-                    fileStream.once("close", async () => {
-                        await fsE.remove(destFile);
-                        logger.info(`Deleted converted file successfully: ${destFile}`);
-                        
-                        fsE.remove(tmpFile.name).then(() => {
-                            logger.info(`Deleted temp file successfully: ${tmpFile.name}`);
-                        }).catch();
-                    });
-
-                    frames.push({
-                        stream: fileStream,
-                        index: i,
-                        size: statSync(destFile).size,
-                    });
+            const frameNumbers = (() => {
+                if (!options.frameNumber) {
+                    return numberOfFrames > 1 ? 
+                    Array.from({ length: numberOfFrames }, (_, i) => i + 1) : [1];
                 }
 
-                return {
-                    frames,
-                    contentType: this.getMimeType() as OutputFormat,
-                };
-            } else {
-                const destFile = `${tmpFile.name}.${this.getFileExtension()}`;
-                writeFileSync(destFile, "");
-                const inputFrameNumber = options.frameNumber || 1;
-                if (inputFrameNumber > numberOfFrames) {
+                if (Array.isArray(options.frameNumber)) {
+                    return options.frameNumber;
+                }
+
+                return [options.frameNumber];
+            })();
+
+            for (const frameNumber of frameNumbers) {
+                if (frameNumber > numberOfFrames || frameNumber < 1) {
                     throw new HTTPException(400, {
-                        message: "Invalid frame number"
-                    })
+                        message: `Invalid frame number: ${frameNumber}. Valid range: 1-${numberOfFrames}`
+                    });
                 }
+            }
+
+            for (const frameNumber of frameNumbers) {
+                const destFile = `${tmpFile.name}.${frameNumber}.${this.getFileExtension()}`;
+                writeFileSync(destFile, "");
                 await Dcm2imageWrapper.dcm2Image(
                     tmpFile.name,
                     destFile,
                     imageTranscodeParam,
-                    inputFrameNumber,
+                    frameNumber
                 );
 
                 await this.handleConvertOptions(destFile, options);
-
                 const fileStream = createReadStream(destFile);
                 fileStream.once("close", async () => {
                     await fsE.remove(destFile);
-                    logger.info(`Deleted temp file successfully: ${destFile}`);
-                    try {
-                        await fsE.remove(tmpFile.name);
-                        logger.info(`Deleted temp file successfully: ${tmpFile.name}`);
-                    } catch {}
+                    logger.info(`Deleted converted file successfully: ${destFile}`);
+                    
+                    if (frameNumber === frameNumbers[frameNumbers.length - 1]) {
+                        // Clean up temp file on last frame
+                        fsE.remove(tmpFile.name).then(() => {
+                            logger.info(`Deleted temp file successfully: ${tmpFile.name}`);
+                        }).catch();
+                    }
                 });
 
-                return {
-                    frames: [
-                        {
-                            stream: fileStream,
-                            index: 1,
-                            size: statSync(destFile).size,
-                        },
-                    ],
-                    contentType: this.getMimeType() as OutputFormat,
-                };
+                frames.push({
+                    stream: fileStream,
+                    index: frameNumber,
+                    size: statSync(destFile).size,
+                });
+            }
+
+            return {
+                frames,
+                contentType: this.getMimeType() as OutputFormat,
             }
         }
     }

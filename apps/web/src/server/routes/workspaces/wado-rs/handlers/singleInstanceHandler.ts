@@ -59,7 +59,7 @@ export class SingleInstanceHandler implements WadoResponseHandler {
 
             const convertOptions = wadoUriParamsToConvertOptions(
                 {
-                    ...c.req.query()
+                    ...c.req.query(),
                 }
             );
             const { body } = await storage.downloadFile(key);

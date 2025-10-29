@@ -87,7 +87,6 @@ export class MultipartHandler implements WadoResponseHandler {
             const key = instance.instancePath;
             const convertOptions = toConvertOptions({
                 ...c.req.query(),
-                frameNumber: c.req.param("frameNumber") || c.req.query("frameNumber") || "1"
             });
             const { body } = await storage.downloadFile(key);
 

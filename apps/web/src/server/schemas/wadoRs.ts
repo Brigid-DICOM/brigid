@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { positiveNumberQuerySchema } from "./positiveNumberQuerySchema";
 
 export const wadoRsQueryParamSchema = z.object({
     accept: z.string().optional(),
@@ -56,7 +57,7 @@ export const wadoRsQueryParamSchema = z.object({
             return false;
         })
         .optional(),
-    frameNumber: z.coerce.number().int().min(1).default(1).optional(),
+    frameNumber: positiveNumberQuerySchema.optional(),
 });
 
 export const wadoRsHeaderSchema = z.object({
