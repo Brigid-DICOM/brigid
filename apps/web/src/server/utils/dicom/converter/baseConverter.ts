@@ -31,6 +31,8 @@ const logger = appLogger.child({
 export abstract class BaseConverter implements DicomToImageConverter {
 
     private dicomDataset: AttributesClass | null = null;
+
+    private static magickWasmPath: string | null = null;
     
     public abstract getMimeType(): string;
     
@@ -344,6 +346,10 @@ export abstract class BaseConverter implements DicomToImageConverter {
     }
 
     private async resolveMagickWasmPath(): Promise<string> {
+        if (BaseConverter.magickWasmPath) {
+            return BaseConverter.magickWasmPath;
+        }
+
         const possiblePaths = [
             path.resolve(
                 "node_modules/@imagemagick/magick-wasm/dist/magick.wasm"
@@ -359,6 +365,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
         for (const wasmPath of possiblePaths) {
             if (await fsE.pathExists(wasmPath)) {
                 logger.info(`Found magick.wasm at: ${wasmPath}`);
+                BaseConverter.magickWasmPath = wasmPath;
                 return wasmPath;
             }
         }
