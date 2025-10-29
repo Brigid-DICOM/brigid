@@ -7,6 +7,7 @@ import searchStudySeriesInstancesRoute from "./qido-rs/searchStudySeriesInstance
 import stowRsRoute from "./stow-rs/stowRs.route";
 import retrieveFramePixelDataRoute from "./wado-rs/pixelData/retrieveFramePixelData.route";
 import retrieveRenderedFramesRoute from "./wado-rs/rendered/retrieveRenderedFrames.route";
+import retrieveRenderedInstancesRoute from "./wado-rs/rendered/retrieveRenderedInstances.route";
 import retrieveInstanceRoute from "./wado-rs/retrieveInstance.route";
 import retrieveSeriesInstancesRoute from "./wado-rs/retrieveSeriesInstances.route";
 import retrieveStudyInstancesRoute from "./wado-rs/retrieveStudyInstances.route";
@@ -24,7 +25,8 @@ const workspacesRoute = new Hono()
 .route("/", searchSeriesRoute)
 .route("/", searchInstancesRoute)
 .route("/", retrieveFramePixelDataRoute)
-.route("/", retrieveRenderedFramesRoute);
+.route("/", retrieveRenderedFramesRoute)
+.route("/", retrieveRenderedInstancesRoute);
 
 
 export default workspacesRoute;

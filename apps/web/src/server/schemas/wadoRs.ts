@@ -84,7 +84,6 @@ const wadoRsSingleFrameAcceptEnum = z.enum([
 ]);
 
 const wadoRsMultipleFramesAcceptEnum = z.enum([
-    "application/zip",
     'multipart/related; type="application/octet-stream"',
     'multipart/related; type="image/jpeg"',
     'multipart/related; type="image/jp2"',

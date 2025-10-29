@@ -11,7 +11,6 @@ import {
 import { InstanceService } from "@/server/services/instance.service";
 import { MultipartHandler } from "../handlers/multipartHandler";
 import { SingleFrameHandler } from "../handlers/singleFrameHandler";
-import { ZipHandler } from "../handlers/zipHandler";
 
 const retrieveRenderedFramesRoute = new Hono().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/frames/:frameNumbers/rendered",
@@ -84,7 +83,7 @@ const retrieveRenderedFramesRoute = new Hono().get(
         const handlers =
             frameCount === 1
                 ? [new SingleFrameHandler()]
-                : [new MultipartHandler(), new ZipHandler()];
+                : [new MultipartHandler()];
 
         const handler = handlers.find((handler) => handler.canHandle(accept));
         if (!handler) {
