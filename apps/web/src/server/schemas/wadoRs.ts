@@ -60,16 +60,51 @@ export const wadoRsQueryParamSchema = z.object({
     frameNumber: positiveNumberQuerySchema.optional(),
 });
 
+const wadoRsBaseAcceptEnum = z.enum([
+    "application/zip",
+    'multipart/related; type="application/dicom"',
+    'multipart/related; type="application/octet-stream"',
+    'multipart/related; type="image/jpeg"',
+    'multipart/related; type="image/jp2"',
+    'multipart/related; type="image/png"',
+    "*/*",
+])
+
 export const wadoRsHeaderSchema = z.object({
-    accept: z
-        .enum([
-            "application/zip",
-            'multipart/related; type="application/dicom"',
-            'multipart/related; type="application/octet-stream"',
-            'multipart/related; type="image/jpeg"',
-            'multipart/related; type="image/jp2"',
-            'multipart/related; type="image/png"',
-            "*/*",
-        ])
-        .default('multipart/related; type="application/dicom"'),
+    accept: wadoRsBaseAcceptEnum
+            .default('multipart/related; type="application/dicom"'),
+});
+
+const wadoRsSingleFrameAcceptEnum = z.enum([
+    "image/jpeg",
+    "image/jp2",
+    "image/png",
+    "image/*",
+    "*/*"
+]);
+
+const wadoRsMultipleFramesAcceptEnum = z.enum([
+    "application/zip",
+    'multipart/related; type="application/octet-stream"',
+    'multipart/related; type="image/jpeg"',
+    'multipart/related; type="image/jp2"',
+    'multipart/related; type="image/png"',
+    "*/*"
+]);
+
+const wadoRsRenderedFramesAcceptEnum = z.enum([
+    ...wadoRsSingleFrameAcceptEnum.options,
+    ...wadoRsMultipleFramesAcceptEnum.options,
+]);
+
+export const wadoRsRenderedFramesHeaderSchema = z.object({
+    accept: wadoRsRenderedFramesAcceptEnum
+});
+
+export const wadoRsSingleFrameHeaderSchema = z.object({
+    accept: wadoRsSingleFrameAcceptEnum
+});
+
+export const wadoRsMultipleFramesHeaderSchema = z.object({
+    accept: wadoRsMultipleFramesAcceptEnum
 });
