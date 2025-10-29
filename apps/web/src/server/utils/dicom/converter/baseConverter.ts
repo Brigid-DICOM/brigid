@@ -198,9 +198,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
         filename: string,
         options: ConvertOptions,
     ) {
-        const magickWasmPath = path.resolve(
-            "node_modules/@imagemagick/magick-wasm/dist/magick.wasm",
-        );
+        const magickWasmPath = await this.resolveMagickWasmPath();
         const magickWasmBuffer = await readFile(magickWasmPath);
 
         await initializeImageMagick(magickWasmBuffer);
@@ -358,5 +356,30 @@ export abstract class BaseConverter implements DicomToImageConverter {
             const cropHeight = (options.region.ymax - options.region.ymin) * imageHeight;
             image.crop(new MagickGeometry(cropX, cropY, cropWidth, cropHeight));
         }
+    }
+
+    private async resolveMagickWasmPath(): Promise<string> {
+        const possiblePaths = [
+            path.resolve(
+                "node_modules/@imagemagick/magick-wasm/dist/magick.wasm"
+            ),
+            path.resolve(
+                "../../node_modules/@imagemagick/magick-wasm/dist/magick.wasm"
+            ),
+            path.resolve(
+                "apps/web/node_modules/@imagemagick/magick-wasm/dist/magick.wasm"
+            )
+        ];
+
+        for (const wasmPath of possiblePaths) {
+            if (await fsE.pathExists(wasmPath)) {
+                logger.info(`Found magick.wasm at: ${wasmPath}`);
+                return wasmPath;
+            }
+        }
+
+        const errorMsg = `magick.wasm not found. Searched paths: ${possiblePaths.join(", ")}`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
     }
 }
