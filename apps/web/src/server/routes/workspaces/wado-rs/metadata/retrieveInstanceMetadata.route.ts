@@ -1,5 +1,6 @@
 import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
+import fsE from "fs-extra";
 import { Hono } from "hono";
 import {
     describeRoute,
@@ -10,7 +11,12 @@ import { z } from "zod";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { InstanceService } from "@/server/services/instance.service";
 import { DicomJsonBinaryDataUtils } from "@/server/utils/dicom/dicomJsonBinaryDataUtils";
+import { appLogger } from "@/server/utils/logger";
 import { getStorageProvider } from "@/server/utils/storage/storageFactory";
+
+const logger = appLogger.child({
+    module: "RetrieveInstanceMetadataRoute"
+});
 
 const retrieveInstanceMetadataRoute = new Hono()
 .get(
@@ -65,6 +71,9 @@ const retrieveInstanceMetadataRoute = new Hono()
         const dicomJsonBinaryDataUtils = new DicomJsonBinaryDataUtils(dicomJson, workspaceId);
         dicomJsonBinaryDataUtils.replaceBinaryPropsToUriProp();
 
+        fsE.remove(tempFile.name).then(() => {
+            logger.info(`Deleted temp file successfully: ${tempFile.name}`);
+        }).catch();
         return c.json(dicomJson);
     }
 );
