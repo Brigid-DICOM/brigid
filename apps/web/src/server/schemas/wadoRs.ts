@@ -1,6 +1,38 @@
 import { z } from "zod";
 import { positiveNumberQuerySchema } from "./positiveNumberQuerySchema";
 
+export const wadoRsViewportSchema = z
+.string()
+.refine((v) => {
+    const parts = v.split(",");
+    if (parts.length === 2) {
+        const [vw, vh] = parts.map(Number);
+        return (
+            !Number.isNaN(vw) && !Number.isNaN(vh) && vw > 0 && vh > 0
+        );
+    }
+
+    if (parts.length === 6) {
+        let [vw, vh, sx, sy, sw, sh] = parts.map(Number);
+        if (Number.isNaN(sw) || Number.isNaN(sh)) return false;
+
+        if (Number.isNaN(sx)) {
+            sx = 0;
+        }
+        if (Number.isNaN(sy)) {
+            sy = 0;
+        }
+
+        return (
+            [vw, vh, sx, sy, sw, sh].every((v) => !Number.isNaN(v)) &&
+            vw > 0 &&
+            vh > 0
+        );
+    }
+
+    return false;
+});
+
 export const wadoRsQueryParamSchema = z.object({
     accept: z.string().optional(),
     charset: z.string().optional(),
@@ -25,38 +57,7 @@ export const wadoRsQueryParamSchema = z.object({
         .string()
         .default("no")
         .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb", "displayp3"])),
-    viewport: z
-        .string()
-        .refine((v) => {
-            const parts = v.split(",");
-            if (parts.length === 2) {
-                const [vw, vh] = parts.map(Number);
-                return (
-                    !Number.isNaN(vw) && !Number.isNaN(vh) && vw > 0 && vh > 0
-                );
-            }
-
-            if (parts.length === 6) {
-                let [vw, vh, sx, sy, sw, sh] = parts.map(Number);
-                if (Number.isNaN(sw) || Number.isNaN(sh)) return false;
-
-                if (Number.isNaN(sx)) {
-                    sx = 0;
-                }
-                if (Number.isNaN(sy)) {
-                    sy = 0;
-                }
-
-                return (
-                    [vw, vh, sx, sy, sw, sh].every((v) => !Number.isNaN(v)) &&
-                    vw > 0 &&
-                    vh > 0
-                );
-            }
-
-            return false;
-        })
-        .optional(),
+    viewport: wadoRsViewportSchema.optional(),
     frameNumber: positiveNumberQuerySchema.optional(),
 });
 

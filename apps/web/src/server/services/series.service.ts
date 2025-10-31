@@ -120,4 +120,35 @@ export class SeriesService {
             hasNextPage: instances.length + offset < total,
         };
     }
+
+    async getSeriesInstanceCount(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+        seriesInstanceUid: string;
+    }) {
+        const { workspaceId, studyInstanceUid, seriesInstanceUid } = options;
+        return await this.entityManager.count(InstanceEntity, {
+            where: { workspaceId, studyInstanceUid, seriesInstanceUid },
+        });
+    }
+
+    async getSeriesMedianInstance(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+        seriesInstanceUid: string;
+    }) {
+        const instanceCount = await this.getSeriesInstanceCount(options);
+        const medianInstanceNumber = instanceCount >> 1;
+
+        return await this.entityManager.find(InstanceEntity, {
+            where: {
+                workspaceId: options.workspaceId,
+                studyInstanceUid: options.studyInstanceUid,
+                seriesInstanceUid: options.seriesInstanceUid,
+            },
+            order: { instanceNumber: "ASC" },
+            skip: medianInstanceNumber,
+            take: 1,
+        });
+    }
 }

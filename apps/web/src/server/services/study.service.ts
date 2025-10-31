@@ -87,4 +87,32 @@ export class StudyService {
             hasNextPage: instances.length + offset < total,
         }
     }
+
+    async getStudyInstanceCount(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+    }) {
+        const { workspaceId, studyInstanceUid } = options;
+        return await this.entityManager.count(InstanceEntity, {
+            where: { workspaceId, studyInstanceUid },
+        });
+    }
+
+    async getStudyMedianInstance(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+    }) {
+        const instanceCount = await this.getStudyInstanceCount(options);
+        const medianInstanceNumber = instanceCount >> 1;
+
+        return await this.entityManager.find(InstanceEntity, {
+            where: {
+                workspaceId: options.workspaceId,
+                studyInstanceUid: options.studyInstanceUid,
+            },
+            order: { instanceNumber: "ASC" },
+            skip: medianInstanceNumber,
+            take: 1,
+        });
+    }
 }

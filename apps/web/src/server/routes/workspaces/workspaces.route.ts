@@ -14,6 +14,9 @@ import retrieveRenderedInstancesRoute from "./wado-rs/rendered/retrieveRenderedI
 import retrieveInstanceRoute from "./wado-rs/retrieveInstance.route";
 import retrieveSeriesInstancesRoute from "./wado-rs/retrieveSeriesInstances.route";
 import retrieveStudyInstancesRoute from "./wado-rs/retrieveStudyInstances.route";
+import retrieveInstanceThumbnailRoute from "./wado-rs/thumbnail/retrieveInstanceThumbnail.route";
+import retrieveSeriesThumbnailRoute from "./wado-rs/thumbnail/retrieveSeriesThumbnail.route";
+import retrieveStudyThumbnailRoute from "./wado-rs/thumbnail/retrieveStudyThumbnail.route";
 import uriRetrieveInstanceRoute from "./wado-uri/uriRetrieveInstance.route";
 
 const workspacesRoute = new Hono()
@@ -32,7 +35,10 @@ const workspacesRoute = new Hono()
 .route("/", retrieveRenderedInstancesRoute)
 .route("/", retrieveInstanceMetadataRoute)
 .route("/", retrieveSeriesMetadataRoute)
-.route("/", retrieveStudyMetadataRoute);
+.route("/", retrieveStudyMetadataRoute)
+.route("/", retrieveInstanceThumbnailRoute)
+.route("/", retrieveSeriesThumbnailRoute)
+.route("/", retrieveStudyThumbnailRoute);
 
 
 export default workspacesRoute;
