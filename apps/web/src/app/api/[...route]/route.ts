@@ -38,7 +38,7 @@ export const app = new Hono().basePath("/api")
 .use(
     "*",
     async (c, next) => {
-        if (env.ENABLE_AUTH) {
+        if (env.NEXT_PUBLIC_ENABLE_AUTH) {
             return initAuthConfig(() => ({
                 basePath: "/api/auth",
                 secret: env.NEXTAUTH_SECRET,
@@ -80,7 +80,7 @@ export const app = new Hono().basePath("/api")
     }
 )
 .use("/auth/*", async (c, next) => {
-    if (env.ENABLE_AUTH) {
+    if (env.NEXT_PUBLIC_ENABLE_AUTH) {
         return authHandler()(c, next);
     }
 

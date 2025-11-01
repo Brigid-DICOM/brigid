@@ -50,9 +50,9 @@ const storageSchema = z.discriminatedUnion("STORAGE_PROVIDER", [
 // #region base schema
 const baseSchema = z.object({
     // app
+    NEXT_PUBLIC_ENABLE_AUTH: booleanFromEnv.default(false),
     NEXT_PUBLIC_APP_URL: z.string().default("http://localhost:3119"),
     IS_LOCAL_APP: booleanFromEnv.default(false),
-    ENABLE_AUTH: booleanFromEnv.default(false),
     // auth
     NEXTAUTH_SECRET: z.string().min(32).max(255),
     NEXTAUTH_URL: z.string().default("http://localhost:3119"),
@@ -76,7 +76,7 @@ const baseSchema = z.object({
 const envSchemaBase = z.intersection(baseSchema, storageSchema);
 
 const envSchema = envSchemaBase.superRefine((data, ctx) => {
-    if (data.ENABLE_AUTH) {
+    if (data.NEXT_PUBLIC_ENABLE_AUTH) {
         const result = authSchema.safeParse(data);
         if (!result.success) {
             for (const issue of result.error.issues) {
