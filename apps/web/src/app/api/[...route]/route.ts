@@ -12,6 +12,7 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import { openAPIRouteHandler } from "hono-openapi";
 import CasdoorProvider from "@/lib/auth/providers/casdoor";
+import guestRoute from "@/server/routes/guest.route";
 import helloRoute from "@/server/routes/hello.route";
 import workspacesRoute from "@/server/routes/workspaces/workspaces.route";
 import { WorkspaceService } from "@/server/services/workspace.service";
@@ -87,7 +88,8 @@ export const app = new Hono().basePath("/api")
     await next();
 })
 .route("/hello", helloRoute)
-.route("/", workspacesRoute);
+.route("/", workspacesRoute)
+.route("/", guestRoute);
 
 app.get(
     "/openapi.json",
