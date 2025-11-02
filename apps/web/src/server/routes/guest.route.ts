@@ -26,7 +26,7 @@ const guestRoute = new Hono()
                     id: guestUser.id,
                     name: guestUser.name,
                     email: guestUser.email,
-                    image: "/guest-avatar.png"
+                    image: guestUser.image
                 }
             });
         } catch( error) {

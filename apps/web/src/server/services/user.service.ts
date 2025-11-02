@@ -25,7 +25,8 @@ export class UserService {
                 id: GUEST_USER_ID,
                 name: "Guest User",
                 email: "guest@brigid.local",
-                emailVerified: new Date().toISOString()
+                emailVerified: new Date().toISOString(),
+                image: "/guest-avatar.jpg"
             });
         }
 

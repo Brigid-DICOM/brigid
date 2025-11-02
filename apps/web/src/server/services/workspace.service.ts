@@ -154,4 +154,26 @@ export class WorkspaceService {
     async getWorkspaceForGuestAccess() {
         return await this.getOrCreateSystemWorkspace();
     }
+
+    async getUserWorkspace(userId: string) {
+        const userWorkspaces = await this.userWorkspaceRepository.find({
+            where: {
+                userId
+            },
+            relations: ["workspace"]
+        });
+
+        return userWorkspaces.map((userWorkspace) => ({
+            id: userWorkspace.workspace.id,
+            name: userWorkspace.workspace.name,
+            ownerId: userWorkspace.workspace.ownerId,
+            createdAt: userWorkspace.workspace.createdAt,
+            updatedAt: userWorkspace.workspace.updatedAt,
+            membership: {
+                role: userWorkspace.role,
+                permissions: userWorkspace.permissions,
+                isDefault: userWorkspace.isDefault
+            }
+        }));
+    }
 }

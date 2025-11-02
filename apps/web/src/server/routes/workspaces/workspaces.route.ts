@@ -1,4 +1,8 @@
+import env from "@brigid/env";
 import { Hono } from "hono";
+import { describeRoute } from "hono-openapi";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { WorkspaceService } from "@/server/services/workspace.service";
 import searchInstancesRoute from "./qido-rs/searchInstances.route";
 import searchSeriesRoute from "./qido-rs/searchSeries.route";
 import searchStudiesRoute from "./qido-rs/searchStudies.route";
@@ -38,7 +42,38 @@ const workspacesRoute = new Hono()
 .route("/", retrieveStudyMetadataRoute)
 .route("/", retrieveInstanceThumbnailRoute)
 .route("/", retrieveSeriesThumbnailRoute)
-.route("/", retrieveStudyThumbnailRoute);
+.route("/", retrieveStudyThumbnailRoute)
+.get(
+    "/workspaces",
+    describeRoute({
+        description: "Get all workspaces",
+        tags: ["Workspaces"]
+    }),
+    verifyAuthMiddleware,
+    async (c) => {
+        const workspaceService = new WorkspaceService();
+        const authUser = c.get("authUser");
+
+        if (!authUser?.user) {
+            return c.json({
+                message: "Unauthorized"
+            }, 401);
+        }
+
+        if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
+            const workspaces = await workspaceService.getUserWorkspace(authUser.user.id);
+
+            return c.json({
+                workspaces
+            });
+        }
+
+        const workspaces = await workspaceService.getUserWorkspace(authUser.user.id);
+        return c.json({
+            workspaces
+        });
+    }
+);
 
 
 export default workspacesRoute;
