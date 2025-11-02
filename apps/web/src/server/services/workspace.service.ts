@@ -176,4 +176,15 @@ export class WorkspaceService {
             }
         }));
     }
+
+    async getUserWorkspacePermissions(userId: string, workspaceId: string) {
+        const userWorkspace = await this.userWorkspaceRepository.findOne({
+            where: {
+                userId,
+                workspaceId
+            }
+        });
+
+        return userWorkspace?.permissions ?? 0;
+    }
 }
