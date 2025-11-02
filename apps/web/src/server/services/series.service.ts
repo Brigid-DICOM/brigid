@@ -3,6 +3,7 @@ import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { DicomTag } from "@brigid/types";
 import type { EntityManager } from "typeorm";
+import { DateQueryStrategy } from "./qido-rs/dateQueryStrategy";
 
 export class SeriesService {
     private readonly entityManager: EntityManager;
@@ -150,5 +151,28 @@ export class SeriesService {
             skip: medianInstanceNumber,
             take: 1,
         });
+    }
+
+    async getUniqueModalities(workspaceId: string, range?: string) {
+        const modalitiesQuery = this.entityManager.createQueryBuilder(SeriesEntity, "series")
+            .select("series.modality", "modality")
+            .addSelect("COUNT(series.modality)", "count")
+            .distinct(true)
+            .where("series.workspaceId = :workspaceId", { workspaceId })
+            .groupBy("modality")
+            .orderBy("count", "DESC");
+
+        if (range) {
+            const dateQueryStrategy = new DateQueryStrategy();
+            const dateQuery = dateQueryStrategy.buildQuery("series", "createdAt", range);
+            modalitiesQuery.andWhere(dateQuery.sql, dateQuery.parameters);
+        }
+
+        const modalities = await modalitiesQuery.getRawMany();
+
+        return modalities.map(modality => ({
+            modality: modality.modality,
+            count: modality.count,
+        }));
     }
 }

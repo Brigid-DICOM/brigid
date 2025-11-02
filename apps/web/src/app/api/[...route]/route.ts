@@ -25,20 +25,20 @@ function getAuthProvider() {
             issuer: env.AUTH_CASDOOR_ISSUER
         });
     }
+
     throw new Error("Invalid auth provider");
 }
 
-export const app = new Hono().basePath("/api")
-.use(async (c, next) => {
-    if (!AppDataSource.isInitialized) {
-        await AppDataSource.initialize();
-    }
+export const app = new Hono()
+    .basePath("/api")
+    .use(async (c, next) => {
+        if (!AppDataSource.isInitialized) {
+            await AppDataSource.initialize();
+        }
 
-    await next();
-})
-.use(
-    "*",
-    async (c, next) => {
+        await next();
+    })
+    .use("*", async (c, next) => {
         if (env.NEXT_PUBLIC_ENABLE_AUTH) {
             return initAuthConfig(() => ({
                 basePath: "/api/auth",
@@ -50,14 +50,14 @@ export const app = new Hono().basePath("/api")
                         AccountEntity,
                         UserEntity,
                         SessionEntity,
-                        VerificationTokenEntity
+                        VerificationTokenEntity,
                     ],
-                    synchronize: false
+                    synchronize: false,
                 }),
                 callbacks: {
                     session: async ({ session }) => {
                         return session;
-                    }
+                    },
                 },
                 events: {
                     createUser: async ({ user }) => {
@@ -66,30 +66,32 @@ export const app = new Hono().basePath("/api")
                                 const workspaceService = new WorkspaceService();
                                 await workspaceService.createDefaultWorkspace({
                                     userId: user.id,
-                                    userName: user.name ?? undefined
+                                    userName: user.name ?? undefined,
                                 });
                             } catch (error) {
-                                console.error("Error creating default configuration for user", error);
+                                console.error(
+                                    "Error creating default configuration for user",
+                                    error,
+                                );
                             }
                         }
-                    }
-                }
+                    },
+                },
             }))(c, next);
         }
 
         await next();
-    }
-)
-.use("/auth/*", async (c, next) => {
-    if (env.NEXT_PUBLIC_ENABLE_AUTH) {
-        return authHandler()(c, next);
-    }
+    })
+    .use("/auth/*", async (c, next) => {
+        if (env.NEXT_PUBLIC_ENABLE_AUTH) {
+            return authHandler()(c, next);
+        }
 
-    await next();
-})
-.route("/hello", helloRoute)
-.route("/", workspacesRoute)
-.route("/", guestRoute);
+        await next();
+    })
+    .route("/hello", helloRoute)
+    .route("/", workspacesRoute)
+    .route("/", guestRoute)
 
 app.get(
     "/openapi.json",
@@ -98,22 +100,21 @@ app.get(
             info: {
                 title: "Brigid API",
                 description: "Brigid API",
-                version: "1.0.0"
+                version: "1.0.0",
             },
             servers: [
                 {
-                    url: env.NEXT_PUBLIC_APP_URL
-                }
-            ]
+                    url: env.NEXT_PUBLIC_APP_URL,
+                },
+            ],
         },
-        includeEmptyPaths: true
-    })
-)
-.get(
+        includeEmptyPaths: true,
+    }),
+).get(
     "/docs",
     swaggerUI({
-        url: "/api/openapi.json"
-    })
+        url: "/api/openapi.json",
+    }),
 );
 
 export const GET = handle(app);

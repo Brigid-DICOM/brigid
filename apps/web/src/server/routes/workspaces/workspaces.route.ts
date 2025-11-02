@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import { WorkspaceService } from "@/server/services/workspace.service";
+import getStatsRoute from "./dicom/getStats.route";
 import searchInstancesRoute from "./qido-rs/searchInstances.route";
 import searchSeriesRoute from "./qido-rs/searchSeries.route";
 import searchStudiesRoute from "./qido-rs/searchStudies.route";
@@ -43,6 +44,7 @@ const workspacesRoute = new Hono()
 .route("/", retrieveInstanceThumbnailRoute)
 .route("/", retrieveSeriesThumbnailRoute)
 .route("/", retrieveStudyThumbnailRoute)
+.route("/", getStatsRoute)
 .get(
     "/workspaces",
     describeRoute({
@@ -74,6 +76,7 @@ const workspacesRoute = new Hono()
         });
     }
 );
+
 
 
 export default workspacesRoute;
