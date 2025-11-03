@@ -187,4 +187,16 @@ export class WorkspaceService {
 
         return userWorkspace?.permissions ?? 0;
     }
+
+    async getDefaultWorkspace(userId: string) {
+        const userWorkspace = await this.userWorkspaceRepository.findOne({
+            where: {
+                userId,
+                isDefault: true
+            },
+            relations: ["workspace"]
+        });
+
+        return userWorkspace?.workspace ?? null;
+    }
 }

@@ -75,8 +75,42 @@ const workspacesRoute = new Hono()
             workspaces
         });
     }
+)
+.get(
+    "/workspaces/default",
+    describeRoute({
+        description: "Get default workspace",
+        tags: ["Workspaces"]
+    }),
+    verifyAuthMiddleware,
+    async (c) => {
+        const authUser = c.get("authUser");
+        const userId = authUser?.user?.id;
+        if (!userId) {
+            return c.json({
+                message: "Unauthorized"
+            }, 401);
+        }
+
+        const workspaceService = new WorkspaceService();
+
+        const defaultWorkspace = await workspaceService.getDefaultWorkspace(userId);
+        if (!defaultWorkspace) {
+            return c.json({
+                message: "Default workspace not found"
+            }, 404);
+        }
+
+        return c.json({
+            workspace: {
+                id: defaultWorkspace.id,
+                name: defaultWorkspace.name,
+                ownerId: defaultWorkspace.ownerId,
+                createdAt: defaultWorkspace.createdAt,
+                updatedAt: defaultWorkspace.updatedAt
+            }
+        });
+    }
 );
-
-
 
 export default workspacesRoute;
