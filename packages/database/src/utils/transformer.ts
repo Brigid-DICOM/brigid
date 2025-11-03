@@ -17,11 +17,11 @@ export const transformer: Record<"date" | "bigint" | "textJson" | "DT", ValueTra
     },
     DT: {
         from: (value: string | null) => value && new Date(parseInt(value, 10)),
-        to: (value: string | null) => {
+        to: (value: string | Date | null) => {
             if (!value) return null;
-
+            if (value instanceof Date) value = value.toISOString();
+            
             value = value.trim();
-
             if (value === '""') return null;
 
             const match = value.match(
