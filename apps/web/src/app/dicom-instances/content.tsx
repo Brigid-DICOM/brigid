@@ -150,7 +150,7 @@ export default function DicomInstancesContent({
                                 <Button 
                                     onClick={handleDownloadSelected}
                                     size="sm"
-                                    className="flex items-center space-x-2"
+                                    className="flex items-center"
                                 >
                                     <DownloadIcon className="size-4" />
                                     <span>

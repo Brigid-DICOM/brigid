@@ -59,6 +59,10 @@ export function DicomStudyCard({
     }, [thumbnailUrl]);
 
     const handleCardClick = useCallback((event: React.MouseEvent) => {
+
+        // 只允許左鍵點擊
+        if (event.button !== 0) return;
+
         event.preventDefault();
 
         const ctrlKey = event.ctrlKey || event.metaKey;
