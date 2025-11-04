@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
+import { DownloadTaskList } from "@/components/download/download-task-list";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import Providers from "./providers";
 
 const geistSans = Geist({
@@ -47,11 +49,15 @@ export default function RootLayout({
                             <div className="flex flex-1 flex-col">
                                 <div className="@container/main flex flex-1 flex-col gap-2">
                                     {children}
+                                    <DownloadTaskList />
                                 </div>
                             </div>
                         </SidebarInset>
                     </SidebarProvider>
                 </Providers>
+
+                <Toaster richColors />
+
             </body>
         </html>
     );

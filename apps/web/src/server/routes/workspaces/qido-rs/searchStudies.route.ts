@@ -1,3 +1,4 @@
+import type { DicomTag } from "@brigid/types";
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
@@ -33,7 +34,7 @@ const searchStudiesRoute = new Hono().get(
             return c.body(null, 204);
         }
 
-        return c.json(studies.map((study) => JSON.parse(study.json)));
+        return c.json(studies.map((study) => JSON.parse(study.json) as DicomTag));
     },
 );
 
