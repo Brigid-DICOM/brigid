@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback } from "react";
+import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getDicomSeriesThumbnailQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
@@ -57,19 +58,7 @@ export function DicomSeriesCard({
         ),
     );
 
-    const thumbnailUrl = useMemo(() => {
-        if (!thumbnail) return null;
-
-        return URL.createObjectURL(thumbnail);
-    }, [thumbnail]);
-
-    useEffect(() => {
-        return () => {
-            if (thumbnailUrl) {
-                URL.revokeObjectURL(thumbnailUrl);
-            }
-        };
-    }, [thumbnailUrl]);
+    const thumbnailUrl = useDicomThumbnail(thumbnail);
 
     const handleCardClick = useCallback(
         (event: React.MouseEvent) => {

@@ -6,7 +6,8 @@ import { CheckIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type React from "react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback } from "react";
+import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getDicomStudyThumbnailQuery } from "@/react-query/queries/dicomThumbnail";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
@@ -47,19 +48,7 @@ export function DicomStudyCard({
         getDicomStudyThumbnailQuery(workspaceId, studyInstanceUid, "224,224"),
     );
 
-    const thumbnailUrl = useMemo(() => {
-        if (!thumbnail) return null;
-
-        return URL.createObjectURL(thumbnail);
-    }, [thumbnail]);
-
-    useEffect(() => {
-        return () => {
-            if (thumbnailUrl) {
-                URL.revokeObjectURL(thumbnailUrl);
-            }
-        };
-    }, [thumbnailUrl]);
+    const thumbnailUrl = useDicomThumbnail(thumbnail);
 
     const handleCardClick = useCallback((event: React.MouseEvent) => {
 
