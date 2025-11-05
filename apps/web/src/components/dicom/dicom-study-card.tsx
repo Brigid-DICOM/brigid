@@ -5,8 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type React from "react";
-import { useCallback } from "react";
+import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getDicomStudyThumbnailQuery } from "@/react-query/queries/dicomThumbnail";
@@ -50,36 +49,14 @@ export function DicomStudyCard({
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
-    const handleCardClick = useCallback((event: React.MouseEvent) => {
-
-        // 只允許左鍵點擊
-        if (event.button !== 0) return;
-
-        event.preventDefault();
-
-        const ctrlKey = event.ctrlKey || event.metaKey;
-        toggleStudySelection(studyInstanceUid, ctrlKey);
-
-    }, [toggleStudySelection, studyInstanceUid]);
-
-    const handleDoubleClick = useCallback((event: React.MouseEvent) => {
-        event.preventDefault();
-        event.stopPropagation();
-        router.push(`/dicom-instances/${studyInstanceUid}`);
-    }, [router, studyInstanceUid]);
-    
-    const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
-        const ctrlKey = e.ctrlKey || e.metaKey;
-
-        if (!isSelected) {
-            if (ctrlKey) {
-                selectStudy(studyInstanceUid);
-            } else {
-                clearSelection();
-                selectStudy(studyInstanceUid);
-            }
-        }
-    }
+    const { handleCardClick, handleContextMenu, handleDoubleClick } = useDicomCardSelection({
+        itemId: studyInstanceUid,
+        isSelected,
+        toggleSelection: toggleStudySelection,
+        selectItem: selectStudy,
+        clearSelection,
+        onDoubleClick: () => router.push(`/dicom-instances/${studyInstanceUid}`),
+    });
 
     return (
         <DicomStudyContextMenu

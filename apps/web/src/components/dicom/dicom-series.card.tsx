@@ -3,8 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
-import type React from "react";
-import { useCallback } from "react";
+import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getDicomSeriesThumbnailQuery } from "@/react-query/queries/dicomSeries";
@@ -60,31 +59,13 @@ export function DicomSeriesCard({
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
-    const handleCardClick = useCallback(
-        (event: React.MouseEvent) => {
-            // 只允許左鍵點擊
-            if (event.button !== 0) return;
-
-            event.preventDefault();
-
-            const ctrlKey = event.ctrlKey || event.metaKey;
-            toggleSeriesSelection(seriesInstanceUid, ctrlKey);
-        },
-        [toggleSeriesSelection, seriesInstanceUid],
-    );
-
-    const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
-        const ctrlKey = e.ctrlKey || e.metaKey;
-
-        if (!isSelected) {
-            if (ctrlKey) {
-                selectSeries(seriesInstanceUid);
-            } else {
-                clearSelection();
-                selectSeries(seriesInstanceUid);
-            }
-        }
-    };
+    const { handleCardClick, handleContextMenu } = useDicomCardSelection({
+        itemId: seriesInstanceUid,
+        isSelected,
+        toggleSelection: toggleSeriesSelection,
+        selectItem: selectSeries,
+        clearSelection,
+    });
 
     return (
         <DicomSeriesContextMenu
