@@ -29,6 +29,7 @@ export default function DicomInstancesContent({
         getSelectedStudyIds,
     } = useDicomStudySelectionStore();
 
+
     const {
         data: studies,
         isLoading,

@@ -36,9 +36,24 @@ export function DicomStudyContextMenu({
 
     const selectedIds = getSelectedStudyIds();
 
+    const closeContextMenu = () => {
+        const openContextMenus = document.querySelectorAll("[data-radix-menu-content]");
+        openContextMenus.forEach((menu) => {
+            const escEvent = new KeyboardEvent("keydown", {
+                key: "Escape",
+                code: "Escape",
+                keyCode: 27,
+                bubbles: true,
+                cancelable: true,
+            });
+            menu.dispatchEvent(escEvent);
+        });
+    }
+
     const handleDownloadThis = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
-
+        closeContextMenu();
+        
         try {
             await downloadStudy(workspaceId, studyInstanceUid);
         } catch(error) {
@@ -54,6 +69,7 @@ export function DicomStudyContextMenu({
 
     const handleDownloadSelected = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
+        closeContextMenu();
 
         const currentSelectedIds = getSelectedStudyIds();
 
@@ -78,6 +94,8 @@ export function DicomStudyContextMenu({
             toast.error("Failed to download selected studies");
         }
     };
+
+    
 
     return (
         <ContextMenu>
