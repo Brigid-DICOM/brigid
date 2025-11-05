@@ -64,6 +64,7 @@ export function DicomStudyCard({
             studyInstanceUid={studyInstanceUid}
         >
             <Card
+                data-dicom-card
                 className={cn(
                     "w-full max-w-sm",
                     "overflow-hidden",

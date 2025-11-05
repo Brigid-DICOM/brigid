@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
@@ -29,7 +30,6 @@ export default function DicomInstancesContent({
         getSelectedStudyIds,
     } = useDicomStudySelectionStore();
 
-
     const {
         data: studies,
         isLoading,
@@ -50,6 +50,11 @@ export default function DicomInstancesContent({
     const selectedIds = getSelectedStudyIds();
     const isAllSelected = currentPageStudyIds.length > 0 &&
     currentPageStudyIds.every((studyId) => selectedStudyIds.has(studyId as string));
+
+    useClearSelectionOnBlankClick({
+        clearSelection,
+        enabled: selectedCount > 0,
+    });
 
     const handleSelectAll = () => {
         if (isAllSelected) {

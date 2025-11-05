@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
@@ -55,6 +56,11 @@ export default function DicomInstancesSeriesContent({
         currentPageSeriesUids.every((seriesId) =>
             selectedSeriesIds.has(seriesId as string),
         );
+
+    useClearSelectionOnBlankClick({
+        clearSelection,
+        enabled: selectedCount > 0,
+    });
 
     const handleSelectAll = () => {
         if (isAllSelected) {

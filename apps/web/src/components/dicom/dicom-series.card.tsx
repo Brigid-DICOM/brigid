@@ -74,6 +74,7 @@ export function DicomSeriesCard({
             seriesInstanceUid={seriesInstanceUid}
         >
             <Card
+                data-dicom-card
                 className={cn(
                     "w-full max-w-sm",
                     "overflow-hidden",
