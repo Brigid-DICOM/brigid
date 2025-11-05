@@ -159,126 +159,56 @@ export const downloadMultipleStudies = async (
     }
 }
 
-    const { addDownloadTask, updateTaskProgress, updateTaskStatus, setTaskAbortController } = useDownloadManagerStore.getState();
+export const downloadSeries = async (
+    workspaceId: string,
+    studyInstanceUid: string,
+    seriesInstanceUid: string,
+    filename?: string
+): Promise<string> => {
 
-    const taskId = addDownloadTask({
-        studyInstanceUid,
-        workspaceId,
-        status: "pending",
-        filename: filename || `study-${studyInstanceUid}.zip`,
-    });
+    const config: DownloadConfig = {
+        taskParams: {
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+        },
+        defaultFilename: filename || `series-${seriesInstanceUid}.zip`,
+        apiRequest: (abortController) =>
+            apiClient.api.workspaces[":workspaceId"].studies[":studyInstanceUid"].series[":seriesInstanceUid"].$get({
+                header: {
+                    accept: "application/zip",
+                },
+                param: {
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                },
+                query: {}
+            }, {
+                init: {
+                    signal: abortController.signal
+                }
+            }),
+        errorMessage: "Failed to download series",
+    };
 
-    const abortController = new AbortController();
-    setTaskAbortController(taskId, abortController);
-
-    try {
-        updateTaskStatus(taskId, "downloading");
-
-        const response = await apiClient.api.workspaces[":workspaceId"].studies[":studyInstanceUid"].$get({
-            header: {
-                accept: "application/zip",
-            },
-            param: {
-                workspaceId,
-                studyInstanceUid
-            },
-            query: {}
-        }, {
-            init: {
-                signal: abortController.signal
-            }
-        });
-
-        if (abortController.signal.aborted) {
-            updateTaskStatus(taskId, "cancelled");
-            return taskId;
-        }
-
-        if (!response.ok) {
-            throw new Error("Failed to download study");
-        }
-
-        const contentLength = response.headers.get("content-length");
-        const totalSize = contentLength ? parseInt(contentLength, 10) : 0;
-
-        const reader: ReadableStreamDefaultReader<Uint8Array> | undefined = response.body?.getReader();
-        if (!reader) {
-            throw new Error("Failed to get reader");
-        }
-
-        const chunks: Uint8Array[] = [];
-        let receivedLength = 0;
-
-        while(true) {
-
-            if (abortController.signal.aborted) {
-                reader.cancel();
-                updateTaskStatus(taskId, "cancelled");
-                return taskId;
-            }
-
-            const { done, value } = await reader.read();
-
-            if (done) break;
-
-            chunks.push(value);
-            receivedLength += value.length;
-
-            if (totalSize > 0) {
-                const progress = Math.round((receivedLength / totalSize ) * 100);
-                updateTaskProgress(taskId, progress);
-            }
-        }
-
-        if (abortController.signal.aborted) {
-            updateTaskStatus(taskId, "cancelled");
-            return taskId;
-        }
-
-        const blob = new Blob(chunks as BlobPart[]);
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename || `study-${studyInstanceUid}.zip`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        updateTaskStatus(taskId, "completed");
-        updateTaskProgress(taskId, 100);
-
-        return taskId;
-    } catch (error) {
-        console.error("Failed to download study", error);
-
-        if (error instanceof Error && error.name === "AbortError") {
-            updateTaskStatus(taskId, "cancelled");
-        } else {
-            updateTaskStatus(
-                taskId,
-                "failed",
-                error instanceof Error ? error.message : "Unknown error"
-            );
-        }
-        throw error;
-    }
+    return downloadDicomResource(config, filename);
 }
 
-export const downloadMultipleStudies = async (
+export const downloadMultipleSeries = async (
     workspaceId: string,
-    studyInstanceUids: string[],
+    studyInstanceUid: string,
+    seriesInstanceUids: string[],
 ): Promise<string[]> => {
-    const downloadPromises = studyInstanceUids.map((studyInstanceUid, index) => {
-        const filename = `study-${index + 1}-${studyInstanceUid}.zip`;
-        return downloadStudy(workspaceId, studyInstanceUid, filename);
+    const downloadPromises = seriesInstanceUids.map((seriesInstanceUid, index) => {
+        const filename = `series-${index + 1}-${seriesInstanceUid}.zip`;
+        return downloadSeries(workspaceId, studyInstanceUid, seriesInstanceUid, filename);
     });
 
     try {
         return await Promise.all(downloadPromises);
     } catch (error) {
-        console.error("Failed to download multiple studies", error);
+        console.error("Failed to download multiple series", error);
         throw error;
     }
 }
