@@ -11,3 +11,18 @@ export function formatFileSize(bytes?: number) {
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${Math.round(bytes / 1024 ** i * 100) / 100} ${sizes[i]}`;
 };
+
+
+export function closeContextMenu() {
+  const openContextMenus = document.querySelectorAll("[data-radix-menu-content]");
+  openContextMenus.forEach((menu) => {
+    const escEvent = new KeyboardEvent("keydown", {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      bubbles: true,
+      cancelable: true,
+    });
+    menu.dispatchEvent(escEvent);
+  });
+}

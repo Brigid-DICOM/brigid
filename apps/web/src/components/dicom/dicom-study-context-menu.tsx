@@ -1,8 +1,10 @@
 "use client";
 
 import {
-    DownloadIcon,
+    CornerDownLeftIcon, 
+    DownloadIcon
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { toast } from "sonner";
 import {
@@ -15,6 +17,7 @@ import {
     downloadMultipleStudies,
     downloadStudy
 } from "@/lib/clientDownload";
+import { closeContextMenu } from "@/lib/utils";
 import {
     useDicomStudySelectionStore
 } from "@/stores/dicom-study-selection-store";
@@ -30,24 +33,16 @@ export function DicomStudyContextMenu({
     workspaceId,
     studyInstanceUid,
 }: DicomStudyContextMenuProps) {
+    const router = useRouter();
     const {
         getSelectedStudyIds
     } = useDicomStudySelectionStore();
 
     const selectedIds = getSelectedStudyIds();
 
-    const closeContextMenu = () => {
-        const openContextMenus = document.querySelectorAll("[data-radix-menu-content]");
-        openContextMenus.forEach((menu) => {
-            const escEvent = new KeyboardEvent("keydown", {
-                key: "Escape",
-                code: "Escape",
-                keyCode: 27,
-                bubbles: true,
-                cancelable: true,
-            });
-            menu.dispatchEvent(escEvent);
-        });
+    const handleViewSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        router.push(`/dicom-instances/${studyInstanceUid}`);
     }
 
     const handleDownloadThis = async (e: React.MouseEvent<HTMLDivElement>) => {
@@ -106,6 +101,15 @@ export function DicomStudyContextMenu({
             </ContextMenuTrigger>
 
             <ContextMenuContent className="w-56">
+                {selectedIds.length === 1 && <ContextMenuItem
+                    onClick={handleViewSeries}
+                    className="flex items-center space-x-2"
+                >
+                    <CornerDownLeftIcon className="size-4" />
+                    <span>View Series</span>
+                </ContextMenuItem>
+                }
+                
                 {selectedIds.length === 1 && <ContextMenuItem 
                     onClick={handleDownloadThis}
                     className="flex items-center space-x-2"

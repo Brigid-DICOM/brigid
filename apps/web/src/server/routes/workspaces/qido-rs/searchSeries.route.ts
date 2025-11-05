@@ -1,3 +1,4 @@
+import type { DicomTag } from "@brigid/types";
 import { Hono } from "hono";
 import {
     describeRoute,
@@ -40,7 +41,7 @@ const searchSeriesRoute = new Hono().get(
             return c.body(null, 204);
         }
 
-        return c.json(series.map((series) => JSON.parse(series.json)));
+        return c.json(series.map((series) => JSON.parse(series.json) as DicomTag));
     }
 );
 
