@@ -14,13 +14,13 @@ import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 
-interface DicomInstancesContentProps {
+interface DicomStudiesContentProps {
     workspaceId: string;
 }
 
-export default function DicomInstancesContent({
+export default function DicomStudiesContent({
     workspaceId,
-}: DicomInstancesContentProps) {
+}: DicomStudiesContentProps) {
     const ITEM_PER_PAGE = 10;
 
     const {

@@ -6,6 +6,7 @@ interface DownloadConfig {
         workspaceId: string;
         studyInstanceUid: string;
         seriesInstanceUid?: string;
+        sopInstanceUid?: string;
     },
     defaultFilename: string;
     apiRequest: (abortController: AbortController) => Promise<Response>;
@@ -209,6 +210,62 @@ export const downloadMultipleSeries = async (
         return await Promise.all(downloadPromises);
     } catch (error) {
         console.error("Failed to download multiple series", error);
+        throw error;
+    }
+}
+
+export const downloadInstance = async (
+    workspaceId: string,
+    studyInstanceUid: string,
+    seriesInstanceUid: string,
+    sopInstanceUid: string,
+    filename?: string
+): Promise<string> => {
+    const config: DownloadConfig = {
+        taskParams: {
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid
+        },
+        defaultFilename: filename || `instance-${sopInstanceUid}.dcm`,
+        apiRequest: (abortController) =>
+            apiClient.api.workspaces[":workspaceId"]["wado-uri"].$get({
+                param: {
+                    workspaceId,
+                },
+                query: {
+                    studyUID: studyInstanceUid,
+                    seriesUID: seriesInstanceUid,
+                    objectUID: sopInstanceUid,
+                    requestType: "WADO",
+                    contentType: "application/dicom",
+                }
+            }, {
+                init: {
+                    signal: abortController.signal
+                }
+            }),
+        errorMessage: "Failed to download instance",
+    };
+    return downloadDicomResource(config, filename);
+};
+
+export const downloadMultipleInstances = async (
+    workspaceId: string,
+    studyInstanceUid: string,
+    seriesInstanceUid: string,
+    sopInstanceUids: string[],
+): Promise<string[]> => {
+    const downloadPromises = sopInstanceUids.map((sopInstanceUid, index) => {
+        const filename = `instance-${index + 1}-${sopInstanceUid}.dcm`;
+        return downloadInstance(workspaceId, studyInstanceUid, seriesInstanceUid, sopInstanceUid, filename);
+    });
+
+    try {
+        return await Promise.all(downloadPromises);
+    } catch (error) {
+        console.error("Failed to download multiple instances", error);
         throw error;
     }
 }

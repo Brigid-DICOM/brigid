@@ -1,25 +1,27 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
+import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
-import DicomSeriesContent from "./content";
+import DicomInstancesContent from "./content";
 
-interface DicomSeriesPageProps {
+interface DicomInstancesPageProps {
     params: Promise<{
         studyInstanceUid: string;
+        seriesInstanceUid: string;
     }>;
 }
 
-export default async function DicomSeriesPage({ params }: DicomSeriesPageProps) {
-    const { studyInstanceUid } = await params;
+export default async function DicomInstancesSeriesPage({ params }: DicomInstancesPageProps) {
+    const { studyInstanceUid, seriesInstanceUid } = await params;
 
     const queryClient = getQueryClient();
     const defaultWorkspace = await queryClient.fetchQuery(getDefaultWorkspaceQuery());
 
     await queryClient.prefetchQuery(
-        getDicomSeriesQuery({
+        getDicomInstanceQuery({
             workspaceId: defaultWorkspace?.workspace?.id ?? "",
             studyInstanceUid: studyInstanceUid,
+            seriesInstanceUid: seriesInstanceUid,
             offset: 0,
             limit: 10,
         })
@@ -27,9 +29,10 @@ export default async function DicomSeriesPage({ params }: DicomSeriesPageProps) 
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <DicomSeriesContent 
+            <DicomInstancesContent 
                 workspaceId={defaultWorkspace?.workspace?.id ?? ""} 
-                studyInstanceUid={studyInstanceUid} 
+                studyInstanceUid={studyInstanceUid}
+                seriesInstanceUid={seriesInstanceUid}
             />
         </HydrationBoundary>
     );

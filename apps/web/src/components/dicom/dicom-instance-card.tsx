@@ -3,75 +3,75 @@
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
-import { getDicomSeriesThumbnailQuery } from "@/react-query/queries/dicomSeries";
-import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { getDicomInstanceThumbnailQuery } from "@/react-query/queries/dicomInstance";
+import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
-import { DicomSeriesContextMenu } from "./dicom-series-context-menu";
+import { DicomInstanceContextMenu } from "./dicom-instance-context-menu";
 
-interface DicomSeriesData {
-    "0020000E"?: { Value: [string] }; // Series Instance UID
-    "00080060"?: { Value: [string] }; // Modality
-    "0008103E"?: { Value: [string] }; // Series Description
-    "00080021"?: { Value: [string] }; // Series Date
-    "00201209"?: { Value: [number] }; // Number of Series Related Instances
+interface DicomInstanceData {
+    "00080016"?: { Value: [string] }; // SOP Class UID
+    "00080018"?: { Value: [string] }; // SOP Instance UID
+    "00080022"?: { Value: [string] }; // Acquisition Date
+    "00080023"?: { Value: [string] }; // Content Date
+    "00200013"?: { Value: [number] }; // Instance Number
 }
 
-interface DicomSeriesCardProps {
-    series: DicomSeriesData;
+interface DicomInstanceCardProps {
+    instance: DicomInstanceData;
     workspaceId: string;
     studyInstanceUid: string;
+    seriesInstanceUid: string;
     className?: string;
 }
 
-export function DicomSeriesCard({
-    series,
+export function DicomInstanceCard({
+    instance,
     workspaceId,
     studyInstanceUid,
+    seriesInstanceUid,
     className,
-}: DicomSeriesCardProps) {
-    const router = useRouter();
-    const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
-    const modality = series["00080060"]?.Value?.[0] || "N/A";
-    const seriesDescription = series["0008103E"]?.Value?.[0] || "N/A";
-    const seriesDate = series["00080021"]?.Value?.[0] || "N/A";
-    const numberOfSeriesRelatedInstances = series["00201209"]?.Value?.[0] || 0;
+}: DicomInstanceCardProps) {
+    const sopClassUid = instance["00080016"]?.Value?.[0] || "N/A";
+    const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
+    const acquisitionDate = instance["00080022"]?.Value?.[0] || "N/A";
+    const contentDate = instance["00080023"]?.Value?.[0] || "N/A";
+    const instanceNumber = instance["00200013"]?.Value?.[0] || 0;
 
     const {
-        toggleSeriesSelection,
-        isSeriesSelected,
-        selectSeries,
+        toggleInstanceSelection,
+        isInstanceSelected,
+        selectInstance,
         clearSelection,
-    } = useDicomSeriesSelectionStore();
+    } = useDicomInstanceSelectionStore();
 
-    const isSelected = isSeriesSelected(seriesInstanceUid);
+    const isSelected = isInstanceSelected(sopInstanceUid);
 
     const { data: thumbnail, isLoading: isLoadingThumbnail } = useQuery(
-        getDicomSeriesThumbnailQuery(
+        getDicomInstanceThumbnailQuery(
             workspaceId,
             studyInstanceUid,
             seriesInstanceUid,
+            sopInstanceUid,
             "224,224",
         ),
     );
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
-    const { handleCardClick, handleContextMenu, handleDoubleClick } = useDicomCardSelection({
-        itemId: seriesInstanceUid,
+    const { handleCardClick, handleContextMenu } = useDicomCardSelection({
+        itemId: sopInstanceUid,
         isSelected,
-        toggleSelection: toggleSeriesSelection,
-        selectItem: selectSeries,
+        toggleSelection: toggleInstanceSelection,
+        selectItem: selectInstance,
         clearSelection,
-        onDoubleClick: () => router.push(`/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`),
     });
 
     return (
-        <DicomSeriesContextMenu
+        <DicomInstanceContextMenu
             workspaceId={workspaceId}
             studyInstanceUid={studyInstanceUid}
             seriesInstanceUid={seriesInstanceUid}
@@ -88,14 +88,13 @@ export function DicomSeriesCard({
                     isSelected
                         ? ["ring-2 ring-primary", "shadow-lg", "bg-accent"]
                         : [
-                            "hover:shadow-lg",
-                            "hover:ring-2 hover:ring-accent hover:bg-accent/10",
-                        ],
+                              "hover:shadow-lg",
+                              "hover:ring-2 hover:ring-accent hover:bg-accent/10",
+                          ],
                     className,
                 )}
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
-                onDoubleClick={handleDoubleClick}
             >
                 {isSelected && (
                     <div className="absolute top-2 right-2 z-10 bg-primary/70 text-white rounded-full p-1">
@@ -129,40 +128,51 @@ export function DicomSeriesCard({
                     <div className="space-y-2">
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Modality:
-                            </span>
-                            <div className="text-gray-900 truncate">{modality}</div>
-                        </div>
-
-                        <div className="text-sm">
-                            <span className="font-medium text-gray-600">
-                                Series Description:
+                                Instance Number:
                             </span>
                             <div className="text-gray-900 truncate">
-                                {seriesDescription}
+                                {instanceNumber}
                             </div>
                         </div>
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Series Date:
+                                SOP Class UID:
                             </span>
                             <div className="text-gray-900 truncate">
-                                {seriesDate}
+                                {sopClassUid}
                             </div>
                         </div>
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Number of Series Related Instances:
+                                SOP Instance UID:
                             </span>
                             <div className="text-gray-900 truncate">
-                                {numberOfSeriesRelatedInstances}
+                                {sopInstanceUid}
+                            </div>
+                        </div>
+
+                        <div className="text-sm">
+                            <span className="font-medium text-gray-600">
+                                Acquisition Date:
+                            </span>
+                            <div className="text-gray-900 truncate">
+                                {acquisitionDate}
+                            </div>
+                        </div>
+
+                        <div className="text-sm">
+                            <span className="font-medium text-gray-600">
+                                Content Date:
+                            </span>
+                            <div className="text-gray-900 truncate">
+                                {contentDate}
                             </div>
                         </div>
                     </div>
                 </CardContent>
             </Card>
-        </DicomSeriesContextMenu>
+        </DicomInstanceContextMenu>
     );
 }

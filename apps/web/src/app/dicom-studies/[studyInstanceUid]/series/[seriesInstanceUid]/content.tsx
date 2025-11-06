@@ -7,64 +7,66 @@ import { useMemo } from "react";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
-import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
+import { DicomInstanceCard } from "@/components/dicom/dicom-instance-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
-import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
-import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
-import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { downloadInstance, downloadMultipleInstances } from "@/lib/clientDownload";
+import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
+import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 
-interface DicomSeriesContentProps {
+interface DicomInstancesContentProps {
     workspaceId: string;
     studyInstanceUid: string;
+    seriesInstanceUid: string;
 }
 
-export default function DicomSeriesContent({
+export default function DicomInstancesContent({
     workspaceId,
     studyInstanceUid,
-}: DicomSeriesContentProps) {
+    seriesInstanceUid,
+}: DicomInstancesContentProps) {
     const ITEM_PER_PAGE = 10;
 
     const {
-        selectedSeriesIds,
+        selectedInstanceIds,
         clearSelection,
         selectAll,
         getSelectedCount,
-        getSelectedSeriesIds
-    } = useDicomSeriesSelectionStore();
+        getSelectedInstanceIds
+    } = useDicomInstanceSelectionStore();
 
     const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } = usePagination();
     const {
-        data: series,
+        data: instances,
         isLoading,
-        error,
+        error
     } = useQuery(
-        getDicomSeriesQuery({
-            workspaceId: workspaceId,
-            studyInstanceUid: studyInstanceUid,
+        getDicomInstanceQuery({
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
-        }),
+        })
     );
-    const canGoNext = series && series.length === ITEM_PER_PAGE;
+    const canGoNext = instances && instances.length === ITEM_PER_PAGE;
 
-    const currentPageSeriesUids = useMemo(() => {
+    const currentPageInstanceUids = useMemo(() => {
         return (
-            series
-                ?.map((s) => s["0020000E"]?.Value?.[0] as string)
+            instances?.map((instance) => instance["00080018"]?.Value?.[0] as string)
                 .filter(Boolean) || []
         );
-    }, [series]);
+    }, [instances]);
     const selectedCount = getSelectedCount();
-    const selectedIds = getSelectedSeriesIds();
-    const isAllSelected =
-        currentPageSeriesUids.length > 0 &&
-        currentPageSeriesUids.every((seriesId) =>
-            selectedSeriesIds.has(seriesId as string),
-        );
+    const selectedIds = getSelectedInstanceIds();
+    const isAllSelected = 
+        currentPageInstanceUids.length > 0 && 
+        currentPageInstanceUids.every((instanceId) => 
+            selectedInstanceIds.has(instanceId as string)
+    );
 
     useClearSelectionOnBlankClick({
         clearSelection,
@@ -75,30 +77,29 @@ export default function DicomSeriesContent({
         if (isAllSelected) {
             clearSelection();
         } else {
-            selectAll(currentPageSeriesUids);
+            selectAll(currentPageInstanceUids);
         }
-    };
+    }
 
     const { handleDownload } = useDownloadHandler({
-        downloadSingle: (id: string) => downloadSeries(workspaceId, studyInstanceUid, id),
-        downloadMultiple: (ids: string[]) => downloadMultipleSeries(workspaceId, studyInstanceUid, ids),
-        errorMessage: "Failed to download selected series",
+        downloadSingle: (id: string) => downloadInstance(workspaceId, studyInstanceUid, seriesInstanceUid, id),
+        downloadMultiple: (ids: string[]) => downloadMultipleInstances(workspaceId, studyInstanceUid, seriesInstanceUid, ids),
+        errorMessage: "Failed to download selected instances",
     });
 
     if (error) {
         return (
             <EmptyState 
                 title="載入失敗"
-                description="無法載入 DICOM series 資料"
+                description="無法載入 DICOM instances 資料"
             />
-        );
+        )
     }
 
     return (
         <div className="container mx-auto px-4 py-8">
-
             <div className="mb-8 flex items-center space-x-4">
-                <Link href="/dicom-studies">
+                <Link href={`/dicom-studies/${studyInstanceUid}`}>
                     <Button
                         variant="outline"
                         className="flex items-center"
@@ -109,41 +110,45 @@ export default function DicomSeriesContent({
 
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">
-                        DICOM Series
+                        DICOM Instances
                     </h1>
                     <p className="text-gray-600">
                         Study Instance UID: {studyInstanceUid}
                     </p>
+                    <p className="text-gray-600">
+                        Series Instance UID: {seriesInstanceUid}
+                    </p>
                 </div>
             </div>
 
-            {!isLoading && series && series.length > 0 && (
+            {!isLoading && instances && instances.length > 0 && (
                 <SelectionControlBar 
                     selectedCount={selectedCount}
                     isAllSelected={isAllSelected}
                     onSelectAll={handleSelectAll}
                     onClearSelection={clearSelection}
                     onDownload={() => handleDownload(selectedIds)}
-                    multiDownloadLabel="Download Selected Series"
+                    multiDownloadLabel="Download Selected Instances"
                 />
             )}
 
             {isLoading ? (
-                <LoadingGrid 
-                    itemCount={ITEM_PER_PAGE} 
+                <LoadingGrid
+                    itemCount={ITEM_PER_PAGE}
                 />
-            ) : series && series.length > 0 ? (
+            ) : instances && instances.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                        {series.map((seriesItem, index) => (
-                            <DicomSeriesCard
-                                // biome-ignore lint/suspicious/noArrayIndexKey: 使用 series instance uid 會出現 type error，所以直接使用 index
-                                key={index}
-                                series={seriesItem}
-                                workspaceId={workspaceId}
-                                studyInstanceUid={studyInstanceUid}
-                            />
-                        ))}
+                    {instances.map((instance, index) => (
+                        <DicomInstanceCard
+                            // biome-ignore lint/suspicious/noArrayIndexKey: 使用 sop instance uid 會出現 type error，所以直接使用 index
+                            key={index}
+                            instance={instance}
+                            workspaceId={workspaceId}
+                            studyInstanceUid={studyInstanceUid}
+                            seriesInstanceUid={seriesInstanceUid}
+                        />
+                    ))}    
                     </div>
 
                     <PaginationControls 
@@ -153,15 +158,11 @@ export default function DicomSeriesContent({
                         onNext={handleNextPage}
                     />
                 </>
-            ) : (
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="text-center">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                            沒有資料
-                        </h2>
-                        <p className="text-gray-600">目前沒有可顯示的 Series</p>
-                    </div>
-                </div>
+            ): (
+                <EmptyState 
+                    title="沒有資料"
+                    description="目前沒有可顯示的 Instances"
+                />
             )}
         </div>
     );
