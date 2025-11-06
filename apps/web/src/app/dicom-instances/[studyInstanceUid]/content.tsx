@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
-import { toast } from "sonner";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -12,6 +11,7 @@ import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
+import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
@@ -79,27 +79,11 @@ export default function DicomInstancesSeriesContent({
         }
     };
 
-    const handleDownloadSelected = async () => {
-        if (selectedIds.length === 0) {
-            return;
-        }
-
-        try {
-            if (selectedIds.length === 1) {
-                await downloadSeries(workspaceId, studyInstanceUid, selectedIds[0]);
-            } else {
-                await downloadMultipleSeries(workspaceId, studyInstanceUid, selectedIds);
-            }
-        } catch(error) {
-            console.error("Failed to download selected series", error);
-
-            if (error instanceof Error && error.name === "AbortError") {
-                return;
-            }
-
-            toast.error("Failed to download selected series");
-        }
-    }
+    const { handleDownload } = useDownloadHandler({
+        downloadSingle: (id: string) => downloadSeries(workspaceId, studyInstanceUid, id),
+        downloadMultiple: (ids: string[]) => downloadMultipleSeries(workspaceId, studyInstanceUid, ids),
+        errorMessage: "Failed to download selected series",
+    });
 
     if (error) {
         return (
@@ -139,7 +123,7 @@ export default function DicomInstancesSeriesContent({
                     isAllSelected={isAllSelected}
                     onSelectAll={handleSelectAll}
                     onClearSelection={clearSelection}
-                    onDownload={handleDownloadSelected}
+                    onDownload={() => handleDownload(selectedIds)}
                     multiDownloadLabel="Download Selected Series"
                 />
             )}

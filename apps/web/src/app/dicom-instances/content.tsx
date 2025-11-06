@@ -2,13 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { toast } from "sonner";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
+import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
@@ -69,27 +69,11 @@ export default function DicomInstancesContent({
         }
     }
 
-    const handleDownloadSelected = async () => {
-        if (selectedIds.length === 0) {
-            return;
-        }
-
-        try {
-            if (selectedIds.length === 1) {
-                await downloadStudy(workspaceId, selectedIds[0]);
-            } else {
-                await downloadMultipleStudies(workspaceId, selectedIds);
-            }
-        } catch (error) {
-            console.error("Failed to download selected studies", error);
-
-            if (error instanceof Error && error.name === "AbortError") {
-                return;
-            }
-
-            toast.error("Failed to download selected studies");
-        }
-    }
+    const { handleDownload } = useDownloadHandler({
+        downloadSingle: (id: string) => downloadStudy(workspaceId, id),
+        downloadMultiple: (ids: string[]) => downloadMultipleStudies(workspaceId, ids),
+        errorMessage: "Failed to download selected studies",
+    });
 
     if (error) {
         return (
@@ -118,7 +102,7 @@ export default function DicomInstancesContent({
                     isAllSelected={isAllSelected}
                     onSelectAll={handleSelectAll}
                     onClearSelection={clearSelection}
-                    onDownload={handleDownloadSelected}
+                    onDownload={() => handleDownload(selectedIds)}
                     multiDownloadLabel="Download Selected Studies"
                 />
             )}
