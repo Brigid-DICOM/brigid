@@ -1,13 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
+import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
@@ -28,6 +30,7 @@ export default function DicomInstancesSeriesContent({
         clearSelection,
         selectAll,
         getSelectedCount,
+        getSelectedSeriesIds
     } = useDicomSeriesSelectionStore();
 
     const {
@@ -51,6 +54,7 @@ export default function DicomInstancesSeriesContent({
         );
     }, [series]);
     const selectedCount = getSelectedCount();
+    const selectedIds = getSelectedSeriesIds();
     const isAllSelected =
         currentPageSeriesUids.length > 0 &&
         currentPageSeriesUids.every((seriesId) =>
@@ -69,6 +73,28 @@ export default function DicomInstancesSeriesContent({
             selectAll(currentPageSeriesUids);
         }
     };
+
+    const handleDownloadSelected = async () => {
+        if (selectedIds.length === 0) {
+            return;
+        }
+
+        try {
+            if (selectedIds.length === 1) {
+                await downloadSeries(workspaceId, studyInstanceUid, selectedIds[0]);
+            } else {
+                await downloadMultipleSeries(workspaceId, studyInstanceUid, selectedIds);
+            }
+        } catch(error) {
+            console.error("Failed to download selected series", error);
+
+            if (error instanceof Error && error.name === "AbortError") {
+                return;
+            }
+
+            toast.error("Failed to download selected series");
+        }
+    }
 
     const handlePreviousPage = () => {
         setCurrentPage((prev) => Math.max(0, prev - 1));
@@ -144,6 +170,21 @@ export default function DicomInstancesSeriesContent({
                             <span className="text-sm text-gray-600">
                                 已選取 {selectedCount} 筆 Series
                             </span>
+                        )}
+
+                        {selectedCount > 0 && (
+                            <div className="flex items-center space-x-2">
+                            <Button 
+                                onClick={handleDownloadSelected}
+                                size="sm"
+                                className="flex items-center"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>
+                                    Download Selected Items ({selectedCount})
+                                </span>
+                            </Button>
+                        </div>
                         )}
                     </div>
                 </div>
