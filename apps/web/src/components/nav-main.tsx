@@ -22,7 +22,7 @@ export function NavMain() {
                     >
                         <SidebarMenuButton tooltip="DICOM Instances Management">
                             <DatabaseIcon className="size-4" />
-                            <Link href="/dicom-instances">DICOM Instances</Link>
+                            <Link href="/dicom-studies">DICOM Instances</Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

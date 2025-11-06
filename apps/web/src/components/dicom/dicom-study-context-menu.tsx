@@ -42,7 +42,7 @@ export function DicomStudyContextMenu({
 
     const handleViewSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
-        router.push(`/dicom-instances/${studyInstanceUid}`);
+        router.push(`/dicom-studies/${studyInstanceUid}`);
     }
 
     const handleDownloadThis = async (e: React.MouseEvent<HTMLDivElement>) => {

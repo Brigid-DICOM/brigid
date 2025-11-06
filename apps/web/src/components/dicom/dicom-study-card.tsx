@@ -55,7 +55,7 @@ export function DicomStudyCard({
         toggleSelection: toggleStudySelection,
         selectItem: selectStudy,
         clearSelection,
-        onDoubleClick: () => router.push(`/dicom-instances/${studyInstanceUid}`),
+        onDoubleClick: () => router.push(`/dicom-studies/${studyInstanceUid}`),
     });
 
     return (

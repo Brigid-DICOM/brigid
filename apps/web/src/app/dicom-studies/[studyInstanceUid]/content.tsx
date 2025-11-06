@@ -98,7 +98,7 @@ export default function DicomInstancesSeriesContent({
         <div className="container mx-auto px-4 py-8">
 
             <div className="mb-8 flex items-center space-x-4">
-                <Link href="/dicom-instances">
+                <Link href="/dicom-studies">
                     <Button
                         variant="outline"
                         className="flex items-center"
