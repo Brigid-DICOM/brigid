@@ -5,11 +5,12 @@ import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
@@ -102,14 +103,10 @@ export default function DicomInstancesSeriesContent({
 
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                        載入失敗
-                    </h2>
-                    <p className="text-gray-600">無法載入 DICOM series 資料</p>
-                </div>
-            </div>
+            <EmptyState 
+                title="載入失敗"
+                description="無法載入 DICOM series 資料"
+            />
         );
     }
 
@@ -148,19 +145,9 @@ export default function DicomInstancesSeriesContent({
             )}
 
             {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                    {Array.from({ length: ITEM_PER_PAGE }).map((_, index) => (
-                        // biome-ignore lint/suspicious/noArrayIndexKey: 沒有合適的 key
-                        <div key={index} className="w-full max-w-sm">
-                            <Skeleton className="aspect-square w-full mb-4" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-3/4" />
-                                <Skeleton className="h-4 w-1/2" />
-                                <Skeleton className="h-4 w-2/3" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <LoadingGrid 
+                    itemCount={ITEM_PER_PAGE} 
+                />
             ) : series && series.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
