@@ -3,12 +3,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
+import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
@@ -22,7 +23,6 @@ export default function DicomInstancesSeriesContent({
     workspaceId,
     studyInstanceUid,
 }: DicomInstancesSeriesContentProps) {
-    const [currentPage, setCurrentPage] = useState(0);
     const ITEM_PER_PAGE = 10;
 
     const {
@@ -33,6 +33,7 @@ export default function DicomInstancesSeriesContent({
         getSelectedSeriesIds
     } = useDicomSeriesSelectionStore();
 
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } = usePagination();
     const {
         data: series,
         isLoading,
@@ -45,6 +46,7 @@ export default function DicomInstancesSeriesContent({
             limit: ITEM_PER_PAGE,
         }),
     );
+    const canGoNext = series && series.length === ITEM_PER_PAGE;
 
     const currentPageSeriesUids = useMemo(() => {
         return (
@@ -95,17 +97,6 @@ export default function DicomInstancesSeriesContent({
             toast.error("Failed to download selected series");
         }
     }
-
-    const handlePreviousPage = () => {
-        setCurrentPage((prev) => Math.max(0, prev - 1));
-    };
-
-    const handleNextPage = () => {
-        setCurrentPage((prev) => prev + 1);
-    };
-
-    const canGoPrevious = currentPage > 0;
-    const canGoNext = series && series.length === ITEM_PER_PAGE;
 
     if (error) {
         return (

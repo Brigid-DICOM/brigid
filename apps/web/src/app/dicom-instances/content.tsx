@@ -2,12 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, DownloadIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
+import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
@@ -19,7 +20,6 @@ interface DicomInstancesContentProps {
 export default function DicomInstancesContent({
     workspaceId,
 }: DicomInstancesContentProps) {
-    const [currentPage, setCurrentPage] = useState(0);
     const ITEM_PER_PAGE = 10;
 
     const {
@@ -29,6 +29,8 @@ export default function DicomInstancesContent({
         getSelectedCount,
         getSelectedStudyIds,
     } = useDicomStudySelectionStore();
+    
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } = usePagination();
 
     const {
         data: studies,
@@ -41,6 +43,8 @@ export default function DicomInstancesContent({
             limit: ITEM_PER_PAGE,
         }),
     );
+
+    const canGoNext = studies && studies.length === ITEM_PER_PAGE;
 
     const currentPageStudyIds = useMemo(() => {
         return studies?.map((study) => study["0020000D"]?.Value?.[0] as string).filter(Boolean) || [];
@@ -85,17 +89,6 @@ export default function DicomInstancesContent({
             toast.error("Failed to download selected studies");
         }
     }
-
-    const handlePreviousPage = () => {
-        setCurrentPage((prev) => Math.max(0, prev - 1));
-    };
-
-    const handleNextPage = () => {
-        setCurrentPage((prev) => prev + 1);
-    };
-
-    const canGoPrevious = currentPage > 0;
-    const canGoNext = studies && studies.length === ITEM_PER_PAGE;
 
     if (error) {
         <div className="flex items-center justify-center min-h-[400px]">
