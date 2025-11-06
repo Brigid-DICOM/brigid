@@ -1,11 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
+import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
@@ -135,50 +136,14 @@ export default function DicomInstancesSeriesContent({
             </div>
 
             {!isLoading && series && series.length > 0 && (
-                <div className="flex items-center mb-6 p-4 bg-muted rounded-lg gap-6">
-                    <div className="flex items-center space-x-4">
-                        <Button
-                            variant={"outline"}
-                            size="sm"
-                            onClick={handleSelectAll}
-                        >
-                            {isAllSelected ? "取消全選" : "全選"}
-                        </Button>
-
-                        {selectedCount > 0 && (
-                            <Button
-                                variant={"outline"}
-                                size="sm"
-                                onClick={clearSelection}
-                            >
-                                清除選取
-                            </Button>
-                        )}
-                    </div>
-
-                    <div className="flex items-center space-x-4">
-                        {selectedCount > 0 && (
-                            <span className="text-sm text-gray-600">
-                                已選取 {selectedCount} 筆 Series
-                            </span>
-                        )}
-
-                        {selectedCount > 0 && (
-                            <div className="flex items-center space-x-2">
-                            <Button 
-                                onClick={handleDownloadSelected}
-                                size="sm"
-                                className="flex items-center"
-                            >
-                                <DownloadIcon className="size-4" />
-                                <span>
-                                    Download Selected Items ({selectedCount})
-                                </span>
-                            </Button>
-                        </div>
-                        )}
-                    </div>
-                </div>
+                <SelectionControlBar 
+                    selectedCount={selectedCount}
+                    isAllSelected={isAllSelected}
+                    onSelectAll={handleSelectAll}
+                    onClearSelection={clearSelection}
+                    onDownload={handleDownloadSelected}
+                    multiDownloadLabel="Download Selected Series"
+                />
             )}
 
             {isLoading ? (
