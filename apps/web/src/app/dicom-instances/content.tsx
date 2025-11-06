@@ -1,12 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
@@ -150,27 +149,12 @@ export default function DicomInstancesContent({
                         ))}
                     </div>
 
-                    <div className="flex items-between items-center justify-center space-x-4">
-                        <Button
-                            variant={"outline"}
-                            onClick={handlePreviousPage}
-                            disabled={!canGoPrevious}
-                            className="flex items-center space-x-2"
-                        >
-                            <ChevronLeft className="size-4" />
-                            <span>Previous</span>
-                        </Button>
-
-                        <Button
-                            variant={"outline"}
-                            onClick={handleNextPage}
-                            disabled={!canGoNext}
-                            className="flex items-center space-x-2"
-                        >
-                            <span>Next</span>
-                            <ChevronRight className="size-4" />
-                        </Button>
-                    </div>
+                    <PaginationControls 
+                        canGoPrevious={canGoPrevious}
+                        canGoNext={Boolean(canGoNext)}
+                        onPrevious={handlePreviousPage}
+                        onNext={handleNextPage}
+                    />
                 </>
             ) : (
                 <div className="flex items-center justify-center min-h-[400px]">

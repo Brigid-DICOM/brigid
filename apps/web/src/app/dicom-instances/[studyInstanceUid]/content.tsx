@@ -1,10 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
@@ -174,27 +175,12 @@ export default function DicomInstancesSeriesContent({
                         ))}
                     </div>
 
-                    <div className="flex items-between items-center justify-center space-x-4">
-                        <Button
-                            variant={"outline"}
-                            onClick={handlePreviousPage}
-                            disabled={!canGoPrevious}
-                            className="flex items-center space-x-2"
-                        >
-                            <ChevronLeftIcon className="size-4" />
-                            <span>Previous</span>
-                        </Button>
-
-                        <Button
-                            variant={"outline"}
-                            onClick={handleNextPage}
-                            disabled={!canGoNext}
-                            className="flex items-center space-x-2"
-                        >
-                            <span>Next</span>
-                            <ChevronRightIcon className="size-4" />
-                        </Button>
-                    </div>
+                    <PaginationControls 
+                        canGoPrevious={canGoPrevious}
+                        canGoNext={Boolean(canGoNext)}
+                        onPrevious={handlePreviousPage}
+                        onNext={handleNextPage}
+                    />
                 </>
             ) : (
                 <div className="flex items-center justify-center min-h-[400px]">
