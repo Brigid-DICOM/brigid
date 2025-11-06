@@ -36,6 +36,7 @@ interface DownloadManagerState {
     getCompletedTasksCount: () => number;
     getPendingTasksCount: () => number;
     getDownloadingTasksCount: () => number;
+    getAllTasksCount: () => number;
     hasOnlyCompletedOrFailedTasks: () => boolean;
 }
 
@@ -152,6 +153,10 @@ export const useDownloadManagerStore = create<DownloadManagerState>()(
                 return get().tasks.filter(
                     (task) => task.status === "completed"
                 ).length;
+            },
+
+            getAllTasksCount: () => {
+                return get().tasks.length;
             },
 
             hasOnlyCompletedOrFailedTasks: () => {

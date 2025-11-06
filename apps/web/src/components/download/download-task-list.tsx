@@ -20,6 +20,7 @@ export function DownloadTaskList() {
         getActiveTasksCount,
         getPendingTasksCount,
         getDownloadingTasksCount,
+        getAllTasksCount,
         hasOnlyCompletedOrFailedTasks
     } = useDownloadManagerStore();
 
@@ -28,7 +29,7 @@ export function DownloadTaskList() {
     const [showCloseDialog, setShowCloseDialog] = useState(false);
 
     const handleCloseDownloadList = () => {
-        if (hasOnlyCompletedOrFailedTasks()) {
+        if (hasOnlyCompletedOrFailedTasks() || getAllTasksCount() === 0) {
             clearAllTasks();
             setIsVisible(false);
         } else {
