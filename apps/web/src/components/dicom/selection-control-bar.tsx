@@ -1,4 +1,5 @@
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, Grid3x3Icon, ListIcon } from "lucide-react";
+import { type LayoutMode, useLayoutStore } from "@/stores/layout-store";
 import { Button } from "../ui/button";
 
 interface SelectionControlBarProps {
@@ -18,6 +19,12 @@ export function SelectionControlBar({
     onDownload,
     multiDownloadLabel,
 }: SelectionControlBarProps) {
+    const { layoutMode, setLayoutMode } = useLayoutStore();
+
+    const handleLayoutChange = (mode: LayoutMode) => {
+        setLayoutMode(mode);
+    }
+
     return (
         <div className="flex items-center mb-6 p-4 bg-muted rounded-lg gap-6">
             <div className="flex items-center space-x-4">
@@ -56,6 +63,25 @@ export function SelectionControlBar({
                         </div>
                     </>
                 )}
+            </div>
+
+            <div className="flex items-end justify-end ml-auto">
+                <Button
+                    variant={layoutMode === "grid" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => handleLayoutChange("grid")}
+                    className="rounded-r-none border-r"
+                >
+                    <Grid3x3Icon className="size-4" />
+                </Button>
+                <Button
+                    variant={layoutMode === "list" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => handleLayoutChange("list")}
+                    className="rounded-l-none"
+                >
+                    <ListIcon className="size-4" />
+                </Button>
             </div>
         </div>
     );

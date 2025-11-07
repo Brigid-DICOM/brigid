@@ -1,5 +1,6 @@
 "use client";
 
+import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
@@ -16,6 +17,8 @@ import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { useLayoutStore } from "@/stores/layout-store";
+import { DicomSeriesDataTable } from "./data-table";
 
 interface DicomSeriesContentProps {
     workspaceId: string;
@@ -27,6 +30,8 @@ export default function DicomSeriesContent({
     studyInstanceUid,
 }: DicomSeriesContentProps) {
     const ITEM_PER_PAGE = 10;
+
+    const { layoutMode } = useLayoutStore();
 
     const {
         selectedSeriesIds,
@@ -68,7 +73,7 @@ export default function DicomSeriesContent({
 
     useClearSelectionOnBlankClick({
         clearSelection,
-        enabled: selectedCount > 0,
+        enabled: selectedCount > 0 && layoutMode === "grid",
     });
 
     const handleSelectAll = () => {
@@ -134,17 +139,26 @@ export default function DicomSeriesContent({
                 />
             ) : series && series.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                        {series.map((seriesItem, index) => (
-                            <DicomSeriesCard
-                                // biome-ignore lint/suspicious/noArrayIndexKey: 使用 series instance uid 會出現 type error，所以直接使用 index
-                                key={index}
-                                series={seriesItem}
+                    {layoutMode === "grid" ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+                            {series.map((seriesItem, index) => (
+                                <DicomSeriesCard
+                                    // biome-ignore lint/suspicious/noArrayIndexKey: 使用 series instance uid 會出現 type error，所以直接使用 index
+                                    key={index}
+                                    series={seriesItem as DicomSeriesData}
+                                    workspaceId={workspaceId}
+                                    studyInstanceUid={studyInstanceUid}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="mb-8">
+                            <DicomSeriesDataTable 
+                                series={series as DicomSeriesData[]}
                                 workspaceId={workspaceId}
-                                studyInstanceUid={studyInstanceUid}
                             />
-                        ))}
-                    </div>
+                        </div>
+                    )}
 
                     <PaginationControls 
                         canGoPrevious={canGoPrevious}

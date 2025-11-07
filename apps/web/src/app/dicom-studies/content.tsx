@@ -1,5 +1,6 @@
 "use client";
 
+import type { DicomStudyData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { EmptyState } from "@/components/common/empty-state";
@@ -13,6 +14,8 @@ import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { useLayoutStore } from "@/stores/layout-store";
+import { DicomStudiesDataTable } from "./data-table";
 
 interface DicomStudiesContentProps {
     workspaceId: string;
@@ -22,6 +25,8 @@ export default function DicomStudiesContent({
     workspaceId,
 }: DicomStudiesContentProps) {
     const ITEM_PER_PAGE = 10;
+
+    const { layoutMode } = useLayoutStore();
 
     const {
         selectedStudyIds,
@@ -58,7 +63,7 @@ export default function DicomStudiesContent({
 
     useClearSelectionOnBlankClick({
         clearSelection,
-        enabled: selectedCount > 0,
+        enabled: selectedCount > 0 && layoutMode === "grid",
     });
 
     const handleSelectAll = () => {
@@ -113,12 +118,22 @@ export default function DicomStudiesContent({
                 />
             ) : studies && studies.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                        {studies.map((study, index) => (
-                            // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index
-                            <DicomStudyCard key={index} study={study} workspaceId={workspaceId} />
-                        ))}
-                    </div>
+                    {layoutMode === "grid" ? (
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+                            {studies.map((study, index) => (
+                                // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index
+                                <DicomStudyCard key={index} study={study as DicomStudyData} workspaceId={workspaceId} />
+                            ))}
+                        </div>
+                    ): (
+                        <div className="mb-8">
+                            <DicomStudiesDataTable 
+                                studies={studies as DicomStudyData[]}
+                                workspaceId={workspaceId}
+                            />
+                        </div>
+                    )}
 
                     <PaginationControls 
                         canGoPrevious={canGoPrevious}

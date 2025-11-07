@@ -1,5 +1,6 @@
 "use client";
 
+import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
@@ -12,14 +13,6 @@ import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-st
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DicomSeriesContextMenu } from "./dicom-series-context-menu";
-
-interface DicomSeriesData {
-    "0020000E"?: { Value: [string] }; // Series Instance UID
-    "00080060"?: { Value: [string] }; // Modality
-    "0008103E"?: { Value: [string] }; // Series Description
-    "00080021"?: { Value: [string] }; // Series Date
-    "00201209"?: { Value: [number] }; // Number of Series Related Instances
-}
 
 interface DicomSeriesCardProps {
     series: DicomSeriesData;

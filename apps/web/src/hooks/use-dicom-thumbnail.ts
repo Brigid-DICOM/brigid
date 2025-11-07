@@ -1,4 +1,6 @@
-import { useEffect, useMemo } from "react";
+"use client";
+
+import { useMemo } from "react";
 
 export function useDicomThumbnail(
     thumbnail: Blob | undefined
@@ -8,14 +10,6 @@ export function useDicomThumbnail(
 
         return URL.createObjectURL(thumbnail);
     }, [thumbnail]);
-
-    useEffect(() => {
-        return () => {
-            if (thumbnailUrl) {
-                URL.revokeObjectURL(thumbnailUrl);
-            }
-        };
-    }, [thumbnailUrl]);
 
     return thumbnailUrl;
 }

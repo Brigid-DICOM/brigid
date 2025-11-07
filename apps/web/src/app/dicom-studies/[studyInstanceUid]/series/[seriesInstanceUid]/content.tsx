@@ -1,5 +1,6 @@
 "use client";
 
+import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
@@ -16,6 +17,8 @@ import { usePagination } from "@/hooks/use-pagination";
 import { downloadInstance, downloadMultipleInstances } from "@/lib/clientDownload";
 import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useLayoutStore } from "@/stores/layout-store";
+import { DicomInstancesDataTable } from "./data-table";
 
 interface DicomInstancesContentProps {
     workspaceId: string;
@@ -29,6 +32,8 @@ export default function DicomInstancesContent({
     seriesInstanceUid,
 }: DicomInstancesContentProps) {
     const ITEM_PER_PAGE = 10;
+
+    const { layoutMode } = useLayoutStore();
 
     const {
         selectedInstanceIds,
@@ -70,7 +75,7 @@ export default function DicomInstancesContent({
 
     useClearSelectionOnBlankClick({
         clearSelection,
-        enabled: selectedCount > 0,
+        enabled: selectedCount > 0 && layoutMode === "grid",
     });
 
     const handleSelectAll = () => {
@@ -138,18 +143,27 @@ export default function DicomInstancesContent({
                 />
             ) : instances && instances.length > 0 ? (
                 <>
+                    {layoutMode === "grid" ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
                     {instances.map((instance, index) => (
                         <DicomInstanceCard
                             // biome-ignore lint/suspicious/noArrayIndexKey: 使用 sop instance uid 會出現 type error，所以直接使用 index
                             key={index}
-                            instance={instance}
+                            instance={instance as DicomInstanceData}
                             workspaceId={workspaceId}
                             studyInstanceUid={studyInstanceUid}
                             seriesInstanceUid={seriesInstanceUid}
                         />
                     ))}    
-                    </div>
+                    </div>): (
+                        <div className="mb-8">
+                            <DicomInstancesDataTable
+                                instances={instances as DicomInstanceData[]}
+                                workspaceId={workspaceId}
+                                className="mb-8"
+                            />
+                        </div>
+                    )}
 
                     <PaginationControls 
                         canGoPrevious={canGoPrevious}

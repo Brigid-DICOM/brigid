@@ -1,6 +1,6 @@
 "use client";
 
-import type { DicomPersonName } from "@brigid/types";
+import type { DicomStudyData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
@@ -13,14 +13,6 @@ import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-stor
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DicomStudyContextMenu } from "./dicom-study-context-menu";
-
-interface DicomStudyData {
-    "00100010"?: { Value: [DicomPersonName] }; // Patient Name
-    "00100020"?: { Value: [string] }; // Patient ID
-    "00080050"?: { Value: [string] }; // Accession Number
-    "0020000D"?: { Value: [string] }; // Study Instance UID
-    [key: string]: any;
-}
 
 interface DicomStudyCardProps {
     study: DicomStudyData;

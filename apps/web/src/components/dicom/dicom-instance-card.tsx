@@ -1,5 +1,6 @@
 "use client";
 
+import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import Image from "next/image";
@@ -11,14 +12,6 @@ import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selectio
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DicomInstanceContextMenu } from "./dicom-instance-context-menu";
-
-interface DicomInstanceData {
-    "00080016"?: { Value: [string] }; // SOP Class UID
-    "00080018"?: { Value: [string] }; // SOP Instance UID
-    "00080022"?: { Value: [string] }; // Acquisition Date
-    "00080023"?: { Value: [string] }; // Content Date
-    "00200013"?: { Value: [number] }; // Instance Number
-}
 
 interface DicomInstanceCardProps {
     instance: DicomInstanceData;
