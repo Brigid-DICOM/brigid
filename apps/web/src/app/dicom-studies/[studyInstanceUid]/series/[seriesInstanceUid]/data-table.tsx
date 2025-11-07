@@ -232,6 +232,24 @@ export function DicomInstancesDataTable({
                 },
             },
             {
+                accessorKey: "sopInstanceUid",
+                header: "SOP Instance UID",
+                cell: ({ row }) => {
+                    const sopInstanceUid =
+                        row.original["00080018"]?.Value?.[0] || "N/A";
+                    return <div>{sopInstanceUid}</div>;
+                },
+            },
+            {
+                accessorKey: "sopClassUid",
+                header: "SOP Class UID",
+                cell: ({ row }) => {
+                    const sopClassUid =
+                        row.original["00080016"]?.Value?.[0] || "N/A";
+                    return <div>{sopClassUid}</div>;
+                },
+            },
+            {
                 accessorKey: "actions",
                 header: "Actions",
                 cell: ({ row }) => {
