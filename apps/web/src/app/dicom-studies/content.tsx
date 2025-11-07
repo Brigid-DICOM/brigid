@@ -4,6 +4,7 @@ import type { DicomStudyData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { EmptyState } from "@/components/common/empty-state";
+import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
@@ -113,13 +114,19 @@ export default function DicomStudiesContent({
             )}
 
             {isLoading ? (
-                <LoadingGrid 
-                    itemCount={ITEM_PER_PAGE}
-                />
+                layoutMode === "grid" ? (
+                    <LoadingGrid 
+                        itemCount={ITEM_PER_PAGE}
+                    />
+                ) : (
+                    <LoadingDataTable 
+                        columns={8}
+                        rows={ITEM_PER_PAGE}
+                    />
+                )
             ) : studies && studies.length > 0 ? (
                 <>
                     {layoutMode === "grid" ? (
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
                             {studies.map((study, index) => (
                                 // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index

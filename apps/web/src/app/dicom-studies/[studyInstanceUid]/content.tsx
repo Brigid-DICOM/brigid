@@ -6,6 +6,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { EmptyState } from "@/components/common/empty-state";
+import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
@@ -134,9 +135,16 @@ export default function DicomSeriesContent({
             )}
 
             {isLoading ? (
-                <LoadingGrid 
-                    itemCount={ITEM_PER_PAGE} 
-                />
+                layoutMode === "grid" ? (
+                    <LoadingGrid 
+                        itemCount={ITEM_PER_PAGE} 
+                    />
+                ) : (
+                    <LoadingDataTable 
+                        columns={7}
+                        rows={ITEM_PER_PAGE}
+                    />
+                )
             ) : series && series.length > 0 ? (
                 <>
                     {layoutMode === "grid" ? (
