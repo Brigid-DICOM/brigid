@@ -14,7 +14,8 @@ export const getDicomInstanceQuery = ({
     studyInstanceUid,
     seriesInstanceUid,
     offset = 0,
-    limit = 10
+    limit = 10,
+    ...searchConditions
 }: DicomInstanceQueryParams) => queryOptions({
     queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid, offset, limit],
     queryFn: async () => {
@@ -26,7 +27,12 @@ export const getDicomInstanceQuery = ({
             },
             query: {
                 offset: offset.toString(),
-                limit: limit.toString()
+                limit: limit.toString(),
+                ...Object.fromEntries(
+                    Object.entries(searchConditions).filter(([_, value]) =>
+                        value !== undefined && value !== null && value !== ""
+                    )
+                )
             }
         });
         

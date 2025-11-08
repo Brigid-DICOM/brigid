@@ -4,18 +4,22 @@ import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
+import { DicomSearchButton } from "@/components/dicom/search/dicom-search-button";
+import type { SearchCondition } from "@/components/dicom/search/dicom-search-condition-item";
+import { DicomSearchModal } from "@/components/dicom/search/dicom-search-modal";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
+import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -31,6 +35,9 @@ export default function DicomSeriesContent({
     studyInstanceUid,
 }: DicomSeriesContentProps) {
     const ITEM_PER_PAGE = 10;
+    const queryClient = getQueryClient();
+    const [searchModalOpen, setSearchModalOpen] = useState(false);
+    const [searchConditions, setSearchConditions] = useState<Record<string, string>>({});
 
     const { layoutMode } = useLayoutStore();
 
@@ -42,7 +49,7 @@ export default function DicomSeriesContent({
         getSelectedSeriesIds
     } = useDicomSeriesSelectionStore();
 
-    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } = usePagination();
+    const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } = usePagination();
     const {
         data: series,
         isLoading,
@@ -53,6 +60,7 @@ export default function DicomSeriesContent({
             studyInstanceUid: studyInstanceUid,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
+            ...searchConditions,
         }),
     );
     const canGoNext = series && series.length === ITEM_PER_PAGE;
@@ -76,6 +84,22 @@ export default function DicomSeriesContent({
         clearSelection,
         enabled: selectedCount > 0 && layoutMode === "grid",
     });
+
+    const handleSearch = (conditions: SearchCondition[]) => {
+        const searchParams = conditions.reduce((acc, condition) => {
+            acc[condition.field] = condition.value;
+            return acc;
+        }, {} as Record<string, string>);
+
+        setSearchConditions(searchParams);
+        handleResetToFirstPage();
+
+        requestAnimationFrame(() => {
+            queryClient.invalidateQueries({
+                queryKey: ["dicom-series", workspaceId, studyInstanceUid, 0, ITEM_PER_PAGE],
+            });
+        });
+    }
 
     const handleSelectAll = () => {
         if (isAllSelected) {
@@ -103,24 +127,33 @@ export default function DicomSeriesContent({
     return (
         <div className="container mx-auto px-4 py-8">
 
-            <div className="mb-8 flex items-center space-x-4">
-                <Link href="/dicom-studies">
-                    <Button
-                        variant="outline"
-                        className="flex items-center"
-                    >
-                        <ArrowLeftIcon className="size-4" />
-                    </Button>
-                </Link>
-
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">
-                        DICOM Series
-                    </h1>
-                    <p className="text-gray-600">
-                        Study Instance UID: {studyInstanceUid}
-                    </p>
+            <div className="mb-8 flex flex-col items-start space-x-4">
+                <div className="mb-4 flex-1">
+                    <DicomSearchButton 
+                        onSearch={() => setSearchModalOpen(true)}
+                    />
                 </div>
+
+                <div className="flex flex-1 items-center space-x-4">
+                    <Link href="/dicom-studies">
+                        <Button
+                            variant="outline"
+                            className="flex items-center"
+                        >
+                            <ArrowLeftIcon className="size-4" />
+                        </Button>
+                    </Link>
+
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            DICOM Series
+                        </h1>
+                        <p className="text-gray-600">
+                            Study Instance UID: {studyInstanceUid}
+                        </p>
+                    </div>
+                </div>
+
             </div>
 
             {!isLoading && series && series.length > 0 && (
@@ -185,6 +218,13 @@ export default function DicomSeriesContent({
                     </div>
                 </div>
             )}
+
+            <DicomSearchModal
+                open={searchModalOpen}
+                onOpenChange={setSearchModalOpen}
+                level="series"
+                onSearch={handleSearch}
+            />
         </div>
     );
 }
