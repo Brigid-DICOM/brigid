@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
     Dialog,
@@ -34,17 +34,25 @@ const DEFAULT_FIELDS: Record<SearchLevel, string[]> = {
     instance: ["ContentDate"],
 };
 
+const createDefaultConditions = (level: SearchLevel) => {
+    return DEFAULT_FIELDS[level].map((field) => ({
+        id: field,
+        field: field,
+        value: "",
+    }));
+}
+
 export function DicomSearchModal({
     open,
     onOpenChange,
     level,
     onSearch,
 }: SearchModalProps) {
-    const [conditions, setConditions] = useState<SearchCondition[]>(DEFAULT_FIELDS[level].map((field) => ({
-        id: field,
-        field: field,
-        value: "",
-    })));
+    const [conditions, setConditions] = useState<SearchCondition[]>(createDefaultConditions(level));
+
+    useEffect(() => {
+        setConditions(createDefaultConditions(level));
+    }, [level]);
 
     const addCondition = (key: string) => {
         setConditions(prev => [

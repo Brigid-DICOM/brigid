@@ -1,3 +1,4 @@
+import { GlobalSearch } from "./search/global-search";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
@@ -14,6 +15,10 @@ export function SiteHeader() {
                 />
 
                 <h1 className="text-base font-medium">Brigid</h1>
+
+                <div className="ml-4">
+                    <GlobalSearch />
+                </div>
                 
                 <div className="ml-auto flex items-center gap-2">
                     <Button

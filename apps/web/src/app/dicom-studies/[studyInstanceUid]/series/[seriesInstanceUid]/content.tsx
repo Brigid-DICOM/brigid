@@ -4,15 +4,12 @@ import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomInstanceCard } from "@/components/dicom/dicom-instance-card";
-import { DicomSearchButton } from "@/components/dicom/search/dicom-search-button";
-import type { SearchCondition } from "@/components/dicom/search/dicom-search-condition-item";
-import { DicomSearchModal } from "@/components/dicom/search/dicom-search-modal";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
@@ -29,6 +26,7 @@ import {
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomInstancesDataTable } from "./data-table";
 
@@ -45,9 +43,10 @@ export default function DicomInstancesContent({
 }: DicomInstancesContentProps) {
     const queryClient = getQueryClient();
     const ITEM_PER_PAGE = 10;
-    const [searchConditions, setSearchConditions] = useState<Record<string, string>>({});
-    const [searchModalOpen, setSearchModalOpen] = useState(false);
     const { layoutMode } = useLayoutStore();
+
+    const { getSearchConditionsForType } = useGlobalSearchStore();
+    const searchConditions = getSearchConditionsForType("dicom-instance");
 
     const {
         selectedInstanceIds,
@@ -95,21 +94,13 @@ export default function DicomInstancesContent({
         enabled: selectedCount > 0 && layoutMode === "grid",
     });
 
-    const handleSearch = (conditions: SearchCondition[]) => {
-        const searchParams = conditions.reduce((acc, condition) => {
-            acc[condition.field] = condition.value;
-            return acc;
-        }, {} as Record<string, string>);
-
-        setSearchConditions(searchParams);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 當 searchConditions 改變時，需要重置分頁到第一頁並重新查詢
+    useEffect(() => {
         handleResetToFirstPage();
-
-        requestAnimationFrame(() => {
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid, 0, ITEM_PER_PAGE],
-            });
+        queryClient.invalidateQueries({
+            queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid, 0, ITEM_PER_PAGE],
         });
-    }
+    }, [searchConditions]);
 
     const handleSelectAll = () => {
         if (isAllSelected) {
@@ -200,12 +191,6 @@ export default function DicomInstancesContent({
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8 flex flex-col items-start space-x-4">
-                <div className="mb-4 flex-1">
-                    <DicomSearchButton 
-                        onSearch={() => setSearchModalOpen(true)}
-                    />
-                </div>
-
                 <div className="flex flex-1 items-center space-x-4">
                     <Link href={`/dicom-studies/${studyInstanceUid}`}>
                         <Button variant="outline" className="flex items-center">
@@ -282,13 +267,6 @@ export default function DicomInstancesContent({
                     description="目前沒有可顯示的 Instances"
                 />
             )}
-
-            <DicomSearchModal 
-                open={searchModalOpen}
-                onOpenChange={setSearchModalOpen}
-                level="instance"
-                onSearch={handleSearch}
-            />
         </div>
     );
 }

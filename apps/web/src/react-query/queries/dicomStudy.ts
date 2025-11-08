@@ -15,7 +15,6 @@ export const getDicomStudyQuery = ({
 }: DicomStudyQueryParams) => queryOptions({
     queryKey: ["dicom-study", workspaceId, offset, limit],
     queryFn: async () => {
-        console.log(searchParams);
         const response = await apiClient.api.workspaces[":workspaceId"].studies.$get({
             param: {
                 workspaceId,

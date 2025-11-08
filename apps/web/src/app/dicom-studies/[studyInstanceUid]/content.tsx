@@ -4,15 +4,12 @@ import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series.card";
-import { DicomSearchButton } from "@/components/dicom/search/dicom-search-button";
-import type { SearchCondition } from "@/components/dicom/search/dicom-search-condition-item";
-import { DicomSearchModal } from "@/components/dicom/search/dicom-search-modal";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
@@ -22,6 +19,7 @@ import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomSeriesDataTable } from "./data-table";
 
@@ -36,8 +34,8 @@ export default function DicomSeriesContent({
 }: DicomSeriesContentProps) {
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
-    const [searchModalOpen, setSearchModalOpen] = useState(false);
-    const [searchConditions, setSearchConditions] = useState<Record<string, string>>({});
+    const { getSearchConditionsForType } = useGlobalSearchStore();
+    const searchConditions = getSearchConditionsForType("dicom-series");
 
     const { layoutMode } = useLayoutStore();
 
@@ -85,21 +83,13 @@ export default function DicomSeriesContent({
         enabled: selectedCount > 0 && layoutMode === "grid",
     });
 
-    const handleSearch = (conditions: SearchCondition[]) => {
-        const searchParams = conditions.reduce((acc, condition) => {
-            acc[condition.field] = condition.value;
-            return acc;
-        }, {} as Record<string, string>);
-
-        setSearchConditions(searchParams);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 當 searchConditions 改變時，需要重置分頁到第一頁並重新查詢
+    useEffect(() => {
         handleResetToFirstPage();
-
-        requestAnimationFrame(() => {
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId, studyInstanceUid, 0, ITEM_PER_PAGE],
-            });
+        queryClient.invalidateQueries({
+            queryKey: ["dicom-series", workspaceId, studyInstanceUid, 0, ITEM_PER_PAGE],
         });
-    }
+    }, [searchConditions]);
 
     const handleSelectAll = () => {
         if (isAllSelected) {
@@ -128,12 +118,6 @@ export default function DicomSeriesContent({
         <div className="container mx-auto px-4 py-8">
 
             <div className="mb-8 flex flex-col items-start space-x-4">
-                <div className="mb-4 flex-1">
-                    <DicomSearchButton 
-                        onSearch={() => setSearchModalOpen(true)}
-                    />
-                </div>
-
                 <div className="flex flex-1 items-center space-x-4">
                     <Link href="/dicom-studies">
                         <Button
@@ -218,13 +202,6 @@ export default function DicomSeriesContent({
                     </div>
                 </div>
             )}
-
-            <DicomSearchModal
-                open={searchModalOpen}
-                onOpenChange={setSearchModalOpen}
-                level="series"
-                onSearch={handleSearch}
-            />
         </div>
     );
 }
