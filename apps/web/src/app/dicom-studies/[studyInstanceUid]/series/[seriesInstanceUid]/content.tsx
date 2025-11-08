@@ -15,7 +15,14 @@ import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
-import { downloadInstance, downloadMultipleInstances } from "@/lib/clientDownload";
+import {
+    downloadInstance,
+    downloadInstanceAsJpg,
+    downloadInstanceAsPng,
+    downloadMultipleInstances,
+    downloadMultipleInstancesAsJpg,
+    downloadMultipleInstancesAsPng,
+} from "@/lib/clientDownload";
 import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -41,14 +48,15 @@ export default function DicomInstancesContent({
         clearSelection,
         selectAll,
         getSelectedCount,
-        getSelectedInstanceIds
+        getSelectedInstanceIds,
     } = useDicomInstanceSelectionStore();
 
-    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } = usePagination();
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
+        usePagination();
     const {
         data: instances,
         isLoading,
-        error
+        error,
     } = useQuery(
         getDicomInstanceQuery({
             workspaceId,
@@ -56,23 +64,24 @@ export default function DicomInstancesContent({
             seriesInstanceUid,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
-        })
+        }),
     );
     const canGoNext = instances && instances.length === ITEM_PER_PAGE;
 
     const currentPageInstanceUids = useMemo(() => {
         return (
-            instances?.map((instance) => instance["00080018"]?.Value?.[0] as string)
+            instances
+                ?.map((instance) => instance["00080018"]?.Value?.[0] as string)
                 .filter(Boolean) || []
         );
     }, [instances]);
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedInstanceIds();
-    const isAllSelected = 
-        currentPageInstanceUids.length > 0 && 
-        currentPageInstanceUids.every((instanceId) => 
-            selectedInstanceIds.has(instanceId as string)
-    );
+    const isAllSelected =
+        currentPageInstanceUids.length > 0 &&
+        currentPageInstanceUids.every((instanceId) =>
+            selectedInstanceIds.has(instanceId as string),
+        );
 
     useClearSelectionOnBlankClick({
         clearSelection,
@@ -85,31 +94,91 @@ export default function DicomInstancesContent({
         } else {
             selectAll(currentPageInstanceUids);
         }
-    }
+    };
 
-    const { handleDownload } = useDownloadHandler({
-        downloadSingle: (id: string) => downloadInstance(workspaceId, studyInstanceUid, seriesInstanceUid, id),
-        downloadMultiple: (ids: string[]) => downloadMultipleInstances(workspaceId, studyInstanceUid, seriesInstanceUid, ids),
+    const { handleDownload: handleDicomDownload } = useDownloadHandler({
+        downloadSingle: (id: string) =>
+            downloadInstance(
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                id,
+            ),
+        downloadMultiple: (ids: string[]) =>
+            downloadMultipleInstances(
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                ids,
+            ),
         errorMessage: "Failed to download selected instances",
     });
 
+    const { handleDownload: handleJpgDownload } = useDownloadHandler({
+        downloadSingle: (id: string) =>
+            downloadInstanceAsJpg(
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                id,
+            ),
+        downloadMultiple: (ids: string[]) =>
+            downloadMultipleInstancesAsJpg(
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                ids,
+            ),
+        errorMessage: "Failed to download selected instances as jpg",
+    });
+
+    const { handleDownload: handlePngDownload } = useDownloadHandler({
+        downloadSingle: (id: string) =>
+            downloadInstanceAsPng(
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                id,
+            ),
+        downloadMultiple: (ids: string[]) =>
+            downloadMultipleInstancesAsPng(
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                ids,
+            ),
+        errorMessage: "Failed to download selected instances as png",
+    });
+
+    const downloadOptions = [
+        {
+            label: "DICOM",
+            onClick: () => handleDicomDownload(selectedIds),
+        },
+        {
+            label: "JPG",
+            onClick: () => handleJpgDownload(selectedIds),
+        },
+        {
+            label: "PNG",
+            onClick: () => handlePngDownload(selectedIds),
+        }
+    ]
+
     if (error) {
         return (
-            <EmptyState 
+            <EmptyState
                 title="載入失敗"
                 description="無法載入 DICOM instances 資料"
             />
-        )
+        );
     }
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8 flex items-center space-x-4">
                 <Link href={`/dicom-studies/${studyInstanceUid}`}>
-                    <Button
-                        variant="outline"
-                        className="flex items-center"
-                    >
+                    <Button variant="outline" className="flex items-center">
                         <ArrowLeftIcon className="size-4" />
                     </Button>
                 </Link>
@@ -128,42 +197,38 @@ export default function DicomInstancesContent({
             </div>
 
             {!isLoading && instances && instances.length > 0 && (
-                <SelectionControlBar 
+                <SelectionControlBar
                     selectedCount={selectedCount}
                     isAllSelected={isAllSelected}
                     onSelectAll={handleSelectAll}
                     onClearSelection={clearSelection}
-                    onDownload={() => handleDownload(selectedIds)}
                     multiDownloadLabel="Download Selected Instances"
+                    downloadOptions={downloadOptions}
                 />
             )}
 
             {isLoading ? (
                 layoutMode === "grid" ? (
-                    <LoadingGrid
-                        itemCount={ITEM_PER_PAGE}
-                    />
+                    <LoadingGrid itemCount={ITEM_PER_PAGE} />
                 ) : (
-                    <LoadingDataTable
-                        columns={5}
-                        rows={ITEM_PER_PAGE}
-                    />
+                    <LoadingDataTable columns={5} rows={ITEM_PER_PAGE} />
                 )
             ) : instances && instances.length > 0 ? (
                 <>
                     {layoutMode === "grid" ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                    {instances.map((instance, index) => (
-                        <DicomInstanceCard
-                            // biome-ignore lint/suspicious/noArrayIndexKey: 使用 sop instance uid 會出現 type error，所以直接使用 index
-                            key={index}
-                            instance={instance as DicomInstanceData}
-                            workspaceId={workspaceId}
-                            studyInstanceUid={studyInstanceUid}
-                            seriesInstanceUid={seriesInstanceUid}
-                        />
-                    ))}    
-                    </div>): (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+                            {instances.map((instance, index) => (
+                                <DicomInstanceCard
+                                    // biome-ignore lint/suspicious/noArrayIndexKey: 使用 sop instance uid 會出現 type error，所以直接使用 index
+                                    key={index}
+                                    instance={instance as DicomInstanceData}
+                                    workspaceId={workspaceId}
+                                    studyInstanceUid={studyInstanceUid}
+                                    seriesInstanceUid={seriesInstanceUid}
+                                />
+                            ))}
+                        </div>
+                    ) : (
                         <div className="mb-8">
                             <DicomInstancesDataTable
                                 instances={instances as DicomInstanceData[]}
@@ -173,15 +238,15 @@ export default function DicomInstancesContent({
                         </div>
                     )}
 
-                    <PaginationControls 
+                    <PaginationControls
                         canGoPrevious={canGoPrevious}
                         canGoNext={Boolean(canGoNext)}
                         onPrevious={handlePreviousPage}
                         onNext={handleNextPage}
                     />
                 </>
-            ): (
-                <EmptyState 
+            ) : (
+                <EmptyState
                     title="沒有資料"
                     description="目前沒有可顯示的 Instances"
                 />

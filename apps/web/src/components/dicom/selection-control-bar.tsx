@@ -1,15 +1,23 @@
-import { DownloadIcon, Grid3x3Icon, ListIcon } from "lucide-react";
+import { ChevronDownIcon, DownloadIcon, Grid3x3Icon, ListIcon } from "lucide-react";
 import { type LayoutMode, useLayoutStore } from "@/stores/layout-store";
 import { Button } from "../ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+
+interface DownloadOption {
+    label: string;
+    onClick: () => void;
+}
 
 interface SelectionControlBarProps {
     selectedCount: number;
     isAllSelected: boolean;
     onSelectAll: () => void;
     onClearSelection: () => void;
-    onDownload: () => void;
+    onDownload?: () => void;
     multiDownloadLabel: string;
+    downloadOptions?: DownloadOption[];
 }
+
 
 export function SelectionControlBar({
     selectedCount,
@@ -18,6 +26,7 @@ export function SelectionControlBar({
     onClearSelection,
     onDownload,
     multiDownloadLabel,
+    downloadOptions,
 }: SelectionControlBarProps) {
     const { layoutMode, setLayoutMode } = useLayoutStore();
 
@@ -50,6 +59,30 @@ export function SelectionControlBar({
                         </span>
 
                         <div className="flex items-center space-x-2">
+                            {downloadOptions ? (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            size={"sm"}
+                                            className="flex items-center"
+                                        >
+                                            <DownloadIcon className="size-4" />
+                                            <span>下載 ({selectedCount})</span>
+                                            <ChevronDownIcon className="size-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        {downloadOptions.map((option) => (
+                                            <DropdownMenuItem 
+                                                key={option.label} 
+                                                onClick={option.onClick}
+                                            >
+                                                {option.label}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            ): (
                             <Button
                                 onClick={onDownload}
                                 size="sm"
@@ -60,6 +93,7 @@ export function SelectionControlBar({
                                     {multiDownloadLabel} ({selectedCount})
                                 </span>
                             </Button>
+                            )}
                         </div>
                     </>
                 )}
