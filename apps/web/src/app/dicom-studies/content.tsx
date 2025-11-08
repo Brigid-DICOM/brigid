@@ -2,17 +2,21 @@
 
 import type { DicomStudyData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
+import { DicomSearchButton } from "@/components/dicom/search/dicom-search-button";
+import type { SearchCondition } from "@/components/dicom/search/dicom-search-condition-item";
+import { DicomSearchModal } from "@/components/dicom/search/dicom-search-modal";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
+import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -26,6 +30,9 @@ export default function DicomStudiesContent({
     workspaceId,
 }: DicomStudiesContentProps) {
     const ITEM_PER_PAGE = 10;
+    const queryClient = getQueryClient();
+    const [searchModalOpen, setSearchModalOpen] = useState(false);
+    const [searchConditions, setSearchConditions] = useState<Record<string, string>>({});
 
     const { layoutMode } = useLayoutStore();
 
@@ -37,7 +44,7 @@ export default function DicomStudiesContent({
         getSelectedStudyIds,
     } = useDicomStudySelectionStore();
     
-    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } = usePagination();
+    const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } = usePagination();
 
     const {
         data: studies,
@@ -48,6 +55,7 @@ export default function DicomStudiesContent({
             workspaceId: workspaceId,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
+            ...searchConditions,
         }),
     );
 
@@ -66,6 +74,22 @@ export default function DicomStudiesContent({
         clearSelection,
         enabled: selectedCount > 0 && layoutMode === "grid",
     });
+
+    const handleSearch = (conditions: SearchCondition[]) => {
+        const searchParams = conditions.reduce((acc, condition) => {
+            acc[condition.field] = condition.value;
+            return acc;
+        }, {} as Record<string, string>);
+
+        setSearchConditions(searchParams);
+        handleResetToFirstPage();
+
+        requestAnimationFrame(() => {
+            queryClient.invalidateQueries({
+                queryKey: ["dicom-study", workspaceId, 0, ITEM_PER_PAGE],
+            });
+        });
+    }
 
     const handleSelectAll = () => {
         if (isAllSelected) {
@@ -93,6 +117,13 @@ export default function DicomStudiesContent({
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
+
+                <div className="mb-4">
+                    <DicomSearchButton 
+                        onSearch={() => setSearchModalOpen(true)}
+                    />
+                </div>
+
                 <h1 className="text-3xl font-bold text-gray-900">
                     DICOM Studies
                 </h1>
@@ -159,6 +190,13 @@ export default function DicomStudiesContent({
                     </div>
                 </div>
             )}
+
+            <DicomSearchModal 
+                open={searchModalOpen}
+                onOpenChange={setSearchModalOpen}
+                level="study"
+                onSearch={handleSearch}
+            />
         </div>
     );
 }

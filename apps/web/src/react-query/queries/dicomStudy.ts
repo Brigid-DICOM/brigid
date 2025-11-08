@@ -10,17 +10,24 @@ export interface DicomStudyQueryParams {
 export const getDicomStudyQuery = ({
     workspaceId,
     offset = 0,
-    limit = 10
+    limit = 10,
+    ...searchParams
 }: DicomStudyQueryParams) => queryOptions({
     queryKey: ["dicom-study", workspaceId, offset, limit],
     queryFn: async () => {
+        console.log(searchParams);
         const response = await apiClient.api.workspaces[":workspaceId"].studies.$get({
             param: {
                 workspaceId,
             },
             query: {
                 offset: offset.toString(),
-                limit: limit.toString()
+                limit: limit.toString(),
+                ...Object.fromEntries(
+                    Object.entries(searchParams).filter(([_, value]) =>
+                        value !== undefined && value !== null && value !== ""
+                    )
+                )
             }
         });
 

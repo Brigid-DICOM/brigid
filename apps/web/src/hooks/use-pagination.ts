@@ -13,10 +13,15 @@ export function usePagination() {
         setCurrentPage((prev) => prev + 1);
     };
 
+    const handleResetToFirstPage = () => {
+        setCurrentPage(0);
+    };
+
     const canGoPrevious = currentPage > 0;
 
     return {
         currentPage,
+        handleResetToFirstPage,
         handlePreviousPage,
         handleNextPage,
         canGoPrevious,
