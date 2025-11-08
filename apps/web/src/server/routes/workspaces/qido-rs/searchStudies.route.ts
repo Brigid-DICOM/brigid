@@ -34,7 +34,22 @@ const searchStudiesRoute = new Hono().get(
             return c.body(null, 204);
         }
 
-        return c.json(studies.map((study) => JSON.parse(study.json) as DicomTag));
+        return c.json(studies.map(
+            (study) => {
+                const studyData = JSON.parse(study.json) as DicomTag;
+                return {
+                    ...studyData,
+                    "00201206": {
+                        "vr": "IS",
+                        "Value": [study.numberOfStudyRelatedSeries || 0]
+                    },
+                    "00201208": {
+                        "vr": "IS",
+                        "Value": [study.numberOfStudyRelatedInstances || 0]
+                    }
+                } as DicomTag;
+            })
+        );
     },
 );
 
