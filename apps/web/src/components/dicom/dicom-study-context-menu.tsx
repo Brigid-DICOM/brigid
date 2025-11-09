@@ -40,8 +40,9 @@ export function DicomStudyContextMenu({
 
     const selectedIds = getSelectedStudyIds();
 
-    const handleViewSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleEnterSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
+        closeContextMenu();
         router.push(`/dicom-studies/${studyInstanceUid}`);
     }
 
@@ -102,11 +103,11 @@ export function DicomStudyContextMenu({
 
             <ContextMenuContent className="w-56">
                 {selectedIds.length === 1 && <ContextMenuItem
-                    onClick={handleViewSeries}
+                    onClick={handleEnterSeries}
                     className="flex items-center space-x-2"
                 >
                     <CornerDownLeftIcon className="size-4" />
-                    <span>View Series</span>
+                    <span>Enter Series</span>
                 </ContextMenuItem>
                 }
                 

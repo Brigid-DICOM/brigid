@@ -11,6 +11,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useMemo } from "react";
+import { DicomInstanceContextMenu } from "@/components/dicom/dicom-instance-context-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -145,6 +146,7 @@ export function DicomInstancesDataTable({
         clearSelection,
         selectAll,
         getSelectedCount,
+        selectInstance
     } = useDicomInstanceSelectionStore();
 
     const columns: ColumnDef<DicomInstanceData>[] = useMemo(
@@ -335,30 +337,46 @@ export function DicomInstancesDataTable({
                     <TableBody>
                         {table.getRowModel().rows.length ? (
                             table.getRowModel().rows.map((row) => {
+                                const studyInstanceUid = row.original["0020000D"]?.Value?.[0] || "";
+                                const seriesInstanceUid = row.original["0020000E"]?.Value?.[0] || "";
                                 const sopInstanceUid = row.original["00080018"]?.Value?.[0] || "";
                                 const isSelected = isInstanceSelected(sopInstanceUid);
 
                                 return (
-                                    <TableRow 
+                                    <DicomInstanceContextMenu
                                         key={row.id}
-                                        data-dicom-card
-                                        onClick={(e) => handleRowClick(e, row.original)}
-                                        className={cn(
-                                            "cursor-pointer select-none transition-colors",
-                                            isSelected && "bg-accent/50",
-                                        )}
+                                        workspaceId={workspaceId}
+                                        studyInstanceUid={studyInstanceUid}
+                                        seriesInstanceUid={seriesInstanceUid}
                                     >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell
-                                                key={cell.id}
-                                            >
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext(),
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
+                                        <TableRow 
+                                            data-dicom-card
+                                            onClick={(e) => handleRowClick(e, row.original)}
+                                            className={cn(
+                                                "cursor-pointer select-none transition-colors",
+                                                isSelected && "bg-accent/50",
+                                            )}
+                                            onContextMenu={() => {
+                                                if (getSelectedCount() === 0) {
+                                                    selectInstance(sopInstanceUid);
+                                                } else if (getSelectedCount() === 1) {
+                                                    clearSelection();
+                                                    selectInstance(sopInstanceUid);
+                                                }
+                                            }}
+                                        >
+                                            {row.getVisibleCells().map((cell) => (
+                                                <TableCell
+                                                    key={cell.id}
+                                                >
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext(),
+                                                    )}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    </DicomInstanceContextMenu>
                                 )
                             })
                         ) : (

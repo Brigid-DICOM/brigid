@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-interface UseCardSelectionProps<T> {
+interface UseCardSelectionProps {
     itemId: string;
     isSelected: boolean;
     toggleSelection: (id: string, ctrlKey?: boolean) => void;
@@ -9,14 +9,14 @@ interface UseCardSelectionProps<T> {
     onDoubleClick?: () => void;
 }
 
-export function useDicomCardSelection<T>({
+export function useDicomCardSelection({
     itemId,
     isSelected,
     toggleSelection,
     selectItem,
     clearSelection,
     onDoubleClick,
-}: UseCardSelectionProps<T>) {
+}: UseCardSelectionProps) {
     const handleCardClick = useCallback(
         (event: React.MouseEvent) => {
             if (event.button !== 0) return;

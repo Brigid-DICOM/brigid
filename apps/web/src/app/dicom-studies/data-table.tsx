@@ -12,6 +12,7 @@ import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -146,6 +147,7 @@ export function DicomStudiesDataTable({
         clearSelection,
         selectAll,
         getSelectedCount,
+        selectStudy
     } = useDicomStudySelectionStore();
 
     const columns: ColumnDef<DicomStudyData>[] = useMemo(
@@ -329,24 +331,37 @@ export function DicomStudiesDataTable({
                                     isStudySelected(studyInstanceUid);
 
                                 return (
-                                    <TableRow
+                                    <DicomStudyContextMenu
                                         key={row.id}
-                                        data-dicom-card
-                                        className={cn(
-                                            "cursor-pointer select-none transition-colors",
-                                            isSelected && "bg-accent/50",
-                                        )}
-                                        onClick={(e) => handleRowClick(e, row.original)}
+                                        workspaceId={workspaceId}
+                                        studyInstanceUid={studyInstanceUid}
                                     >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext(),
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
+                                        <TableRow
+                                            data-dicom-card
+                                            className={cn(
+                                                "cursor-pointer select-none transition-colors",
+                                                isSelected && "bg-accent/50",
+                                            )}
+                                            onClick={(e) => handleRowClick(e, row.original)}
+                                            onContextMenu={() => {
+                                                if (getSelectedCount() === 0) {
+                                                    selectStudy(studyInstanceUid);
+                                                } else if (getSelectedCount() === 1) {
+                                                    clearSelection();
+                                                    selectStudy(studyInstanceUid);
+                                                }
+                                            }}
+                                        >
+                                            {row.getVisibleCells().map((cell) => (
+                                                <TableCell key={cell.id}>
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext(),
+                                                    )}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    </DicomStudyContextMenu>
                                 );
                             })
                         ) : (

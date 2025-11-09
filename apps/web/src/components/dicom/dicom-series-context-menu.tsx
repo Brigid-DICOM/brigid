@@ -1,6 +1,7 @@
 "use client";
 
-import { DownloadIcon } from "lucide-react";
+import { CornerDownLeftIcon, DownloadIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { toast } from "sonner";
 import {
@@ -26,9 +27,16 @@ export function DicomSeriesContextMenu({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomSeriesContextMenuProps) {
+    const router = useRouter();
     const { getSelectedSeriesIds } = useDicomSeriesSelectionStore();
 
     const selectedIds = getSelectedSeriesIds();
+
+    const handleEnterInstances = async (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        router.push(`/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`);
+    }
 
     const handleDownloadThis = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -94,13 +102,22 @@ export function DicomSeriesContextMenu({
 
             <ContextMenuContent className="w-56">
                 {selectedIds.length === 1 && (
-                    <ContextMenuItem
-                        onClick={handleDownloadThis}
-                        className="flex items-center space-x-2"
-                    >
-                        <DownloadIcon className="size-4" />
-                        <span>Download</span>
-                    </ContextMenuItem>
+                    <>
+                        <ContextMenuItem
+                            onClick={handleEnterInstances}
+                            className="flex items-center space-x-2"
+                        >
+                            <CornerDownLeftIcon className="size-4" />
+                            <span>Enter Instances</span>
+                        </ContextMenuItem>
+                        <ContextMenuItem
+                            onClick={handleDownloadThis}
+                            className="flex items-center space-x-2"
+                        >
+                            <DownloadIcon className="size-4" />
+                            <span>Download</span>
+                        </ContextMenuItem>
+                    </>
                 )}
 
                 {selectedIds.length > 1 && (
