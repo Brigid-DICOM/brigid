@@ -9,9 +9,11 @@ export type SearchType = "dicom-study" | "dicom-series" | "dicom-instance";
 export interface GlobalSearchState {
     searchType: SearchType | null;
     searchConditions: Record<string, string>;
+    searchConditionsByType: Record<SearchType, Record<string, string>>;
 
     setSearchType: (type: SearchType | null) => void;
     setSearchConditions: (conditions: Record<string, string>) => void;
+    setSearchConditionsForType: (type: SearchType, conditions: Record<string, string>) => void;
     executeSearch: (type: SearchType, conditions: SearchCondition[]) => void;
     clearSearch: () => void;
     getSearchConditionsForType: (type: SearchType) => Record<string, string>;
@@ -23,13 +25,38 @@ export const useGlobalSearchStore = create<GlobalSearchState>()(
             (set, get) => ({
                 searchType: null,
                 searchConditions: {},
+                searchConditionsByType: {
+                    "dicom-study": {},
+                    "dicom-series": {},
+                    "dicom-instance": {},
+                },
 
                 setSearchType: (type: SearchType | null) => {
                     set({ searchType: type });
                 },
 
                 setSearchConditions: (conditions: Record<string, string>) => {
-                    set({ searchConditions: conditions });
+                    const state = get();
+                    set({ 
+                        searchConditions: conditions,
+                        ...(state.searchType && {
+                            searchConditionsByType: {
+                                ...state.searchConditionsByType,
+                                [state.searchType]: conditions
+                            }
+                        })
+                    });
+                },
+
+                setSearchConditionsForType: (type: SearchType, conditions: Record<string, string>) => {
+                    const state = get();
+                    set({
+                        searchConditions: state.searchType === type ? conditions : state.searchConditions,
+                        searchConditionsByType: {
+                            ...state.searchConditionsByType,
+                            [type]: conditions,
+                        },
+                    })
                 },
 
                 executeSearch: (type: SearchType, conditions: SearchCondition[]) => {

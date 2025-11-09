@@ -23,8 +23,12 @@ export function GlobalSearch() {
         const autoDetectedType = getSearchTypeFromRoute(pathname);
         if (autoDetectedType && autoDetectedType !== searchType) {
             setSearchType(autoDetectedType);
+
+            if (searchModalOpen) {
+                setSearchModalOpen(false);
+            }
         }
-    }, [pathname, searchType, setSearchType]);
+    }, [pathname, searchType, setSearchType, searchModalOpen]);
 
     const currentSearchTypeConfig = searchType ? getSearchTypeConfig(searchType) : null;
 

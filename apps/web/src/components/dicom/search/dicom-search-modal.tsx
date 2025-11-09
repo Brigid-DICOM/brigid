@@ -10,8 +10,10 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
+import { type SearchType, useGlobalSearchStore } from "@/stores/global-search-store";
 import { DicomSearchConditionItem } from "./dicom-search-condition-item";
 import { SearchFieldDropdownMenu } from "./search-field-dropdown-menu";
+import { SEARCH_FIELD_CONFIGS } from "./search-field-types";
 
 export type SearchLevel = "study" | "series" | "instance";
 
@@ -34,6 +36,12 @@ const DEFAULT_FIELDS: Record<SearchLevel, string[]> = {
     instance: ["ContentDate"],
 };
 
+const SEARCH_TYPE_MAPPING: Record<SearchLevel, SearchType> = {
+    study: "dicom-study",
+    series: "dicom-series",
+    instance: "dicom-instance",
+};
+
 const createDefaultConditions = (level: SearchLevel) => {
     return DEFAULT_FIELDS[level].map((field) => ({
         id: field,
@@ -42,13 +50,56 @@ const createDefaultConditions = (level: SearchLevel) => {
     }));
 }
 
+const getSupportedFieldsForLevel = (level: SearchLevel): Set<string> => {
+    const configs = SEARCH_FIELD_CONFIGS[level];
+    return new Set(configs.map(config => config.key));
+}
+
+const convertSearchParamsToConditions = (searchParams: Record<string, string>, level: SearchLevel) => {
+    const supportedFields = getSupportedFieldsForLevel(level);
+
+    return Object.entries(searchParams)
+        .filter(([field, value]) => value?.trim() && supportedFields.has(field))
+        .map(([field, value], index) => ({
+            id: `${field}-${index}`,
+            field,
+            value
+        }));
+}
+
 export function DicomSearchModal({
     open,
     onOpenChange,
     level,
     onSearch,
 }: SearchModalProps) {
+    const { getSearchConditionsForType } = useGlobalSearchStore();
     const [conditions, setConditions] = useState<SearchCondition[]>(createDefaultConditions(level));
+
+    const initializeConditions = (currentLevel: SearchLevel) => {
+        const searchType = SEARCH_TYPE_MAPPING[currentLevel];
+        const existingConditions = getSearchConditionsForType(searchType);
+    
+        const convertedConditions = convertSearchParamsToConditions(existingConditions, currentLevel);
+
+        if (convertedConditions.length > 0) {
+            setConditions(convertedConditions);
+        } else {
+            setConditions(createDefaultConditions(currentLevel));
+        }
+    }
+    
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 只在 level 變化時初始化
+    useEffect(() => {
+        initializeConditions(level);
+    }, [level]);
+
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 當 modal 打開時，重新載入新的搜尋條件
+    useEffect(() => {
+        if (open) {
+            initializeConditions(level);
+        }
+    }, [open, level]);
 
     useEffect(() => {
         setConditions(createDefaultConditions(level));
@@ -76,6 +127,10 @@ export function DicomSearchModal({
     const handleSearch = () => {
         const validConditions = conditions.filter(condition => condition.value.trim() !== "");
         onSearch(validConditions);
+    }
+
+    const handleClearAll = () => {
+        setConditions(createDefaultConditions(level));
     }
 
     return (
@@ -106,11 +161,24 @@ export function DicomSearchModal({
                 </div>
 
                 <DialogFooter className="flex sm:justify-between">
-                    <SearchFieldDropdownMenu 
-                        level={level}
-                        onSelect={addCondition}
-                        existingFields={conditions.map(condition => condition.field)}
-                    />
+                    <div className="flex gap-2">
+                        <SearchFieldDropdownMenu 
+                            level={level}
+                            onSelect={addCondition}
+                            existingFields={conditions.map(condition => condition.field)}
+                        />
+
+                        {conditions.some(c => c.value.trim()) && (
+                            <Button
+                                variant={"ghost"}
+                                size={"sm"}
+                                onClick={handleClearAll}
+                                className="text-xs"
+                            >
+                                清除全部
+                            </Button>
+                        )}
+                    </div>
 
                     <div className="flex gap-2">
                         <Button

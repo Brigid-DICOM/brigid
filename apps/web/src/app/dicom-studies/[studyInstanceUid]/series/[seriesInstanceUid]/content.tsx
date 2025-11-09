@@ -4,7 +4,7 @@ import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
+import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import {
     downloadInstance,
     downloadInstanceAsJpg,
@@ -45,7 +46,7 @@ export default function DicomInstancesContent({
     const ITEM_PER_PAGE = 10;
     const { layoutMode } = useLayoutStore();
 
-    const { getSearchConditionsForType } = useGlobalSearchStore();
+    const { getSearchConditionsForType, setSearchConditionsForType, setSearchType } = useGlobalSearchStore();
     const searchConditions = getSearchConditionsForType("dicom-instance");
 
     const {
@@ -58,6 +59,21 @@ export default function DicomInstancesContent({
 
     const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } =
         usePagination();
+
+    const handleSearchParamsChange = useCallback((urlParams: Record<string, string>) => {
+        setSearchConditionsForType("dicom-instance", urlParams);
+        setSearchType("dicom-instance");
+    }, [setSearchConditionsForType, setSearchType]);
+
+    const { syncSearchParamsToUrl } = useUrlSearchParams({
+        searchLevel: "instance",
+        onSearchParamsChange: handleSearchParamsChange
+    });
+
+    useEffect(() => {
+        syncSearchParamsToUrl(searchConditions);
+    }, [searchConditions, syncSearchParamsToUrl]);
+
     const {
         data: instances,
         isLoading,
