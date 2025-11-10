@@ -54,12 +54,16 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
         const selectedFiles = Array.from(e.target.files || []);
         const validatedFiles = await validateDicomFiles(selectedFiles);
         onFilesSelected(validatedFiles.map((result) => result.file));
+
+        e.target.value = "";
     };
 
     const handleFolderSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFolder = Array.from(e.target.files || []);
         const validatedFiles = await validateDicomFiles(selectedFolder);
         onFilesSelected(validatedFiles.map((result) => result.file));
+
+        e.target.value = "";
     };
 
     return (
