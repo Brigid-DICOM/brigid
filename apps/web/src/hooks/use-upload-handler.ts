@@ -103,6 +103,8 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
             await Promise.all(
                 tasksToUpload.map((task) => uploadFile(task.id, task.file))
             );
+
+            processQueue();
         }
     }, [getTasksByStatus, uploadFile]);
 
