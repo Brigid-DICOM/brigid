@@ -21,17 +21,26 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
 
         const items = Array.from(e.dataTransfer.items);
         const files: File[] = [];
+        let hasDirectory = false;
 
         for (const item of items) {
-            if (item.kind === "file") {
+            const entry = item.webkitGetAsEntry?.();
+            if (entry?.isDirectory) {
+                hasDirectory = true;
+                break;
+            }
+        }
+
+        if (hasDirectory) {
+            for (const item of items) {
                 const entry = item.webkitGetAsEntry?.();
                 if (entry) {
                     await traverseFileTree(entry, files);
-                } else {
-                    const file = item.getAsFile();
-                    if (file) files.push(file);
                 }
             }
+        } else {
+            const droppedFiles = Array.from(e.dataTransfer.files);
+            files.push(...droppedFiles);
         }
 
         const validatedFiles = await validateDicomFiles(files);
