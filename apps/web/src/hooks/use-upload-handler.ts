@@ -71,16 +71,22 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
                 }
 
                 updateTaskStatus(taskId, "completed");
-                toast.success(`Uploaded ${file.name}`);
+                toast.success(`Uploaded ${file.name}`, {
+                    position: "bottom-center"
+                });
             } catch (error) {
                 if (abortController.signal.aborted) {
-                    toast.info(`Upload cancelled ${file.name}`);
+                    toast.info(`Upload cancelled ${file.name}`, {
+                        position: "bottom-center"
+                    });
                     return;
                 }
 
                 const errorMessage = error instanceof Error ? error.message : "Unknown error";
                 updateTaskStatus(taskId, "failed", errorMessage);
-                toast.error(`Failed to upload ${file.name}`);
+                toast.error(`Failed to upload ${file.name}`, {
+                    position: "bottom-center"
+                });
             }
         },
         [
@@ -134,10 +140,14 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
             const invalidCount = files.length - validCount;
 
             if (validCount > 0) {
-                toast.success(`added ${validCount} valid files`);
+                toast.success(`added ${validCount} valid files`, {
+                    position: "bottom-center"
+                });
             }
             if (invalidCount > 0) {
-                toast.warning(`${invalidCount} invalid DICOM files were skipped`);
+                toast.warning(`${invalidCount} invalid DICOM files were skipped`, {
+                    position: "bottom-center"
+                });
             }
 
             processQueue();
