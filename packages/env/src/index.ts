@@ -70,6 +70,10 @@ const baseSchema = z.object({
             message: "DICOM_STORAGE_FILEPATH must contain 0020000D, 0020000E, and 00080018"
         }
     ),
+    // cleanup
+    DICOM_CLEANUP_RETENTION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
+    DICOM_CLEANUP_INTERVAL_HOURS: z.coerce.number().int().min(1).max(168).default(24),
+    // query
     QUERY_MAX_LIMIT: z.coerce.number().int().min(1).max(1000).default(100)
 });
 

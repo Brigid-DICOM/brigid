@@ -1,4 +1,5 @@
 export async function register() {
+
     if (process.env.NEXT_RUNTIME === "nodejs") {
         const { AppDataSource } = await import("@brigid/database/src/dataSource");
         if (!AppDataSource.isInitialized) {
@@ -9,5 +10,34 @@ export async function register() {
             isPackagedElectron: true
         });
         console.log("Raccoon DCM4CHE Java loader registered");
+
+        let cleanupScheduler: any;
+        try {
+            const { DicomCleanupSchedulerService } = await import("@/server/services/dicom/dicomCleanupScheduler.service");
+            cleanupScheduler = new DicomCleanupSchedulerService();
+            cleanupScheduler.start();
+            console.log("Dicom cleanup scheduler started");
+        } catch(error) {
+            console.error("Failed to start dicom cleanup scheduler", error);
+        }
+
+        const handleShutdown = async (signal: string) => {
+            console.log(`Received ${signal}, shutting down...`);
+
+            if (cleanupScheduler) {
+                await cleanupScheduler.stop();
+                console.log("Dicom cleanup scheduler stopped");
+            }
+
+            if (AppDataSource.isInitialized) {
+                await AppDataSource.destroy();
+                console.log("Database connection closed");
+            }
+
+            process.exit(0);
+        }
+
+        process.on("SIGINT", () => handleShutdown("SIGINT"));
+        process.on("SIGTERM", () => handleShutdown("SIGTERM"));
     }
 }
