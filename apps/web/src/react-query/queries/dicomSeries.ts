@@ -1,11 +1,13 @@
 import { queryOptions } from "@tanstack/react-query";
 import { apiClient } from "../apiClient";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 
 export interface DicomSeriesQueryParams {
     workspaceId: string;
     studyInstanceUid: string;
     offset?: number;
     limit?: number;
+    deleteStatus?: number;
 }
 
 export const getDicomSeriesQuery = ({
@@ -13,6 +15,7 @@ export const getDicomSeriesQuery = ({
     studyInstanceUid,
     offset = 0,
     limit = 10,
+    deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
     ...searchConditions
 }: DicomSeriesQueryParams) => queryOptions({
     queryKey: ["dicom-series", workspaceId, studyInstanceUid, offset, limit],
@@ -25,6 +28,7 @@ export const getDicomSeriesQuery = ({
             query: {
                 offset: offset.toString(),
                 limit: limit.toString(),
+                deleteStatus: deleteStatus.toString(),
                 ...Object.fromEntries(
                     Object.entries(searchConditions).filter(([_, value]) =>
                         value !== undefined && value !== null && value !== ""

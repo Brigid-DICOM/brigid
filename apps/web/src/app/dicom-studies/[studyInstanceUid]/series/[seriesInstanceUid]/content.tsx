@@ -1,5 +1,6 @@
 "use client";
 
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
@@ -85,6 +86,7 @@ export default function DicomInstancesContent({
             seriesInstanceUid,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
+            deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
             ...searchConditions,
         }),
     );

@@ -20,6 +20,7 @@ import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-stor
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomStudiesDataTable } from "./data-table";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 
 interface DicomStudiesContentProps {
     workspaceId: string;
@@ -68,6 +69,7 @@ export default function DicomStudiesContent({
             workspaceId: workspaceId,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
+            deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
             ...searchConditions,
         }),
     );
