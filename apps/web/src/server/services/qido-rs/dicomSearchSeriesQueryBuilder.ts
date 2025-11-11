@@ -1,3 +1,4 @@
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { SelectQueryBuilder } from "typeorm";
 import type { SearchStudySeriesQueryParam } from "@/server/schemas/searchStudySeriesSchema";
@@ -7,6 +8,7 @@ import {
     type SeriesFieldConfig,
 } from "./dicomSearchSeriesQueryConfig";
 import type { FieldConfig } from "./dicomSearchStudyQueryConfig";
+import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 
 export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
     SeriesEntity,
@@ -17,6 +19,7 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
 
     protected buildBaseQuery(
         workspaceId: string,
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
     ): SelectQueryBuilder<SeriesEntity> {
         return this.entityManager
             .createQueryBuilder(SeriesEntity, this.seriesTable)
@@ -27,7 +30,23 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
                 "patientName",
                 "patientName.id = patient.patientNameId",
             )
-            .where("series.workspaceId = :workspaceId", { workspaceId });
+            .where("series.workspaceId = :workspaceId", { workspaceId })
+            .andWhere("series.deleteStatus = :deleteStatus", { deleteStatus });
+    }
+
+    protected applyInstanceDeleteStatusFilter(
+        query: SelectQueryBuilder<SeriesEntity>,
+        instanceDeleteStatus: number
+    ): void {
+        const subQuery = this.entityManager
+            .createQueryBuilder(InstanceEntity, "instance")
+            .select("instance.seriesInstanceUid")
+            .where("instance.workspaceId = series.workspaceId")
+            .andWhere("instance.seriesInstanceUid = series.seriesInstanceUid")
+            .andWhere("instance.deleteStatus = :instanceDeleteStatus", { instanceDeleteStatus })
+            .getQuery();
+            
+        query.andWhere(`EXISTS (${subQuery})`, { instanceDeleteStatus });
     }
 
 

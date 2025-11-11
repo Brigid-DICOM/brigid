@@ -1,3 +1,4 @@
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { z } from "zod";
 import { DICOM_TAG_KEYWORD_REGISTRY } from "../const/dicomTagKeywordRegistry";
 import { dateRangeSchema } from "./dateRangeSchema";
@@ -7,6 +8,8 @@ export const searchStudiesQueryParamSchema = z.object({
     limit: z.coerce.number().int().min(1).max(1000).optional(),
     offset: z.coerce.number().int().min(0).optional(),
     fuzzymatching: z.boolean().optional(),
+    deleteStatus: z.coerce.number().min(0).max(2).optional().default(DICOM_DELETE_STATUS.ACTIVE),
+    instanceDeleteStatus: z.coerce.number().min(0).max(2).optional(),
     StudyInstanceUID: z.string().optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag]: z.string().optional(),
     StudyDate: dateRangeSchema.optional(),

@@ -33,6 +33,8 @@ export const searchStudySeriesInstancesQueryParamSchema =
         ContentTime: timeRangeSchema.optional(),
         [DICOM_TAG_KEYWORD_REGISTRY.ContentTime.tag]:
             timeRangeSchema.optional(),
+    }).omit({
+        instanceDeleteStatus: true,
     });
 
 export type SearchStudySeriesInstancesQueryParam = z.infer<typeof searchStudySeriesInstancesQueryParamSchema>;

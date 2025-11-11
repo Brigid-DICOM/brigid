@@ -1,4 +1,5 @@
 import { AppDataSource } from "@brigid/database";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { EntityManager, ObjectLiteral, SelectQueryBuilder } from "typeorm";
 import type { InstanceFieldConfig } from "./dicomSearchInstanceQueryConfig";
 import type { SeriesFieldConfig } from "./dicomSearchSeriesQueryConfig";
@@ -22,21 +23,36 @@ export abstract class BaseDicomSearchQueryBuilder<
         workspaceId,
         limit = 100,
         offset = 0,
+        deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+        instanceDeleteStatus,
         ...queryParams
     }: { workspaceId: string } & TQueryParam & {
         limit?: number;
         offset?: number;
+        deleteStatus?: number;
+        instanceDeleteStatus?: number;
     }) {
-        const query = this.buildBaseQuery(workspaceId);
+        const query = this.buildBaseQuery(workspaceId, deleteStatus);
+
+        if (instanceDeleteStatus !== undefined) {
+            this.applyInstanceDeleteStatusFilter(query, instanceDeleteStatus);
+        }
+
         this.applySearchFilters(query, queryParams as unknown as TQueryParam);
         return await query.take(limit).skip(offset).getMany();
     }
 
     protected abstract buildBaseQuery(
-        workspaceId: string
+        workspaceId: string,
+        deleteStatus?: number
     ): SelectQueryBuilder<TEntity>;
     
     protected abstract getSearchFields(): readonly TFieldConfig[];
+
+    protected abstract applyInstanceDeleteStatusFilter(
+        query: SelectQueryBuilder<TEntity>,
+        instanceDeleteStatus: number
+    ): void;
 
     protected applySearchFilters(
         query: SelectQueryBuilder<TEntity>,
