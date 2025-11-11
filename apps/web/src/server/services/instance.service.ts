@@ -1,7 +1,7 @@
 import { AppDataSource } from "@brigid/database";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import type { DicomTag } from "@brigid/types";
-import type { EntityManager } from "typeorm";
+import { type EntityManager, In } from "typeorm";
 import { DateQueryStrategy } from "./qido-rs/dateQueryStrategy";
 
 export class InstanceService {
@@ -52,6 +52,24 @@ export class InstanceService {
                 studyInstanceUid: options.studyInstanceUid,
                 seriesInstanceUid: options.seriesInstanceUid,
                 sopInstanceUid: options.sopInstanceUid
+            }
+        });
+    }
+
+    async getInstancesBySopInstanceUid(workspaceId: string, sopInstanceUids: string[]) {
+        return await this.entityManager.find(InstanceEntity, {
+            where: {
+                workspaceId: workspaceId,
+                sopInstanceUid: In(sopInstanceUids)
+            },
+            select: {
+                id: true,
+                studyInstanceUid: true,
+                seriesInstanceUid: true,
+                localSeriesId: true,
+                sopInstanceUid: true,
+                deleteStatus: true,
+                deletedAt: true
             }
         });
     }

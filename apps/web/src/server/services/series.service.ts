@@ -3,6 +3,7 @@ import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { DicomTag } from "@brigid/types";
 import type { EntityManager } from "typeorm";
+import { In } from "typeorm";
 import { DateQueryStrategy } from "./qido-rs/dateQueryStrategy";
 
 export class SeriesService {
@@ -88,6 +89,22 @@ export class SeriesService {
         });
     }
 
+    async getSeriesBySeriesInstanceUids(workspaceId: string, seriesInstanceUids: string[]) {
+        return await this.entityManager.find(SeriesEntity, {
+            where: {
+                workspaceId: workspaceId,
+                seriesInstanceUid: In(seriesInstanceUids),
+            },
+            select: {
+                id: true,
+                localStudyId: true,
+                studyInstanceUid: true,
+                seriesInstanceUid: true,
+                deleteStatus: true,
+                deletedAt: true
+            }
+        });
+    }
     async getSeriesInstances(options: {
         workspaceId: string;
         studyInstanceUid: string;

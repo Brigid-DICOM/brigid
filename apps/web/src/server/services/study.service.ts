@@ -3,6 +3,7 @@ import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import type { DicomTag } from "@brigid/types";
 import type { EntityManager } from "typeorm";
+import { In } from "typeorm";
 
 export class StudyService {
     private readonly entityManager: EntityManager;
@@ -59,6 +60,18 @@ export class StudyService {
     }) {
         return await this.entityManager.findOne(StudyEntity, {
             where: { workspaceId: options.workspaceId, studyInstanceUid: options.studyInstanceUid }
+        });
+    }
+
+    async getStudiesByStudyInstanceUids(workspaceId: string, studyInstanceUids: string[]) {
+        return await this.entityManager.find(StudyEntity, {
+            where: { workspaceId: workspaceId, studyInstanceUid: In(studyInstanceUids) },
+            select: {
+                id: true,
+                studyInstanceUid: true,
+                deleteStatus: true,
+                deletedAt: true
+            }
         });
     }
 
