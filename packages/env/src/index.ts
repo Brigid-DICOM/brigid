@@ -71,6 +71,7 @@ const baseSchema = z.object({
         }
     ),
     // cleanup
+    DICOM_RECYCLE_BIN_RETENTION_DAYS: z.coerce.number().int().min(1).max(365).default(90),
     DICOM_CLEANUP_RETENTION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
     DICOM_CLEANUP_INTERVAL_HOURS: z.coerce.number().int().min(1).max(168).default(24),
     // query
