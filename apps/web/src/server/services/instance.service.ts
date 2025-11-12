@@ -1,8 +1,8 @@
 import { AppDataSource } from "@brigid/database";
-import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import type { DicomTag } from "@brigid/types";
 import { type EntityManager, In } from "typeorm";
+import { DicomDeleteService } from "./dicom/dicomDelete.service";
 import { DateQueryStrategy } from "./qido-rs/dateQueryStrategy";
 
 export class InstanceService {
@@ -28,7 +28,6 @@ export class InstanceService {
         
         if (existingInstance) {
             instanceEntity.id = existingInstance.id;
-            instanceEntity.deleteStatus = DICOM_DELETE_STATUS.ACTIVE;
 
             const existingInstanceJson = JSON.parse(existingInstance.json ?? "{}") as DicomTag;
             const incomingInstanceJson = JSON.parse(instanceEntity.json ?? "{}") as DicomTag;
@@ -39,7 +38,14 @@ export class InstanceService {
             });
         }
 
-        return await this.entityManager.save(InstanceEntity, instanceEntity);
+        const savedInstance = await this.entityManager.save(InstanceEntity, instanceEntity);
+
+        if (existingInstance) {
+            const dicomDeleteService = new DicomDeleteService(this.entityManager);
+            await dicomDeleteService.restoreInstances(savedInstance.workspaceId, [savedInstance.id]);
+        }
+
+        return savedInstance;
     }
 
     async getInstanceByUid(options: {

@@ -1,5 +1,4 @@
 import { AppDataSource } from "@brigid/database";
-import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { DicomTag } from "@brigid/types";
@@ -39,7 +38,6 @@ export class SeriesService {
 
         if (existingSeries) {
             seriesEntity.id = existingSeries.id;
-            seriesEntity.deleteStatus = DICOM_DELETE_STATUS.ACTIVE;
 
             if (
                 "seriesDescriptionCodeSequence" in seriesEntity &&

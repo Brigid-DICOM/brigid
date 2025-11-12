@@ -203,51 +203,44 @@ export class DicomDeleteService {
         );
     }
 
-    async restoreInstances(workspaceId: string, instanceIds: string[]) {
-        return await this.entityManager.transaction(
-            async (transactionalEntityManager) => {
-                const result = await transactionalEntityManager.update(
-                    InstanceEntity,
-                    {
-                        id: In(instanceIds),
-                        workspaceId,
-                        deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
-                    },
-                    {
-                        deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
-                        deletedAt: null,
-                    },
-                );
+    async restoreInstances(
+        workspaceId: string,
+        instanceIds: string[],
+        transactionalEntityManager?: EntityManager,
+    ) {
+        const em = transactionalEntityManager ?? this.entityManager;
 
-                if (result.affected && result.affected > 0) {
-                    const instances = await transactionalEntityManager.find(
-                        InstanceEntity,
-                        {
-                            where: {
-                                id: In(instanceIds),
-                            },
-                            select: {
-                                localSeriesId: true,
-                            },
-                        },
-                    );
-
-                    const seriesIds = instances.map(
-                        (instance) => instance.localSeriesId,
-                    );
-                    await this.updateSeriesInstanceCounts(
-                        seriesIds,
-                        transactionalEntityManager,
-                    );
-                    await this.restoreActiveSeries(
-                        seriesIds,
-                        transactionalEntityManager,
-                    );
-                }
-
-                return { affected: result.affected ?? 0 };
+        const result = await em.update(
+            InstanceEntity,
+            {
+                id: In(instanceIds),
+                workspaceId,
+                deleteStatus: In([DICOM_DELETE_STATUS.RECYCLED, DICOM_DELETE_STATUS.DELETED]),
+            },
+            {
+                deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
+                deletedAt: null,
             },
         );
+
+        if (result.affected && result.affected > 0) {
+            const instances = await em.find(InstanceEntity, {
+                where: {
+                    id: In(instanceIds),
+                },
+                select: {
+                    localSeriesId: true,
+                },
+            });
+
+            const seriesIds = instances.map(
+                (instance) => instance.localSeriesId,
+            );
+            await this.updateSeriesInstanceCounts(seriesIds, em);
+            await this.restoreActiveSeries(seriesIds, em);
+        }
+
+        return { affected: result.affected ?? 0 };
     }
 
     async restoreSeries(workspaceId: string, seriesIds: string[]) {
@@ -768,18 +761,21 @@ export class DicomDeleteService {
             .select("instance.localSeriesId", "seriesId")
             .addSelect("COUNT(*)", "count")
             .where("instance.localSeriesId IN (:...seriesIds)", { seriesIds })
-            .andWhere("instance.deleteStatus IN (:...deleteStatus)", { 
-                deleteStatus: [DICOM_DELETE_STATUS.ACTIVE, DICOM_DELETE_STATUS.RECYCLED] 
+            .andWhere("instance.deleteStatus IN (:...deleteStatus)", {
+                deleteStatus: [
+                    DICOM_DELETE_STATUS.ACTIVE,
+                    DICOM_DELETE_STATUS.RECYCLED,
+                ],
             })
             .groupBy("instance.localSeriesId")
             .getRawMany();
-        
+
         const seriesWithActiveInstances = new Set(
-            seriesWithCounts.map((row) => row.seriesId)
+            seriesWithCounts.map((row) => row.seriesId),
         );
 
         const emptySeriesIds = seriesIds.filter(
-            id => !seriesWithActiveInstances.has(id)
+            (id) => !seriesWithActiveInstances.has(id),
         );
 
         if (emptySeriesIds.length === 0) return [];
@@ -795,8 +791,8 @@ export class DicomDeleteService {
                     id: true,
                     deleteStatus: true,
                     localStudyId: true,
-                }
-            }
+                },
+            },
         );
 
         if (seriesToMark.length === 0) return [];
@@ -809,8 +805,8 @@ export class DicomDeleteService {
             {
                 deleteStatus: DICOM_DELETE_STATUS.DELETED,
                 deletedAt: new Date(),
-            }
-        )
+            },
+        );
 
         return seriesToMark.map((series) => series.id);
     }
@@ -837,16 +833,21 @@ export class DicomDeleteService {
             .select("series.localStudyId", "studyId")
             .addSelect("COUNT(*)", "count")
             .where("series.localStudyId IN (:...studyIds)", { studyIds })
-            .andWhere("series.deleteStatus IN (:...deleteStatus)", { deleteStatus: [DICOM_DELETE_STATUS.ACTIVE, DICOM_DELETE_STATUS.RECYCLED] })
+            .andWhere("series.deleteStatus IN (:...deleteStatus)", {
+                deleteStatus: [
+                    DICOM_DELETE_STATUS.ACTIVE,
+                    DICOM_DELETE_STATUS.RECYCLED,
+                ],
+            })
             .groupBy("series.localStudyId")
             .getRawMany();
 
         const studiesWithActiveSeries = new Set(
-            studiesWithCounts.map((row) => row.studyId)
+            studiesWithCounts.map((row) => row.studyId),
         );
 
         const emptyStudyIds = studyIds.filter(
-            id => !studiesWithActiveSeries.has(id)
+            (id) => !studiesWithActiveSeries.has(id),
         );
 
         if (emptyStudyIds.length === 0) return [];
@@ -861,8 +862,8 @@ export class DicomDeleteService {
                 select: {
                     id: true,
                     deleteStatus: true,
-                }
-            }
+                },
+            },
         );
 
         if (studiesToMark.length === 0) return [];
@@ -875,8 +876,8 @@ export class DicomDeleteService {
             {
                 deleteStatus: DICOM_DELETE_STATUS.DELETED,
                 deletedAt: new Date(),
-            }
-        )
+            },
+        );
 
         return studiesToMark.map((study) => study.id);
     }
