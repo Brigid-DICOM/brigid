@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { isDicomFile } from "@/lib/dicom-validator"; 
 import { useUploadManagerStore } from "@/stores/upload-manager-store";
 
-const MAX_CONCURRENT_UPLOADS = 3;
+const MAX_CONCURRENT_UPLOADS = 1;
 
 interface UseUploadHandlerProps {
     workspaceId: string;
