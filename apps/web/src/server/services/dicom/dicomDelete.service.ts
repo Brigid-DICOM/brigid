@@ -215,7 +215,7 @@ export class DicomDeleteService {
             {
                 id: In(instanceIds),
                 workspaceId,
-                deleteStatus: In([DICOM_DELETE_STATUS.RECYCLED, DICOM_DELETE_STATUS.DELETED]),
+                deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
             },
             {
                 deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
@@ -880,5 +880,50 @@ export class DicomDeleteService {
         );
 
         return studiesToMark.map((study) => study.id);
+    }
+
+    async reactivateInstancesOnUpload(
+        workspaceId: string,
+        instanceIds: string[],
+        transactionalEntityManager?: EntityManager,
+    ) {
+        const em = transactionalEntityManager ?? this.entityManager;
+
+        const instancesToReactivate = await em.find(InstanceEntity, {
+            where: {
+                id: In(instanceIds),
+                workspaceId,
+                deleteStatus: Not(DICOM_DELETE_STATUS.ACTIVE),
+            },
+            select: {
+                id: true,
+                localSeriesId: true,
+                deleteStatus: true,
+            },
+        });
+
+        if (instancesToReactivate.length === 0) return { affected: 0 };
+
+        await em.update(
+            InstanceEntity,
+            {
+                id: In(instancesToReactivate.map((instance) => instance.id)),
+            },
+            {
+                deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
+                deletedAt: null,
+            },
+        );
+
+        const seriesIds = [
+            ...new Set(
+                instancesToReactivate.map((instance) => instance.localSeriesId),
+            ),
+        ];
+
+        await this.updateSeriesInstanceCounts(seriesIds, em);
+        await this.restoreActiveSeries(seriesIds, em);
+
+        return { affected: instancesToReactivate.length };
     }
 }

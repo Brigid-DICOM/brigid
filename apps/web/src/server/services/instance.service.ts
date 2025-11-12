@@ -42,7 +42,7 @@ export class InstanceService {
 
         if (existingInstance) {
             const dicomDeleteService = new DicomDeleteService(this.entityManager);
-            await dicomDeleteService.restoreInstances(savedInstance.workspaceId, [savedInstance.id]);
+            await dicomDeleteService.reactivateInstancesOnUpload(savedInstance.workspaceId, [savedInstance.id]);
         }
 
         return savedInstance;
