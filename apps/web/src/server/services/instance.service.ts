@@ -1,4 +1,5 @@
 import { AppDataSource } from "@brigid/database";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import type { DicomTag } from "@brigid/types";
 import { type EntityManager, In } from "typeorm";
@@ -27,6 +28,7 @@ export class InstanceService {
         
         if (existingInstance) {
             instanceEntity.id = existingInstance.id;
+            instanceEntity.deleteStatus = DICOM_DELETE_STATUS.ACTIVE;
 
             const existingInstanceJson = JSON.parse(existingInstance.json ?? "{}") as DicomTag;
             const incomingInstanceJson = JSON.parse(instanceEntity.json ?? "{}") as DicomTag;

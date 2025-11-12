@@ -1,4 +1,5 @@
 import { AppDataSource } from "@brigid/database";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import type { DicomTag } from "@brigid/types";
@@ -32,6 +33,7 @@ export class StudyService {
 
         if (existingStudy) {
             studyEntity.id = existingStudy.id;
+            studyEntity.deleteStatus = DICOM_DELETE_STATUS.ACTIVE;
             
             if (
                 "referringPhysicianName" in studyEntity &&
