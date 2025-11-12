@@ -279,7 +279,18 @@ export class DicomDeleteService {
                             select: { localStudyId: true },
                         },
                     );
+
+                    await this.updateSeriesInstanceCounts(
+                        seriesIds,
+                        transactionalEntityManager,
+                    );
+
                     await this.updateStudySeriesCounts(
+                        [...new Set(series.map((s) => s.localStudyId))],
+                        transactionalEntityManager,
+                    );
+
+                    await this.restoreActiveStudies(
                         [...new Set(series.map((s) => s.localStudyId))],
                         transactionalEntityManager,
                     );
