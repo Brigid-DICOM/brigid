@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { isDicomFile } from "@/lib/dicom-validator"; 
+import { getQueryClient } from "@/react-query/get-query-client";
 import { useUploadManagerStore } from "@/stores/upload-manager-store";
 
 const MAX_CONCURRENT_UPLOADS = 1;
@@ -18,6 +19,8 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
         setTaskAbortController,
         getTasksByStatus,
     } = useUploadManagerStore();
+
+    const queryClient = getQueryClient();
 
     const uploadFile = useCallback(
         async (taskId: string, file: File) => {
@@ -74,6 +77,10 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
                 toast.success(`Uploaded ${file.name}`, {
                     position: "bottom-center"
                 });
+
+                queryClient.invalidateQueries({ queryKey: ["dicom-study", workspaceId] });
+                queryClient.invalidateQueries({ queryKey: ["dicom-series", workspaceId] });
+                queryClient.invalidateQueries({ queryKey: ["dicom-instance", workspaceId] });
             } catch (error) {
                 if (abortController.signal.aborted) {
                     toast.info(`Upload cancelled ${file.name}`, {
@@ -93,7 +100,8 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
             workspaceId,
             updateTaskProgress,
             updateTaskStatus,
-            setTaskAbortController
+            setTaskAbortController,
+            queryClient.invalidateQueries,
         ]
     );
 
