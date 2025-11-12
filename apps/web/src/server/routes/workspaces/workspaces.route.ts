@@ -6,6 +6,9 @@ import { WorkspaceService } from "@/server/services/workspace.service";
 import recycleInstancesRoute from "./dicom/delete/recycleInstances.route";
 import recycleSeriesRoute from "./dicom/delete/recycleSeries.route";
 import recycleStudyRoute from "./dicom/delete/recycleStudy.route";
+import restoreInstancesRoute from "./dicom/delete/restoreInstances.route";
+import restoreSeriesRoute from "./dicom/delete/restoreSeries.route";
+import restoreStudyRoute from "./dicom/delete/restoreStudy.route";
 import getStatsRoute from "./dicom/getStats.route";
 import searchInstancesRoute from "./qido-rs/searchInstances.route";
 import searchSeriesRoute from "./qido-rs/searchSeries.route";
@@ -51,6 +54,9 @@ const workspacesRoute = new Hono()
 .route("/", recycleInstancesRoute)
 .route("/", recycleSeriesRoute)
 .route("/", recycleStudyRoute)
+.route("/", restoreInstancesRoute)
+.route("/", restoreSeriesRoute)
+.route("/", restoreStudyRoute)
 .get(
     "/workspaces",
     describeRoute({

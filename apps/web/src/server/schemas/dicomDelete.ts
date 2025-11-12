@@ -19,3 +19,7 @@ export const restoreInstancesBodySchema = z.object({
 export const restoreSeriesBodySchema = z.object({
     seriesIds: z.array(z.string().min(1)).min(1)
 });
+
+export const restoreStudyBodySchema = z.object({
+    studyIds: z.array(z.string().min(1)).min(1)
+});
