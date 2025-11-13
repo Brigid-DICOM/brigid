@@ -3,6 +3,9 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import { WorkspaceService } from "@/server/services/workspace.service";
+import deleteInstancesRoute from "./dicom/delete/deleteInstances.route";
+import deleteSeriesRoute from "./dicom/delete/deleteSeries.route";
+import deleteStudiesRoute from "./dicom/delete/deleteStudies.route";
 import recycleInstancesRoute from "./dicom/delete/recycleInstances.route";
 import recycleSeriesRoute from "./dicom/delete/recycleSeries.route";
 import recycleStudyRoute from "./dicom/delete/recycleStudy.route";
@@ -57,6 +60,9 @@ const workspacesRoute = new Hono()
 .route("/", restoreInstancesRoute)
 .route("/", restoreSeriesRoute)
 .route("/", restoreStudyRoute)
+.route("/", deleteInstancesRoute)
+.route("/", deleteSeriesRoute)
+.route("/", deleteStudiesRoute)
 .get(
     "/workspaces",
     describeRoute({
