@@ -961,7 +961,7 @@ export class DicomDeleteService {
         const seriesToDelete = await transactionalEntityManager.find(SeriesEntity, {
             where: {
                 id: In(emptySeriesIds),
-                deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
+                deleteStatus: DICOM_DELETE_STATUS.DELETED,
             },
             select: {
                 id: true,
