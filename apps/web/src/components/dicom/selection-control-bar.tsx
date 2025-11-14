@@ -1,4 +1,4 @@
-import { ChevronDownIcon, DownloadIcon, Grid3x3Icon, ListIcon } from "lucide-react";
+import { ChevronDownIcon, DownloadIcon, Grid3x3Icon, ListIcon, Trash2Icon } from "lucide-react";
 import { type LayoutMode, useLayoutStore } from "@/stores/layout-store";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -14,7 +14,9 @@ interface SelectionControlBarProps {
     onSelectAll: () => void;
     onClearSelection: () => void;
     onDownload?: () => void;
+    onRecycle?: () => void;
     multiDownloadLabel: string;
+    multiRecycleLabel?: string;
     downloadOptions?: DownloadOption[];
 }
 
@@ -25,7 +27,9 @@ export function SelectionControlBar({
     onSelectAll,
     onClearSelection,
     onDownload,
+    onRecycle,
     multiDownloadLabel,
+    multiRecycleLabel,
     downloadOptions,
 }: SelectionControlBarProps) {
     const { layoutMode, setLayoutMode } = useLayoutStore();
@@ -93,6 +97,20 @@ export function SelectionControlBar({
                                     {multiDownloadLabel} ({selectedCount})
                                 </span>
                             </Button>
+                            )}
+
+                            {onRecycle && (
+                                <Button
+                                    onClick={onRecycle}
+                                    size="sm"
+                                    className="flex items-center"
+                                    variant="destructive"
+                                >
+                                    <Trash2Icon className="size-4" />
+                                    <span>
+                                        {multiRecycleLabel} ({selectedCount})
+                                    </span>
+                                </Button>
                             )}
                         </div>
                     </>

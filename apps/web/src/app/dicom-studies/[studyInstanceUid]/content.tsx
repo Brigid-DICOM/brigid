@@ -1,10 +1,13 @@
 "use client";
 
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomSeriesData } from "@brigid/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo } from "react";
+import { toast } from "sonner";
+import { nanoid } from "zod";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -18,12 +21,11 @@ import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
+import { getDicomSeriesQuery, recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomSeriesDataTable } from "./data-table";
-import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 
 interface DicomSeriesContentProps {
     workspaceId: string;
@@ -100,6 +102,33 @@ export default function DicomSeriesContent({
             selectedSeriesIds.has(seriesId as string),
         );
 
+    const { mutate: recycleDicomSeries } = useMutation({
+        ...recycleDicomSeriesMutation({
+            workspaceId,
+            seriesIds: selectedIds,
+        }),
+        meta: {
+            toastId: nanoid()
+        },
+        onMutate: (_, context) => {
+            toast.loading("Recycling DICOM series...", {
+                id: context.meta?.toastId as string,
+            });
+        },
+        onSuccess: (_, __, ___, context) => {
+            toast.success("DICOM series recycled successfully");
+            toast.dismiss(context.meta?.toastId as string);
+            queryClient.invalidateQueries({
+                queryKey: ["dicom-series", workspaceId],
+            });
+            clearSelection();
+        },
+        onError: (_, __, ___, context) => {
+            toast.error("Failed to recycle DICOM series");
+            toast.dismiss(context.meta?.toastId as string);
+        },
+    });
+
     useClearSelectionOnBlankClick({
         clearSelection,
         enabled: selectedCount > 0 && layoutMode === "grid",
@@ -169,6 +198,8 @@ export default function DicomSeriesContent({
                     onSelectAll={handleSelectAll}
                     onClearSelection={clearSelection}
                     onDownload={() => handleDownload(selectedIds)}
+                    onRecycle={() => recycleDicomSeries()}
+                    multiRecycleLabel="Recycle Selected Series"
                     multiDownloadLabel="Download Selected Series"
                 />
             )}

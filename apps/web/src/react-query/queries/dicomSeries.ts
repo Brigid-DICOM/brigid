@@ -1,6 +1,6 @@
-import { queryOptions } from "@tanstack/react-query";
-import { apiClient } from "../apiClient";
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
+import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import { apiClient } from "../apiClient";
 
 export interface DicomSeriesQueryParams {
     workspaceId: string;
@@ -78,4 +78,29 @@ export const getDicomSeriesThumbnailQuery = (
         return await response.blob();
     },
     enabled: !!workspaceId && !!studyInstanceUid && !!seriesInstanceUid
+});
+
+export const recycleDicomSeriesMutation = ({
+    workspaceId,
+    seriesIds,
+}: {
+    workspaceId: string;
+    seriesIds: string[];
+}) => mutationOptions({
+    mutationFn: async () => {
+        const response = await apiClient.api.workspaces[":workspaceId"].dicom.series.recycle.$post({
+            param: {
+                workspaceId,
+            },
+            json: {
+                seriesIds,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to recycle DICOM series");
+        }
+
+        return await response.json();
+    }
 });

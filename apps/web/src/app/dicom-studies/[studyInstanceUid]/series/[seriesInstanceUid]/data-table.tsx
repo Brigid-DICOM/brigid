@@ -1,7 +1,7 @@
 "use client";
 
 import type { DicomInstanceData } from "@brigid/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -11,6 +11,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useMemo } from "react";
+import { toast } from "sonner";
 import { DicomInstanceContextMenu } from "@/components/dicom/dicom-instance-context-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,7 +34,11 @@ import {
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { downloadInstance } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
-import { getDicomInstanceThumbnailQuery } from "@/react-query/queries/dicomInstance";
+import { getQueryClient } from "@/react-query/get-query-client";
+import {
+    getDicomInstanceThumbnailQuery,
+    recycleDicomInstanceMutation,
+} from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 
 interface DicomInstancesTableProps {
@@ -93,9 +98,38 @@ function ActionsCell({
     instance: DicomInstanceData;
     workspaceId: string;
 }) {
+    const queryClient = getQueryClient();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
+
+    const { mutate: recycleDicomInstance } = useMutation({
+        ...recycleDicomInstanceMutation({
+            workspaceId,
+            instanceIds: [sopInstanceUid],
+        }),
+        onMutate: () => {
+            toast.loading("Recycling DICOM instance...", {
+                id: `recycle-${sopInstanceUid}`,
+            });
+        },
+        onSuccess: () => {
+            toast.success("DICOM instance recycled successfully");
+            toast.dismiss(`recycle-${sopInstanceUid}`);
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "dicom-instance",
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                ],
+            });
+        },
+        onError: () => {
+            toast.error("Failed to recycle DICOM instance");
+            toast.dismiss(`recycle-${sopInstanceUid}`);
+        },
+    });
 
     const handleDownloadInstance = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -110,6 +144,11 @@ function ActionsCell({
     const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         navigator.clipboard.writeText(sopInstanceUid);
+    };
+
+    const handleRecycleInstance = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        recycleDicomInstance();
     };
 
     return (
@@ -130,6 +169,12 @@ function ActionsCell({
                 <DropdownMenuItem onClick={handleDownloadInstance}>
                     Download Instance
                 </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleRecycleInstance}>
+                    Recycle Instance
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -146,7 +191,7 @@ export function DicomInstancesDataTable({
         clearSelection,
         selectAll,
         getSelectedCount,
-        selectInstance
+        selectInstance,
     } = useDicomInstanceSelectionStore();
 
     const columns: ColumnDef<DicomInstanceData>[] = useMemo(
@@ -302,7 +347,7 @@ export function DicomInstancesDataTable({
         const target = e.target as HTMLElement;
 
         if (
-            target.closest('[role="checkbox]') ||
+            target.closest('[role="checkbox"]') ||
             target.closest('[role="menuitem"]') ||
             target.closest("button")
         ) {
@@ -337,10 +382,14 @@ export function DicomInstancesDataTable({
                     <TableBody>
                         {table.getRowModel().rows.length ? (
                             table.getRowModel().rows.map((row) => {
-                                const studyInstanceUid = row.original["0020000D"]?.Value?.[0] || "";
-                                const seriesInstanceUid = row.original["0020000E"]?.Value?.[0] || "";
-                                const sopInstanceUid = row.original["00080018"]?.Value?.[0] || "";
-                                const isSelected = isInstanceSelected(sopInstanceUid);
+                                const studyInstanceUid =
+                                    row.original["0020000D"]?.Value?.[0] || "";
+                                const seriesInstanceUid =
+                                    row.original["0020000E"]?.Value?.[0] || "";
+                                const sopInstanceUid =
+                                    row.original["00080018"]?.Value?.[0] || "";
+                                const isSelected =
+                                    isInstanceSelected(sopInstanceUid);
 
                                 return (
                                     <DicomInstanceContextMenu
@@ -349,35 +398,44 @@ export function DicomInstancesDataTable({
                                         studyInstanceUid={studyInstanceUid}
                                         seriesInstanceUid={seriesInstanceUid}
                                     >
-                                        <TableRow 
+                                        <TableRow
                                             data-dicom-card
-                                            onClick={(e) => handleRowClick(e, row.original)}
+                                            onClick={(e) =>
+                                                handleRowClick(e, row.original)
+                                            }
                                             className={cn(
                                                 "cursor-pointer select-none transition-colors",
                                                 isSelected && "bg-accent/50",
                                             )}
                                             onContextMenu={() => {
                                                 if (getSelectedCount() === 0) {
-                                                    selectInstance(sopInstanceUid);
-                                                } else if (getSelectedCount() === 1) {
+                                                    selectInstance(
+                                                        sopInstanceUid,
+                                                    );
+                                                } else if (
+                                                    getSelectedCount() === 1
+                                                ) {
                                                     clearSelection();
-                                                    selectInstance(sopInstanceUid);
+                                                    selectInstance(
+                                                        sopInstanceUid,
+                                                    );
                                                 }
                                             }}
                                         >
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell
-                                                    key={cell.id}
-                                                >
-                                                    {flexRender(
-                                                        cell.column.columnDef.cell,
-                                                        cell.getContext(),
-                                                    )}
-                                                </TableCell>
-                                            ))}
+                                            {row
+                                                .getVisibleCells()
+                                                .map((cell) => (
+                                                    <TableCell key={cell.id}>
+                                                        {flexRender(
+                                                            cell.column
+                                                                .columnDef.cell,
+                                                            cell.getContext(),
+                                                        )}
+                                                    </TableCell>
+                                                ))}
                                         </TableRow>
                                     </DicomInstanceContextMenu>
-                                )
+                                );
                             })
                         ) : (
                             <TableRow>

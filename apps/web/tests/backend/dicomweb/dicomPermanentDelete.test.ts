@@ -584,12 +584,6 @@ describe("DICOM Permanent Delete Operations", () => {
         it("should cleanup empty series and studies when permanently deleting", async () => {
             // Arrange
             const study = seedData.studies[0];
-            const allSeries = seedData.series.filter(
-                s => s.studyInstanceUid === study.studyInstanceUid
-            );
-            const allInstances = seedData.instances.filter(
-                i => i.studyInstanceUid === study.studyInstanceUid
-            );
 
             // Recycle and delete study
             await app.request(

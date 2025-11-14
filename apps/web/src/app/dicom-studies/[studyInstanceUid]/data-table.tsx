@@ -1,12 +1,13 @@
 "use client";
 
 import type { DicomSeriesData } from "@brigid/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query"; 
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { toast } from "sonner";
 import { DicomSeriesContextMenu } from "@/components/dicom/dicom-series-context-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,7 +29,8 @@ import {
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { downloadSeries } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
-import { getDicomSeriesThumbnailQuery } from "@/react-query/queries/dicomSeries";
+import { getQueryClient } from "@/react-query/get-query-client";
+import { getDicomSeriesThumbnailQuery, recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
 interface DicomSeriesTableProps {
@@ -80,11 +82,36 @@ function ActionsCell({
     series: DicomSeriesData;
     workspaceId: string;
 }) {
+    const queryClient = getQueryClient();
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
 
-    const { clearSelection } = useDicomSeriesSelectionStore();
+    const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
+
+    const { mutate: recycleDicomSeries } = useMutation({
+        ...recycleDicomSeriesMutation({
+            workspaceId,
+            seriesIds: [seriesInstanceUid],
+        }),
+        onMutate: () => {
+            toast.loading("Recycling DICOM series...", {
+                id: `recycle-${seriesInstanceUid}`,
+            });
+        },
+        onSuccess: () => {
+            toast.success("DICOM series recycled successfully");
+            toast.dismiss(`recycle-${seriesInstanceUid}`);
+            queryClient.invalidateQueries({
+                queryKey: ["dicom-series", workspaceId, studyInstanceUid],
+            });
+            deselectSeries(seriesInstanceUid);
+        },
+        onError: () => {
+            toast.error("Failed to recycle DICOM series");
+            toast.dismiss(`recycle-${seriesInstanceUid}`);
+        },
+    });
 
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -102,6 +129,11 @@ function ActionsCell({
         downloadSeries(workspaceId, studyInstanceUid, seriesInstanceUid);
     }
     
+    const handleRecycleSeries = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        recycleDicomSeries();
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -125,6 +157,12 @@ function ActionsCell({
 
                 <DropdownMenuItem onClick={handleDownloadSeries}>
                     Download Series
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleRecycleSeries}>
+                    Recycle Series
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -264,7 +302,7 @@ export function DicomSeriesDataTable({
         const target = e.target as HTMLElement;
 
         if (
-            target.closest('[role="checkbox]')||
+            target.closest('[role="checkbox"]')||
             target.closest('[role="menuitem"]') ||
             target.closest('button')
         ) {

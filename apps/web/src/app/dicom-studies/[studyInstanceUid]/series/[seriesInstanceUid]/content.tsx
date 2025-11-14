@@ -2,10 +2,12 @@
 
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomInstanceData } from "@brigid/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
+import { nanoid } from "nanoid";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -26,7 +28,7 @@ import {
     downloadMultipleInstancesAsPng,
 } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
+import { getDicomInstanceQuery, recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -106,6 +108,33 @@ export default function DicomInstancesContent({
         currentPageInstanceUids.every((instanceId) =>
             selectedInstanceIds.has(instanceId as string),
         );
+
+    const { mutate: recycleDicomInstances } = useMutation({
+        ...recycleDicomInstanceMutation({
+            workspaceId,
+            instanceIds: selectedIds,
+        }),
+        meta: {
+            toastId: nanoid()
+        },
+        onMutate: (_, context) => {
+            toast.loading("Recycling DICOM instances...", {
+                id: context.meta?.toastId as string,
+            });
+        },
+        onSuccess: (_, __, ___, context) => {
+            toast.success("DICOM instances recycled successfully");
+            toast.dismiss(context.meta?.toastId as string);
+            clearSelection();
+            queryClient.invalidateQueries({
+                queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid],
+            });
+        },
+        onError: (_, __, ___, context) => {
+            toast.error("Failed to recycle DICOM instances");
+            toast.dismiss(context.meta?.toastId as string);
+        },
+    });
 
     useClearSelectionOnBlankClick({
         clearSelection,
@@ -236,7 +265,9 @@ export default function DicomInstancesContent({
                     isAllSelected={isAllSelected}
                     onSelectAll={handleSelectAll}
                     onClearSelection={clearSelection}
+                    onRecycle={() => recycleDicomInstances()}
                     multiDownloadLabel="Download Selected Instances"
+                    multiRecycleLabel="Recycle Selected Instances"
                     downloadOptions={downloadOptions}
                 />
             )}

@@ -1,6 +1,8 @@
 "use client";
 
-import { CornerDownLeftIcon, DownloadIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { CornerDownLeftIcon, DownloadIcon, Trash2Icon } from "lucide-react";
+import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { toast } from "sonner";
@@ -8,10 +10,13 @@ import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
+    ContextMenuLabel,
+    ContextMenuSeparator,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
+import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
 interface DicomSeriesContextMenuProps {
@@ -28,9 +33,33 @@ export function DicomSeriesContextMenu({
     seriesInstanceUid,
 }: DicomSeriesContextMenuProps) {
     const router = useRouter();
-    const { getSelectedSeriesIds } = useDicomSeriesSelectionStore();
+    const { getSelectedSeriesIds, clearSelection } = useDicomSeriesSelectionStore();
 
     const selectedIds = getSelectedSeriesIds();
+
+    const { mutate: recycleDicomSeries } = useMutation({
+        ...recycleDicomSeriesMutation({
+            workspaceId,
+            seriesIds: selectedIds,
+        }),
+        meta: {
+            toastId: nanoid()
+        },
+        onMutate: (_, context) => {
+            toast.loading("Recycling DICOM series...", {
+                id: context.meta?.toastId as string,
+            });
+        },
+        onSuccess: (_, __, ___, context) => {
+            toast.success("DICOM series recycled successfully");
+            toast.dismiss(context.meta?.toastId as string);
+            clearSelection();
+        },
+        onError: (_, __, ___, context) => {
+            toast.error("Failed to recycle DICOM series");
+            toast.dismiss(context.meta?.toastId as string);
+        }
+    })
 
     const handleEnterInstances = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -63,6 +92,7 @@ export function DicomSeriesContextMenu({
         e: React.MouseEvent<HTMLDivElement>,
     ) => {
         e.preventDefault();
+        closeContextMenu();
 
         const currentSelectedIds = getSelectedSeriesIds();
 
@@ -96,6 +126,12 @@ export function DicomSeriesContextMenu({
         }
     };
 
+    const handleRecycle = async (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        recycleDicomSeries();
+    }
+
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
@@ -117,19 +153,43 @@ export function DicomSeriesContextMenu({
                             <DownloadIcon className="size-4" />
                             <span>Download</span>
                         </ContextMenuItem>
+
+                        <ContextMenuSeparator />
+                        
+                        <ContextMenuItem
+                            onClick={handleRecycle}
+                            className="flex items-center space-x-2"
+                        >
+                            <Trash2Icon className="size-4" />
+                            <span>Recycle</span>
+                        </ContextMenuItem>
                     </>
                 )}
 
                 {selectedIds.length > 1 && (
-                    <ContextMenuItem
-                        onClick={handleDownloadSelected}
-                        className="flex items-center space-x-2"
-                    >
-                        <DownloadIcon className="size-4" />
-                        <span>
-                            Download Selected Items ({selectedIds.length})
-                        </span>
-                    </ContextMenuItem>
+                    <>
+                        <ContextMenuLabel>
+                            Selected Items ({selectedIds.length})
+                        </ContextMenuLabel>
+                        
+                        <ContextMenuItem
+                            onClick={handleDownloadSelected}
+                            className="flex items-center space-x-2"
+                        >
+                            <DownloadIcon className="size-4" />
+                            <span>Download</span>
+                        </ContextMenuItem>
+
+                        <ContextMenuSeparator />
+
+                        <ContextMenuItem
+                            onClick={handleRecycle}
+                            className="flex items-center space-x-2"
+                        >
+                            <Trash2Icon className="size-4" />
+                            <span>Recycle</span>
+                        </ContextMenuItem>
+                    </>
                 )}
             </ContextMenuContent>
         </ContextMenu>
