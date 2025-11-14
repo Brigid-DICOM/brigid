@@ -1,5 +1,7 @@
 import { AppDataSource } from "@brigid/database";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
+import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import type { EntityManager } from "typeorm";
 import { DateQueryStrategy } from "./qido-rs/dateQueryStrategy";
 
@@ -44,10 +46,25 @@ export class PatientService {
         return this.entityManager.save(PatientEntity, patientEntity);
     }
 
-    async getPatientCount(workspaceId: string, range?: string) {
+    async getPatientCount(
+        workspaceId: string, 
+        range?: string,
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE
+    ) {
         const countQuery = this.entityManager
         .createQueryBuilder(PatientEntity, "patient")
-        .where("patient.workspaceId = :workspaceId", { workspaceId });
+        .where("patient.workspaceId = :workspaceId", { workspaceId })
+        .andWhere((qb) => {
+            const subQuery = qb
+                .subQuery()
+                .select("1")
+                .from(StudyEntity, "study")
+                .where("study.patientId = patient.id")
+                .andWhere("study.deleteStatus = :deleteStatus", { deleteStatus })
+                .getQuery();
+            
+            return `EXISTS (${subQuery})`;
+        });
 
         if (range) {
             const dateQueryStrategy = new DateQueryStrategy();

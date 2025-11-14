@@ -1,4 +1,5 @@
 import { AppDataSource } from "@brigid/database";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { DicomTag } from "@brigid/types";
@@ -170,12 +171,17 @@ export class SeriesService {
         });
     }
 
-    async getUniqueModalities(workspaceId: string, range?: string) {
+    async getUniqueModalities(
+        workspaceId: string,
+        range?: string,
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE
+    ) {
         const modalitiesQuery = this.entityManager.createQueryBuilder(SeriesEntity, "series")
             .select("series.modality", "modality")
             .addSelect("COUNT(series.modality)", "count")
             .distinct(true)
             .where("series.workspaceId = :workspaceId", { workspaceId })
+            .andWhere("series.deleteStatus = :deleteStatus", { deleteStatus })
             .groupBy("modality")
             .orderBy("count", "DESC");
 

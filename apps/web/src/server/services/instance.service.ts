@@ -1,4 +1,5 @@
 import { AppDataSource } from "@brigid/database";
+import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import type { DicomTag } from "@brigid/types";
 import { type EntityManager, In } from "typeorm";
@@ -82,10 +83,15 @@ export class InstanceService {
         });
     }
 
-    async getInstanceCount(workspaceId: string, range?: string) {
+    async getInstanceCount(
+        workspaceId: string, 
+        range?: string,
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE
+    ) {
         const countQuery = this.entityManager
         .createQueryBuilder(InstanceEntity, "instance")
-        .where("instance.workspaceId = :workspaceId", { workspaceId });
+        .where("instance.workspaceId = :workspaceId", { workspaceId })
+        .andWhere("instance.deleteStatus = :deleteStatus", { deleteStatus });
         
         if (range) {
             const dateQueryStrategy = new DateQueryStrategy();
