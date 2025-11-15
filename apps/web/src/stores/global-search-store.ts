@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import type { SearchCondition } from "@/components/dicom/search/dicom-search-condition-item";
 
 export type SearchType = "dicom-study" | "dicom-series" | "dicom-instance";
@@ -67,7 +67,11 @@ export const useGlobalSearchStore = create<GlobalSearchState>()(
 
                     set({
                         searchType: type,
-                        searchConditions: searchParams
+                        searchConditions: searchParams,
+                        searchConditionsByType: {
+                            ...get().searchConditionsByType,
+                            [type]: searchParams
+                        }
                     });
                 },
 
@@ -82,6 +86,7 @@ export const useGlobalSearchStore = create<GlobalSearchState>()(
             }),
             {
                 name: "global-search",
+                storage: createJSONStorage(() => sessionStorage),
             }
         ),
         {
