@@ -1,6 +1,6 @@
 "use client";
 
-import { DatabaseIcon, GaugeIcon, UploadIcon } from "lucide-react";
+import { DatabaseIcon, GaugeIcon, Trash2Icon, UploadIcon } from "lucide-react";
 import Link from "next/link";
 import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 
@@ -24,6 +24,15 @@ export function NavMain() {
                         <SidebarMenuButton tooltip="DICOM Instances Management">
                             <DatabaseIcon className="size-4" />
                             <Link href="/dicom-studies">DICOM Instances</Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem
+                        key="dicom recycle"
+                    >
+                        <SidebarMenuButton tooltip="DICOM Recycle">
+                            <Trash2Icon className="size-4" />
+                            <Link href="/dicom-recycle/studies">DICOM Recycle</Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 

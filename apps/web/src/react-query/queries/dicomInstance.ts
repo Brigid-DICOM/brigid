@@ -140,3 +140,53 @@ export const recycleDicomInstanceMutation = ({
             return await response.json();
         },
     });
+
+export const restoreDicomInstanceMutation = ({
+    workspaceId,
+    instanceIds,
+}: {
+    workspaceId: string;
+    instanceIds: string[];
+}) => mutationOptions({
+    mutationFn: async () => {
+        const response = await apiClient.api.workspaces[":workspaceId"].dicom.instances.restore.$post({
+            param: {
+                workspaceId,
+            },
+            json: {
+                instanceIds,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to restore DICOM instance");
+        }
+
+        return await response.json();
+    }
+});
+
+export const deleteDicomInstanceMutation = ({
+    workspaceId,
+    instanceIds,
+}: {
+    workspaceId: string;
+    instanceIds: string[];
+}) => mutationOptions({
+    mutationFn: async () => {
+        const response = await apiClient.api.workspaces[":workspaceId"].dicom.instances.delete.$post({
+            param: {
+                workspaceId,
+            },
+            json: {
+                instanceIds,
+            },
+        });
+
+        if (!response.ok) {
+            throw Error("Failed to delete DICOM instance");
+        }
+
+        return await response.json();
+    }
+});

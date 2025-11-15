@@ -32,6 +32,27 @@ export const SEARCH_TYPE_CONFIGS: SearchTypeConfig[] = [
         dicomLevel: "instance",
         routePattern: /^\/dicom-studies\/([\d.]+)\/series\/([\d.]+)(?:\?.*)?$/,
     },
+    {
+        key: "dicom-recycle-study",
+        label: "DICOM Recycle Studies",
+        description: "Search for DICOM recycle studies",
+        dicomLevel: "recycle-study",
+        routePattern: /^\/dicom-recycle\/studies(?:\?.*)?$/,
+    },
+    {
+        key: "dicom-recycle-series",
+        label: "DICOM Recycle Series",
+        description: "Search for DICOM recycle series",
+        dicomLevel: "recycle-series",
+        routePattern: /^\/dicom-recycle\/studies\/([\d.]+)\/series(?:\?.*)?$/,
+    },
+    {
+        key: "dicom-recycle-instance",
+        label: "DICOM Recycle Instance",
+        description: "Search for DICOM recycle instances",
+        dicomLevel: "recycle-instance",
+        routePattern: /^\/dicom-recycle\/studies\/([\d.]+)\/series\/([\d.]+)\/instances(?:\?.*)?$/,
+    },
 ]
 
 export function getSearchTypeFromRoute(pathname: string): SearchType | null {

@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import type { SearchCondition } from "@/components/dicom/search/dicom-search-condition-item";
 
-export type SearchType = "dicom-study" | "dicom-series" | "dicom-instance";
+export type SearchType = "dicom-study" | "dicom-series" | "dicom-instance" | "dicom-recycle-study" | "dicom-recycle-series" | "dicom-recycle-instance";
 
 export interface GlobalSearchState {
     searchType: SearchType | null;
@@ -29,6 +29,9 @@ export const useGlobalSearchStore = create<GlobalSearchState>()(
                     "dicom-study": {},
                     "dicom-series": {},
                     "dicom-instance": {},
+                    "dicom-recycle-study": {},
+                    "dicom-recycle-series": {},
+                    "dicom-recycle-instance": {},
                 },
 
                 setSearchType: (type: SearchType | null) => {

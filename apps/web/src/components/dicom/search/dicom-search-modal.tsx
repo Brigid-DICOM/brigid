@@ -15,7 +15,7 @@ import { DicomSearchConditionItem } from "./dicom-search-condition-item";
 import { SearchFieldDropdownMenu } from "./search-field-dropdown-menu";
 import { SEARCH_FIELD_CONFIGS } from "./search-field-types";
 
-export type SearchLevel = "study" | "series" | "instance";
+export type SearchLevel = "study" | "series" | "instance" | "recycle-study" | "recycle-series" | "recycle-instance";
 
 interface SearchCondition {
     id: string;
@@ -34,12 +34,18 @@ const DEFAULT_FIELDS: Record<SearchLevel, string[]> = {
     study: ["PatientID", "AccessionNumber"],
     series: ["Modality"],
     instance: ["ContentDate"],
+    "recycle-study": ["PatientID", "AccessionNumber"],
+    "recycle-series": ["Modality"],
+    "recycle-instance": ["ContentDate"],
 };
 
 const SEARCH_TYPE_MAPPING: Record<SearchLevel, SearchType> = {
     study: "dicom-study",
     series: "dicom-series",
     instance: "dicom-instance",
+    "recycle-study": "dicom-recycle-study",
+    "recycle-series": "dicom-recycle-series",
+    "recycle-instance": "dicom-recycle-instance",
 };
 
 const createDefaultConditions = (level: SearchLevel) => {

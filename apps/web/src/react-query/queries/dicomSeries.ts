@@ -104,3 +104,53 @@ export const recycleDicomSeriesMutation = ({
         return await response.json();
     }
 });
+
+export const restoreDicomSeriesMutation = ({
+    workspaceId,
+    seriesIds,
+}: {
+    workspaceId: string;
+    seriesIds: string[]
+}) => mutationOptions({
+    mutationFn: async () => {
+        const response = await apiClient.api.workspaces[":workspaceId"].dicom.series.restore.$post({
+            param: {
+                workspaceId,
+            },
+            json: {
+                seriesIds,
+            },
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to restore DICOM series");
+        }
+
+        return await response.json();
+    }
+});
+
+export const deleteDicomSeriesMutation = ({
+    workspaceId,
+    seriesIds,
+}: {
+    workspaceId: string;
+    seriesIds: string[];
+}) => mutationOptions({
+    mutationFn: async () => {
+        const response = await apiClient.api.workspaces[":workspaceId"].dicom.series.delete.$post({
+            param: {
+                workspaceId,
+            },
+            json: {
+                seriesIds,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete DICOM series");
+        }
+
+        return await response.json();
+    }
+})

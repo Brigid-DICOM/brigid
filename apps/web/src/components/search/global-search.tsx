@@ -30,6 +30,13 @@ export function GlobalSearch() {
         }
     }, [pathname, searchType, setSearchType, searchModalOpen]);
 
+    useEffect(() => {
+        const autoDetectedType = getSearchTypeFromRoute(pathname);
+        if (!autoDetectedType) {
+            setSearchType(null);
+        }
+    }, [pathname, setSearchType]);
+
     const currentSearchTypeConfig = searchType ? getSearchTypeConfig(searchType) : null;
 
     const handleSearch = (conditions: SearchCondition[]) => {

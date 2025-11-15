@@ -71,3 +71,52 @@ export const recycleDicomStudyMutation = ({
     }
 });
 
+export const restoreDicomStudyMutation = ({
+    workspaceId,
+    studyIds,
+}: {
+    workspaceId: string;
+    studyIds: string[];
+}) => mutationOptions({
+    mutationFn: async () => {
+        const response = await apiClient.api.workspaces[":workspaceId"].dicom.studies.restore.$post({
+            param: {
+                workspaceId,
+            },
+            json: {
+                studyIds,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to restore DICOM study");
+        }
+
+        return await response.json();
+    }
+});
+
+export const deleteDicomStudyMutation = ({
+    workspaceId,
+    studyIds,
+}: {
+    workspaceId: string;
+    studyIds: string[];
+}) => mutationOptions({
+    mutationFn: async () => {
+        const response = await apiClient.api.workspaces[":workspaceId"].dicom.studies.delete.$post({
+            param: {
+                workspaceId,
+            },
+            json: {
+                studyIds,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete DICOM study");
+        }
+
+        return await response.json();
+    }
+})
