@@ -77,6 +77,10 @@ export default function DicomInstancesContent({
         syncSearchParamsToUrl(searchConditions);
     }, [searchConditions, syncSearchParamsToUrl]);
 
+    useEffect(() => {
+        return () => clearSelection();
+    }, [clearSelection]);
+
     const {
         data: instances,
         isLoading,

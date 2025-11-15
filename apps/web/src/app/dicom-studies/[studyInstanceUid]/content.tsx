@@ -71,6 +71,10 @@ export default function DicomSeriesContent({
         syncSearchParamsToUrl(searchConditions);
     }, [searchConditions, syncSearchParamsToUrl]);
 
+    useEffect(() => {
+        return () => clearSelection();
+    }, [clearSelection]);
+
     const {
         data: series,
         isLoading,

@@ -64,6 +64,10 @@ export default function DicomStudiesContent({
     useEffect(() => {
         syncSearchParamsToUrl(searchConditions);
     }, [searchConditions, syncSearchParamsToUrl]);
+
+    useEffect(() => {
+        return () => clearSelection();
+    }, [clearSelection]);
     
     const {
         data: studies,
