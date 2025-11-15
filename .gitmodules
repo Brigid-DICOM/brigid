@@ -1,0 +1,4 @@
+[submodule "apps/web/public/html/bluelight"]
+	path = apps/web/public/html/bluelight
+	url = https://github.com/Brigid-DICOM/bluelight.git
+	branch = dev
