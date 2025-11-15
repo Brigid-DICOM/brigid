@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { SearchLevel } from "@/components/dicom/search/dicom-search-modal";
 import { SEARCH_FIELD_CONFIGS } from "@/components/dicom/search/search-field-types";
 
@@ -19,6 +19,7 @@ export function useUrlSearchParams({ searchLevel, onSearchParamsChange }: UseUrl
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const previousUrlRef = useRef<string>("");
 
     const getSearchParamsFromUrl = useCallback(() => {
         const params: Record<string, string> = {};
@@ -53,7 +54,8 @@ export function useUrlSearchParams({ searchLevel, onSearchParamsChange }: UseUrl
         const query = search ? `?${search}` : "";
         const newUrl = `${pathname}${query}`;
 
-        if (newUrl !== `${pathname}${window.location.search}`) {
+        if (newUrl !== previousUrlRef.current) {
+            previousUrlRef.current = newUrl;
             router.replace(newUrl, { scroll: false });
         }
     }, [pathname, router, searchParams, searchLevel]);
@@ -62,8 +64,15 @@ export function useUrlSearchParams({ searchLevel, onSearchParamsChange }: UseUrl
         syncSearchParamsToUrl({});
     }, [syncSearchParamsToUrl]);
 
+    const lastReportedParamsRef = useRef<string>("");
+
     useEffect(() => {
         const urlParams = getSearchParamsFromUrl();
+        const paramsString = JSON.stringify(urlParams);
+
+        if (paramsString === lastReportedParamsRef.current) return;
+
+        lastReportedParamsRef.current = paramsString;
         if (Object.keys(urlParams).length > 0 && onSearchParamsChange) {
             onSearchParamsChange(urlParams);
         }
