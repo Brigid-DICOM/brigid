@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/context-menu";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
+import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
@@ -32,6 +33,7 @@ export function DicomSeriesContextMenu({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomSeriesContextMenuProps) {
+    const queryClient = getQueryClient();
     const router = useRouter();
     const { getSelectedSeriesIds, clearSelection } = useDicomSeriesSelectionStore();
 
@@ -53,6 +55,9 @@ export function DicomSeriesContextMenu({
         onSuccess: (_, __, ___, context) => {
             toast.success("DICOM series recycled successfully");
             toast.dismiss(context.meta?.toastId as string);
+            queryClient.invalidateQueries({
+                queryKey: ["dicom-series", workspaceId, studyInstanceUid],
+            });
             clearSelection();
         },
         onError: (_, __, ___, context) => {
