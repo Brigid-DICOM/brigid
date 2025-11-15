@@ -205,6 +205,7 @@ export default function DicomSeriesContent({
                     onRecycle={() => recycleDicomSeries()}
                     multiRecycleLabel="Recycle Selected Series"
                     multiDownloadLabel="Download Selected Series"
+                    dicomLevel="series"
                 />
             )}
 

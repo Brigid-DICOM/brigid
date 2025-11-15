@@ -9,6 +9,7 @@ import {
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
     ContextMenu,
@@ -28,6 +29,7 @@ import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import {
     useDicomStudySelectionStore
 } from "@/stores/dicom-study-selection-store";
+import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 
 interface DicomStudyContextMenuProps {
     children: React.ReactNode;
@@ -42,38 +44,13 @@ export function DicomStudyContextMenu({
 }: DicomStudyContextMenuProps) {
     const router = useRouter();
     const queryClient = getQueryClient();
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+
     const {
         getSelectedStudyIds,
-        clearSelection,
-        deselectStudy
+        clearSelection
     } = useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
-    
-    const { mutate: recycleDicomStudy } = useMutation(
-        {
-            ...recycleDicomStudyMutation({
-                workspaceId,
-                studyIds: [studyInstanceUid],
-            }),
-            onMutate: () => {
-                toast.loading("Recycling DICOM study...", {
-                    id: `recycle-${studyInstanceUid}`,
-                });
-            },
-            onSuccess: () => {
-                toast.success("DICOM study recycled successfully");
-                toast.dismiss(`recycle-${studyInstanceUid}`);
-                queryClient.invalidateQueries({
-                    queryKey: ["dicom-study", workspaceId],
-                });
-                deselectStudy(studyInstanceUid);
-            },
-            onError: () => {
-                toast.dismiss(`recycle-${studyInstanceUid}`);
-                toast.error("Failed to recycle DICOM study");
-            }
-        }
-    );
 
     const { mutate: recycleSelectedStudies } = useMutation({
         ...recycleDicomStudyMutation({
@@ -153,83 +130,91 @@ export function DicomStudyContextMenu({
         }
     };
 
-    const handleRecycleThis = async (e: React.MouseEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        closeContextMenu();
-        recycleDicomStudy();
-    }
-
     const handleRecycleSelected = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
+        setShowRecycleConfirmDialog(true);
+    }
+
+    const handleConfirmRecycle = () => {
         recycleSelectedStudies();
     }
 
     return (
-        <ContextMenu>
-            <ContextMenuTrigger 
-                asChild
-            >
-                {children}
-            </ContextMenuTrigger>
-
-            <ContextMenuContent className="w-56">
-                {selectedIds.length === 1 && <ContextMenuItem
-                    onClick={handleEnterSeries}
-                    className="flex items-center space-x-2"
+        <>
+            <ContextMenu>
+                <ContextMenuTrigger 
+                    asChild
                 >
-                    <CornerDownLeftIcon className="size-4" />
-                    <span>Enter Series</span>
-                </ContextMenuItem>
-                }
-                
-                {selectedIds.length === 1 && (
-                    <>
-                        <ContextMenuItem 
-                            onClick={handleDownloadThis}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
-                        <ContextMenuSeparator />
+                    {children}
+                </ContextMenuTrigger>
 
-                        <ContextMenuItem
-                            onClick={handleRecycleThis}
-                            className="flex items-center space-x-2"
-                        >
-                            <Trash2Icon className="size-4" />
-                            <span>Recycle</span>
-                        </ContextMenuItem>
-                    </>
-                )}
+                <ContextMenuContent className="w-56">
+                    {selectedIds.length === 1 && <ContextMenuItem
+                        onClick={handleEnterSeries}
+                        className="flex items-center space-x-2"
+                    >
+                        <CornerDownLeftIcon className="size-4" />
+                        <span>Enter Series</span>
+                    </ContextMenuItem>
+                    }
+                    
+                    {selectedIds.length === 1 && (
+                        <>
+                            <ContextMenuItem 
+                                onClick={handleDownloadThis}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
 
-                {selectedIds.length > 1 && (
-                    <>
-                        <ContextMenuLabel>
-                            Selected Items ({selectedIds.length})
-                        </ContextMenuLabel>
+                            <ContextMenuItem
+                                onClick={handleRecycleSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <Trash2Icon className="size-4" />
+                                <span>Recycle</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
 
-                        <ContextMenuItem 
-                            onClick={handleDownloadSelected}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
+                    {selectedIds.length > 1 && (
+                        <>
+                            <ContextMenuLabel>
+                                Selected Items ({selectedIds.length})
+                            </ContextMenuLabel>
 
-                        <ContextMenuSeparator />
+                            <ContextMenuItem 
+                                onClick={handleDownloadSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
 
-                        <ContextMenuItem
-                            onClick={handleRecycleSelected}
-                            className="flex items-center space-x-2"
-                        >
-                            <Trash2Icon className="size-4" />
-                            <span>Recycle</span>
-                        </ContextMenuItem>
-                    </>
-                )}
-            </ContextMenuContent>
-        </ContextMenu>
+                            <ContextMenuSeparator />
+
+                            <ContextMenuItem
+                                onClick={handleRecycleSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <Trash2Icon className="size-4" />
+                                <span>Recycle</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
+                </ContextMenuContent>
+            </ContextMenu>
+
+            <DicomRecycleConfirmDialog 
+                open={showRecycleConfirmDialog}
+                onOpenChange={setShowRecycleConfirmDialog}
+                dicomLevel={"study"}
+                selectedCount={selectedIds.length}
+                onConfirm={handleConfirmRecycle}
+            />
+        </>
     )
 }

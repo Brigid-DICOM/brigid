@@ -182,6 +182,7 @@ export default function DicomStudiesContent({
                     onRecycle={handleRecycle}
                     multiRecycleLabel="Recycle Selected Studies"
                     multiDownloadLabel="Download Selected Studies"
+                    dicomLevel="study"
                 />
             )}
 

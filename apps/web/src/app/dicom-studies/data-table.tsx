@@ -11,8 +11,9 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -89,6 +90,7 @@ function ActionsCell({
     study: DicomStudyData;
     workspaceId: string;
 }) {
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
@@ -139,38 +141,52 @@ function ActionsCell({
 
     const handleRecycleStudy = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
-        recycleDicomStudy();
+        setShowRecycleConfirmDialog(true);
     };
+    
+    const handleConfirmRecycle = () => {
+        recycleDicomStudy();
+    }
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant={"ghost"} className="size-8 p-0">
-                    <span className="sr-only">Open Menu</span>
-                    <MoreHorizontalIcon className="size-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleEnterSeries}>
-                    Enter Series
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
-                    Copy Study Instance UID
-                </DropdownMenuItem>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant={"ghost"} className="size-8 p-0">
+                        <span className="sr-only">Open Menu</span>
+                        <MoreHorizontalIcon className="size-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleEnterSeries}>
+                        Enter Series
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
+                        Copy Study Instance UID
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={handleDownloadStudy}>
-                    Download Study
-                </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownloadStudy}>
+                        Download Study
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={handleRecycleStudy}>
-                    Recycle Study
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    <DropdownMenuItem onClick={handleRecycleStudy}>
+                        Recycle Study
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DicomRecycleConfirmDialog 
+                open={showRecycleConfirmDialog}
+                onOpenChange={setShowRecycleConfirmDialog}
+                dicomLevel={"study"}
+                selectedCount={1}
+                onConfirm={handleConfirmRecycle}
+            />
+        </>
     );
 }
 

@@ -6,8 +6,9 @@ import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tan
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomSeriesContextMenu } from "@/components/dicom/dicom-series-context-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -82,6 +83,7 @@ function ActionsCell({
     series: DicomSeriesData;
     workspaceId: string;
 }) {
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
@@ -131,41 +133,55 @@ function ActionsCell({
     
     const handleRecycleSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
+        setShowRecycleConfirmDialog(true);
+    }
+
+    const handleConfirmRecycle = () => {
         recycleDicomSeries();
     }
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant={"ghost"}
-                    className="size-8 p-0"
-                >
-                    <span className="sr-only">Open Menu</span>
-                    <MoreHorizontalIcon className="size-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleEnterInstances}>
-                    Enter Instances
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
-                    Copy Series Instance UID
-                </DropdownMenuItem>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant={"ghost"}
+                        className="size-8 p-0"
+                    >
+                        <span className="sr-only">Open Menu</span>
+                        <MoreHorizontalIcon className="size-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleEnterInstances}>
+                        Enter Instances
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
+                        Copy Series Instance UID
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={handleDownloadSeries}>
-                    Download Series
-                </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownloadSeries}>
+                        Download Series
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={handleRecycleSeries}>
-                    Recycle Series
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    <DropdownMenuItem onClick={handleRecycleSeries}>
+                        Recycle Series
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DicomRecycleConfirmDialog 
+                open={showRecycleConfirmDialog}
+                onOpenChange={setShowRecycleConfirmDialog}
+                dicomLevel={"series"}
+                selectedCount={1}
+                onConfirm={handleConfirmRecycle}
+            />
+        </>
     )
 }
 
@@ -231,6 +247,14 @@ export function DicomSeriesDataTable({
                             workspaceId={workspaceId}
                         />
                     );
+                },
+            },
+            {
+                accessorKey: "modality",
+                header: "Modality",
+                cell: ({ row }) => {
+                    const modality = row.original["00080060"]?.Value?.[0] || "N/A";
+                    return <div>{modality}</div>;
                 },
             },
             {

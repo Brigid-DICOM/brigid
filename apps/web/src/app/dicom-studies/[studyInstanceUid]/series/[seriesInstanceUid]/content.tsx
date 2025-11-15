@@ -273,6 +273,7 @@ export default function DicomInstancesContent({
                     multiDownloadLabel="Download Selected Instances"
                     multiRecycleLabel="Recycle Selected Instances"
                     downloadOptions={downloadOptions}
+                    dicomLevel="instance"
                 />
             )}
 

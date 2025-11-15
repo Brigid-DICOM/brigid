@@ -5,6 +5,7 @@ import { CornerDownLeftIcon, DownloadIcon, Trash2Icon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
     ContextMenu,
@@ -19,6 +20,7 @@ import { closeContextMenu } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 
 interface DicomSeriesContextMenuProps {
     children: React.ReactNode;
@@ -33,6 +35,7 @@ export function DicomSeriesContextMenu({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomSeriesContextMenuProps) {
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { getSelectedSeriesIds, clearSelection } = useDicomSeriesSelectionStore();
@@ -131,72 +134,86 @@ export function DicomSeriesContextMenu({
         }
     };
 
-    const handleRecycle = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
+        setShowRecycleConfirmDialog(true);
+    }
+
+    const handleConfirmRecycle = () => {
         recycleDicomSeries();
     }
 
     return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+        <>
+            <ContextMenu>
+                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-            <ContextMenuContent className="w-56">
-                {selectedIds.length === 1 && (
-                    <>
-                        <ContextMenuItem
-                            onClick={handleEnterInstances}
-                            className="flex items-center space-x-2"
-                        >
-                            <CornerDownLeftIcon className="size-4" />
-                            <span>Enter Instances</span>
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                            onClick={handleDownloadThis}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
+                <ContextMenuContent className="w-56">
+                    {selectedIds.length === 1 && (
+                        <>
+                            <ContextMenuItem
+                                onClick={handleEnterInstances}
+                                className="flex items-center space-x-2"
+                            >
+                                <CornerDownLeftIcon className="size-4" />
+                                <span>Enter Instances</span>
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                                onClick={handleDownloadThis}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
 
-                        <ContextMenuSeparator />
-                        
-                        <ContextMenuItem
-                            onClick={handleRecycle}
-                            className="flex items-center space-x-2"
-                        >
-                            <Trash2Icon className="size-4" />
-                            <span>Recycle</span>
-                        </ContextMenuItem>
-                    </>
-                )}
+                            <ContextMenuSeparator />
+                            
+                            <ContextMenuItem
+                                onClick={handleRecycle}
+                                className="flex items-center space-x-2"
+                            >
+                                <Trash2Icon className="size-4" />
+                                <span>Recycle</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
 
-                {selectedIds.length > 1 && (
-                    <>
-                        <ContextMenuLabel>
-                            Selected Items ({selectedIds.length})
-                        </ContextMenuLabel>
-                        
-                        <ContextMenuItem
-                            onClick={handleDownloadSelected}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
+                    {selectedIds.length > 1 && (
+                        <>
+                            <ContextMenuLabel>
+                                Selected Items ({selectedIds.length})
+                            </ContextMenuLabel>
+                            
+                            <ContextMenuItem
+                                onClick={handleDownloadSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
 
-                        <ContextMenuSeparator />
+                            <ContextMenuSeparator />
 
-                        <ContextMenuItem
-                            onClick={handleRecycle}
-                            className="flex items-center space-x-2"
-                        >
-                            <Trash2Icon className="size-4" />
-                            <span>Recycle</span>
-                        </ContextMenuItem>
-                    </>
-                )}
-            </ContextMenuContent>
-        </ContextMenu>
+                            <ContextMenuItem
+                                onClick={handleRecycle}
+                                className="flex items-center space-x-2"
+                            >
+                                <Trash2Icon className="size-4" />
+                                <span>Recycle</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
+                </ContextMenuContent>
+            </ContextMenu>
+
+            <DicomRecycleConfirmDialog 
+                open={showRecycleConfirmDialog}
+                onOpenChange={setShowRecycleConfirmDialog}
+                dicomLevel={"series"}
+                selectedCount={selectedIds.length}
+                onConfirm={handleConfirmRecycle}
+            />
+        </>
     );
 }

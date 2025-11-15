@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { DownloadIcon, Trash2Icon } from "lucide-react";
 import { nanoid } from "nanoid";
 import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
     ContextMenu,
@@ -29,6 +30,7 @@ import { closeContextMenu } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 
 interface DicomInstanceContextMenuProps {
     children: React.ReactNode;
@@ -79,6 +81,7 @@ export function DicomInstanceContextMenu({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomInstanceContextMenuProps) {
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const queryClient = getQueryClient();
     const { getSelectedInstanceIds, clearSelection } =
         useDicomInstanceSelectionStore();
@@ -174,91 +177,105 @@ export function DicomInstanceContextMenu({
     const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        recycleDicomInstance();
+        setShowRecycleConfirmDialog(true);
     };
 
+    const handleConfirmRecycle = () => {
+        recycleDicomInstance();
+    }
+
     return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+        <>
+            <ContextMenu>
+                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-            <ContextMenuContent className="w-56">
-                {selectedIds.length === 1 && (
-                    <>
-                        <ContextMenuSub>
-                            <ContextMenuSubTrigger>
-                                <DownloadIcon className="size-4 mr-2" />
-                                <span>Download</span>
-                            </ContextMenuSubTrigger>
-                            <ContextMenuSubContent>
-                                <DownloadSubMenuItems
-                                    onDicomDownload={() => {
-                                        closeContextMenu();
-                                        handleDicomDownload(selectedIds);
-                                    }}
-                                    onJpgDownload={() => {
-                                        closeContextMenu();
-                                        handleJpgDownload(selectedIds);
-                                    }}
-                                    onPngDownload={() => {
-                                        closeContextMenu();
-                                        handlePngDownload(selectedIds);
-                                    }}
-                                />
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
+                <ContextMenuContent className="w-56">
+                    {selectedIds.length === 1 && (
+                        <>
+                            <ContextMenuSub>
+                                <ContextMenuSubTrigger>
+                                    <DownloadIcon className="size-4 mr-2" />
+                                    <span>Download</span>
+                                </ContextMenuSubTrigger>
+                                <ContextMenuSubContent>
+                                    <DownloadSubMenuItems
+                                        onDicomDownload={() => {
+                                            closeContextMenu();
+                                            handleDicomDownload(selectedIds);
+                                        }}
+                                        onJpgDownload={() => {
+                                            closeContextMenu();
+                                            handleJpgDownload(selectedIds);
+                                        }}
+                                        onPngDownload={() => {
+                                            closeContextMenu();
+                                            handlePngDownload(selectedIds);
+                                        }}
+                                    />
+                                </ContextMenuSubContent>
+                            </ContextMenuSub>
 
-                        <ContextMenuSeparator />
+                            <ContextMenuSeparator />
 
-                        <ContextMenuItem
-                            onClick={handleRecycle}
-                            className="flex items-center"
-                        >
-                            <Trash2Icon className="size-4" />
-                            <span>Recycle</span>
-                        </ContextMenuItem>
-                    </>
-                )}
+                            <ContextMenuItem
+                                onClick={handleRecycle}
+                                className="flex items-center"
+                            >
+                                <Trash2Icon className="size-4" />
+                                <span>Recycle</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
 
-                {selectedIds.length > 1 && (
-                    <>
-                        <ContextMenuLabel>
-                            Selected Items ({selectedIds.length})
-                        </ContextMenuLabel>
-                        <ContextMenuSub>
-                            <ContextMenuSubTrigger>
-                                <DownloadIcon className="size-4 mr-2" />
-                                <span>Download</span>
-                            </ContextMenuSubTrigger>
-                            <ContextMenuSubContent>
-                                <DownloadSubMenuItems
-                                    onDicomDownload={() => {
-                                        closeContextMenu();
-                                        handleDicomDownload(selectedIds);
-                                    }}
-                                    onJpgDownload={() => {
-                                        closeContextMenu();
-                                        handleJpgDownload(selectedIds);
-                                    }}
-                                    onPngDownload={() => {
-                                        closeContextMenu();
-                                        handlePngDownload(selectedIds);
-                                    }}
-                                />
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
+                    {selectedIds.length > 1 && (
+                        <>
+                            <ContextMenuLabel>
+                                Selected Items ({selectedIds.length})
+                            </ContextMenuLabel>
+                            <ContextMenuSub>
+                                <ContextMenuSubTrigger>
+                                    <DownloadIcon className="size-4 mr-2" />
+                                    <span>Download</span>
+                                </ContextMenuSubTrigger>
+                                <ContextMenuSubContent>
+                                    <DownloadSubMenuItems
+                                        onDicomDownload={() => {
+                                            closeContextMenu();
+                                            handleDicomDownload(selectedIds);
+                                        }}
+                                        onJpgDownload={() => {
+                                            closeContextMenu();
+                                            handleJpgDownload(selectedIds);
+                                        }}
+                                        onPngDownload={() => {
+                                            closeContextMenu();
+                                            handlePngDownload(selectedIds);
+                                        }}
+                                    />
+                                </ContextMenuSubContent>
+                            </ContextMenuSub>
 
-                        <ContextMenuSeparator />
+                            <ContextMenuSeparator />
 
-                        <ContextMenuItem
-                            onClick={handleRecycle}
-                            className="flex items-center"
-                        >
-                            <Trash2Icon className="size-4" />
-                            <span>Recycle</span>
-                        </ContextMenuItem>
-                    </>
-                )}
-            </ContextMenuContent>
-        </ContextMenu>
+                            <ContextMenuItem
+                                onClick={handleRecycle}
+                                className="flex items-center"
+                            >
+                                <Trash2Icon className="size-4" />
+                                <span>Recycle</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
+                </ContextMenuContent>
+            </ContextMenu>
+
+            <DicomRecycleConfirmDialog 
+                open={showRecycleConfirmDialog}
+                onOpenChange={setShowRecycleConfirmDialog}
+                dicomLevel={"instance"}
+                selectedCount={selectedIds.length}
+                onConfirm={handleConfirmRecycle}
+            />
+        </>
     );
 }

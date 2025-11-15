@@ -10,9 +10,10 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DicomInstanceContextMenu } from "@/components/dicom/dicom-instance-context-menu";
+import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -98,6 +99,7 @@ function ActionsCell({
     instance: DicomInstanceData;
     workspaceId: string;
 }) {
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const queryClient = getQueryClient();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
@@ -148,35 +150,49 @@ function ActionsCell({
 
     const handleRecycleInstance = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
-        recycleDicomInstance();
+        setShowRecycleConfirmDialog(true);
     };
 
+    const handleConfirmRecycle = () => {
+        recycleDicomInstance();
+    }
+
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant={"ghost"} className="size-8 p-0">
-                    <span className="sr-only">Open Menu</span>
-                    <MoreHorizontalIcon className="size-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleCopySopInstanceUid}>
-                    Copy SOP Instance UID
-                </DropdownMenuItem>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant={"ghost"} className="size-8 p-0">
+                        <span className="sr-only">Open Menu</span>
+                        <MoreHorizontalIcon className="size-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleCopySopInstanceUid}>
+                        Copy SOP Instance UID
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={handleDownloadInstance}>
-                    Download Instance
-                </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownloadInstance}>
+                        Download Instance
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={handleRecycleInstance}>
-                    Recycle Instance
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    <DropdownMenuItem onClick={handleRecycleInstance}>
+                        Recycle Instance
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DicomRecycleConfirmDialog 
+                open={showRecycleConfirmDialog}
+                onOpenChange={setShowRecycleConfirmDialog}
+                dicomLevel={"instance"}
+                selectedCount={1}
+                onConfirm={handleConfirmRecycle}
+            />
+        </>
     );
 }
 
@@ -324,15 +340,6 @@ export function DicomInstancesDataTable({
         data: instances,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        state: {
-            rowSelection: instances.reduce((acc, instance) => {
-                const sopInstanceUid = instance["00080018"]?.Value?.[0] || "";
-                if (isInstanceSelected(sopInstanceUid)) {
-                    acc[sopInstanceUid] = true;
-                }
-                return acc;
-            }),
-        },
         enableRowSelection: false,
     });
 
