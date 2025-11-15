@@ -28,6 +28,8 @@ export const getDicomInstanceQuery = ({
             seriesInstanceUid,
             offset,
             limit,
+            deleteStatus,
+            ...Object.keys(searchConditions),
         ],
         queryFn: async () => {
             const response = await apiClient.api.workspaces[

@@ -16,7 +16,7 @@ export const getDicomStudyQuery = ({
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
     ...searchParams
 }: DicomStudyQueryParams) => queryOptions({
-    queryKey: ["dicom-study", workspaceId, offset, limit],
+    queryKey: ["dicom-study", workspaceId, offset, limit, deleteStatus, ...Object.keys(searchParams)],
     queryFn: async () => {
         const response = await apiClient.api.workspaces[":workspaceId"].studies.$get({
             param: {

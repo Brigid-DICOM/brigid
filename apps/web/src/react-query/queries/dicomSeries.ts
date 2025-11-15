@@ -18,7 +18,7 @@ export const getDicomSeriesQuery = ({
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
     ...searchConditions
 }: DicomSeriesQueryParams) => queryOptions({
-    queryKey: ["dicom-series", workspaceId, studyInstanceUid, offset, limit],
+    queryKey: ["dicom-series", workspaceId, studyInstanceUid, offset, limit, deleteStatus, ...Object.keys(searchConditions)],
     queryFn: async () => {
         const response = await apiClient.api.workspaces[":workspaceId"].studies[":studyInstanceUid"].series.$get({
             param: {
