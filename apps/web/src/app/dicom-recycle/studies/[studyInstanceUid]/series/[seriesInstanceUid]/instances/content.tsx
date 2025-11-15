@@ -223,7 +223,13 @@ export default function DicomRecycleInstancesContent({
             <div className="mb-8 flex flex-col items-start space-x-4">
                 <div className="flex flex-1 items-center space-x-4">
                     <Link href={`/dicom-recycle/studies/${studyInstanceUid}/series`}>
-                        <Button variant="outline" className="flex items-center">
+                        <Button 
+                            variant="outline" 
+                            className="flex items-center"
+                            onClick={() => {
+                                setSearchConditionsForType("dicom-recycle-instance", {});
+                            }}
+                        >
                             <ArrowLeftIcon className="size-4" />
                         </Button>
                     </Link>

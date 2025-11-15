@@ -178,6 +178,9 @@ export default function DicomSeriesContent({
                         <Button
                             variant="outline"
                             className="flex items-center"
+                            onClick={() => {
+                                setSearchConditionsForType("dicom-series", {});
+                            }}
                         >
                             <ArrowLeftIcon className="size-4" />
                         </Button>
