@@ -49,9 +49,6 @@ export class SeriesEntity {
     @Column({ type: "decimal", precision: 12, scale: 6, comment: "0040,0245", nullable: true })
     performedProcedureStepStartTime?: string | null;
 
-    @Column({ type: "int", comment: "0020,1209", nullable: true, default: 0 })
-    numberOfSeriesRelatedInstances?: number | null;
-
     @Column({ type: "smallint", default: DICOM_DELETE_STATUS.ACTIVE })
     deleteStatus!: number; // 0: active, 1: recycled, 2: deleted
 

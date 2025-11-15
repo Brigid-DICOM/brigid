@@ -53,12 +53,6 @@ export class StudyEntity {
     @Column({ type: "varchar", length: 255, comment: "0020,0010", nullable: true })
     studyId?: string | null;
 
-    @Column({ type: "int", comment: "0020,1206", nullable: true, default: 0 })
-    numberOfStudyRelatedSeries?: number | null;
-
-    @Column({ type: "int", comment: "0020,1208", nullable: true, default: 0 })
-    numberOfStudyRelatedInstances?: number | null;
-
     @Column({ type: "smallint", default: DICOM_DELETE_STATUS.ACTIVE })
     deleteStatus!: number; // 0: active, 1: recycled, 2: deleted
 

@@ -16,16 +16,6 @@ export class SeriesSubscriber
     }
 
     async afterInsert(event: InsertEvent<SeriesEntity>): Promise<void> {
-        await event.manager.increment(
-            StudyEntity,
-            {
-                studyInstanceUid: event.entity.studyInstanceUid,
-                workspaceId: event.entity.workspaceId,
-            },
-            "numberOfStudyRelatedSeries",
-            1,
-        );
-
         if (event.entity.modality) {
             const parentStudy = await event.manager
                 .createQueryBuilder(StudyEntity, "study")

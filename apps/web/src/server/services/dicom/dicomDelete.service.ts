@@ -53,11 +53,6 @@ export class DicomDeleteService {
 
                 if (affected === 0 || !parentIds) return { affected: 0 };
 
-                await this.updateSeriesInstanceCounts(
-                    parentIds,
-                    transactionalEntityManager,
-                );
-
                 await this.recycleEmptySeries(
                     parentIds,
                     transactionalEntityManager,
@@ -90,10 +85,6 @@ export class DicomDeleteService {
                     transactionalEntityManager
                 );
 
-                await this.updateStudySeriesCounts(
-                    parentIds,
-                    transactionalEntityManager
-                );
                 await this.recycleEmptyStudies(
                     parentIds,
                     transactionalEntityManager
@@ -216,15 +207,6 @@ export class DicomDeleteService {
                         },
                     );
 
-                    await this.updateSeriesInstanceCounts(
-                        seriesIds,
-                        transactionalEntityManager,
-                    );
-                    await this.updateStudySeriesCounts(
-                        [...new Set(series.map((s) => s.localStudyId))],
-                        transactionalEntityManager,
-                    );
-
                     await this.restoreActiveStudies(
                         [...new Set(series.map((s) => s.localStudyId))],
                         transactionalEntityManager,
@@ -271,15 +253,6 @@ export class DicomDeleteService {
                             DICOM_DELETE_STATUS.ACTIVE,
                             "series",
                             transactionalEntityManager
-                        );
-
-                        await this.updateStudySeriesCounts(
-                            [...new Set(studyIds)],
-                            transactionalEntityManager
-                        );
-                        await this.updateSeriesInstanceCounts(
-                            [...new Set(seriesIds)],
-                            transactionalEntityManager,
                         );
                     }
                 }
@@ -361,11 +334,6 @@ export class DicomDeleteService {
                     
                     const studyIds = [...new Set(series.map(s => s.localStudyId))];
 
-                    await this.updateSeriesInstanceCounts(
-                        seriesIds,
-                        transactionalEntityManager,
-                    );
-
                     await this.undeleteActiveStudies(
                         studyIds,
                         transactionalEntityManager,
@@ -416,15 +384,6 @@ export class DicomDeleteService {
                             DICOM_DELETE_STATUS.ACTIVE,
                             "series",
                             transactionalEntityManager
-                        );
-
-                        await this.updateSeriesInstanceCounts(
-                            seriesIds,
-                            transactionalEntityManager,
-                        );
-                        await this.updateStudySeriesCounts(
-                            studyIds,
-                            transactionalEntityManager,
                         );
                     }
                 }
@@ -479,91 +438,6 @@ export class DicomDeleteService {
                 };
             },
         );
-    }
-
-    private async updateSeriesInstanceCounts(
-        seriesIds: string[],
-        transactionalEntityManager?: EntityManager,
-    ) {
-        if (seriesIds.length === 0) return;
-
-        const em = transactionalEntityManager ?? this.entityManager;
-        const uniqueSeriesIds = [...new Set(seriesIds)];
-
-        const counts = await em
-            .createQueryBuilder(InstanceEntity, "instance")
-            .select("instance.localSeriesId", "seriesId")
-            .addSelect("COUNT(*)", "count")
-            .where("instance.localSeriesId IN (:...seriesIds)", { seriesIds })
-            .andWhere("instance.deleteStatus = :deleteStatus", {
-                deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
-            })
-            .groupBy("instance.localSeriesId")
-            .getRawMany<{ seriesId: string; count: number }>();
-        
-        const countMap = new Map(
-            counts.map(c => [c.seriesId, c.count])
-        );
-
-        for (const seriesId of uniqueSeriesIds) {
-            await em.update(
-                SeriesEntity,
-                { id: seriesId },
-                { numberOfSeriesRelatedInstances: countMap.get(seriesId) ?? 0 },
-            );
-        }
-    }
-
-    private async updateStudySeriesCounts(
-        studyIds: string[],
-        transactionalEntityManager?: EntityManager,
-    ) {
-        if (studyIds.length === 0) return;
-
-        const em = transactionalEntityManager ?? this.entityManager;
-        const uniqueStudyIds = [...new Set(studyIds)];
-
-        const seriesCounts = await em
-            .createQueryBuilder(SeriesEntity, "series")
-            .select("series.localStudyId", "studyId")
-            .addSelect("COUNT(*)", "count")
-            .where("series.localStudyId IN (:...studyIds)", { studyIds })
-            .andWhere("series.deleteStatus = :deleteStatus", {
-                deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
-            })
-            .groupBy("series.localStudyId")
-            .getRawMany<{ studyId: string; count: number }>();
-        
-        const instanceCounts = await em
-            .createQueryBuilder(InstanceEntity, "instance")
-            .innerJoin(SeriesEntity, "series", "series.id = instance.localSeriesId")
-            .select("series.localStudyId", "studyId")
-            .addSelect("COUNT(*)", "count")
-            .where("series.localStudyId IN (:...studyIds)", { studyIds })
-            .andWhere("instance.deleteStatus = :deleteStatus", {
-                deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
-            })
-            .groupBy("series.localStudyId")
-            .getRawMany<{ studyId: string; count: number }>();
-
-
-        const seriesCountMap = new Map(
-            seriesCounts.map(c => [c.studyId, c.count])
-        );
-        const instanceCountMap = new Map(
-            instanceCounts.map(c => [c.studyId, c.count])
-        );
-
-        for (const studyId of uniqueStudyIds) {
-            await em.update(
-                StudyEntity,
-                { id: studyId },
-                {
-                    numberOfStudyRelatedSeries: seriesCountMap.get(studyId) ?? 0,
-                    numberOfStudyRelatedInstances: instanceCountMap.get(studyId) ?? 0,
-                },
-            );
-        }
     }
 
     private async recycleEmptySeries(
@@ -624,11 +498,6 @@ export class DicomDeleteService {
 
         // 獲取受影響的 study IDs
         const affectedStudyIds = [...new Set(seriesToRecycle.map(s => s.localStudyId))];
-
-        await this.updateStudySeriesCounts(
-            affectedStudyIds,
-            em,
-        );
 
         await this.recycleEmptyStudies(affectedStudyIds, em);
     }
@@ -742,17 +611,8 @@ export class DicomDeleteService {
                 deletedAt: null,
             }
         );
-
-        await this.updateSeriesInstanceCounts(
-            seriesToRestore.map(s => s.id),
-            em,
-        );
     
         const affectedStudyIds = [...new Set(seriesToRestore.map(s => s.localStudyId))];
-        await this.updateStudySeriesCounts(
-            affectedStudyIds,
-            em,
-        );
         await this.restoreActiveStudies(
             affectedStudyIds,
             em,
@@ -798,11 +658,6 @@ export class DicomDeleteService {
                 deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
                 deletedAt: null,
             }
-        );
-
-        await this.updateStudySeriesCounts(
-            activeStudyIds,
-            em,
         );
     }
 
@@ -860,17 +715,6 @@ export class DicomDeleteService {
                 deletedAt: null,
             }
         );
-        
-        await this.updateSeriesInstanceCounts(
-            seriesToUndelete.map(s => s.id),
-            em,
-        );
-
-        const affectedStudyIds = [...new Set(seriesToUndelete.map(s => s.localStudyId))];
-        await this.updateStudySeriesCounts(
-            affectedStudyIds,
-            em,
-        );
     }
 
     private async undeleteActiveStudies(
@@ -925,11 +769,6 @@ export class DicomDeleteService {
                 deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
                 deletedAt: null,
             }
-        );
-
-        await this.updateStudySeriesCounts(
-            activeStudyIds,
-            em,
         );
     }
 
@@ -1242,7 +1081,6 @@ export class DicomDeleteService {
             ),
         ];
 
-        await this.updateSeriesInstanceCounts(seriesIds, em);
         await this.restoreActiveSeries(seriesIds, em);
 
         return { affected: instancesToReactivate.length };
@@ -1262,7 +1100,6 @@ export class DicomDeleteService {
 
                 if (affected === 0 || !parentIds) return { affected: 0 };
 
-                await this.updateSeriesInstanceCounts(parentIds, transactionalEntityManager);
                 const markedSeriesIds = await this.markEmptySeriesAsDeleted(parentIds, transactionalEntityManager);
 
                 if (markedSeriesIds.length > 0) {
@@ -1300,10 +1137,6 @@ export class DicomDeleteService {
                 );
 
                 if (parentIds) {
-                    await this.updateStudySeriesCounts(
-                        parentIds,
-                        transactionalEntityManager
-                    );
                     await this.markEmptyStudiesAsDeleted(
                         seriesIds,
                         transactionalEntityManager

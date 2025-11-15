@@ -156,8 +156,6 @@ export class TestDatabaseManager {
             studyDescription: "Study Description 1",
             studyPath: "/test/study1",
             referringPhysicianNameId: referringPhysician1.id,
-            numberOfStudyRelatedSeries: 2,
-            numberOfStudyRelatedInstances: 150,
             json: JSON.stringify(study1Json),
         });
 
@@ -188,8 +186,6 @@ export class TestDatabaseManager {
             studyDescription: "Study Description 2",
             studyPath: "/test/study2",
             referringPhysicianNameId: null,
-            numberOfStudyRelatedSeries: 2,
-            numberOfStudyRelatedInstances: 150,
             json: JSON.stringify(study2Json),
         });
 
@@ -224,8 +220,6 @@ export class TestDatabaseManager {
             characterSet: "ISO_IR 100",
             studyPath: "/test/study3",
             referringPhysicianNameId: referringPhysician1.id,
-            numberOfStudyRelatedSeries: 1,
-            numberOfStudyRelatedInstances: 100,
             json: JSON.stringify(study3Json),
         });
 

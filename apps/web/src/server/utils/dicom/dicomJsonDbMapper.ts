@@ -195,12 +195,6 @@ export const toStudyDbEntity = (
     study.studyId = dicomJsonUtils.getValue<string>(
         DICOM_TAG_KEYWORD_REGISTRY.StudyID.tag
     );
-    study.numberOfStudyRelatedSeries = dicomJsonUtils.getValue<number>(
-        DICOM_TAG_KEYWORD_REGISTRY.NumberOfStudyRelatedSeries.tag
-    );
-    study.numberOfStudyRelatedInstances = dicomJsonUtils.getValue<number>(
-        DICOM_TAG_KEYWORD_REGISTRY.NumberOfStudyRelatedInstances.tag
-    );
     study.json = JSON.stringify(
         dicomJsonUtils.getSelectionDicomJson([
             ...STUDY_TAGS_TO_STORE,

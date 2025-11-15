@@ -204,7 +204,6 @@ describe("DICOM Permanent Delete Operations", () => {
             );
             expect(updatedSeries).not.toBeNull();
             expect(updatedSeries?.deleteStatus).toBe(DICOM_DELETE_STATUS.ACTIVE);
-            expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(1);
         });
 
         it("should return 200 with 0 affected for active instances", async () => {

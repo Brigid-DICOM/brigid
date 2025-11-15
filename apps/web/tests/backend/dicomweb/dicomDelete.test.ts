@@ -96,7 +96,6 @@ describe("DICOM Delete Operations", () => {
                 DICOM_DELETE_STATUS.RECYCLED,
             );
             expect(updatedSeries?.deletedAt).not.toBeNull();
-            expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(0);
         });
 
         it("should not cascade to series when some instances remain active", async () => {
@@ -154,7 +153,6 @@ describe("DICOM Delete Operations", () => {
                 DICOM_DELETE_STATUS.ACTIVE,
             );
             expect(updatedSeries?.deletedAt).toBeNull();
-            expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(1);
         });
 
         it("should return 404 for non-existent instances", async () => {
@@ -222,7 +220,6 @@ describe("DICOM Delete Operations", () => {
                 DICOM_DELETE_STATUS.RECYCLED,
             );
             expect(updatedSeries?.deletedAt).not.toBeNull();
-            expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(0);
 
             // Verify all instances are also recycled
             const updatedInstances = await testDb.dataSource.manager.find(
@@ -290,8 +287,6 @@ describe("DICOM Delete Operations", () => {
                 DICOM_DELETE_STATUS.RECYCLED,
             );
             expect(updatedStudy?.deletedAt).not.toBeNull();
-            expect(updatedStudy?.numberOfStudyRelatedSeries).toBe(0);
-            expect(updatedStudy?.numberOfStudyRelatedInstances).toBe(0);
         });
 
         it("should return 404 for non-existent series", async () => {
@@ -690,7 +685,6 @@ describe("DICOM Delete Operations", () => {
                 expect(updatedSeries?.deleteStatus).toBe(
                     DICOM_DELETE_STATUS.RECYCLED,
                 );
-                expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(0);
 
                 // Act: Restore series
                 const restoreResponse = await app.request(
@@ -745,9 +739,6 @@ describe("DICOM Delete Operations", () => {
                     DICOM_DELETE_STATUS.ACTIVE,
                 );
                 expect(updatedSeries?.deletedAt).toBeNull();
-                expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(
-                    allInstanceUids.length,
-                );
             });
 
             it("should restore series when only some instances are active", async () => {
@@ -818,7 +809,6 @@ describe("DICOM Delete Operations", () => {
                     DICOM_DELETE_STATUS.RECYCLED,
                 );
                 expect(updatedSeries?.deletedAt).not.toBeNull();
-                expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(0);
 
                 // Act: 只 restore 部分 instances
                 const partialInstanceUids = [allInstanceUids[0]];
@@ -863,7 +853,6 @@ describe("DICOM Delete Operations", () => {
                     DICOM_DELETE_STATUS.ACTIVE,
                 );
                 expect(updatedSeries?.deletedAt).toBeNull();
-                expect(updatedSeries?.numberOfSeriesRelatedInstances).toBe(1);
             });
 
             it("should return 404 for non-existent instances", async () => {
@@ -975,9 +964,6 @@ describe("DICOM Delete Operations", () => {
                 expect(updatedSeries?.deleteStatus).toBe(
                     DICOM_DELETE_STATUS.ACTIVE,
                 );
-                expect(
-                    updatedSeries?.numberOfSeriesRelatedInstances,
-                ).toBeGreaterThan(0);
 
                 updatedInstances = await testDb.dataSource.manager.find(
                     InstanceEntity,
@@ -1074,9 +1060,6 @@ describe("DICOM Delete Operations", () => {
                 expect(updatedStudy?.deleteStatus).toBe(
                     DICOM_DELETE_STATUS.ACTIVE,
                 );
-                expect(
-                    updatedStudy?.numberOfStudyRelatedSeries,
-                ).toBeGreaterThan(0);
             });
 
             it("should update study counts when series is restored", async () => {
@@ -1126,12 +1109,6 @@ describe("DICOM Delete Operations", () => {
                 expect(updatedStudy?.deleteStatus).toBe(
                     DICOM_DELETE_STATUS.ACTIVE,
                 );
-                expect(
-                    updatedStudy?.numberOfStudyRelatedSeries,
-                ).toBeGreaterThan(0);
-                expect(
-                    updatedStudy?.numberOfStudyRelatedInstances,
-                ).toBeGreaterThan(0);
             });
 
             it("should return 404 for non-existent series", async () => {
@@ -1604,12 +1581,6 @@ describe("DICOM Delete Operations", () => {
                 );
 
                 expect(updatedStudy).not.toBeNull();
-                expect(
-                    updatedStudy?.numberOfStudyRelatedSeries,
-                ).toBeGreaterThan(0);
-                expect(updatedStudy?.numberOfStudyRelatedSeries).toBeLessThan(
-                    seriesInStudy.length,
-                );
             });
         });
 
