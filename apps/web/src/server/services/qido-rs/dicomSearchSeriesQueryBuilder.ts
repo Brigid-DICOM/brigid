@@ -72,6 +72,10 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
             s => s.seriesInstanceUid
         );
 
+        if (seriesInstances.length === 0) {
+            return [];
+        }
+
         const counts = await this.entityManager
             .createQueryBuilder(SeriesEntity, "series")
             .select("series.seriesInstanceUid", "seriesInstanceUid")

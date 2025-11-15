@@ -66,6 +66,10 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
             s => s.studyInstanceUid
         );
 
+        if (studyInstances.length === 0) {
+            return [];
+        }
+
         const counts = await this.entityManager
             .createQueryBuilder(StudyEntity, "study")
             .select("study.studyInstanceUid", "studyInstanceUid")
