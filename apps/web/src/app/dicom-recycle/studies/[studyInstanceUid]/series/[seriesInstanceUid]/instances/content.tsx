@@ -280,6 +280,7 @@ export default function DicomRecycleInstancesContent({
                                     workspaceId={workspaceId}
                                     studyInstanceUid={studyInstanceUid}
                                     seriesInstanceUid={seriesInstanceUid}
+                                    type="recycle"
                                 />
                             ))}
                         </div>

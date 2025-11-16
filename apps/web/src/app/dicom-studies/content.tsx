@@ -203,7 +203,7 @@ export default function DicomStudiesContent({
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
                             {studies.map((study, index) => (
                                 // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index
-                                <DicomStudyCard key={index} study={study as DicomStudyData} workspaceId={workspaceId} />
+                                <DicomStudyCard key={index} study={study as DicomStudyData} workspaceId={workspaceId} type="management" />
                             ))}
                         </div>
                     ): (

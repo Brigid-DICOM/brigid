@@ -13,12 +13,14 @@ import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-st
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DicomSeriesContextMenu } from "./dicom-series-context-menu";
+import { DicomRecycleSeriesContextMenu } from "./recycle/dicom-recycle-series-context-menu";
 
 interface DicomSeriesCardProps {
     series: DicomSeriesData;
     workspaceId: string;
     studyInstanceUid: string;
     className?: string;
+    type: "management" | "recycle";
 }
 
 export function DicomSeriesCard({
@@ -26,6 +28,7 @@ export function DicomSeriesCard({
     workspaceId,
     studyInstanceUid,
     className,
+    type = "management",
 }: DicomSeriesCardProps) {
     const router = useRouter();
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
@@ -63,8 +66,14 @@ export function DicomSeriesCard({
         onDoubleClick: () => router.push(`/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`),
     });
 
+    const ContextMenu = type === "management" ? (
+        DicomSeriesContextMenu
+    ) : (
+        DicomRecycleSeriesContextMenu
+    );
+
     return (
-        <DicomSeriesContextMenu
+        <ContextMenu
             workspaceId={workspaceId}
             studyInstanceUid={studyInstanceUid}
             seriesInstanceUid={seriesInstanceUid}
@@ -156,6 +165,6 @@ export function DicomSeriesCard({
                     </div>
                 </CardContent>
             </Card>
-        </DicomSeriesContextMenu>
+        </ContextMenu>
     );
 }

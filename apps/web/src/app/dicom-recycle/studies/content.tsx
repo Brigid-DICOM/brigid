@@ -264,6 +264,7 @@ export default function DicomRecycleStudiesContent({
                                     key={index}
                                     study={study as DicomStudyData}
                                     workspaceId={workspaceId}
+                                    type="recycle"
                                 />
                             ))}
                         </div>

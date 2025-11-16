@@ -12,6 +12,7 @@ import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selectio
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DicomInstanceContextMenu } from "./dicom-instance-context-menu";
+import { DicomRecycleInstanceContextMenu } from "./recycle/dicom-recycle-instance-context-menu";
 
 interface DicomInstanceCardProps {
     instance: DicomInstanceData;
@@ -19,6 +20,7 @@ interface DicomInstanceCardProps {
     studyInstanceUid: string;
     seriesInstanceUid: string;
     className?: string;
+    type: "management" | "recycle";
 }
 
 export function DicomInstanceCard({
@@ -27,6 +29,7 @@ export function DicomInstanceCard({
     studyInstanceUid,
     seriesInstanceUid,
     className,
+    type = "management",
 }: DicomInstanceCardProps) {
     const sopClassUid = instance["00080016"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
@@ -63,8 +66,14 @@ export function DicomInstanceCard({
         clearSelection,
     });
 
+    const ContextMenu = type === "management" ? (
+        DicomInstanceContextMenu
+    ) : (
+        DicomRecycleInstanceContextMenu
+    );
+
     return (
-        <DicomInstanceContextMenu
+        <ContextMenu
             workspaceId={workspaceId}
             studyInstanceUid={studyInstanceUid}
             seriesInstanceUid={seriesInstanceUid}
@@ -166,6 +175,6 @@ export function DicomInstanceCard({
                     </div>
                 </CardContent>
             </Card>
-        </DicomInstanceContextMenu>
+        </ContextMenu>
     );
 }

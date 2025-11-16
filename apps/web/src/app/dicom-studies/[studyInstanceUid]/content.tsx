@@ -234,6 +234,7 @@ export default function DicomSeriesContent({
                                     series={seriesItem as DicomSeriesData}
                                     workspaceId={workspaceId}
                                     studyInstanceUid={studyInstanceUid}
+                                    type="management"
                                 />
                             ))}
                         </div>

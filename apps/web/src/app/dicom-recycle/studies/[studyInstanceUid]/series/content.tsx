@@ -289,6 +289,7 @@ export default function DicomRecycleSeriesContent({
                                     series={seriesItem as DicomSeriesData}
                                     workspaceId={workspaceId}
                                     studyInstanceUid={studyInstanceUid}
+                                    type="recycle"
                                 />
                             ))}
                         </div>

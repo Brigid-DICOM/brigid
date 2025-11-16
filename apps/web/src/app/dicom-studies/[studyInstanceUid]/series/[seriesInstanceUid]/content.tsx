@@ -301,6 +301,7 @@ export default function DicomInstancesContent({
                                     workspaceId={workspaceId}
                                     studyInstanceUid={studyInstanceUid}
                                     seriesInstanceUid={seriesInstanceUid}
+                                    type="management"
                                 />
                             ))}
                         </div>

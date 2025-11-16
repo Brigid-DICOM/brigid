@@ -13,17 +13,20 @@ import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-stor
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DicomStudyContextMenu } from "./dicom-study-context-menu";
+import { DicomRecycleStudyContextMenu } from "./recycle/dicom-recycle-study-context-menu";
 
 interface DicomStudyCardProps {
     study: DicomStudyData;
     workspaceId: string;
     className?: string;
+    type: "management" | "recycle";
 }
 
 export function DicomStudyCard({
     study,
     workspaceId,
     className,
+    type = "management",
 }: DicomStudyCardProps) {
     const router = useRouter();
     const patientId = study["00100020"]?.Value?.[0] || "N/A";
@@ -50,8 +53,14 @@ export function DicomStudyCard({
         onDoubleClick: () => router.push(`/dicom-studies/${studyInstanceUid}`),
     });
 
+    const ContextMenu = type === "management" ? (
+        DicomStudyContextMenu
+    ) : (
+        DicomRecycleStudyContextMenu
+    );
+
     return (
-        <DicomStudyContextMenu
+        <ContextMenu
             workspaceId={workspaceId}
             studyInstanceUid={studyInstanceUid}
         >
@@ -135,6 +144,6 @@ export function DicomStudyCard({
                     </div>
                 </CardContent>
             </Card>
-        </DicomStudyContextMenu>
+        </ContextMenu>
     );
 }
