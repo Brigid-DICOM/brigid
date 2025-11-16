@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import { WorkspaceService } from "@/server/services/workspace.service";
+import getBlueLightConfigRoute from "./bl/getConfig.route";
 import deleteInstancesRoute from "./dicom/delete/deleteInstances.route";
 import deleteSeriesRoute from "./dicom/delete/deleteSeries.route";
 import deleteStudiesRoute from "./dicom/delete/deleteStudies.route";
@@ -63,6 +64,7 @@ const workspacesRoute = new Hono()
 .route("/", deleteInstancesRoute)
 .route("/", deleteSeriesRoute)
 .route("/", deleteStudiesRoute)
+.route("/", getBlueLightConfigRoute)
 .get(
     "/workspaces",
     describeRoute({
