@@ -40,6 +40,7 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { getDicomStudyThumbnailQuery } from "@/react-query/queries/dicomThumbnail";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 
 interface DicomStudiesTableProps {
     studies: DicomStudyData[];
@@ -94,6 +95,7 @@ function ActionsCell({
     const queryClient = getQueryClient();
     const router = useRouter();
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
+    const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
 
     const { mutate: recycleDicomStudy } = useMutation({
@@ -148,6 +150,11 @@ function ActionsCell({
         recycleDicomStudy();
     }
 
+    const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        openBlueLightViewer(studyInstanceUid);
+    }
+
     return (
         <>
             <DropdownMenu>
@@ -161,6 +168,11 @@ function ActionsCell({
                     <DropdownMenuItem onClick={handleEnterSeries}>
                         Enter Series
                     </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                        Open in BlueLight Viewer
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
                         Copy Study Instance UID
                     </DropdownMenuItem>

@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
     CornerDownLeftIcon, 
     DownloadIcon,
+    EyeIcon,
     Trash2Icon
 } from "lucide-react";
 import { nanoid } from "nanoid";
@@ -30,6 +31,7 @@ import {
     useDicomStudySelectionStore
 } from "@/stores/dicom-study-selection-store";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 
 interface DicomStudyContextMenuProps {
     children: React.ReactNode;
@@ -45,6 +47,7 @@ export function DicomStudyContextMenu({
     const router = useRouter();
     const queryClient = getQueryClient();
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const { open } = useBlueLightViewerStore();
 
     const {
         getSelectedStudyIds,
@@ -140,6 +143,13 @@ export function DicomStudyContextMenu({
         recycleSelectedStudies();
     }
 
+    const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+
+        open(studyInstanceUid);
+    }
+
     return (
         <>
             <ContextMenu>
@@ -158,9 +168,17 @@ export function DicomStudyContextMenu({
                         <span>Enter Series</span>
                     </ContextMenuItem>
                     }
+
                     
                     {selectedIds.length === 1 && (
                         <>
+                            <ContextMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                                className="flex items-center space-x-2"
+                            >
+                                <EyeIcon className="size-4" />
+                                <span>Open in BlueLight Viewer</span>
+                            </ContextMenuItem>
                             <ContextMenuItem 
                                 onClick={handleDownloadThis}
                                 className="flex items-center space-x-2"

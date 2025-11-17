@@ -26,6 +26,8 @@ import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-st
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomSeriesDataTable } from "./data-table";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useSearchParams } from "next/navigation";
 
 interface DicomSeriesContentProps {
     workspaceId: string;
@@ -38,6 +40,8 @@ export default function DicomSeriesContent({
 }: DicomSeriesContentProps) {
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
+    const searchParams = useSearchParams();
+
     const { 
         getSearchConditionsForType,
         setSearchConditionsForType,
@@ -46,6 +50,7 @@ export default function DicomSeriesContent({
     const searchConditions = getSearchConditionsForType("dicom-series");
 
     const { layoutMode } = useLayoutStore();
+    const { close: closeBlueLightViewer, open: openBlueLightViewer } = useBlueLightViewerStore();
 
     const {
         selectedSeriesIds,
@@ -54,6 +59,14 @@ export default function DicomSeriesContent({
         getSelectedCount,
         getSelectedSeriesIds
     } = useDicomSeriesSelectionStore();
+
+    useEffect(() => {
+        const openStudyInstanceUid = searchParams.get("openStudyInstanceUid");
+        const openSeriesInstanceUid = searchParams.get("openSeriesInstanceUid");
+        if (openStudyInstanceUid) {
+            openBlueLightViewer(openStudyInstanceUid, openSeriesInstanceUid || undefined);
+        }
+    }, [searchParams, openBlueLightViewer]);
 
     const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } = usePagination();
 
@@ -72,7 +85,10 @@ export default function DicomSeriesContent({
     }, [searchConditions, syncSearchParamsToUrl]);
 
     useEffect(() => {
-        return () => clearSelection();
+        return () => {
+            clearSelection();
+            closeBlueLightViewer();
+        };
     }, [clearSelection]);
 
     const {

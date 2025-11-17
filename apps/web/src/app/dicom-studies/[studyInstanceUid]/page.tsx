@@ -3,6 +3,7 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
 import DicomSeriesContent from "./content";
+import { BlueLightViewerDialog } from "@/components/dicom/bluelight-viewer-dialog";
 
 interface DicomSeriesPageProps {
     params: Promise<{
@@ -31,6 +32,7 @@ export default async function DicomSeriesPage({ params }: DicomSeriesPageProps) 
                 workspaceId={defaultWorkspace?.workspace?.id ?? ""} 
                 studyInstanceUid={studyInstanceUid} 
             />
+            <BlueLightViewerDialog />
         </HydrationBoundary>
     );
 }

@@ -23,6 +23,8 @@ import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-stor
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomStudiesDataTable } from "./data-table";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useSearchParams } from "next/navigation";
 
 interface DicomStudiesContentProps {
     workspaceId: string;
@@ -33,10 +35,12 @@ export default function DicomStudiesContent({
 }: DicomStudiesContentProps) {
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
+    const searchParams = useSearchParams();
     const { getSearchConditionsForType, setSearchConditionsForType, setSearchType } = useGlobalSearchStore();
     const searchConditions = getSearchConditionsForType("dicom-study");
 
     const { layoutMode } = useLayoutStore();
+    const { close: closeBlueLightViewer, open: openBlueLightViewer } = useBlueLightViewerStore();
 
     const {
         selectedStudyIds,
@@ -45,6 +49,13 @@ export default function DicomStudiesContent({
         getSelectedCount,
         getSelectedStudyIds,
     } = useDicomStudySelectionStore();
+
+    useEffect(() => {
+        const openStudyInstanceUid = searchParams.get("openStudyInstanceUid");
+        if (openStudyInstanceUid) {
+            openBlueLightViewer(openStudyInstanceUid, undefined);
+        }
+    }, [searchParams, openBlueLightViewer]);
     
     const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } = usePagination();
     
@@ -66,7 +77,10 @@ export default function DicomStudiesContent({
     }, [searchConditions, syncSearchParamsToUrl]);
 
     useEffect(() => {
-        return () => clearSelection();
+        return () => {
+            clearSelection();
+            closeBlueLightViewer();
+        };
     }, [clearSelection]);
     
     const {
