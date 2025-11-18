@@ -10,6 +10,8 @@ import { SeriesEntity } from "./entities/series.entity";
 import { SeriesRequestAttributesEntity } from "./entities/seriesRequestAttributes.entity";
 import { SessionEntity } from "./entities/session.entity";
 import { StudyEntity } from "./entities/study.entity";
+import { TagEntity } from "./entities/tag.entity";
+import { TagAssignmentEntity } from "./entities/tagAssignment.entity";
 import { UserEntity } from "./entities/user.entity";
 import { UserWorkspaceEntity } from "./entities/userWorkspace.entity";
 import { VerificationTokenEntity } from "./entities/verificationToken.entity";
@@ -33,7 +35,9 @@ export const AppDataSource = new DataSource({
         SeriesEntity,
         InstanceEntity,
         DicomCodeSequenceEntity,
-        SeriesRequestAttributesEntity
+        SeriesRequestAttributesEntity,
+        TagEntity,
+        TagAssignmentEntity
     ],
     subscribers: [
         SeriesSubscriber,
