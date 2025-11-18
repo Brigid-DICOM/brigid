@@ -20,6 +20,7 @@ import searchStudiesRoute from "./qido-rs/searchStudies.route";
 import searchStudySeriesRoute from "./qido-rs/searchStudySeries.route";
 import searchStudySeriesInstancesRoute from "./qido-rs/searchStudySeriesInstances.route";
 import stowRsRoute from "./stow-rs/stowRs.route";
+import tagRoute from "./tags/tag.route";
 import retrieveInstanceMetadataRoute from "./wado-rs/metadata/retrieveInstanceMetadata.route";
 import retrieveSeriesMetadataRoute from "./wado-rs/metadata/retrieveSeriesMetadata.route";
 import retrieveStudyMetadataRoute from "./wado-rs/metadata/retrieveStudyMetadata.route";
@@ -65,6 +66,9 @@ const workspacesRoute = new Hono()
 .route("/", deleteSeriesRoute)
 .route("/", deleteStudiesRoute)
 .route("/", getBlueLightConfigRoute)
+// tags routes
+.route("/", tagRoute)
+// workspace routes
 .get(
     "/workspaces",
     describeRoute({
