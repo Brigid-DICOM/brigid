@@ -4,11 +4,10 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
-    PrimaryColumn,
     PrimaryGeneratedColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
 } from "typeorm";
-import { getDateTimeType } from "@/utils/getDateTimeType";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { TagEntity } from "./tag.entity";
 import type { WorkspaceEntity } from "./workspace.entity";
 
@@ -37,10 +36,10 @@ export class TagAssignmentEntity {
     @Column({ type: "varchar" })
     targetId!: string;
 
-    @Column({ type: getDateTimeType() })
+    @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
-    @Column({ type: getDateTimeType() })
+    @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
     @ManyToOne("tag", "assignments", { onDelete: "CASCADE" })

@@ -11,8 +11,8 @@ import {
 import {
     getDateTimeType
 } from "../utils/getDateTimeType";
-import type { WorkspaceEntity } from "./workspace.entity";
 import type { TagAssignmentEntity } from "./tagAssignment.entity";
+import type { WorkspaceEntity } from "./workspace.entity";
 
 @Entity("tag")
 export class TagEntity {
