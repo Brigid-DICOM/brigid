@@ -13,3 +13,4 @@ export { AddSeriesRequestAttributesTable1761038228473 } from "./1761038228473-ad
 export { RenameToContentTime1761293029642 } from "./1761293029642-renameToContentTime";
 export { ConvertAcquisitionDateTimeToBigint1761365623525 } from "./1761365623525-convertAcquisitionDateTimeToBigint";
 export { DropNumberOfRelatedColumns1763129169731 } from "./1763129169731-dropNumberOfRelatedColumns";
+export { CreateTagTables1763441190259 } from "./1763441190259-createTagTables";
