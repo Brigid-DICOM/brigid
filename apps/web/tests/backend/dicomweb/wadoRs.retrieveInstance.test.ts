@@ -11,7 +11,7 @@ import {
     vi
 } from "vitest";
 import { app } from "@/app/api/[...route]/route";
-import multipartMessage from "@/server/utils/multipartMessage";
+import { multipartDecode } from "@/lib/dicomMultipartDecode";
 import testData from "../../fixtures/dicomFiles/data.json";
 import { TestDatabaseManager } from "../../utils/testDatabaseManager";
 import { TestFileManager } from "../../utils/testFileManager";
@@ -77,7 +77,7 @@ describe("WADO-RS Route", () => {
             // Assert
             expect(response.status).toBe(200);
 
-            const parts = multipartMessage.multipartDecode(await response.arrayBuffer());
+            const parts = multipartDecode(await response.arrayBuffer());
             expect(parts.length).toBe(1);
         });
 
