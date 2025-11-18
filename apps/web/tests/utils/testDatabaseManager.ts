@@ -8,6 +8,8 @@ import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import { SeriesRequestAttributesEntity } from "@brigid/database/src/entities/seriesRequestAttributes.entity";
 import { SessionEntity } from "@brigid/database/src/entities/session.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
+import { TagEntity } from "@brigid/database/src/entities/tag.entity";
+import { TagAssignmentEntity } from "@brigid/database/src/entities/tagAssignment.entity";
 import { UserEntity } from "@brigid/database/src/entities/user.entity";
 import { UserWorkspaceEntity } from "@brigid/database/src/entities/userWorkspace.entity";
 import { VerificationTokenEntity } from "@brigid/database/src/entities/verificationToken.entity";
@@ -38,6 +40,8 @@ export class TestDatabaseManager {
                 InstanceEntity,
                 DicomCodeSequenceEntity,
                 SeriesRequestAttributesEntity,
+                TagEntity,
+                TagAssignmentEntity,
             ],
             synchronize: true,
             logging: false,
@@ -60,6 +64,8 @@ export class TestDatabaseManager {
     }
 
     async clearDatabase() {
+        await this.dataSource.manager.clear(TagAssignmentEntity);
+        await this.dataSource.manager.clear(TagEntity);
         await this.dataSource.manager.clear(InstanceEntity);
         await this.dataSource.manager.clear(SeriesEntity);
         await this.dataSource.manager.clear(StudyEntity);
@@ -234,26 +240,37 @@ export class TestDatabaseManager {
             "00200011": { vr: "IS", Value: [1] },
             "00400244": { vr: "DA", Value: ["20241017"] },
             "00400245": { vr: "TM", Value: ["143500.000000"] },
-            "00400275": { 
-                vr: "SQ", 
+            "00400275": {
+                vr: "SQ",
                 Value: [
                     {
-                        "0020000D": { vr: "UI", Value: [study1.studyInstanceUid] },
+                        "0020000D": {
+                            vr: "UI",
+                            Value: [study1.studyInstanceUid],
+                        },
                         "00080050": { vr: "SH", Value: ["REQACC001"] },
-                        "00080051": { 
-                            vr: "SQ", 
+                        "00080051": {
+                            vr: "SQ",
                             Value: [
                                 {
-                                    "00400031": { vr: "LO", Value: ["Local Entity ID 1"] },
-                                    "00400032": { vr: "LO", Value: ["054453f4-805f-48f2-b5ca-120d64b809fb"] },
+                                    "00400031": {
+                                        vr: "LO",
+                                        Value: ["Local Entity ID 1"],
+                                    },
+                                    "00400032": {
+                                        vr: "LO",
+                                        Value: [
+                                            "054453f4-805f-48f2-b5ca-120d64b809fb",
+                                        ],
+                                    },
                                     "00400033": { vr: "LO", Value: ["UUID"] },
-                                }
-                            ] 
+                                },
+                            ],
                         },
                         "00401001": { vr: "SH", Value: ["SPS-1"] },
                         "00400009": { vr: "SH", Value: ["RP-1"] },
                     },
-                ]
+                ],
             },
         };
 
@@ -292,26 +309,37 @@ export class TestDatabaseManager {
             "00200011": { vr: "IS", Value: [2] },
             "00400244": { vr: "DA", Value: ["20241017"] },
             "00400245": { vr: "TM", Value: ["144000.000000"] },
-            "00400275": { 
-                vr: "SQ", 
+            "00400275": {
+                vr: "SQ",
                 Value: [
                     {
-                        "0020000D": { vr: "UI", Value: [study1.studyInstanceUid] },
+                        "0020000D": {
+                            vr: "UI",
+                            Value: [study1.studyInstanceUid],
+                        },
                         "00080050": { vr: "SH", Value: ["REQACC002"] },
-                        "00080051": { 
-                            vr: "SQ", 
+                        "00080051": {
+                            vr: "SQ",
                             Value: [
                                 {
-                                    "00400031": { vr: "LO", Value: ["Local Entity ID 2"] },
-                                    "00400032": { vr: "LO", Value: ["2f6316f6-0d26-4f17-b5b4-0d296673da0c"] },
+                                    "00400031": {
+                                        vr: "LO",
+                                        Value: ["Local Entity ID 2"],
+                                    },
+                                    "00400032": {
+                                        vr: "LO",
+                                        Value: [
+                                            "2f6316f6-0d26-4f17-b5b4-0d296673da0c",
+                                        ],
+                                    },
                                     "00400033": { vr: "LO", Value: ["UUID"] },
-                                }
-                            ] 
+                                },
+                            ],
                         },
                         "00401001": { vr: "SH", Value: ["SPS-2"] },
                         "00400009": { vr: "SH", Value: ["RP-2"] },
-                    }
-                ]
+                    },
+                ],
             },
         };
         const series1_2 = await manager.save(SeriesEntity, {
@@ -439,7 +467,7 @@ export class TestDatabaseManager {
             "00281051": { vr: "DS", Value: ["100"] },
             "0040A491": { vr: "CS", Value: ["COMPLETED"] },
             "0040A493": { vr: "CS", Value: ["VERIFIED"] },
-        }
+        };
         const instance1_2_1 = await manager.save(InstanceEntity, {
             workspaceId: workspace.id,
             localSeriesId: series1_2.id,
@@ -513,7 +541,7 @@ export class TestDatabaseManager {
             "00281051": { vr: "DS", Value: ["100"] },
             "0040A491": { vr: "CS", Value: ["COMPLETED"] },
             "0040A493": { vr: "CS", Value: ["VERIFIED"] },
-        }
+        };
         const instance3_1_1 = await manager.save(InstanceEntity, {
             workspaceId: workspace.id,
             localSeriesId: series3_1.id,
@@ -543,7 +571,12 @@ export class TestDatabaseManager {
             referringPhysicians: [referringPhysician1],
             studies: [study1, study2, study3],
             series: [series1_1, series1_2, series2_1, series3_1],
-            instances: [instance1_1_1, instance1_2_1, instance2_1_1, instance3_1_1],
+            instances: [
+                instance1_1_1,
+                instance1_2_1,
+                instance2_1_1,
+                instance3_1_1,
+            ],
         };
     }
 
