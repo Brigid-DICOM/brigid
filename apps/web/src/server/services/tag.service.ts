@@ -100,15 +100,19 @@ export class TagService {
         if (!tag) return null;
 
         let targetEntity: typeof StudyEntity | typeof SeriesEntity | typeof InstanceEntity;
+        let targetIdField: string;
         switch (options.targetType) {
             case TAG_TARGET_TYPE.STUDY:
                 targetEntity = StudyEntity;
+                targetIdField = "studyInstanceUid";
                 break;
             case TAG_TARGET_TYPE.SERIES:
                 targetEntity = SeriesEntity;
+                targetIdField = "seriesInstanceUid";
                 break;
             case TAG_TARGET_TYPE.INSTANCE:
                 targetEntity = InstanceEntity;
+                targetIdField = "sopInstanceUid";
                 break;
             default:
                 throw new Error(`Invalid target type: ${options.targetType}`);
@@ -116,12 +120,22 @@ export class TagService {
 
         const target = await this.entityManager.findOne(targetEntity, {
             where: {
-                id: options.targetId,
+                [targetIdField]: options.targetId,
                 workspaceId: options.workspaceId
             }
         });
 
         if (!target) return null;
+
+        const existingAssignment = await this.entityManager.findOne(TagAssignmentEntity, {
+            where: {
+                tagId: options.tagId,
+                targetType: options.targetType,
+                targetId: options.targetId,
+                workspaceId: options.workspaceId
+            }
+        });
+        if (existingAssignment) return existingAssignment;
 
         const assignment = new TagAssignmentEntity();
         assignment.tagId = options.tagId;
@@ -170,7 +184,7 @@ export class TagService {
     async getWorkspaceTags(workspaceId: string, name?: string) {
         const queryBuilder = this.entityManager
             .createQueryBuilder(TagEntity, "tag")
-            .            where("tag.workspaceId = :workspaceId", {                 workspaceId })
+            .where("tag.workspaceId = :workspaceId", { workspaceId })
 
         if (name) {
             queryBuilder.andWhere("tag.name = :name", { name });
