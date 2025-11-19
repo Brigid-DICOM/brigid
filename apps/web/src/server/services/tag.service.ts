@@ -167,11 +167,15 @@ export class TagService {
         });
     }
 
-    async getWorkspaceTags(workspaceId: string) {
-        return await this.entityManager.find(TagEntity, {
-            where: {
-                workspaceId
+    async getWorkspaceTags(workspaceId: string, name?: string) {
+        const queryBuilder = this.entityManager
+            .createQueryBuilder(TagEntity, "tag")
+            .            where("tag.workspaceId = :workspaceId", {                 workspaceId })
+
+        if (name) {
+            queryBuilder.andWhere("tag.name = :name", { name });
             }
-        });
+        
+        return await queryBuilder.getMany();
     }
 }

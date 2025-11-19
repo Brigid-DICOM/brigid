@@ -24,11 +24,15 @@ const getAllTagsRoute = new Hono().get(
             workspaceId: z.string().describe("The ID of the workspace"),
         }),
     ),
+    zValidator("query", z.object({
+        name: z.string().optional().describe("The name of the tag"),
+    })),
     async (c) => {
         const { workspaceId } = c.req.valid("param");
+        const { name } = c.req.valid("query");
 
         const tagService = new TagService();
-        const tags = await tagService.getWorkspaceTags(workspaceId);
+        const tags = await tagService.getWorkspaceTags(workspaceId, name);
 
         return c.json(
             {
