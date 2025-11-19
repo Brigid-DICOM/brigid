@@ -15,7 +15,7 @@ export const updateTagSchema = z.object({
 export const assignTagSchema = z.object({
     tagId: z.uuid(),
     targetType: z.enum(["study", "series", "instance"]),
-    targetId: z.uuid(),
+    targetId: z.string().min(1),
 });
 
 export const removeTagAssignmentSchema = z.object({
