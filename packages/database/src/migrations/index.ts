@@ -14,3 +14,4 @@ export { RenameToContentTime1761293029642 } from "./1761293029642-renameToConten
 export { ConvertAcquisitionDateTimeToBigint1761365623525 } from "./1761365623525-convertAcquisitionDateTimeToBigint";
 export { DropNumberOfRelatedColumns1763129169731 } from "./1763129169731-dropNumberOfRelatedColumns";
 export { CreateTagTables1763441190259 } from "./1763441190259-createTagTables";
+export { ChangeTagTargetIdToString1763545308303 } from "./1763545308303-changeTagTargetIdToString";
