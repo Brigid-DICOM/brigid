@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomSeriesContextMenu } from "@/components/dicom/dicom-series-context-menu";
 import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
@@ -273,11 +274,26 @@ export function DicomSeriesDataTable({
                 cell: ({ row }) => {
                     return (
                         <ThumbnailCell
-                            series={row.original}
-                            workspaceId={workspaceId}
+                        series={row.original}
+                        workspaceId={workspaceId}
                         />
                     );
                 },
+            },
+            {
+                accessorKey: "tags",
+                header: "Tags",
+                cell: ({ row }) => {
+                    return (
+                        <DicomDataTableTagCell
+                            workspaceId={workspaceId}
+                            targetType="series"
+                            targetId={row.original["0020000E"]?.Value?.[0] || ""}
+                        />
+                    );
+                },
+                enableSorting: false,
+                enableHiding: false,
             },
             {
                 accessorKey: "modality",

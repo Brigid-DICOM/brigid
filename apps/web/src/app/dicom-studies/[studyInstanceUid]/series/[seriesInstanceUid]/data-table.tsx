@@ -12,6 +12,7 @@ import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomInstanceContextMenu } from "@/components/dicom/dicom-instance-context-menu";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
@@ -286,6 +287,21 @@ export function DicomInstancesDataTable({
                         />
                     );
                 },
+            },
+            {
+                accessorKey: "tags",
+                header: "Tags",
+                cell: ({ row }) => {
+                    return (
+                        <DicomDataTableTagCell
+                            workspaceId={workspaceId}
+                            targetType="instance"
+                            targetId={row.original["00080018"]?.Value?.[0] || ""}
+                        />
+                    );
+                },
+                enableSorting: false,
+                enableHiding: false,
             },
             {
                 accessorKey: "instanceNumber",

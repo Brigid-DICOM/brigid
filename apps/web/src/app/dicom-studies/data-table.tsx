@@ -13,6 +13,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
 import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
@@ -289,6 +290,21 @@ export function DicomStudiesDataTable({
                         />
                     );
                 },
+            },
+            {
+                accessorKey: "tags",
+                header: "Tags",
+                cell: ({ row }) => {
+                    return (
+                        <DicomDataTableTagCell
+                            workspaceId={workspaceId}
+                            targetType="study"
+                            targetId={row.original["0020000D"]?.Value?.[0] || ""}
+                        />
+                    );
+                },
+                enableSorting: false,
+                enableHiding: false,
             },
             {
                 accessorKey: "patientId",
