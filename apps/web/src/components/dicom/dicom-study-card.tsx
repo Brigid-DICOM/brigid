@@ -9,9 +9,11 @@ import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getDicomStudyThumbnailQuery } from "@/react-query/queries/dicomThumbnail";
+import { getTargetTagsQuery } from "@/react-query/queries/tag";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
+import { DicomCardTagBadge } from "./dicom-card-tag-badge";
 import { DicomStudyContextMenu } from "./dicom-study-context-menu";
 import { DicomRecycleStudyContextMenu } from "./recycle/dicom-recycle-study-context-menu";
 
@@ -44,6 +46,10 @@ export function DicomStudyCard({
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
+    const { data: tags, isLoading: isLoadingTags } = useQuery(
+        getTargetTagsQuery(workspaceId, "study", studyInstanceUid),
+    );
+
     const { handleCardClick, handleContextMenu, handleDoubleClick } = useDicomCardSelection({
         itemId: studyInstanceUid,
         isSelected,
@@ -70,7 +76,7 @@ export function DicomStudyCard({
                     "w-full max-w-sm",
                     "overflow-hidden",
                     "transition-all duration-200",
-                    "pt-0",
+                    "pt-0 gap-0",
                     "select-none",
                     "relative",
                     isSelected ? [
@@ -87,13 +93,30 @@ export function DicomStudyCard({
                 onContextMenu={handleContextMenu}
                 onDoubleClick={handleDoubleClick}
             >
-                {isSelected && (
-                    <div className="absolute top-2 right-2 z-10 bg-primary/70 text-white rounded-full p-1">
-                        <CheckIcon className="size-3" />
-                    </div>
-                )}
+                <div className="flex items-stretch justify-between px-2 py-1.5 bg-white/50 backdrop-blur-sm border-b border-gray-100 leading-none">
+                    <div className="flex-1 flex min-w-0 items-center">
+                        {tags?.data && tags?.data.length > 0 ? (
+                            <DicomCardTagBadge tags={tags.data} maxDisplay={2} />
+                        ): (
+                            <div className="h-5" />
+                        )}
 
-                <div className="aspect-square w-full bg-gray-100 flex items-center justify-center">
+                        {isLoadingTags && (
+                            <Skeleton className="h-5 w-7 rounded-full" />
+                        )}
+                    </div>
+
+                    
+                    {isSelected && (
+                        <div className="ml-2 flex-shrink-0">
+                            <div className="bg-primary text-white rounded-full p-1.5 shadow-md">
+                                <CheckIcon className="size-2" />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="aspect-square w-full bg-gray-100 flex items-center justify-center mb-4">
                     {isLoadingThumbnail ? (
                         <Skeleton className="w-full h-full" />
                     ) : thumbnailUrl ? (
