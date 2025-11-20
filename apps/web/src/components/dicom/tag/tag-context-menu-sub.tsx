@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckIcon, TagIcon, TagsIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon, TagIcon, TagsIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -40,11 +40,11 @@ export function TagContextMenuSub({
         Map<string, OptimisticState>
     >(new Map());
 
-    const { data: workspaceTags } = useQuery({
+    const { data: workspaceTags, isLoading: isLoadingWorkspaceTags } = useQuery({
         ...getWorkspaceTagsQuery(workspaceId),
     });
 
-    const { data: tags } = useQuery({
+    const { data: tags, isLoading: isLoadingTags } = useQuery({
         ...getTargetTagsQuery(workspaceId, targetType, targetId),
     });
 
@@ -190,6 +190,8 @@ export function TagContextMenuSub({
         }
     }
 
+    const isLoading = isLoadingWorkspaceTags || isLoadingTags;
+
     return (
         <ContextMenuSub>
             <ContextMenuSubTrigger className="flex items-center space-x-4">
@@ -206,6 +208,13 @@ export function TagContextMenuSub({
                 </ContextMenuItem>
 
                 <ContextMenuSeparator />
+
+                {isLoading && (
+                    <ContextMenuItem className="flex items-center space-x-2">
+                        <Loader2Icon className="size-4 animate-spin" />
+                        <span>Loading...</span>
+                    </ContextMenuItem>
+                )}
 
                 {combinedTags?.map((tag) => {
                     const isAssigned = getIsAssigned(tag.id);
