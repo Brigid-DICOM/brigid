@@ -19,9 +19,11 @@ import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
-import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { CreateTagDialog } from "./tag/create-tag-dialog";
+import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
 
 interface DicomSeriesContextMenuProps {
     children: React.ReactNode;
@@ -37,6 +39,7 @@ export function DicomSeriesContextMenu({
     seriesInstanceUid,
 }: DicomSeriesContextMenuProps) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { getSelectedSeriesIds, clearSelection } = useDicomSeriesSelectionStore();
@@ -182,6 +185,15 @@ export function DicomSeriesContextMenu({
                             </ContextMenuItem>
 
                             <ContextMenuSeparator />
+
+                            <TagContextMenuSub 
+                                workspaceId={workspaceId}
+                                targetId={seriesInstanceUid}
+                                targetType="series"
+                                onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                            />
+
+                            <ContextMenuSeparator />
                             
                             <ContextMenuItem
                                 onClick={handleRecycle}
@@ -227,6 +239,14 @@ export function DicomSeriesContextMenu({
                 dicomLevel={"series"}
                 selectedCount={selectedIds.length}
                 onConfirm={handleConfirmRecycle}
+            />
+
+            <CreateTagDialog 
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                workspaceId={workspaceId}
+                targetType="series"
+                targetId={seriesInstanceUid}
             />
         </>
     );

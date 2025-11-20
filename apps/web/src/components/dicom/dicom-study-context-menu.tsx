@@ -27,11 +27,13 @@ import {
 import { closeContextMenu } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import {
     useDicomStudySelectionStore
 } from "@/stores/dicom-study-selection-store";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
-import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { CreateTagDialog } from "./tag/create-tag-dialog";
+import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
 
 interface DicomStudyContextMenuProps {
     children: React.ReactNode;
@@ -47,6 +49,7 @@ export function DicomStudyContextMenu({
     const router = useRouter();
     const queryClient = getQueryClient();
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { open } = useBlueLightViewerStore();
 
     const {
@@ -186,6 +189,16 @@ export function DicomStudyContextMenu({
                                 <DownloadIcon className="size-4" />
                                 <span>Download</span>
                             </ContextMenuItem>
+
+                            <ContextMenuSeparator />
+
+                            <TagContextMenuSub 
+                                workspaceId={workspaceId}
+                                targetId={studyInstanceUid}
+                                targetType="study"
+                                onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                            />
+
                             <ContextMenuSeparator />
 
                             <ContextMenuItem
@@ -232,6 +245,14 @@ export function DicomStudyContextMenu({
                 dicomLevel={"study"}
                 selectedCount={selectedIds.length}
                 onConfirm={handleConfirmRecycle}
+            />
+
+            <CreateTagDialog 
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                workspaceId={workspaceId}
+                targetId={studyInstanceUid}
+                targetType="study"
             />
         </>
     )

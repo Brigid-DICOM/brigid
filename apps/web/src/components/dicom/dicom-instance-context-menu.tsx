@@ -31,6 +31,8 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
+import { CreateTagDialog } from "./tag/create-tag-dialog";
+import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
 
 interface DicomInstanceContextMenuProps {
     children: React.ReactNode;
@@ -82,6 +84,7 @@ export function DicomInstanceContextMenu({
     seriesInstanceUid,
 }: DicomInstanceContextMenuProps) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const { getSelectedInstanceIds, clearSelection } =
         useDicomInstanceSelectionStore();
@@ -194,7 +197,7 @@ export function DicomInstanceContextMenu({
                         <>
                             <ContextMenuSub>
                                 <ContextMenuSubTrigger>
-                                    <DownloadIcon className="size-4 mr-2" />
+                                    <DownloadIcon className="size-4 mr-4" />
                                     <span>Download</span>
                                 </ContextMenuSubTrigger>
                                 <ContextMenuSubContent>
@@ -217,9 +220,16 @@ export function DicomInstanceContextMenu({
 
                             <ContextMenuSeparator />
 
+                            <TagContextMenuSub 
+                                workspaceId={workspaceId}
+                                targetType="instance"
+                                targetId={selectedIds[0]}
+                                onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                            />
+
                             <ContextMenuItem
                                 onClick={handleRecycle}
-                                className="flex items-center"
+                                className="flex items-center space-x-2"
                             >
                                 <Trash2Icon className="size-4" />
                                 <span>Recycle</span>
@@ -275,6 +285,14 @@ export function DicomInstanceContextMenu({
                 dicomLevel={"instance"}
                 selectedCount={selectedIds.length}
                 onConfirm={handleConfirmRecycle}
+            />
+
+            <CreateTagDialog 
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                workspaceId={workspaceId}
+                targetType="instance"
+                targetId={selectedIds[0]}
             />
         </>
     );
