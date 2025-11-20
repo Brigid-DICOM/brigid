@@ -424,6 +424,7 @@ export function DicomInstancesDataTable({
                                         workspaceId={workspaceId}
                                         studyInstanceUid={studyInstanceUid}
                                         seriesInstanceUid={seriesInstanceUid}
+                                        sopInstanceUid={sopInstanceUid}
                                     >
                                         <TableRow
                                             data-dicom-card

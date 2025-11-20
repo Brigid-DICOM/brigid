@@ -39,6 +39,7 @@ interface DicomInstanceContextMenuProps {
     workspaceId: string;
     studyInstanceUid: string;
     seriesInstanceUid: string;
+    sopInstanceUid: string;
 }
 
 const DownloadSubMenuItems = ({
@@ -82,6 +83,7 @@ export function DicomInstanceContextMenu({
     workspaceId,
     studyInstanceUid,
     seriesInstanceUid,
+    sopInstanceUid,
 }: DicomInstanceContextMenuProps) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
@@ -223,7 +225,7 @@ export function DicomInstanceContextMenu({
                             <TagContextMenuSub 
                                 workspaceId={workspaceId}
                                 targetType="instance"
-                                targetId={selectedIds[0]}
+                                targetId={sopInstanceUid}
                                 onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
                             />
 
@@ -292,7 +294,7 @@ export function DicomInstanceContextMenu({
                 onOpenChange={setOpenCreateTagDialog}
                 workspaceId={workspaceId}
                 targetType="instance"
-                targetId={selectedIds[0]}
+                targetId={sopInstanceUid}
             />
         </>
     );
