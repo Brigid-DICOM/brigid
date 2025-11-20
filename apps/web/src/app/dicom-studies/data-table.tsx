@@ -15,6 +15,8 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
+import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
+import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -39,8 +41,8 @@ import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { getDicomStudyThumbnailQuery } from "@/react-query/queries/dicomThumbnail";
-import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 
 interface DicomStudiesTableProps {
     studies: DicomStudyData[];
@@ -92,6 +94,7 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
@@ -185,6 +188,13 @@ function ActionsCell({
 
                     <DropdownMenuSeparator />
 
+                    <TagDropdownSub 
+                        workspaceId={workspaceId}
+                        targetId={studyInstanceUid}
+                        targetType="study"
+                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                    />
+
                     <DropdownMenuItem onClick={handleRecycleStudy}>
                         Recycle Study
                     </DropdownMenuItem>
@@ -197,6 +207,14 @@ function ActionsCell({
                 dicomLevel={"study"}
                 selectedCount={1}
                 onConfirm={handleConfirmRecycle}
+            />
+
+            <CreateTagDialog 
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                workspaceId={workspaceId}
+                targetType="study"
+                targetId={studyInstanceUid}
             />
         </>
     );

@@ -10,6 +10,8 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomSeriesContextMenu } from "@/components/dicom/dicom-series-context-menu";
+import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
+import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu,
@@ -32,8 +34,8 @@ import { downloadSeries } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomSeriesThumbnailQuery, recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
-import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
 interface DicomSeriesTableProps {
     series: DicomSeriesData[];
@@ -85,6 +87,7 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
@@ -178,6 +181,15 @@ function ActionsCell({
 
                     <DropdownMenuSeparator />
 
+                    <TagDropdownSub 
+                        workspaceId={workspaceId}
+                        targetId={seriesInstanceUid}
+                        targetType="series"
+                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                    />
+
+                    <DropdownMenuSeparator />
+
                     <DropdownMenuItem onClick={handleRecycleSeries}>
                         Recycle Series
                     </DropdownMenuItem>
@@ -190,6 +202,14 @@ function ActionsCell({
                 dicomLevel={"series"}
                 selectedCount={1}
                 onConfirm={handleConfirmRecycle}
+            />
+
+            <CreateTagDialog 
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                workspaceId={workspaceId}
+                targetType="series"
+                targetId={seriesInstanceUid}
             />
         </>
     )

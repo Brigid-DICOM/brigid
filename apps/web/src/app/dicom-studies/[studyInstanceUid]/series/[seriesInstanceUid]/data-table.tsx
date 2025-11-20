@@ -14,6 +14,8 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DicomInstanceContextMenu } from "@/components/dicom/dicom-instance-context-menu";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
+import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
+import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -100,6 +102,7 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
@@ -179,6 +182,15 @@ function ActionsCell({
 
                     <DropdownMenuSeparator />
 
+                    <TagDropdownSub 
+                        workspaceId={workspaceId}
+                        targetId={sopInstanceUid}
+                        targetType="instance"
+                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                    />
+
+                    <DropdownMenuSeparator />
+
                     <DropdownMenuItem onClick={handleRecycleInstance}>
                         Recycle Instance
                     </DropdownMenuItem>
@@ -191,6 +203,14 @@ function ActionsCell({
                 dicomLevel={"instance"}
                 selectedCount={1}
                 onConfirm={handleConfirmRecycle}
+            />
+
+            <CreateTagDialog 
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                workspaceId={workspaceId}
+                targetType="instance"
+                targetId={sopInstanceUid}
             />
         </>
     );
