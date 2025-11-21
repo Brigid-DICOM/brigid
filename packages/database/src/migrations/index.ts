@@ -15,3 +15,4 @@ export { ConvertAcquisitionDateTimeToBigint1761365623525 } from "./1761365623525
 export { DropNumberOfRelatedColumns1763129169731 } from "./1763129169731-dropNumberOfRelatedColumns";
 export { CreateTagTables1763441190259 } from "./1763441190259-createTagTables";
 export { ChangeTagTargetIdToString1763545308303 } from "./1763545308303-changeTagTargetIdToString";
+export { ChangeTagAssignmentUqIdx1763710517185 } from "./1763710517185-changeTagAssignmentUqIdx";
