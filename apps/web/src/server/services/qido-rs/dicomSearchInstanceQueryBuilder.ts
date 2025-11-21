@@ -17,8 +17,12 @@ export class DicomSearchInstanceQueryBuilder extends BaseDicomSearchQueryBuilder
 > {
     private readonly instanceTable = "instance";
 
-    protected buildBaseQuery(workspaceId: string, deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE): SelectQueryBuilder<InstanceEntity> {
-        return this.entityManager
+    protected buildBaseQuery(
+        workspaceId: string,
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
+        tagName?: string,
+    ): SelectQueryBuilder<InstanceEntity> {
+        const query = this.entityManager
             .createQueryBuilder(InstanceEntity, this.instanceTable)
             .innerJoin("series", "series", "series.id = instance.localSeriesId")
             .innerJoin("study", "study", "study.id = series.localStudyId")
@@ -28,8 +32,13 @@ export class DicomSearchInstanceQueryBuilder extends BaseDicomSearchQueryBuilder
                 "patientName",
                 "patientName.id = patient.patientNameId",
             )
-            .where("instance.workspaceId = :workspaceId", { workspaceId })
-            .andWhere("instance.deleteStatus = :deleteStatus", { deleteStatus });
+            
+        this.applyTagJoin(query, "instance", tagName);
+        query.where("instance.workspaceId = :workspaceId", { workspaceId })
+        .andWhere("instance.deleteStatus = :deleteStatus", { deleteStatus });
+        this.applyTagFilter(query, tagName);
+
+        return query;
     }
 
     protected applyInstanceDeleteStatusFilter(

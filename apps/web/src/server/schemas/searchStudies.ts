@@ -10,6 +10,7 @@ export const searchStudiesQueryParamSchema = z.object({
     fuzzymatching: z.boolean().optional(),
     deleteStatus: z.coerce.number().min(0).max(2).optional().default(DICOM_DELETE_STATUS.ACTIVE),
     instanceDeleteStatus: z.coerce.number().min(0).max(2).optional(),
+    tagName: z.string().optional(),
     StudyInstanceUID: z.string().optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag]: z.string().optional(),
     StudyDate: dateRangeSchema.optional(),

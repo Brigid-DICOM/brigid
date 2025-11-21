@@ -6,6 +6,7 @@ import type { SeriesFieldConfig } from "./dicomSearchSeriesQueryConfig";
 import type { FieldConfig } from "./dicomSearchStudyQueryConfig";
 import type { QueryDicomResult } from "./queryStrategy";
 import { getQueryStrategy } from "./queryStrategyFactory";
+import { StringQueryStrategy } from "./stringQueryStrategy";
 
 export abstract class BaseDicomSearchQueryBuilder<
     TEntity extends ObjectLiteral,
@@ -25,14 +26,16 @@ export abstract class BaseDicomSearchQueryBuilder<
         offset = 0,
         deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
         instanceDeleteStatus,
+        tagName,
         ...queryParams
     }: { workspaceId: string } & TQueryParam & {
         limit?: number;
         offset?: number;
         deleteStatus?: number;
         instanceDeleteStatus?: number;
+        tagName?: string;
     }) {
-        const query = this.buildBaseQuery(workspaceId, deleteStatus);
+        const query = this.buildBaseQuery(workspaceId, deleteStatus, tagName);
 
         if (instanceDeleteStatus !== undefined) {
             this.applyInstanceDeleteStatusFilter(query, instanceDeleteStatus);
@@ -44,7 +47,8 @@ export abstract class BaseDicomSearchQueryBuilder<
 
     protected abstract buildBaseQuery(
         workspaceId: string,
-        deleteStatus?: number
+        deleteStatus?: number,
+        tagName?: string
     ): SelectQueryBuilder<TEntity>;
     
     protected abstract getSearchFields(): readonly TFieldConfig[];
@@ -152,5 +156,48 @@ export abstract class BaseDicomSearchQueryBuilder<
             sql: remappedSql,
             parameters: remappedParameters,
         };
+    }
+
+    protected applyTagJoin(
+        query: SelectQueryBuilder<TEntity>,
+        targetType: "study" | "series" | "instance",
+        tagName?: string
+    ): void {
+        if (!tagName) return;
+
+        let targetIdField: string;
+
+        switch (targetType) {
+            case "study":
+                targetIdField = `study."studyInstanceUid"`;
+                break;
+            case "series":
+                targetIdField = `series."seriesInstanceUid"`;
+                break;
+            case "instance":
+                targetIdField = `instance."sopInstanceUid"`;
+                break;
+            default:
+                throw new Error(`Invalid target type: ${targetType}`);
+        }
+
+        query.innerJoin(
+            "tag_assignment",
+            "tag_assignment",
+            `tag_assignment.targetType = :targetType AND tag_assignment.targetId = ${targetIdField}`,
+            { targetType }
+        )
+        .innerJoin("tag", "tag", "tag.id = tag_assignment.tagId")
+    }
+
+    protected applyTagFilter(
+        query: SelectQueryBuilder<TEntity>,
+        tagName?: string
+    ): void {
+        if (!tagName) return;
+
+        const stringQueryStrategy = new StringQueryStrategy();
+        const tagQuery = stringQueryStrategy.buildQuery("tag", "name", tagName);
+        query.andWhere(tagQuery.sql, tagQuery.parameters);
     }
 }

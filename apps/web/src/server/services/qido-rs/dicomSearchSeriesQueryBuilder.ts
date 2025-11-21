@@ -24,8 +24,9 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
     protected buildBaseQuery(
         workspaceId: string,
         deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
+        tagName?: string,
     ): SelectQueryBuilder<SeriesEntity> {
-        return this.entityManager
+        const query = this.entityManager
             .createQueryBuilder(SeriesEntity, this.seriesTable)
             .innerJoin("study", "study", "study.id = series.localStudyId")
             .innerJoin("patient", "patient", "patient.id = study.patientId")
@@ -34,8 +35,14 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
                 "patientName",
                 "patientName.id = patient.patientNameId",
             )
-            .where("series.workspaceId = :workspaceId", { workspaceId })
-            .andWhere("series.deleteStatus = :deleteStatus", { deleteStatus });
+
+        this.applyTagJoin(query, "series", tagName);
+        query.where("series.workspaceId = :workspaceId", { workspaceId })
+        .andWhere("series.deleteStatus = :deleteStatus", { deleteStatus });
+
+        this.applyTagFilter(query, tagName);
+
+        return query;
     }
 
     async getSeriesWithRelatedCounts({

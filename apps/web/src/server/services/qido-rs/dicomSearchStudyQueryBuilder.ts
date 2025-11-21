@@ -25,8 +25,9 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
     protected buildBaseQuery(
         workspaceId: string,
         deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
+        tagName?: string
     ): SelectQueryBuilder<StudyEntity> {
-        return this.entityManager
+        const query = this.entityManager
             .createQueryBuilder(StudyEntity, this.studyTable)
             .innerJoin("patient", "patient", "patient.id = study.patientId")
             .innerJoin(
@@ -34,8 +35,13 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
                 "patientName",
                 "patientName.id = patient.patientNameId",
             )
-            .where("study.workspaceId = :workspaceId", { workspaceId })
-            .andWhere("study.deleteStatus = :deleteStatus", { deleteStatus });
+            
+        this.applyTagJoin(query, "study", tagName);
+        query.where("study.workspaceId = :workspaceId", { workspaceId })
+        .andWhere("study.deleteStatus = :deleteStatus", { deleteStatus });
+        this.applyTagFilter(query, tagName);
+
+        return query;
     }
 
     async getStudiesWithRelatedCounts({
@@ -44,6 +50,7 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
         offset = 0,
         deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
         instanceDeleteStatus,
+        tagName,
         ...queryParams
     }: {
         workspaceId: string;
@@ -52,6 +59,7 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
         offset?: number;
         deleteStatus?: number;
         instanceDeleteStatus?: number;
+        tagName?: string;
     }): Promise<StudyQueryResult[]> {
         const studies = await this.execQuery({
             workspaceId,
@@ -59,6 +67,7 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
             offset,
             deleteStatus,
             instanceDeleteStatus,
+            tagName,
             ...queryParams
         });
 
