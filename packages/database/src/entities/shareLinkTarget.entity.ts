@@ -32,7 +32,7 @@ export class ShareLinkTargetEntity {
     @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
-    @ManyToOne("share_link", "targets", { onDelete: "CASCADE" })
+    @ManyToOne("ShareLinkEntity", "targets", { onDelete: "CASCADE" })
     @JoinColumn({ name: "shareLinkId", referencedColumnName: "id" })
     shareLink!: ShareLinkEntity;
 }

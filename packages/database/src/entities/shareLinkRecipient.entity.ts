@@ -9,6 +9,7 @@ import {
     UpdateDateColumn
 } from "typeorm";
 import { getDateTimeType } from "../utils/getDateTimeType";
+import type { ShareLinkEntity } from "./shareLink.entity";
 import type { UserEntity } from "./user.entity";
 
 @Entity("share_link_recipient")
@@ -32,7 +33,11 @@ export class ShareLinkRecipientEntity {
     @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
-    @ManyToOne("user", { onDelete: "CASCADE" })
+    @ManyToOne("ShareLinkEntity", "recipients", { onDelete: "CASCADE" })
+    @JoinColumn({ name: "shareLinkId", referencedColumnName: "id" })
+    shareLink!: ShareLinkEntity;
+
+    @ManyToOne("UserEntity", { onDelete: "CASCADE" })
     @JoinColumn({ name: "userId", referencedColumnName: "id" })
     user!: UserEntity;
 }

@@ -64,13 +64,13 @@ export class ShareLinkEntity {
     @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
-    @OneToMany("share_link_target", "shareLinkId", { cascade: true })
+    @OneToMany("ShareLinkTargetEntity", "shareLink", { cascade: true })
     targets!: ShareLinkTargetEntity[];
 
-    @OneToMany("share_link_recipient", "shareLinkId", { cascade: true })
+    @OneToMany("ShareLinkRecipientEntity", "shareLink", { cascade: true })
     recipients!: ShareLinkRecipientEntity[];
 
-    @ManyToOne("user", { nullable: true })
+    @ManyToOne("UserEntity", { nullable: true })
     @JoinColumn({ name: "creatorId", referencedColumnName: "id" })
     creator!: UserEntity;
 }
