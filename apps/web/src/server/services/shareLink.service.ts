@@ -272,22 +272,11 @@ export class ShareLinkService {
 
         if (!shareLink) return null;
 
-        if (shareLink.creatorId !== options.creatorId) {
-            const workspaceMemberToUpdateShareLink = await this.entityManager.findOne(UserWorkspaceEntity, {
-                where: {
-                    workspaceId: shareLink.workspaceId,
-                    userId: options.creatorId
-                }
-            });
-
-            if (!workspaceMemberToUpdateShareLink || 
-                !hasPermission(workspaceMemberToUpdateShareLink.permissions, WORKSPACE_PERMISSIONS.MANAGE)
-            ) {
-                throw new HTTPException(403, {
-                    message: "You do not have permission to update this share link",
-                });
-            }
-        }
+        this.verifyShareLinkOperator({
+            shareLink,
+            workspaceId: shareLink.workspaceId,
+            userId: options.creatorId,
+        });
 
         if (options.publicPermissions !== undefined) {
             shareLink.publicPermissions = options.publicPermissions;
@@ -431,5 +420,48 @@ export class ShareLinkService {
         .getMany();
 
         return shareLinks;
+    }
+
+    async deleteShareLink(options: {
+        shareLinkId: string;
+        workspaceId: string;
+        creatorId: string;
+    }) {
+        const shareLink = await this.entityManager.findOne(ShareLinkEntity, {
+            where: { id: options.shareLinkId, workspaceId: options.workspaceId },
+        });
+
+        if (!shareLink) return false;
+
+        this.verifyShareLinkOperator({
+            shareLink,
+            workspaceId: shareLink.workspaceId,
+            userId: options.creatorId,
+        });
+
+
+        await this.entityManager.remove(ShareLinkEntity, shareLink);
+        return true;
+    }
+
+    private async verifyShareLinkOperator(options: {
+        shareLink: ShareLinkEntity;
+        workspaceId: string;
+        userId: string;
+    }) {
+        if (options.shareLink.creatorId !== options.userId) {
+            const workspaceMember = await this.entityManager.findOne(UserWorkspaceEntity, {
+                where: {
+                    workspaceId: options.workspaceId,
+                    userId: options.userId,
+                }
+            });
+
+            if (!workspaceMember || !hasPermission(workspaceMember.permissions, WORKSPACE_PERMISSIONS.MANAGE)) {
+                throw new HTTPException(403, {
+                    message: "You do not have permission to delete this share link",
+                });
+            }
+        }
     }
 }

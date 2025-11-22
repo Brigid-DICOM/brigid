@@ -68,8 +68,6 @@ const verifyPasswordRoute = new Hono().post(
                 );
             }
 
-            await shareLinkService.incrementAccessCount(shareLink.id);
-
             return c.json(
                 {
                     ok: true,
