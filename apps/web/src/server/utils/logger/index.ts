@@ -21,7 +21,8 @@ const customConsoleFormat = printf(({ level, message, label, timestamp, stack, .
         return arg;
     }).join(", ");
 
-    return `[${timestamp}] [${label}] [${level}] ${message} ${argString}`;
+    const text = `[${timestamp}] [${label}] [${level}] ${message} ${argString}`;
+    return stack ? `${text}\n${stack}` : text;
 });
 
 loggers.add("brigid", {
