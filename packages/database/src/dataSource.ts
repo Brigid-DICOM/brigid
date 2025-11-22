@@ -9,6 +9,9 @@ import { PersonNameEntity } from "./entities/personName.entity";
 import { SeriesEntity } from "./entities/series.entity";
 import { SeriesRequestAttributesEntity } from "./entities/seriesRequestAttributes.entity";
 import { SessionEntity } from "./entities/session.entity";
+import { ShareLinkEntity } from "./entities/shareLink.entity";
+import { ShareLinkRecipientEntity } from "./entities/shareLinkRecipient.entity";
+import { ShareLinkTargetEntity } from "./entities/shareLinkTarget.entity";
 import { StudyEntity } from "./entities/study.entity";
 import { TagEntity } from "./entities/tag.entity";
 import { TagAssignmentEntity } from "./entities/tagAssignment.entity";
@@ -37,7 +40,10 @@ export const AppDataSource = new DataSource({
         DicomCodeSequenceEntity,
         SeriesRequestAttributesEntity,
         TagEntity,
-        TagAssignmentEntity
+        TagAssignmentEntity,
+        ShareLinkEntity,
+        ShareLinkRecipientEntity,
+        ShareLinkTargetEntity
     ],
     subscribers: [
         SeriesSubscriber,
