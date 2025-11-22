@@ -3,6 +3,7 @@ import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import { ShareLinkEntity } from "@brigid/database/src/entities/shareLink.entity";
 import { ShareLinkRecipientEntity } from "@brigid/database/src/entities/shareLinkRecipient.entity";
 import { ShareLinkTargetEntity } from "@brigid/database/src/entities/shareLinkTarget.entity";
+import { UserWorkspaceEntity } from "@brigid/database/src/entities/userWorkspace.entity";
 import { pbkdf2, randomBytes, timingSafeEqual } from "crypto";
 import { addSeconds } from "date-fns";
 import { HTTPException } from "hono/http-exception";
@@ -14,6 +15,7 @@ import {
     SHARE_PERMISSIONS,
     type SharePermissionsType,
 } from "../const/share.const";
+import { WORKSPACE_PERMISSIONS } from "../const/workspace.const";
 import { hasPermission } from "../utils/sharePermissions";
 import { DicomSearchSeriesQueryBuilder } from "./qido-rs/dicomSearchSeriesQueryBuilder";
 import { DicomSearchStudyQueryBuilder } from "./qido-rs/dicomSearchStudyQueryBuilder";
@@ -268,10 +270,23 @@ export class ShareLinkService {
             relations: ["recipients"],
         });
 
-        if (shareLink?.creatorId !== options.creatorId) {
-            throw new HTTPException(403, {
-                message: "You are not the creator of this share link",
+        if (!shareLink) return null;
+
+        if (shareLink.creatorId !== options.creatorId) {
+            const workspaceMemberToUpdateShareLink = await this.entityManager.findOne(UserWorkspaceEntity, {
+                where: {
+                    workspaceId: shareLink.workspaceId,
+                    userId: options.creatorId
+                }
             });
+
+            if (!workspaceMemberToUpdateShareLink || 
+                !hasPermission(workspaceMemberToUpdateShareLink.permissions, WORKSPACE_PERMISSIONS.MANAGE)
+            ) {
+                throw new HTTPException(403, {
+                    message: "You do not have permission to update this share link",
+            });
+            }
         }
 
         if (options.publicPermissions !== undefined) {
