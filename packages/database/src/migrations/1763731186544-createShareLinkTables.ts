@@ -1,5 +1,5 @@
 import { type MigrationInterface, type QueryRunner, Table } from "typeorm";
-import { getDateTimeType } from "@/utils/getDateTimeType";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import { enableUuidExtension, getNowColumn, getUuidColumn, getUuidReferenceColumn } from "./helper";
 
 export class CreateShareLinkTables1763731186544 implements MigrationInterface {
@@ -172,7 +172,7 @@ export class CreateShareLinkTables1763731186544 implements MigrationInterface {
                         ...getUuidColumn(queryRunner, "id")
                     },
                     {
-                        ...getUuidReferenceColumn(queryRunner, "shareLinkId ")
+                        ...getUuidReferenceColumn(queryRunner, "shareLinkId")
                     },
                     {
                         ...getUuidReferenceColumn(queryRunner, "userId")
