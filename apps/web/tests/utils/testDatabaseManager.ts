@@ -7,6 +7,9 @@ import { PersonNameEntity } from "@brigid/database/src/entities/personName.entit
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import { SeriesRequestAttributesEntity } from "@brigid/database/src/entities/seriesRequestAttributes.entity";
 import { SessionEntity } from "@brigid/database/src/entities/session.entity";
+import { ShareLinkEntity } from "@brigid/database/src/entities/shareLink.entity";
+import { ShareLinkRecipientEntity } from "@brigid/database/src/entities/shareLinkRecipient.entity";
+import { ShareLinkTargetEntity } from "@brigid/database/src/entities/shareLinkTarget.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { TagEntity } from "@brigid/database/src/entities/tag.entity";
 import { TagAssignmentEntity } from "@brigid/database/src/entities/tagAssignment.entity";
@@ -42,6 +45,9 @@ export class TestDatabaseManager {
                 SeriesRequestAttributesEntity,
                 TagEntity,
                 TagAssignmentEntity,
+                ShareLinkEntity,
+                ShareLinkTargetEntity,
+                ShareLinkRecipientEntity
             ],
             synchronize: true,
             logging: false,
@@ -64,6 +70,9 @@ export class TestDatabaseManager {
     }
 
     async clearDatabase() {
+        await this.dataSource.manager.clear(ShareLinkRecipientEntity);
+        await this.dataSource.manager.clear(ShareLinkTargetEntity);
+        await this.dataSource.manager.clear(ShareLinkEntity);
         await this.dataSource.manager.clear(TagAssignmentEntity);
         await this.dataSource.manager.clear(TagEntity);
         await this.dataSource.manager.clear(InstanceEntity);
