@@ -56,7 +56,7 @@ export class ShareLinkService {
         });
     }
 
-    private async verifyPassword(password: string, hash: string) {
+    async verifyPassword(password: string, hash: string) {
         return new Promise((resolve, reject) => {
             const [iterations, salt, originalHash] = hash.split(":");
 
@@ -285,7 +285,7 @@ export class ShareLinkService {
             ) {
                 throw new HTTPException(403, {
                     message: "You do not have permission to update this share link",
-            });
+                });
             }
         }
 
@@ -399,18 +399,37 @@ export class ShareLinkService {
         await this.entityManager.save(ShareLinkRecipientEntity, recipients);
     }
 
-    async validatePassword(options: { token: string; password: string }) {
+    async incrementAccessCount(shareLinkId: string) {
         const shareLink = await this.entityManager.findOne(ShareLinkEntity, {
-            where: { token: options.token },
+            where: { id: shareLinkId },
         });
 
-        if (!shareLink) return false;
-        if (!shareLink?.requiredPassword || !shareLink?.passwordHash)
-            return false;
+        if (!shareLink) return null;
 
-        return await this.verifyPassword(
-            options.password,
-            shareLink.passwordHash,
-        );
+        shareLink.accessCount += 1;
+        shareLink.lastAccessedAt = new Date();
+        return await this.entityManager.save(ShareLinkEntity, shareLink);
+    }
+
+    async getUserShareLinks(options: {
+        userId: string;
+        workspaceId: string;
+    }) {
+        const shareLinks = await this.entityManager
+        .createQueryBuilder(ShareLinkEntity, "shareLink")
+        .leftJoinAndSelect("shareLink.targets", "targets")
+        .leftJoinAndSelect("shareLink.recipients", "recipients")
+        .where("shareLink.workspaceId = :workspaceId", { workspaceId: options.workspaceId })
+        .andWhere(
+            (subQuery) => {
+                return subQuery
+                .where("shareLink.creatorId = :userId", { userId: options.userId })
+                .orWhere("recipients.userId = :userId", { userId: options.userId });
+            }
+        )
+        .orderBy("shareLink.createdAt", "DESC")
+        .getMany();
+
+        return shareLinks;
     }
 }
