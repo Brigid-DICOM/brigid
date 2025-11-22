@@ -8,7 +8,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
-import { getDateTimeType } from "@/utils/getDateTimeType";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { ShareLinkRecipientEntity } from "./shareLinkRecipient.entity";
 import type { ShareLinkTargetEntity } from "./shareLinkTarget.entity";
 import type { UserEntity } from "./user.entity";

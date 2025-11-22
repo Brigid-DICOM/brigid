@@ -8,7 +8,7 @@ import {
     Unique, 
     UpdateDateColumn
 } from "typeorm";
-import { getDateTimeType } from "@/utils/getDateTimeType";
+import { getDateTimeType } from "../utils/getDateTimeType";
 import type { ShareLinkEntity } from "./shareLink.entity";
 
 @Entity("share_link_target")
