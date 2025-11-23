@@ -1,7 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+    const url = request.nextUrl;
     const nextAuthCookie = request.cookies.get("authjs.session-token");
+
+    if (url.pathname.startsWith("/auth/signin")) {
+        if (nextAuthCookie) {
+            return NextResponse.redirect(new URL("/", request.url));
+        }
+        return NextResponse.next();
+    }
 
     if (!nextAuthCookie) {
         return NextResponse.redirect(new URL("/auth/signin", request.url));
@@ -28,5 +36,6 @@ export const config = {
         "/dicom-recycle/:path*",
         "/dicom-upload/:path*",
         "/dicom-studies/:path*",
+        "/auth/signin"
     ]
 }
