@@ -38,11 +38,11 @@ export class UserWorkspaceEntity {
     @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
-    @ManyToOne("user", "user_workspace", { onDelete: "CASCADE" })
+    @ManyToOne("user", "userWorkspaces", { onDelete: "CASCADE" })
     @JoinColumn({ name: "userId", referencedColumnName: "id" })
     user!: UserEntity;
 
-    @ManyToOne("workspace", "user_workspace", { onDelete: "CASCADE" })
+    @ManyToOne("workspace", "members", { onDelete: "CASCADE" })
     @JoinColumn({ name: "workspaceId", referencedColumnName: "id" })
     workspace!: WorkspaceEntity;
 }

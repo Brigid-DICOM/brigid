@@ -1,10 +1,8 @@
-import { TypeORMAdapter } from "@auth/typeorm-adapter";
 import { AppDataSource } from "@brigid/database/src/dataSource";
 import { AccountEntity } from "@brigid/database/src/entities/account.entity";
 import { SessionEntity } from "@brigid/database/src/entities/session.entity";
 import { UserEntity } from "@brigid/database/src/entities/user.entity";
 import { VerificationTokenEntity } from "@brigid/database/src/entities/verificationToken.entity";
-import { parseDataSourceConfig } from "@brigid/database/src/utils/parseDataSourceConfig";
 import env from "@brigid/env";
 import { authHandler, initAuthConfig } from "@hono/auth-js";
 import { swaggerUI } from "@hono/swagger-ui";
@@ -12,8 +10,10 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import { openAPIRouteHandler } from "hono-openapi";
 import CasdoorProvider from "@/lib/auth/providers/casdoor";
+import { TypeORMAdapter } from "@/lib/auth/typeorm-adapter";
 import guestRoute from "@/server/routes/guest.route";
 import helloRoute from "@/server/routes/hello.route";
+import userRoute from "@/server/routes/user.route";
 import workspacesRoute from "@/server/routes/workspaces/workspaces.route";
 import { WorkspaceService } from "@/server/services/workspace.service";
 
@@ -42,17 +42,19 @@ export const app = new Hono()
         if (env.NEXT_PUBLIC_ENABLE_AUTH) {
             return initAuthConfig(() => ({
                 basePath: "/api/auth",
+                pages: {
+                    signIn: "/auth/signin"
+                },
                 secret: env.NEXTAUTH_SECRET,
                 providers: [getAuthProvider()],
-                adapter: TypeORMAdapter({
-                    ...parseDataSourceConfig(env.TYPEORM_CONNECTION),
-                    entities: [
+                adapter: TypeORMAdapter(AppDataSource.options, {
+                    entities: {
+                        ...AppDataSource.options.entities,
                         AccountEntity,
                         UserEntity,
                         SessionEntity,
                         VerificationTokenEntity,
-                    ],
-                    synchronize: false,
+                    },
                 }),
                 callbacks: {
                     session: async ({ session }) => {
@@ -91,7 +93,11 @@ export const app = new Hono()
     })
     .route("/hello", helloRoute)
     .route("/", workspacesRoute)
-    .route("/", guestRoute)
+    .route("/", userRoute)
+
+if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
+    app.route("/", guestRoute);
+}
 
 app.get(
     "/openapi.json",

@@ -35,12 +35,12 @@ export class UserEntity {
     @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
 
-    @OneToMany("account", "userId")
+    @OneToMany("AccountEntity", "user")
     accounts!: AccountEntity[];
 
-    @OneToMany("session", "userId")
+    @OneToMany("SessionEntity", "user")
     sessions!: SessionEntity[];
 
-    @OneToMany("user_workspace", "userId")
+    @OneToMany("UserWorkspaceEntity", "user")
     userWorkspaces!: UserWorkspaceEntity[];
 }

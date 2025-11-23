@@ -33,6 +33,6 @@ export class WorkspaceEntity {
     @JoinColumn({ name: "ownerId", referencedColumnName: "id" })
     owner!: UserEntity;
 
-    @OneToMany("user_workspace", "workspaceId")
+    @OneToMany("UserWorkspaceEntity", "workspace")
     members!: UserWorkspaceEntity[];
 }
