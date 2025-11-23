@@ -72,28 +72,34 @@ export default function HomeContent() {
                             </Carousel>
                         </div>
                     ): (
-                        <div className="flex flex-wrap gap-4 justify-between w-full">
-                            {dicomStats?.modalities?.map((modality: { modality: string; count: number }) => (
-                                <div 
-                                    key={modality.modality} 
-                                    className={cn(
-                                        "border border-border",
-                                        "flex flex-col flex-1 p-8",
-                                        "bg-card hover:bg-accent",
-                                        "rounded-lg hover:shadow-md"
-                                    )}
-                                >
-                                    <h3 className="text-3xl font-semibold mb-2 text-foreground">
-                                        {modality.modality}
-                                    </h3>
-                                    <div className="flex-1 flex items-center justify-center">
-                                        <p className="text-6xl font-bold text-primary">
-                                            {modality.count}
-                                        </p>
+                        (dicomStats?.modalities && dicomStats.modalities.length > 0) ? (
+                                <div className="flex flex-wrap gap-4 justify-between w-full">
+                                {dicomStats?.modalities?.map((modality: { modality: string; count: number }) => (
+                                    <div 
+                                        key={modality.modality} 
+                                        className={cn(
+                                            "border border-border",
+                                            "flex flex-col flex-1 p-8",
+                                            "bg-card hover:bg-accent",
+                                            "rounded-lg hover:shadow-md"
+                                        )}
+                                    >
+                                        <h3 className="text-3xl font-semibold mb-2 text-foreground">
+                                            {modality.modality}
+                                        </h3>
+                                        <div className="flex-1 flex items-center justify-center">
+                                            <p className="text-6xl font-bold text-primary">
+                                                {modality.count}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center flex-1">
+                                <p className="text-2xl font-semibold mb-2 text-foreground">No modalities found</p>
+                            </div>
+                        )
                     )}
                 </div>
 
