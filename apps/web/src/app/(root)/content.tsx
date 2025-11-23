@@ -8,7 +8,9 @@ import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
 
 export default function HomeContent() {
     const { data: defaultWorkspace } = useQuery(getDefaultWorkspaceQuery());
-    const { data: dicomStats } = useQuery(getDicomStatsQuery(defaultWorkspace?.workspace?.id ?? ""));
+    const { data: dicomStats } = useQuery(getDicomStatsQuery({ 
+        workspaceId: defaultWorkspace?.workspace?.id ?? "", 
+    }));
 
     const useCarousel = (dicomStats?.modalities?.length ?? 0) > 3;
 

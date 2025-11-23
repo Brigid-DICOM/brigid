@@ -1,4 +1,5 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { cookies } from "next/headers";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
@@ -15,7 +16,9 @@ export default async function DicomInstancesSeriesPage({ params }: DicomInstance
     const { studyInstanceUid, seriesInstanceUid } = await params;
 
     const queryClient = getQueryClient();
-    const defaultWorkspace = await queryClient.fetchQuery(getDefaultWorkspaceQuery());
+    const defaultWorkspace = await queryClient.fetchQuery(getDefaultWorkspaceQuery(
+        cookieStore.toString()
+    ));
 
     await queryClient.prefetchQuery(
         getDicomInstanceQuery({
@@ -24,6 +27,7 @@ export default async function DicomInstancesSeriesPage({ params }: DicomInstance
             seriesInstanceUid: seriesInstanceUid,
             offset: 0,
             limit: 10,
+            cookie: cookieStore.toString()
         })
     );
 
