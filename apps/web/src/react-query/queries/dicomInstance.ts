@@ -9,6 +9,7 @@ export interface DicomInstanceQueryParams {
     offset?: number;
     limit?: number;
     deleteStatus?: number;
+    cookie?: string;
 }
 
 export const getDicomInstanceQuery = ({
@@ -18,6 +19,7 @@ export const getDicomInstanceQuery = ({
     offset = 0,
     limit = 10,
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+    cookie,
     ...searchConditions
 }: DicomInstanceQueryParams) =>
     queryOptions({
@@ -32,6 +34,11 @@ export const getDicomInstanceQuery = ({
             ...Object.keys(searchConditions),
         ],
         queryFn: async () => {
+            const headers: HeadersInit = {};
+            if (typeof window === "undefined" && typeof cookie === "string") {
+                headers.cookie = cookie;
+            }
+
             const response = await apiClient.api.workspaces[
                 ":workspaceId"
             ].studies[":studyInstanceUid"].series[
@@ -55,6 +62,8 @@ export const getDicomInstanceQuery = ({
                         ),
                     ),
                 },
+            }, {
+                headers: headers
             });
 
             if (!response.ok) {

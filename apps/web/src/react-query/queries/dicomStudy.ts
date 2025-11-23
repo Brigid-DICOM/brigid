@@ -7,6 +7,7 @@ export interface DicomStudyQueryParams {
     offset?: number;
     limit?: number;
     deleteStatus?: number;
+    cookie?: string;
 }
 
 export const getDicomStudyQuery = ({
@@ -14,10 +15,16 @@ export const getDicomStudyQuery = ({
     offset = 0,
     limit = 10,
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+    cookie,
     ...searchParams
 }: DicomStudyQueryParams) => queryOptions({
     queryKey: ["dicom-study", workspaceId, offset, limit, deleteStatus, ...Object.keys(searchParams)],
     queryFn: async () => {
+        const headers: HeadersInit = {};
+        if (typeof window === "undefined" && typeof cookie === "string") {
+            headers.cookie = cookie;
+        }
+
         const response = await apiClient.api.workspaces[":workspaceId"].studies.$get({
             param: {
                 workspaceId,
@@ -32,6 +39,8 @@ export const getDicomStudyQuery = ({
                     )
                 )
             }
+        }, {
+            headers: headers
         });
 
         if (!response.ok) {

@@ -8,6 +8,7 @@ export interface DicomSeriesQueryParams {
     offset?: number;
     limit?: number;
     deleteStatus?: number;
+    cookie?: string;
 }
 
 export const getDicomSeriesQuery = ({
@@ -16,10 +17,16 @@ export const getDicomSeriesQuery = ({
     offset = 0,
     limit = 10,
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+    cookie,
     ...searchConditions
 }: DicomSeriesQueryParams) => queryOptions({
     queryKey: ["dicom-series", workspaceId, studyInstanceUid, offset, limit, deleteStatus, ...Object.keys(searchConditions)],
     queryFn: async () => {
+        const headers: HeadersInit = {};
+        if (typeof window === "undefined" && typeof cookie === "string") {
+            headers.cookie = cookie;
+        }
+
         const response = await apiClient.api.workspaces[":workspaceId"].studies[":studyInstanceUid"].series.$get({
             param: {
                 workspaceId,
@@ -35,6 +42,8 @@ export const getDicomSeriesQuery = ({
                     )
                 )
             }
+        }, {
+            headers: headers
         });
 
         if (!response.ok) {
