@@ -13,6 +13,7 @@ interface DicomInstancesPageProps {
 }
 
 export default async function DicomInstancesSeriesPage({ params }: DicomInstancesPageProps) {
+    const cookieStore = await cookies();
     const { studyInstanceUid, seriesInstanceUid } = await params;
 
     const queryClient = getQueryClient();
