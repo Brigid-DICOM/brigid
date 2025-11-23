@@ -9,8 +9,12 @@ import DicomUploadContent from "./content";
 export default async function DicomUploadPage() {
     const cookieStore = await cookies();
     const queryClient = getQueryClient();
-    const session = await queryClient.fetchQuery(authSessionQuery(cookieStore.toString()));
-    const defaultWorkspace = await queryClient.fetchQuery(getDefaultWorkspaceQuery());
+    const session = await queryClient.fetchQuery(
+        authSessionQuery(cookieStore.toString()),
+    );
+    const defaultWorkspace = await queryClient.fetchQuery(
+        getDefaultWorkspaceQuery(cookieStore.toString()),
+    );
 
     if (!session) {
         return redirect("/api/auth/signin");
@@ -20,5 +24,5 @@ export default async function DicomUploadPage() {
         <HydrationBoundary state={dehydrate(queryClient)}>
             <DicomUploadContent workspaceId={defaultWorkspace?.workspace?.id} />
         </HydrationBoundary>
-    )
+    );
 }
