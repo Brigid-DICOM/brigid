@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import Image from "next/image";
 import type { ComponentProps } from "react";
 import { getQueryClient } from "@/react-query/get-query-client";
@@ -7,8 +8,11 @@ import { NavUser } from "./nav-user";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 
 export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
+    const cookieStore = await cookies();
     const queryClient = getQueryClient();
-    const session = await queryClient.fetchQuery(authSessionQuery());
+    const session = await queryClient.fetchQuery(authSessionQuery(
+        cookieStore.toString()
+    ));
 
     const user = session?.user;
 
