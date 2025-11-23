@@ -14,7 +14,7 @@ export function NavMain() {
                     >
                         <SidebarMenuButton tooltip="Dashboard">
                             <GaugeIcon className="size-4" />
-                            <Link href="/">Dashboard</Link>
+                            <Link href="/" className="w-full">Dashboard</Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
@@ -23,7 +23,7 @@ export function NavMain() {
                     >
                         <SidebarMenuButton tooltip="DICOM Instances Management">
                             <DatabaseIcon className="size-4" />
-                            <Link href="/dicom-studies">DICOM Instances</Link>
+                            <Link href="/dicom-studies" className="w-full">DICOM Instances</Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
@@ -32,14 +32,14 @@ export function NavMain() {
                     >
                         <SidebarMenuButton tooltip="DICOM Recycle">
                             <Trash2Icon className="size-4" />
-                            <Link href="/dicom-recycle/studies">DICOM Recycle</Link>
+                            <Link href="/dicom-recycle/studies" className="w-full">DICOM Recycle</Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
                     <SidebarMenuItem key="dicom upload">
                         <SidebarMenuButton tooltip={"Upload DICOM"}>
                             <UploadIcon className="size-4" />
-                            <Link href="/dicom-upload">Upload DICOM</Link>
+                            <Link href="/dicom-upload" className="w-full">Upload DICOM</Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
