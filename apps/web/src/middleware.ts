@@ -1,0 +1,32 @@
+import { type NextRequest, NextResponse } from "next/server";
+
+export async function middleware(request: NextRequest) {
+    const nextAuthCookie = request.cookies.get("authjs.session-token");
+
+    if (!nextAuthCookie) {
+        return NextResponse.redirect(new URL("/auth/signin", request.url));
+    }
+
+    const session = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`, {
+        headers: {
+            Cookie: request.cookies.toString()
+        }
+    });
+
+    const sessionData = await session.json();
+
+    if (!sessionData || !sessionData.user) {
+        return NextResponse.redirect(new URL("/auth/signin", request.url));
+    }
+
+    return NextResponse.next();
+}
+
+export const config = {
+    matcher: [
+        "/",
+        "/dicom-recycle/:path*",
+        "/dicom-upload/:path*",
+        "/dicom-studies/:path*",
+    ]
+}
