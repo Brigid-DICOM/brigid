@@ -1,6 +1,7 @@
 "use client";
 
 import { EllipsisVerticalIcon, LogOutIcon } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "./ui/sidebar";
@@ -63,6 +64,7 @@ export function NavUser({ user }: {
                         {process.env.NEXT_PUBLIC_ENABLE_AUTH && (
                             <DropdownMenuItem>
                                 <LogOutIcon className="mr-2 size-4" />
+                                <Link href="/api/auth/signout">Sign Out</Link>
                             </DropdownMenuItem>
                         )}
                     </DropdownMenuContent>
