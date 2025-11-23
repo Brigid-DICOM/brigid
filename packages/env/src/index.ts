@@ -14,6 +14,13 @@ const booleanFromEnv = z.preprocess((val) => {
 
 // #region Auth Schema
 
+const authSchemaBase = z.object({
+    AUTH_PROVIDER: z.enum(["casdoor"]).optional(),
+    AUTH_CASDOOR_ID: z.string().optional(),
+    AUTH_CASDOOR_SECRET: z.string().optional(),
+    AUTH_CASDOOR_ISSUER: z.string().optional()
+});
+
 const authCasdoorSchema = z.object({
     AUTH_PROVIDER: z.literal("casdoor"),
     AUTH_CASDOOR_ID: z.string(),
@@ -78,7 +85,7 @@ const baseSchema = z.object({
     QUERY_MAX_LIMIT: z.coerce.number().int().min(1).max(1000).default(100)
 });
 
-const envSchemaBase = z.intersection(baseSchema, storageSchema);
+const envSchemaBase = z.intersection(z.intersection(baseSchema, storageSchema), authSchemaBase);
 
 const envSchema = envSchemaBase.superRefine((data, ctx) => {
     if (data.NEXT_PUBLIC_ENABLE_AUTH) {
