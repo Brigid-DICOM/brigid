@@ -61,6 +61,7 @@ const createShareLinkRoute = new Hono().post(
                 password: payload.password,
                 expiresInSec: payload.expiresInSec,
                 description: payload.description,
+                recipients: payload.recipients,
             });
 
             return c.json(

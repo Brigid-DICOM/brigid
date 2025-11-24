@@ -108,6 +108,7 @@ export class ShareLinkService {
         password?: string;
         expiresInSec?: number;
         description?: string;
+        recipients?: Array<{ userId: string; permissions: number }>;
     }) {
         const shareLink = new ShareLinkEntity();
         shareLink.token = this.generateToken();
@@ -144,6 +145,18 @@ export class ShareLinkService {
         });
 
         await this.entityManager.save(ShareLinkTargetEntity, targets);
+
+        if (options.recipients) {
+            const recipients = options.recipients.map((recipient) => {
+                const recipientEntity = new ShareLinkRecipientEntity();
+                recipientEntity.shareLinkId = savedShareLink.id;
+                recipientEntity.userId = recipient.userId;
+                recipientEntity.permissions = recipient.permissions;
+                return recipientEntity;
+            });
+
+            await this.entityManager.save(ShareLinkRecipientEntity, recipients);
+        }
 
         return savedShareLink;
     }
@@ -495,7 +508,7 @@ export class ShareLinkService {
             },
             skip: (options.page - 1) * options.limit,
             take: options.limit,
-            relations: ["targets", "recipients", "creator"],
+            relations: ["targets", "recipients", "creator", "recipients.user"],
             order: {
                 updatedAt: "DESC",
             },
