@@ -520,4 +520,35 @@ export class ShareLinkService {
             total,
         };
     }
+
+    async getTargetShareLinkCount(options: {
+        targetType: "study" | "series" | "instance";
+        targetIds: string[];
+        workspaceId: string;
+        userId: string;
+    }) {
+        const workspaceMember = await this.entityManager.findOne(UserWorkspaceEntity, {
+            where: {
+                workspaceId: options.workspaceId,
+                userId: options.userId,
+            }
+        });
+
+        if (!workspaceMember || !hasPermission(workspaceMember.permissions, WORKSPACE_PERMISSIONS.MANAGE)) {
+            throw new HTTPException(403, {
+                message: "You do not have permission to access this target share links",
+            });
+        }
+
+        const count = await this.entityManager.count(ShareLinkEntity, {
+            where: {
+                targets: {
+                    targetType: options.targetType,
+                    targetId: In(options.targetIds),
+                },
+            },
+        });
+
+        return count;
+    }
 }

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import createShareLinkRoute from "./createShareLink.route";
 import deleteShareLinkRoute from "./deleteShareLink.route";
 import getShareLinksRoute from "./getShareLinks.route";
+import getTargetShareLinkCountRoute from "./getTargetShareLinkCount.route";
 import getTargetShareLinksRoute from "./getTargetShareLinks.route";
 import publicShareLinkRoute from "./publicShareLink.route";
 import updateShareLinkRoute from "./updateShareLink.route";
@@ -15,5 +16,6 @@ const shareLinkRoute = new Hono()
 .route("/", deleteShareLinkRoute)
 .route("/", publicShareLinkRoute)
 .route("/", getTargetShareLinksRoute)
+.route("/", getTargetShareLinkCountRoute)
 
 export default shareLinkRoute;

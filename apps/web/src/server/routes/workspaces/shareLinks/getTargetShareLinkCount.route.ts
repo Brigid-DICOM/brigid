@@ -11,14 +11,14 @@ import { ShareLinkService } from "@/server/services/shareLink.service";
 import { appLogger } from "@/server/utils/logger";
 
 const logger = appLogger.child({
-    module: "GetTargetShareLinksRoute",
+    module: "GetTargetShareLinkCountRoute",
 });
 
-const getTargetShareLinksRoute = new Hono().get(
-    "/workspaces/:workspaceId/share-links/:targetType",
+const getTargetShareLinkCountRoute = new Hono().get(
+    "/workspaces/:workspaceId/share-links/:targetType/count",
     describeRoute({
         description:
-            "Get all share links for a target (study, series, instance)",
+            "Get the count of share links for a target (study, series, instance)",
         tags: ["Share Links"],
     }),
     verifyAuthMiddleware,
@@ -36,7 +36,6 @@ const getTargetShareLinksRoute = new Hono().get(
     zValidator(
         "query",
         z.object({
-            page: z.coerce.number().default(1).describe("The page number"),
             targetIds: z.preprocess(
                 (val) => {
                     if (typeof val === "string") {
@@ -51,7 +50,7 @@ const getTargetShareLinksRoute = new Hono().get(
     async (c) => {
         try {
             const { workspaceId, targetType } = c.req.valid("param");
-            const { page, targetIds } = c.req.valid("query");
+            const { targetIds } = c.req.valid("query");
             const authUser = c.get("authUser");
             const userId = authUser?.user?.id;
 
@@ -67,34 +66,30 @@ const getTargetShareLinksRoute = new Hono().get(
             }
 
             const shareLinkService = new ShareLinkService();
-            const { shareLinks, hasNextPage, total } =
-                await shareLinkService.getTargetShareLinks({
-                    targetType,
-                    targetIds,
-                    workspaceId,
-                    userId,
-                    page,
-                    limit: 10,
-                });
+            const count = await shareLinkService.getTargetShareLinkCount({
+                targetType,
+                targetIds,
+                workspaceId,
+                userId,
+            });
 
             return c.json(
                 {
                     ok: true,
                     data: {
-                        shareLinks,
-                        hasNextPage,
-                        total,
+                        count,
                     },
+                    error: null,
                 },
                 200,
             );
         } catch (error) {
-            logger.error("Get target share links failed", error);
+            logger.error("Get target share link count failed", error);
             return c.json(
                 {
                     ok: false,
                     data: null,
-                    error: "Get target share links failed",
+                    error: "Get target share link count failed",
                 },
                 500,
             );
@@ -102,4 +97,4 @@ const getTargetShareLinksRoute = new Hono().get(
     },
 );
 
-export default getTargetShareLinksRoute;
+export default getTargetShareLinkCountRoute;
