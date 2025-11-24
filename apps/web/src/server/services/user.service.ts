@@ -4,6 +4,13 @@ import type { Repository } from "typeorm";
 import { v5 as uuidV5 } from "uuid";
 import { NAMESPACE_FOR_UUID } from "../const/dicom.const";
 
+interface SearchUsersOptions {
+    query: string;
+    limit?: number;
+    page?: number;
+    excludeUserIds?: string[];
+}
+
 export class UserService {
     private userRepository: Repository<UserEntity>;
 
@@ -31,5 +38,31 @@ export class UserService {
         }
 
         return user;
+    }
+
+    async searchUsers({ query, limit = 10, page = 1, excludeUserIds }: SearchUsersOptions) {
+        const offset = (page - 1) * limit;
+
+        const queryBuilder = this.userRepository.createQueryBuilder("user");
+        queryBuilder.where("(user.name ILIKE :query OR user.email ILIKE :query)", { query: `%${query}%` });
+
+        if (excludeUserIds) {
+            queryBuilder.andWhere("user.id NOT IN (:...excludeUserIds)", { excludeUserIds });
+        }
+
+        const [users, total] = await queryBuilder
+        .select(["user.id", "user.name", "user.email", "user.image"])
+        .skip(offset)
+        .take(limit).getManyAndCount();
+
+        return { 
+            users,
+            pagination: {
+                page,
+                limit,
+                total,
+                hasNextPage: offset + limit < total,
+            }
+        };
     }
 }
