@@ -7,7 +7,7 @@ import { UserWorkspaceEntity } from "@brigid/database/src/entities/userWorkspace
 import { pbkdf2, randomBytes, timingSafeEqual } from "crypto";
 import { addSeconds } from "date-fns";
 import { HTTPException } from "hono/http-exception";
-import type { EntityManager } from "typeorm";
+import { type EntityManager, In } from "typeorm";
 import {
     PBKDF2_DIGEST,
     PBKDF2_ITERATIONS,
@@ -459,9 +459,52 @@ export class ShareLinkService {
 
             if (!workspaceMember || !hasPermission(workspaceMember.permissions, WORKSPACE_PERMISSIONS.MANAGE)) {
                 throw new HTTPException(403, {
-                    message: "You do not have permission to delete this share link",
+                    message: "You do not have permission to update/delete this share link",
                 });
             }
         }
+    }
+
+    async getTargetShareLinks(options: {
+        targetType: "study" | "series" | "instance";
+        targetIds: string[];
+        workspaceId: string;
+        userId: string;
+        page: number;
+        limit: number
+    }) {
+        const workspaceMember = await this.entityManager.findOne(UserWorkspaceEntity, {
+            where: {
+                workspaceId: options.workspaceId,
+                userId: options.userId,
+            }
+        });
+
+        if (!workspaceMember || !hasPermission(workspaceMember.permissions, WORKSPACE_PERMISSIONS.MANAGE)) {
+            throw new HTTPException(403, {
+                message: "You do not have permission to access this target share links",
+            });
+        }
+
+        const [shareLinks, total] = await this.entityManager.findAndCount(ShareLinkEntity, {
+            where: {
+                targets: {
+                    targetType: options.targetType,
+                    targetId: In(options.targetIds),
+                },
+            },
+            skip: (options.page - 1) * options.limit,
+            take: options.limit,
+            relations: ["targets", "recipients", "creator"],
+            order: {
+                updatedAt: "DESC",
+            },
+        });
+
+        return {
+            shareLinks,
+            hasNextPage: total > options.page * options.limit,
+            total,
+        };
     }
 }
