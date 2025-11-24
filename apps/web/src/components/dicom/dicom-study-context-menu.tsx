@@ -2,10 +2,11 @@
 
 import { useMutation } from "@tanstack/react-query";
 import {
-    CornerDownLeftIcon, 
+    CornerDownLeftIcon,
     DownloadIcon,
     EyeIcon,
-    Trash2Icon
+    Share2Icon,
+    Trash2Icon,
 } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
@@ -18,19 +19,15 @@ import {
     ContextMenuItem,
     ContextMenuLabel,
     ContextMenuSeparator,
-    ContextMenuTrigger
+    ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import {
-    downloadMultipleStudies,
-    downloadStudy
-} from "@/lib/clientDownload";
+import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
-import {
-    useDicomStudySelectionStore
-} from "@/stores/dicom-study-selection-store";
+import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { ShareManagementDialog } from "../share/share-management-dialog";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
@@ -48,14 +45,15 @@ export function DicomStudyContextMenu({
 }: DicomStudyContextMenuProps) {
     const router = useRouter();
     const queryClient = getQueryClient();
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
+        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const [showShareManagementDialog, setShowShareManagementDialog] =
+        useState(false);
     const { open } = useBlueLightViewerStore();
 
-    const {
-        getSelectedStudyIds,
-        clearSelection
-    } = useDicomStudySelectionStore();
+    const { getSelectedStudyIds, clearSelection } =
+        useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
 
     const { mutate: recycleSelectedStudies } = useMutation({
@@ -64,7 +62,7 @@ export function DicomStudyContextMenu({
             studyIds: selectedIds,
         }),
         meta: {
-            toastId: nanoid()
+            toastId: nanoid(),
         },
         onMutate: (_, context) => {
             toast.loading("Recycling DICOM studies...", {
@@ -82,22 +80,22 @@ export function DicomStudyContextMenu({
         onError: (_, __, ___, context) => {
             toast.error("Failed to recycle DICOM studies");
             toast.dismiss(context.meta?.toastId as string);
-        }
+        },
     });
 
     const handleEnterSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
         router.push(`/dicom-studies/${studyInstanceUid}`);
-    }
+    };
 
     const handleDownloadThis = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        
+
         try {
             await downloadStudy(workspaceId, studyInstanceUid);
-        } catch(error) {
+        } catch (error) {
             console.error("Failed to download this study", error);
 
             if (error instanceof Error && error.name === "AbortError") {
@@ -108,7 +106,9 @@ export function DicomStudyContextMenu({
         }
     };
 
-    const handleDownloadSelected = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleDownloadSelected = async (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
 
@@ -125,7 +125,7 @@ export function DicomStudyContextMenu({
             } else {
                 await downloadMultipleStudies(workspaceId, currentSelectedIds);
             }
-        } catch(error) {
+        } catch (error) {
             console.error("Failed to download selected studies", error);
 
             if (error instanceof Error && error.name === "AbortError") {
@@ -136,45 +136,40 @@ export function DicomStudyContextMenu({
         }
     };
 
-    const handleRecycleSelected = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleRecycleSelected = async (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
         setShowRecycleConfirmDialog(true);
-    }
+    };
 
     const handleConfirmRecycle = () => {
         recycleSelectedStudies();
-    }
+    };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
 
         open(studyInstanceUid);
-    }
+    };
 
     return (
         <>
             <ContextMenu>
-                <ContextMenuTrigger 
-                    asChild
-                >
-                    {children}
-                </ContextMenuTrigger>
+                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
                 <ContextMenuContent className="w-56">
-                    {selectedIds.length === 1 && <ContextMenuItem
-                        onClick={handleEnterSeries}
-                        className="flex items-center space-x-2"
-                    >
-                        <CornerDownLeftIcon className="size-4" />
-                        <span>Enter Series</span>
-                    </ContextMenuItem>
-                    }
-
-                    
                     {selectedIds.length === 1 && (
                         <>
+                            <ContextMenuItem
+                                onClick={handleEnterSeries}
+                                className="flex items-center space-x-2"
+                            >
+                                <CornerDownLeftIcon className="size-4" />
+                                <span>Enter Series</span>
+                            </ContextMenuItem>
                             <ContextMenuItem
                                 onClick={handleOpenBlueLightViewer}
                                 className="flex items-center space-x-2"
@@ -182,7 +177,7 @@ export function DicomStudyContextMenu({
                                 <EyeIcon className="size-4" />
                                 <span>Open in BlueLight Viewer</span>
                             </ContextMenuItem>
-                            <ContextMenuItem 
+                            <ContextMenuItem
                                 onClick={handleDownloadThis}
                                 className="flex items-center space-x-2"
                             >
@@ -192,12 +187,28 @@ export function DicomStudyContextMenu({
 
                             <ContextMenuSeparator />
 
-                            <TagContextMenuSub 
+                            <TagContextMenuSub
                                 workspaceId={workspaceId}
                                 targetId={studyInstanceUid}
                                 targetType="study"
-                                onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                                onOpenCreateTagDialog={() =>
+                                    setOpenCreateTagDialog(true)
+                                }
                             />
+
+                            <ContextMenuSeparator />
+
+                            <ContextMenuItem
+                                className="flex items-center space-x-2"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    closeContextMenu();
+                                    setShowShareManagementDialog(true);
+                                }}
+                            >
+                                <Share2Icon className="size-4" />
+                                <span>Share</span>
+                            </ContextMenuItem>
 
                             <ContextMenuSeparator />
 
@@ -217,12 +228,25 @@ export function DicomStudyContextMenu({
                                 Selected Items ({selectedIds.length})
                             </ContextMenuLabel>
 
-                            <ContextMenuItem 
+                            <ContextMenuItem
                                 onClick={handleDownloadSelected}
                                 className="flex items-center space-x-2"
                             >
                                 <DownloadIcon className="size-4" />
                                 <span>Download</span>
+                            </ContextMenuItem>
+
+                            <ContextMenuSeparator />
+                            <ContextMenuItem
+                                className="flex items-center space-x-2"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    closeContextMenu();
+                                    setShowShareManagementDialog(true);
+                                }}
+                            >
+                                <Share2Icon className="size-4" />
+                                <span>Share</span>
                             </ContextMenuItem>
 
                             <ContextMenuSeparator />
@@ -239,7 +263,7 @@ export function DicomStudyContextMenu({
                 </ContextMenuContent>
             </ContextMenu>
 
-            <DicomRecycleConfirmDialog 
+            <DicomRecycleConfirmDialog
                 open={showRecycleConfirmDialog}
                 onOpenChange={setShowRecycleConfirmDialog}
                 dicomLevel={"study"}
@@ -247,13 +271,21 @@ export function DicomStudyContextMenu({
                 onConfirm={handleConfirmRecycle}
             />
 
-            <CreateTagDialog 
+            <CreateTagDialog
                 open={openCreateTagDialog}
                 onOpenChange={setOpenCreateTagDialog}
                 workspaceId={workspaceId}
                 targetId={studyInstanceUid}
                 targetType="study"
             />
+
+            <ShareManagementDialog
+                open={showShareManagementDialog}
+                onOpenChange={setShowShareManagementDialog}
+                workspaceId={workspaceId}
+                targetType="study"
+                targetIds={selectedIds}
+            />
         </>
-    )
+    );
 }

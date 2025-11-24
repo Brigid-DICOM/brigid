@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { CornerDownLeftIcon, DownloadIcon, EyeIcon, Trash2Icon } from "lucide-react";
+import { CornerDownLeftIcon, DownloadIcon, EyeIcon, Share2Icon, Trash2Icon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -21,6 +21,7 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { ShareManagementDialog } from "../share/share-management-dialog";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
@@ -40,6 +41,7 @@ export function DicomSeriesContextMenu({
 }: DicomSeriesContextMenuProps) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const [showShareManagementDialog, setShowShareManagementDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { getSelectedSeriesIds, clearSelection } = useDicomSeriesSelectionStore();
@@ -194,6 +196,20 @@ export function DicomSeriesContextMenu({
                             />
 
                             <ContextMenuSeparator />
+
+                            <ContextMenuItem
+                                className="flex items-center space-x-2"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    closeContextMenu();
+                                    setShowShareManagementDialog(true);
+                                }}
+                            >
+                                <Share2Icon className="size-4" />
+                                <span>Share</span>
+                            </ContextMenuItem>
+
+                            <ContextMenuSeparator />
                             
                             <ContextMenuItem
                                 onClick={handleRecycle}
@@ -217,6 +233,20 @@ export function DicomSeriesContextMenu({
                             >
                                 <DownloadIcon className="size-4" />
                                 <span>Download</span>
+                            </ContextMenuItem>
+
+                            <ContextMenuSeparator />
+
+                            <ContextMenuItem
+                                className="flex items-center space-x-2"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    closeContextMenu();
+                                    setShowShareManagementDialog(true);
+                                }}
+                            >
+                                <Share2Icon className="size-4" />
+                                <span>Share</span>
                             </ContextMenuItem>
 
                             <ContextMenuSeparator />
@@ -247,6 +277,14 @@ export function DicomSeriesContextMenu({
                 workspaceId={workspaceId}
                 targetType="series"
                 targetId={seriesInstanceUid}
+            />
+
+            <ShareManagementDialog 
+                open={showShareManagementDialog}
+                onOpenChange={setShowShareManagementDialog}
+                workspaceId={workspaceId}
+                targetType="series"
+                targetIds={selectedIds}
             />
         </>
     );
