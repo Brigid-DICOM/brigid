@@ -17,6 +17,7 @@ import {
 } from "../const/share.const";
 import { WORKSPACE_PERMISSIONS } from "../const/workspace.const";
 import { hasPermission } from "../utils/sharePermissions";
+import { DicomSearchInstanceQueryBuilder } from "./qido-rs/dicomSearchInstanceQueryBuilder";
 import { DicomSearchSeriesQueryBuilder } from "./qido-rs/dicomSearchSeriesQueryBuilder";
 import { DicomSearchStudyQueryBuilder } from "./qido-rs/dicomSearchStudyQueryBuilder";
 
@@ -218,12 +219,7 @@ export class ShareLinkService {
                                     workspaceId: shareLink.workspaceId,
                                     SeriesInstanceUID: target.targetId,
                                     deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
-                                } as {
-                                    workspaceId: string;
-                                    deleteStatus?: number;
-                                } & Record<string, string | undefined> & {
-                                        SeriesInstanceUID: string;
-                                    },
+                                }
                             );
                         if (series.length > 0) {
                             resourceInfo = series[0];
@@ -232,19 +228,14 @@ export class ShareLinkService {
                     }
                     case "instance": {
                         const instanceQueryBuilder =
-                            new DicomSearchSeriesQueryBuilder(
+                            new DicomSearchInstanceQueryBuilder(
                                 this.entityManager,
                             );
                         const instances = await instanceQueryBuilder.execQuery({
                             workspaceId: shareLink.workspaceId,
-                            SopInstanceUID: target.targetId,
+                            SOPInstanceUID: target.targetId,
                             deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
-                        } as {
-                            workspaceId: string;
-                            deleteStatus?: number;
-                        } & Record<string, string | undefined> & {
-                                SopInstanceUID: string;
-                            });
+                        });
                         if (instances.length > 0) {
                             resourceInfo = instances[0];
                         }
