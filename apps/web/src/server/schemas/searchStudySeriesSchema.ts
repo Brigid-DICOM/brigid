@@ -5,6 +5,16 @@ import { numberQuerySchema } from "./numberQuerySchema";
 import { searchStudiesQueryParamSchema } from "./searchStudies";
 import { timeRangeSchema } from "./timeRangeSchema";
 
+const NESTED_TAG_KEYS = {
+    "RequestAttributesSequence_ScheduledProcedureStepID": `${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.ScheduledProcedureStepID.tag}`,
+    "RequestAttributesSequence_RequestedProcedureID": `${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.RequestedProcedureID.tag}`,
+    "RequestAttributesSequence_AccessionNumber": `${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag}`,
+    "RequestAttributesSequence_StudyInstanceUID": `${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag}`,
+    "RequestAttributesSequence_IssuerOfAccessionNumberSequence_LocalNamespaceEntityID": `${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.LocalNamespaceEntityID.tag}`,
+    "RequestAttributesSequence_IssuerOfAccessionNumberSequence_UniversalEntityID": `${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityID.tag}`,
+    "RequestAttributesSequence_IssuerOfAccessionNumberSequence_UniversalEntityIDType": `${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityIDType.tag}`,
+} as const;
+
 export const searchStudySeriesQueryParamSchema = searchStudiesQueryParamSchema.extend({
     SeriesInstanceUID: z.string().optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.SeriesInstanceUID.tag]: z.string().optional(),
@@ -28,25 +38,25 @@ export const searchStudySeriesQueryParamSchema = searchStudiesQueryParamSchema.e
     [DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartTime.tag]: timeRangeSchema.optional(),
 
     "RequestAttributesSequence.ScheduleProcedureStepID": z.string().optional(),
-    [`${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.ScheduledProcedureStepID.tag}`]: z.string().optional(),
+    [NESTED_TAG_KEYS.RequestAttributesSequence_ScheduledProcedureStepID]: z.string().optional(),
     
     "RequestAttributesSequence.RequestedProcedureID": z.string().optional(),
-    [`${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.RequestedProcedureID.tag}`]: z.string().optional(),
+    [NESTED_TAG_KEYS.RequestAttributesSequence_RequestedProcedureID]: z.string().optional(),
 
     "RequestAttributesSequence.AccessionNumber": z.string().optional(),
-    [`${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag}`]: z.string().optional(),
+    [NESTED_TAG_KEYS.RequestAttributesSequence_AccessionNumber]: z.string().optional(),
 
     "RequestAttributesSequence.StudyInstanceUID": z.string().optional(),
-    [`${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag}`]: z.string().optional(),
+    [NESTED_TAG_KEYS.RequestAttributesSequence_StudyInstanceUID]: z.string().optional(),
 
     "RequestAttributesSequence.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID": z.string().optional(),
-    [`${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.LocalNamespaceEntityID.tag}`]: z.string().optional(),
+    [NESTED_TAG_KEYS.RequestAttributesSequence_IssuerOfAccessionNumberSequence_LocalNamespaceEntityID]: z.string().optional(),
 
     "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityID": z.string().optional(),
-    [`${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityID.tag}`]: z.string().optional(),
+    [NESTED_TAG_KEYS.RequestAttributesSequence_IssuerOfAccessionNumberSequence_UniversalEntityID]: z.string().optional(),
 
     "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityIDType": z.string().optional(),
-    [`${DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag}.${DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityIDType.tag}`]: z.string().optional(),
+    [NESTED_TAG_KEYS.RequestAttributesSequence_IssuerOfAccessionNumberSequence_UniversalEntityIDType]: z.string().optional(),
 });
 
 export type SearchStudySeriesQueryParam = z.infer<typeof searchStudySeriesQueryParamSchema>;

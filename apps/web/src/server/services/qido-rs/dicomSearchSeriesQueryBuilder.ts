@@ -54,12 +54,11 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
         ...queryParams
     }: {
         workspaceId: string;
-    } & SearchStudySeriesQueryParam & {
         limit?: number;
         offset?: number;
         deleteStatus?: number;
         instanceDeleteStatus?: number;
-    }): Promise<SeriesQueryResult[]> {
+    } & SearchStudySeriesQueryParam): Promise<SeriesQueryResult[]> {
         const series = await this.execQuery({
             workspaceId,
             limit,
