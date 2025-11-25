@@ -13,6 +13,7 @@ import CasdoorProvider from "@/lib/auth/providers/casdoor";
 import { TypeORMAdapter } from "@/lib/auth/typeorm-adapter";
 import guestRoute from "@/server/routes/guest.route";
 import helloRoute from "@/server/routes/hello.route";
+import shareRoute from "@/server/routes/share/share.route";
 import userRoute from "@/server/routes/user.route";
 import workspacesRoute from "@/server/routes/workspaces/workspaces.route";
 import { WorkspaceService } from "@/server/services/workspace.service";
@@ -94,6 +95,7 @@ export const app = new Hono()
     .route("/hello", helloRoute)
     .route("/", workspacesRoute)
     .route("/", userRoute)
+    .route("/", shareRoute)
 
 if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
     app.route("/", guestRoute);
