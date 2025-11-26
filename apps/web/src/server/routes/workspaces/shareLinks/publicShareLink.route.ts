@@ -112,6 +112,15 @@ const publicShareLinkRoute = new Hono().get(
 
             await shareLinkService.incrementAccessCount(shareLink.id);
 
+            let publicPermissions = shareDetails.publicPermissions;
+
+            if (userId) {
+                const recipient = shareDetails.recipients.find((recipient) => recipient.userId === userId);
+                if (recipient) {
+                    publicPermissions = recipient.permissions;
+                }
+            }
+
             return c.json(
                 {
                     ok: true,
@@ -123,6 +132,7 @@ const publicShareLinkRoute = new Hono().get(
                         accessCount: shareDetails.accessCount,
                         lastAccessedAt: shareDetails.lastAccessedAt,
                         expiresAt: shareDetails.expiresAt,
+                        publicPermissions: publicPermissions,
                         targets: shareDetails.targets.map((target) => ({
                             targetType: target.targetType,
                             targetId: target.targetId,
