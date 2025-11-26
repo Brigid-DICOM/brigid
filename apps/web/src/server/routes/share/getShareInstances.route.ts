@@ -6,6 +6,7 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
 import { verifyShareLinkToken } from "@/server/middlewares/shareLink.middleware";
+import { requireShareLinkTargetType } from "@/server/middlewares/shareLinkAccess.middleware";
 import { DicomSearchInstanceQueryBuilder } from "@/server/services/qido-rs/dicomSearchInstanceQueryBuilder";
 import { appLogger } from "@/server/utils/logger";
 
@@ -38,29 +39,21 @@ const getShareInstancesRoute = new Hono().get(
     ),
     setUserMiddleware,
     verifyShareLinkToken,
+    requireShareLinkTargetType("instance"),
     async (c) => {
         try {
             const shareLink = c.get("shareLink") as ShareLinkEntity;
             const workspaceId = c.get("workspaceId");
-
-            const targetType = shareLink.targets[0]?.targetType;
-
-            if (targetType !== "instance") {
-                return c.json(
-                    {
-                        ok: false,
-                        data: null,
-                        error: "Access denied: This share link does not share instances",
-                    },
-                    403,
-                );
-            }
 
             const { offset, limit } = c.req.valid("query");
 
             const targetInstanceUids = shareLink.targets
                 .filter((t) => t.targetType === "instance")
                 .map((t) => t.targetId);
+
+            if (targetInstanceUids.length === 0) {
+                return c.json([], 200);
+            }
 
             const queryBuilder = new DicomSearchInstanceQueryBuilder();
             const instances = await queryBuilder.execQuery({

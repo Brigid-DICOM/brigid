@@ -6,6 +6,7 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import z from "zod";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
 import { verifyShareLinkToken } from "@/server/middlewares/shareLink.middleware";
+import { requireShareLinkTargetType } from "@/server/middlewares/shareLinkAccess.middleware";
 import { DicomSearchSeriesQueryBuilder } from "@/server/services/qido-rs/dicomSearchSeriesQueryBuilder";
 import { appLogger } from "@/server/utils/logger";
 
@@ -38,23 +39,12 @@ const getShareSeriesRoute = new Hono().get(
     ),
     setUserMiddleware,
     verifyShareLinkToken,
+    requireShareLinkTargetType("series"),
     async (c) => {
         try {
             const shareLink = c.get("shareLink") as ShareLinkEntity;
             const workspaceId = c.get("workspaceId");
             const { offset, limit } = c.req.valid("query");
-
-            const targetType = shareLink.targets[0].targetType;
-            if (targetType !== "series") {
-                return c.json(
-                    {
-                        ok: false,
-                        data: null,
-                        error: `The share link targets ${targetType}, not series`,
-                    },
-                    400,
-                );
-            }
 
             const targetSeriesUids = shareLink.targets
                 .filter((t) => t.targetType === "series")

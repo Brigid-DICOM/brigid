@@ -1,11 +1,11 @@
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
-import type { ShareLinkEntity } from "@brigid/database/src/entities/shareLink.entity";
 import type { DicomInstanceData } from "@brigid/types";
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
 import { verifyShareLinkToken } from "@/server/middlewares/shareLink.middleware";
+import { verifySeriesInstancesAccess } from "@/server/middlewares/shareLinkAccess.middleware";
 import { DicomSearchInstanceQueryBuilder } from "@/server/services/qido-rs/dicomSearchInstanceQueryBuilder";
 import { appLogger } from "@/server/utils/logger";
 
@@ -40,41 +40,13 @@ const getShareStudySeriesInstancesRoute = new Hono().get(
     ),
     setUserMiddleware,
     verifyShareLinkToken,
+    verifySeriesInstancesAccess,
     async (c) => {
         try {
-            const shareLink = c.get("shareLink") as ShareLinkEntity;
             const workspaceId = c.get("workspaceId");
             const { studyInstanceUid, seriesInstanceUid } =
                 c.req.valid("param");
             const { offset, limit } = c.req.valid("query");
-
-            const targetType = shareLink.targets[0]?.targetType;
-
-            let isAllowed = false;
-            if (targetType === "study") {
-                isAllowed = shareLink.targets.some(
-                    (t) =>
-                        t.targetType === "study" &&
-                        t.targetId === studyInstanceUid,
-                );
-            } else if (targetType === "series") {
-                isAllowed = shareLink.targets.some(
-                    (t) =>
-                        t.targetType === "series" &&
-                        t.targetId === seriesInstanceUid,
-                );
-            }
-
-            if (!isAllowed) {
-                return c.json(
-                    {
-                        ok: false,
-                        data: null,
-                        error: "Access denied: This study series is not shared by this share link",
-                    },
-                    403,
-                );
-            }
 
             const queryBuilder = new DicomSearchInstanceQueryBuilder();
             const instances = await queryBuilder.execQuery({

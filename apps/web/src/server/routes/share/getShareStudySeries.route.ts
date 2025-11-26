@@ -1,11 +1,11 @@
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
-import type { ShareLinkEntity } from "@brigid/database/src/entities/shareLink.entity";
 import type { DicomSeriesData } from "@brigid/types";
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
 import { verifyShareLinkToken } from "@/server/middlewares/shareLink.middleware";
+import { requireShareLinkTargetType, verifyStudyInShareLink } from "@/server/middlewares/shareLinkAccess.middleware";
 import { DicomSearchSeriesQueryBuilder } from "@/server/services/qido-rs/dicomSearchSeriesQueryBuilder";
 import { appLogger } from "@/server/utils/logger";
 
@@ -39,40 +39,16 @@ const getShareStudySeriesRoute = new Hono().get(
     ),
     setUserMiddleware,
     verifyShareLinkToken,
+    // 目前應該只有 study 層的分享 link 會用到這個 route
+    // i.e. study 進入到 series 層取得 series 列表
+    // series 層的分享，應使用 `/:token/series` route
+    requireShareLinkTargetType("study"),
+    verifyStudyInShareLink,
     async (c) => {
         try {
-            const shareLink = c.get("shareLink") as ShareLinkEntity;
             const workspaceId = c.get("workspaceId");
             const { studyInstanceUid } = c.req.valid("param");
             const { offset, limit } = c.req.valid("query");
-
-            const targetType = shareLink.targets[0].targetType;
-            if (targetType !== "study") {
-                return c.json(
-                    {
-                        ok: false,
-                        data: null,
-                        error: `The share link targets ${targetType}, not studies`,
-                    },
-                    400,
-                );
-            }
-
-            const isStudyAllowed = shareLink.targets.some(
-                (t) =>
-                    t.targetType === "study" && t.targetId === studyInstanceUid,
-            );
-
-            if (!isStudyAllowed) {
-                return c.json(
-                    {
-                        ok: false,
-                        data: null,
-                        error: "Access denied: This study is not shared by this share link",
-                    },
-                    403,
-                );
-            }
 
             const queryBuilder = new DicomSearchSeriesQueryBuilder();
             const series = await queryBuilder.getSeriesWithRelatedCounts({

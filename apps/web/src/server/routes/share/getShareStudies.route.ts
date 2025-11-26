@@ -6,6 +6,7 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import z from "zod";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
 import { verifyShareLinkToken } from "@/server/middlewares/shareLink.middleware";
+import { requireShareLinkTargetType } from "@/server/middlewares/shareLinkAccess.middleware";
 import { DicomSearchStudyQueryBuilder } from "@/server/services/qido-rs/dicomSearchStudyQueryBuilder";
 import { appLogger } from "@/server/utils/logger";
 
@@ -38,6 +39,7 @@ const getShareStudiesRoute = new Hono().get(
     ),
     setUserMiddleware,
     verifyShareLinkToken,
+    requireShareLinkTargetType("study"),
     async (c) => {
         try {
             // 這裡的 shareLink 不會是 null，因為在 verifyShareLinkToken middleware 中已經檢查過了
@@ -45,24 +47,12 @@ const getShareStudiesRoute = new Hono().get(
             const workspaceId = c.get("workspaceId");
             const { offset, limit } = c.req.valid("query");
 
-            const targetType = shareLink.targets[0].targetType;
-            if (targetType !== "study") {
-                return c.json(
-                    {
-                        ok: false,
-                        data: null,
-                        error: `The share link targets ${targetType}, not studies`,
-                    },
-                    400,
-                );
-            }
-
             const targetStudyUids = shareLink.targets
                 .filter((t) => t.targetType === "study")
                 .map((t) => t.targetId);
 
             if (targetStudyUids.length === 0) {
-                return c.json([],200);
+                return c.json([], 200);
             }
 
             const queryBuilder = new DicomSearchStudyQueryBuilder();
