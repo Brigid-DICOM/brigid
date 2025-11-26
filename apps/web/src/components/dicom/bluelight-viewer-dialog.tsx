@@ -1,18 +1,19 @@
 "use client";
 
-import { createPortal } from "react-dom";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     ChevronDownIcon,
     ChevronUpIcon,
     XIcon
 } from "lucide-react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useShallow } from "zustand/react/shallow";
 import {
     Button
 } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
-import { useShallow } from "zustand/react/shallow";
 
 interface Position {
     x: number;
@@ -109,7 +110,7 @@ export function BlueLightViewerDialog() {
         }
         
         animationFrameRef.current = requestAnimationFrame(updateContainerPosition);
-    }, [isDragging, updateContainerPosition]);
+    }, [isDragging, clampPosition, isMinimized, updateContainerPosition]);
 
     const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         setIsDragging(false);
@@ -126,6 +127,8 @@ export function BlueLightViewerDialog() {
         return () => window.removeEventListener("resize", handleResize);
     }, [clampPosition, updateContainerPosition]);
 
+    
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 加入 isMinimized 會導致無法縮小化
     useEffect(() => {
         if (isOpen && isMinimized) {
             setIsMinimized(false);
@@ -134,7 +137,7 @@ export function BlueLightViewerDialog() {
         if (iframeRef.current && isOpen) {
             iframeRef.current.src = iframeSrc;
         }
-    }, [isOpen, studyInstanceUid, seriesInstanceUid]);
+    }, [isOpen, iframeSrc]);
 
     useEffect(() => {
         return () => {
@@ -177,9 +180,14 @@ export function BlueLightViewerDialog() {
         >
             {/* 半透明背景，僅在全屏時顯示 | Semi-transparent backdrop, only visible in fullscreen */}
             {!isMinimized && (
-                <div 
+                <button 
+                    type="button"
+                    aria-label="Close backdrop"
                     className="absolute inset-0 bg-black/50 -z-10" 
                     onClick={() => close()}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") close();
+                    }}
                 />
             )}
 
