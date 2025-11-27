@@ -1,11 +1,9 @@
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
+import { retrieveInstanceHandler } from "@/server/handlers/wado-rs/retrieveInstance.handler";
 import { cleanupTempFiles } from "@/server/middlewares/cleanupTempFiles.middleware";
 import { wadoRsHeaderSchema, wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
-import { InstanceService } from "@/server/services/instance.service";
-import { MultipartHandler } from "./handlers/multipartHandler";
-import { ZipHandler } from "./handlers/zipHandler";
 
 const retrieveInstanceRoute = new Hono()
 .use(cleanupTempFiles)
@@ -37,40 +35,13 @@ const retrieveInstanceRoute = new Hono()
         const sopInstanceUid = c.req.param("sopInstanceUid");
         const { accept } = c.req.valid("header") as { accept: string };
 
-        const instanceService = new InstanceService();
-        const instance = await instanceService.getInstanceByUid({
+        return await retrieveInstanceHandler(c, {
             workspaceId,
             studyInstanceUid,
             seriesInstanceUid,
-            sopInstanceUid
+            sopInstanceUid,
+            accept,
         });
-
-        if (!instance) {
-            return c.json(
-                {
-                    message: "Instance not found"
-                },
-                404
-            );
-        }
-
-        const handlers = [
-            new ZipHandler(),
-            new MultipartHandler()
-        ];
-
-        const handler = handlers.find((handler) => handler.canHandle(accept));
-
-        if (!handler) {
-            return c.json(
-                {
-                    message: "No handler found for the given accept header"
-                },
-                406
-            );
-        }
-
-        return handler.handle(c, { instances: [instance], accept: accept });
     }
 );
 
