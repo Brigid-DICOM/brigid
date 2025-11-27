@@ -4,6 +4,7 @@ import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomStudyData } from "@brigid/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/common/empty-state";
@@ -19,12 +20,11 @@ import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomStudyQuery, recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomStudiesDataTable } from "./data-table";
-import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
-import { useSearchParams } from "next/navigation";
 
 interface DicomStudiesContentProps {
     workspaceId: string;
@@ -81,7 +81,7 @@ export default function DicomStudiesContent({
             clearSelection();
             closeBlueLightViewer();
         };
-    }, [clearSelection]);
+    }, [clearSelection, closeBlueLightViewer]);
     
     const {
         data: studies,

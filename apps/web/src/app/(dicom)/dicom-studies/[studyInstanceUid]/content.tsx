@@ -89,7 +89,7 @@ export default function DicomSeriesContent({
             clearSelection();
             closeBlueLightViewer();
         };
-    }, [clearSelection]);
+    }, [clearSelection, closeBlueLightViewer]);
 
     const {
         data: series,
