@@ -6,11 +6,8 @@ import {
 import {
     z
 } from "zod";
+import { uriRetrieveInstanceHandler } from "@/server/handlers/wado-uri/uriRetrieveInstance.handler";
 import { wadoUriQueryParamSchema } from "@/server/schemas/wadoUri";
-import {
-    InstanceService
-} from "@/server/services/instance.service";
-import { SingleInstanceHandler } from "../wado-rs/handlers/singleInstanceHandler";
 
 const uriRetrieveInstanceRoute = new Hono()
 .get(
@@ -32,35 +29,13 @@ const uriRetrieveInstanceRoute = new Hono()
         } = c.req.valid("query");
         const accept = c.req.valid("query").contentType;
 
-        const instanceService = new InstanceService();
-        const instance = await instanceService.getInstanceByUid({
+        return await uriRetrieveInstanceHandler(c, {
             workspaceId,
             studyInstanceUid: studyUID,
             seriesInstanceUid: seriesUID,
-            sopInstanceUid: objectUID
+            sopInstanceUid: objectUID,
+            accept,
         });
-        
-        if (!instance) {
-            return c.json(
-                {
-                    message: "Instance not found"
-                },
-                404
-            );
-        }
-
-        const handler = new SingleInstanceHandler();
-
-        if (!handler.canHandle(accept)) {
-            return c.json(
-                {
-                    message: "No handler found for the given accept header"
-                },
-                406
-            );
-        }
-
-        return handler.handle(c, { instances: [instance], accept: accept });
     }
 );
 
