@@ -4,9 +4,8 @@ import {
     validator as zValidator
 } from "hono-openapi";
 import { z } from "zod";
+import { retrieveSeriesThumbnailHandler } from "@/server/handlers/wado-rs/thumbnail/retrieveSeriesThumbnail.handler";
 import { wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
-import { SeriesService } from "@/server/services/series.service";
-import { ThumbnailHandler } from "../handlers/thumbnailHandler";
 
 const retrieveSeriesThumbnailRoute = new Hono().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/thumbnail",
@@ -36,39 +35,13 @@ const retrieveSeriesThumbnailRoute = new Hono().get(
             seriesInstanceUid
         } = c.req.valid("param");
 
-        const seriesService = new SeriesService();
-        const medianInstance = await seriesService.getSeriesMedianInstance({
+        const accept = c.req.valid("header").accept;
+
+        return await retrieveSeriesThumbnailHandler(c, {
             workspaceId,
             studyInstanceUid,
-            seriesInstanceUid
-        });
-
-        if (!medianInstance || medianInstance.length === 0) {
-            return c.json(
-                {
-                    message: "Instance not found"
-                },
-                404
-            );
-        }
-
-        const numberOfFrames = medianInstance[0]?.numberOfFrames || 1;
-        const medianFrameNumber = numberOfFrames >> 1;
-
-        const handler = new ThumbnailHandler();
-        if (!handler.canHandle(c.req.valid("header").accept)) {
-            return c.json(
-                {
-                    message: "No handler found for the given accept header"
-                },
-                406
-            );
-        }
-
-        return handler.handle(c, {
-            instances: medianInstance,
-            accept: c.req.valid("header").accept,
-            frameNumber: medianFrameNumber
+            seriesInstanceUid,
+            accept
         });
     }
 );

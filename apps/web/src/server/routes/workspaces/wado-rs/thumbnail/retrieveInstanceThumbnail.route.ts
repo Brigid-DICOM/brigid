@@ -4,9 +4,8 @@ import {
     validator as zValidator
 } from "hono-openapi";
 import { z } from "zod";
+import { retrieveInstanceThumbnailHandler } from "@/server/handlers/wado-rs/thumbnail/retrieveInstanceThumbnail.handler";
 import { wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
-import { InstanceService } from "@/server/services/instance.service";
-import { ThumbnailHandler } from "../handlers/thumbnailHandler";
 
 const retrieveInstanceThumbnailRoute = new Hono().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/thumbnail",
@@ -38,40 +37,14 @@ const retrieveInstanceThumbnailRoute = new Hono().get(
             sopInstanceUid
         } = c.req.valid("param");
 
-        const instanceService = new InstanceService();
-        const instance = await instanceService.getInstanceByUid({
+        const accept = c.req.valid("header").accept;
+
+        return await retrieveInstanceThumbnailHandler(c, {
             workspaceId,
             studyInstanceUid,
             seriesInstanceUid,
-            sopInstanceUid
-        });
-
-        if (!instance) {
-            return c.json(
-                {
-                    message: "Instance not found"
-                },
-                404
-            );
-        }
-
-        const numberOfFrames = instance?.numberOfFrames || 1;
-        const medianFrameNumber = numberOfFrames >> 1;
-
-        const handler = new ThumbnailHandler();
-        if (!handler.canHandle(c.req.valid("header").accept)) {
-            return c.json(
-                {
-                    message: "No handler found for the given accept header"
-                },
-                406
-            );
-        }
-
-        return handler.handle(c, {
-            instances: [instance],
-            accept: c.req.valid("header").accept,
-            frameNumber: medianFrameNumber
+            sopInstanceUid,
+            accept
         });
     }
 );
