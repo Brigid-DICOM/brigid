@@ -152,7 +152,9 @@ export function DicomStudyContextMenu({
         e.preventDefault();
         closeContextMenu();
 
-        open(studyInstanceUid);
+        open({
+            studyInstanceUid,
+        });
     };
 
     return (

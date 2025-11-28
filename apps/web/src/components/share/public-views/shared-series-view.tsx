@@ -2,6 +2,7 @@
 
 import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
@@ -13,6 +14,7 @@ import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-bl
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadShareMultipleSeries } from "@/lib/clientDownload";
 import { getShareSeriesQuery } from "@/react-query/queries/publicShare";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { SharedDicomSeriesDataTable } from "../data-tables/shared-dicom-series-data-table";
@@ -30,6 +32,7 @@ export default function SharedSeriesView({
     password,
     publicPermissions = 0,
 }: SharedSeriesViewProps) {
+    const searchParams = useSearchParams();
     const layoutMode = useLayoutStore((state) => state.layoutMode);
     const { 
         currentPage, 
@@ -41,6 +44,8 @@ export default function SharedSeriesView({
     const { clearSelection, getSelectedCount, selectAll, getSelectedSeriesIds } = useDicomSeriesSelectionStore();
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedSeriesIds();
+
+    const { open: openBlueLightViewer, close: closeBlueLightViewer } = useBlueLightViewerStore();
 
     const { data: series, isLoading } = useQuery(
         getShareSeriesQuery({
@@ -61,8 +66,22 @@ export default function SharedSeriesView({
     useEffect(() => {
         return () => {
             clearSelection();
+            closeBlueLightViewer();
         };
-    }, [clearSelection]);
+    }, [clearSelection, closeBlueLightViewer]);
+
+    useEffect(() => {
+        const shareToken = searchParams.get("shareToken");
+        const studyInstanceUid = searchParams.get("openStudyInstanceUid");
+        const seriesInstanceUid = searchParams.get("openSeriesInstanceUid");
+        if (shareToken && studyInstanceUid && seriesInstanceUid) {
+            openBlueLightViewer({
+                shareToken,
+                studyInstanceUid,
+                seriesInstanceUid,
+            });
+        }
+    }, [openBlueLightViewer, searchParams]);
 
     const canGoNext = series && series.length === ITEM_PER_PAGE;
 

@@ -53,7 +53,9 @@ export default function DicomStudiesContent({
     useEffect(() => {
         const openStudyInstanceUid = searchParams.get("openStudyInstanceUid");
         if (openStudyInstanceUid) {
-            openBlueLightViewer(openStudyInstanceUid, undefined);
+            openBlueLightViewer({
+                studyInstanceUid: openStudyInstanceUid,
+            });
         }
     }, [searchParams, openBlueLightViewer]);
     

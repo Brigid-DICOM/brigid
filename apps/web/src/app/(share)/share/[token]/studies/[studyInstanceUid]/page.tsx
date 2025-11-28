@@ -3,6 +3,7 @@ import {
     HydrationBoundary,
 } from "@tanstack/react-query";
 import { cookies } from "next/headers";
+import { BlueLightViewerDialog } from "@/components/dicom/bluelight-viewer-dialog";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getShareStudySeriesQuery } from "@/react-query/queries/publicShare";
 import ShareStudySeriesContent from "./content";
@@ -43,6 +44,7 @@ export default async function ShareStudySeriesPage({ params, searchParams }: Sha
                 studyInstanceUid={studyInstanceUid}
                 password={password}
             />
+            <BlueLightViewerDialog />
         </HydrationBoundary>
     )
 }

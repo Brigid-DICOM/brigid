@@ -34,6 +34,7 @@ import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { downloadShareInstance } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getShareInstanceThumbnailQuery } from "@/react-query/queries/publicShare";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { SharedDicomInstanceContextMenu } from "../shared-dicom-instance-context-menu";
 
@@ -103,6 +104,7 @@ function ActionsCell({
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
+    const { open: openBlueLightViewer } = useBlueLightViewerStore();
 
     const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -130,6 +132,16 @@ function ActionsCell({
         }
     };
 
+    const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        openBlueLightViewer({
+            shareToken: token,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+            password,
+        });
+    }
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -142,7 +154,9 @@ function ActionsCell({
                 <DropdownMenuItem onClick={handleCopySopInstanceUid}>
                     Copy SOP Instance UID
                 </DropdownMenuItem>
-                
+                <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                    Open in BlueLight Viewer
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDownload}>
                     Download Instance
                 </DropdownMenuItem>

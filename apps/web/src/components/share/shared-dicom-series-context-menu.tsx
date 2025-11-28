@@ -99,9 +99,11 @@ export function SharedDicomSeriesContextMenu({
         e.preventDefault();
         closeContextMenu();
 
-        // TODO: 需要先實作 share 模式的 BlueLight viewer
-        toast.info("BlueLight viewer for shared content coming soon");
-        // open(studyInstanceUid, seriesInstanceUid);
+        open({
+            shareToken: token,
+            studyInstanceUid,
+            seriesInstanceUid,
+        });
     };
 
     return (

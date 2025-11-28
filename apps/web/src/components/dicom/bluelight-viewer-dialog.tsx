@@ -29,9 +29,12 @@ export function BlueLightViewerDialog() {
     const [isMounted, setIsMounted] = useState(false);
 
     const { isOpen, close } = useBlueLightViewerStore();
-    const { studyInstanceUid, seriesInstanceUid }= useBlueLightViewerStore(useShallow((state) => ({
+    const { studyInstanceUid, seriesInstanceUid, sopInstanceUid, shareToken, password }= useBlueLightViewerStore(useShallow((state) => ({
         studyInstanceUid: state.studyInstanceUid,
         seriesInstanceUid: state.seriesInstanceUid,
+        shareToken: state.shareToken,
+        sopInstanceUid: state.sopInstanceUid,
+        password: state.password,
     })));
 
     // 使用 ref 來儲存 position，避免重新觸發渲染
@@ -49,13 +52,31 @@ export function BlueLightViewerDialog() {
         if (seriesInstanceUid) {
             params.set("SeriesInstanceUID", seriesInstanceUid);
         }
+        if (sopInstanceUid) {
+            params.set("SOPInstanceUID", sopInstanceUid);
+        }
+        if (password) {
+            params.set("password", encodeURIComponent(password));
+        }
 
-        return `/html/bluelight/bluelight/html/start.html?${params.toString()}`;
-    }, [studyInstanceUid, seriesInstanceUid]);
+        if (shareToken) {
+            return `/html/bluelight/bluelight/html/start.html?shareToken=${shareToken}&${params.toString()}`;
+        } else {
+            return `/html/bluelight/bluelight/html/start.html?${params.toString()}`;
+        }
+    }, [studyInstanceUid, seriesInstanceUid, sopInstanceUid, shareToken, password]);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (isOpen && !isMinimized) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+    }, [isOpen, isMinimized]);
     
     const clampPosition = useCallback((pos: Position) => {
         const maxX = window.innerWidth - MINIMIZED_WIDTH;

@@ -118,7 +118,9 @@ function ActionsCell({
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
-        openBlueLightViewer(studyInstanceUid);
+        openBlueLightViewer({
+            studyInstanceUid,
+        });
     }
 
     return (

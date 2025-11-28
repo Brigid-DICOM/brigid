@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { downloadShareSeries } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { SharedDicomSeriesContextMenu } from "../shared-dicom-series-context-menu";
 
@@ -55,6 +56,7 @@ function ActionsCell({
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
     const { clearSelection } = useDicomSeriesSelectionStore();
+    const { open: openBlueLightViewer } = useBlueLightViewerStore();
 
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -87,6 +89,16 @@ function ActionsCell({
         }
     };
 
+    const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        openBlueLightViewer({
+            shareToken: token,
+            studyInstanceUid,
+            seriesInstanceUid,
+            password,
+        });
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -98,6 +110,9 @@ function ActionsCell({
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleEnterInstances}>
                     Enter Instances
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                    Open in BlueLight Viewer
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDownload}>
                     Download Series

@@ -165,9 +165,13 @@ export function SharedDicomInstanceContextMenu({
         e.preventDefault();
         closeContextMenu();
 
-        // TODO: 需要先實作 share 模式的 BlueLight viewer
-        toast.info("BlueLight viewer for shared content coming soon");
-        // open(studyInstanceUid, seriesInstanceUid, sopInstanceUid);
+        open({
+            shareToken: token,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+            password,
+        });
     }
 
     useEffect(() => {

@@ -64,7 +64,10 @@ export default function DicomSeriesContent({
         const openStudyInstanceUid = searchParams.get("openStudyInstanceUid");
         const openSeriesInstanceUid = searchParams.get("openSeriesInstanceUid");
         if (openStudyInstanceUid) {
-            openBlueLightViewer(openStudyInstanceUid, openSeriesInstanceUid || undefined);
+            openBlueLightViewer({
+                studyInstanceUid: openStudyInstanceUid,
+                seriesInstanceUid: openSeriesInstanceUid || undefined,
+            });
         }
     }, [searchParams, openBlueLightViewer]);
 

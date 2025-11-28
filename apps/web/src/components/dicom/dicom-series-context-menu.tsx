@@ -153,7 +153,10 @@ export function DicomSeriesContextMenu({
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        open(studyInstanceUid, seriesInstanceUid);
+        open({
+            studyInstanceUid,
+            seriesInstanceUid,
+        });
     }
 
     return (

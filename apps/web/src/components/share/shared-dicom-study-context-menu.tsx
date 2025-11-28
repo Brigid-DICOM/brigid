@@ -18,6 +18,7 @@ import { downloadShareMultipleStudies } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
 import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 
 interface SharedDicomStudyContextMenuProps {
@@ -36,7 +37,7 @@ export function SharedDicomStudyContextMenu({
     publicPermissions
 }: SharedDicomStudyContextMenuProps) {
     const router = useRouter();
-
+    const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { getSelectedStudyIds } = useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
 
@@ -82,9 +83,11 @@ export function SharedDicomStudyContextMenu({
         e.preventDefault();
         closeContextMenu();
 
-        // TODO: 需要先實作 share 模式的 BlueLight viewer
-        toast.info("BlueLight viewer for shared content coming soon");
-        // open(studyInstanceUid);
+        openBlueLightViewer({
+            shareToken: token,
+            studyInstanceUid,
+            password,
+        });
     }
 
     return (

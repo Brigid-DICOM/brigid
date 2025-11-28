@@ -2,6 +2,7 @@
 
 import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
@@ -17,6 +18,7 @@ import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-bl
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadShareMultipleInstances } from "@/lib/clientDownload";
 import { getPublicShareLinkQuery, getShareStudySeriesInstancesQuery } from "@/react-query/queries/publicShare";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
 
@@ -30,6 +32,7 @@ interface ShareStudySeriesInstancesContentProps {
 const ITEM_PER_PAGE = 10;
 
 export default function ShareStudySeriesInstancesContent({ token, studyInstanceUid, seriesInstanceUid, password }: ShareStudySeriesInstancesContentProps) {
+    const searchParams = useSearchParams();
     const layoutMode = useLayoutStore((state) => state.layoutMode);
     const { 
         currentPage, 
@@ -41,6 +44,8 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
     const { clearSelection, getSelectedCount, selectAll, getSelectedInstanceIds } = useDicomInstanceSelectionStore();
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedInstanceIds();
+
+    const { open: openBlueLightViewer, close: closeBlueLightViewer } = useBlueLightViewerStore();
 
     const { data: publicShareLink } = useQuery(
         getPublicShareLinkQuery({
@@ -69,8 +74,27 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
     useEffect(() => {
         return () => {
             clearSelection();
+            closeBlueLightViewer();
         };
-    }, [clearSelection]);
+    }, [clearSelection, closeBlueLightViewer]);
+
+    useEffect(() => {
+        const shareToken = searchParams.get("shareToken");
+        const studyInstanceUid = searchParams.get("openStudyInstanceUid");
+        const seriesInstanceUid = searchParams.get("openSeriesInstanceUid");
+        const sopInstanceUid = searchParams.get("openSopInstanceUid");
+        const password = searchParams.get("password");
+
+        if (shareToken && studyInstanceUid && seriesInstanceUid && sopInstanceUid) {
+            openBlueLightViewer({
+                shareToken,
+                studyInstanceUid,
+                seriesInstanceUid,
+                sopInstanceUid,
+                password: password ? decodeURIComponent(password) : undefined,
+            });
+        }
+    }, [openBlueLightViewer, searchParams]);
 
     const canGoNext = instances && instances.length === ITEM_PER_PAGE;
 
@@ -86,10 +110,10 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
         },
         { 
             label: truncateUid(studyInstanceUid),
-            href: `/share/${token}/studies/${studyInstanceUid}${passwordParam}`
         },
         { 
-            label: "Series"
+            label: "Series",
+            href: `/share/${token}/studies/${studyInstanceUid}${passwordParam}`
         },
         { 
             label: truncateUid(seriesInstanceUid)
