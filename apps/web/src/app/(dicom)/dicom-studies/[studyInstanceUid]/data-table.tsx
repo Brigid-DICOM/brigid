@@ -1,13 +1,19 @@
 "use client";
 
 import type { DicomSeriesData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query"; 
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useMutation } from "@tanstack/react-query";
+import {
+    type ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+} from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
+import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomSeriesContextMenu } from "@/components/dicom/dicom-series-context-menu";
@@ -15,13 +21,13 @@ import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenu,
-DropdownMenuContent, 
-DropdownMenuItem,
-DropdownMenuSeparator,
-    DropdownMenuTrigger
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -30,11 +36,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { downloadSeries } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getDicomSeriesThumbnailQuery, recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
+import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
@@ -44,42 +49,6 @@ interface DicomSeriesTableProps {
     className?: string;
 }
 
-function ThumbnailCell({
-    workspaceId,
-    series,
-}: {
-    workspaceId: string;
-    series: DicomSeriesData;
-}) {
-    const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
-    const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
-
-    const { data: thumbnail, isLoading: isLoadingThumbnail } = useQuery(
-        getDicomSeriesThumbnailQuery(workspaceId, studyInstanceUid, seriesInstanceUid, "64,64"),
-    );
-
-    const thumbnailUrl = useDicomThumbnail(thumbnail);
-
-    if (isLoadingThumbnail) {
-        return <Skeleton className="size-16 rounded" />;
-    }
-    
-    return thumbnailUrl && seriesInstanceUid !== "N/A" ? (
-        <Image
-            src={thumbnailUrl}
-            alt="DICOM Series Thumbnail"
-            width={64}
-            height={64}
-            className="size-16 object-cover rounded"
-            unoptimized
-        />
-    ) : (
-        <div className="size-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-            No image
-        </div>
-    );
-}
-
 function ActionsCell({
     series,
     workspaceId,
@@ -87,7 +56,8 @@ function ActionsCell({
     series: DicomSeriesData;
     workspaceId: string;
 }) {
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
+        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
@@ -124,41 +94,42 @@ function ActionsCell({
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         clearSelection();
-        router.push(`/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`);
-    }
+        router.push(
+            `/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`,
+        );
+    };
 
-    const handleCopySeriesInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleCopySeriesInstanceUid = (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.stopPropagation();
         navigator.clipboard.writeText(seriesInstanceUid);
-    }
+    };
 
     const handleDownloadSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         downloadSeries(workspaceId, studyInstanceUid, seriesInstanceUid);
-    }
-    
+    };
+
     const handleRecycleSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         setShowRecycleConfirmDialog(true);
-    }
+    };
 
     const handleConfirmRecycle = () => {
         recycleDicomSeries();
-    }
+    };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         openBlueLightViewer(studyInstanceUid, seriesInstanceUid);
-    }
+    };
 
     return (
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button
-                        variant={"ghost"}
-                        className="size-8 p-0"
-                    >
+                    <Button variant={"ghost"} className="size-8 p-0">
                         <span className="sr-only">Open Menu</span>
                         <MoreHorizontalIcon className="size-4" />
                     </Button>
@@ -182,11 +153,13 @@ function ActionsCell({
 
                     <DropdownMenuSeparator />
 
-                    <TagDropdownSub 
+                    <TagDropdownSub
                         workspaceId={workspaceId}
                         targetId={seriesInstanceUid}
                         targetType="series"
-                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                        onOpenCreateTagDialog={() =>
+                            setOpenCreateTagDialog(true)
+                        }
                     />
 
                     <DropdownMenuSeparator />
@@ -197,7 +170,7 @@ function ActionsCell({
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <DicomRecycleConfirmDialog 
+            <DicomRecycleConfirmDialog
                 open={showRecycleConfirmDialog}
                 onOpenChange={setShowRecycleConfirmDialog}
                 dicomLevel={"series"}
@@ -205,7 +178,7 @@ function ActionsCell({
                 onConfirm={handleConfirmRecycle}
             />
 
-            <CreateTagDialog 
+            <CreateTagDialog
                 open={openCreateTagDialog}
                 onOpenChange={setOpenCreateTagDialog}
                 workspaceId={workspaceId}
@@ -213,7 +186,7 @@ function ActionsCell({
                 targetId={seriesInstanceUid}
             />
         </>
-    )
+    );
 }
 
 export function DicomSeriesDataTable({
@@ -227,8 +200,10 @@ export function DicomSeriesDataTable({
         clearSelection,
         selectAll,
         getSelectedCount,
-        selectSeries
+        selectSeries,
     } = useDicomSeriesSelectionStore();
+
+    const generalColumns = useMemo(() => createSeriesColumns(), []);
 
     const columns: ColumnDef<DicomSeriesData>[] = useMemo(
         () => [
@@ -237,13 +212,20 @@ export function DicomSeriesDataTable({
                 header: () => (
                     <Checkbox
                         checked={
-                            getSelectedCount() > 0 && getSelectedCount() === series.length
+                            getSelectedCount() > 0 &&
+                            getSelectedCount() === series.length
                         }
                         onCheckedChange={(value) => {
                             const isChecked = !!value;
 
                             if (isChecked) {
-                                selectAll(series.map((series) => series["0020000E"]?.Value?.[0] || ""));
+                                selectAll(
+                                    series.map(
+                                        (series) =>
+                                            series["0020000E"]?.Value?.[0] ||
+                                            "",
+                                    ),
+                                );
                             } else {
                                 clearSelection();
                             }
@@ -252,7 +234,8 @@ export function DicomSeriesDataTable({
                     />
                 ),
                 cell: ({ row }) => {
-                    const seriesInstanceUid = row.original["0020000E"]?.Value?.[0] || "";
+                    const seriesInstanceUid =
+                        row.original["0020000E"]?.Value?.[0] || "";
                     const isSelected = isSeriesSelected(seriesInstanceUid);
 
                     return (
@@ -263,7 +246,7 @@ export function DicomSeriesDataTable({
                             }}
                             aria-label="Select series"
                         />
-                    )
+                    );
                 },
                 enableSorting: false,
                 enableHiding: false,
@@ -273,9 +256,18 @@ export function DicomSeriesDataTable({
                 header: "Preview",
                 cell: ({ row }) => {
                     return (
-                        <ThumbnailCell
-                        series={row.original}
-                        workspaceId={workspaceId}
+                        <TableThumbnailCell
+                            source={{
+                                type: "workspace",
+                                workspaceId,
+                            }}
+                            studyInstanceUid={
+                                row.original["0020000D"]?.Value?.[0] || "N/A"
+                            }
+                            seriesInstanceUid={
+                                row.original["0020000E"]?.Value?.[0] || "N/A"
+                            }
+                            size={64}
                         />
                     );
                 },
@@ -288,77 +280,46 @@ export function DicomSeriesDataTable({
                         <DicomDataTableTagCell
                             workspaceId={workspaceId}
                             targetType="series"
-                            targetId={row.original["0020000E"]?.Value?.[0] || ""}
+                            targetId={
+                                row.original["0020000E"]?.Value?.[0] || ""
+                            }
                         />
                     );
                 },
                 enableSorting: false,
                 enableHiding: false,
             },
-            {
-                accessorKey: "modality",
-                header: "Modality",
-                cell: ({ row }) => {
-                    const modality = row.original["00080060"]?.Value?.[0] || "N/A";
-                    return <div>{modality}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesDescription",
-                header: "Series Description",
-                cell: ({ row }) => {
-                    const seriesDescription = row.original["0008103E"]?.Value?.[0] || "N/A";
-                    return <div>{seriesDescription}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesDate",
-                header: "Series Date",
-                cell: ({ row }) => {
-                    const seriesDate = row.original["00080021"]?.Value?.[0] || "N/A";
-                    return <div>{seriesDate}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesNumber",
-                header: "Series Number",
-                cell: ({ row }) => {
-                    const seriesNumber = row.original["00200011"]?.Value?.[0] || "N/A";
-                    return <div>{seriesNumber}</div>;
-                },
-            },
-            {
-                accessorKey: "numberOfSeriesRelatedInstances",
-                header: "Related Instances",
-                cell: ({ row }) => {
-                    const numberOfSeriesRelatedInstances = row.original["00201209"]?.Value?.[0] || "N/A";
-                    return <div>{numberOfSeriesRelatedInstances}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesInstanceUid",
-                header: "Series Instance UID",
-                cell: ({ row }) => {
-                    const seriesInstanceUid = row.original["0020000E"]?.Value?.[0] || "N/A";
-                    return <div className="font-mono text-sm">{seriesInstanceUid}</div>;
-                },
-            },
+            ...generalColumns,
             {
                 id: "actions",
                 enableHiding: false,
                 cell: ({ row }) => {
-                    return <ActionsCell series={row.original} workspaceId={workspaceId} />;
+                    return (
+                        <ActionsCell
+                            series={row.original}
+                            workspaceId={workspaceId}
+                        />
+                    );
                 },
             },
         ],
-        [workspaceId, series, clearSelection, selectAll, getSelectedCount, isSeriesSelected, toggleSeriesSelection]
+        [
+            workspaceId,
+            series,
+            clearSelection,
+            selectAll,
+            getSelectedCount,
+            isSeriesSelected,
+            toggleSeriesSelection,
+            generalColumns,
+        ],
     );
 
     const table = useReactTable({
         data: series,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        enableRowSelection: false
+        enableRowSelection: false,
     });
 
     const handleRowClick = (
@@ -372,16 +333,16 @@ export function DicomSeriesDataTable({
         const target = e.target as HTMLElement;
 
         if (
-            target.closest('[role="checkbox"]')||
+            target.closest('[role="checkbox"]') ||
             target.closest('[role="menuitem"]') ||
-            target.closest('button')
+            target.closest("button")
         ) {
             return;
         }
 
         e.preventDefault();
         toggleSeriesSelection(seriesInstanceUid, true);
-    }
+    };
 
     return (
         <div className={cn("w-full", className)}>
@@ -389,12 +350,16 @@ export function DicomSeriesDataTable({
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow
-                                key={headerGroup.id}
-                            >
+                            <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
                                     <TableHead key={header.id}>
-                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef
+                                                      .header,
+                                                  header.getContext(),
+                                              )}
                                     </TableHead>
                                 ))}
                             </TableRow>
@@ -403,9 +368,12 @@ export function DicomSeriesDataTable({
                     <TableBody>
                         {table.getRowModel().rows.length ? (
                             table.getRowModel().rows.map((row) => {
-                                const studyInstanceUid = row.original["0020000D"]?.Value?.[0] || "";
-                                const seriesInstanceUid = row.original["0020000E"]?.Value?.[0] || "";
-                                const isSelected = isSeriesSelected(seriesInstanceUid);
+                                const studyInstanceUid =
+                                    row.original["0020000D"]?.Value?.[0] || "";
+                                const seriesInstanceUid =
+                                    row.original["0020000E"]?.Value?.[0] || "";
+                                const isSelected =
+                                    isSeriesSelected(seriesInstanceUid);
 
                                 return (
                                     <DicomSeriesContextMenu
@@ -415,37 +383,50 @@ export function DicomSeriesDataTable({
                                         seriesInstanceUid={seriesInstanceUid}
                                     >
                                         <TableRow
-                                            
                                             data-dicom-card
                                             className={cn(
                                                 "cursor-pointer select-none transition-colors",
                                                 isSelected && "bg-accent/50",
                                             )}
-                                            onClick={(e) => handleRowClick(e, row.original)}
+                                            onClick={(e) =>
+                                                handleRowClick(e, row.original)
+                                            }
                                             onContextMenu={() => {
                                                 if (getSelectedCount() === 0) {
-                                                    selectSeries(seriesInstanceUid);
-                                                } else if (getSelectedCount() === 1) {
+                                                    selectSeries(
+                                                        seriesInstanceUid,
+                                                    );
+                                                } else if (
+                                                    getSelectedCount() === 1
+                                                ) {
                                                     clearSelection();
-                                                    selectSeries(seriesInstanceUid);
+                                                    selectSeries(
+                                                        seriesInstanceUid,
+                                                    );
                                                 }
                                             }}
                                         >
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id}>
-                                                    {flexRender(
-                                                        cell.column.columnDef.cell,
-                                                        cell.getContext(),
-                                                    )}
-                                                </TableCell>
-                                            ))}
+                                            {row
+                                                .getVisibleCells()
+                                                .map((cell) => (
+                                                    <TableCell key={cell.id}>
+                                                        {flexRender(
+                                                            cell.column
+                                                                .columnDef.cell,
+                                                            cell.getContext(),
+                                                        )}
+                                                    </TableCell>
+                                                ))}
                                         </TableRow>
                                     </DicomSeriesContextMenu>
-                                )
+                                );
                             })
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
                                     No results.
                                 </TableCell>
                             </TableRow>
@@ -454,5 +435,5 @@ export function DicomSeriesDataTable({
                 </Table>
             </div>
         </div>
-    )
+    );
 }
