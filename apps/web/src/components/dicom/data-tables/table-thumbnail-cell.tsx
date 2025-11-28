@@ -6,16 +6,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { useThumbnailQuery } from "@/hooks/use-thumbnail-query";
 
-interface TableStudyThumbnailCellProps {
+interface TableThumbnailCellProps {
     source: ThumbnailSource;
     studyInstanceUid: string;
+    seriesInstanceUid?: string;
+    sopInstanceUid?: string;
     size?: number
 }
 
-export function TableStudyThumbnailCell({ source, studyInstanceUid, size = 64 }: TableStudyThumbnailCellProps) {
+export function TableThumbnailCell({ source, studyInstanceUid, seriesInstanceUid, sopInstanceUid, size = 64 }: TableThumbnailCellProps) {
     const { data: thumbnail, isLoading: isLoadingThumbnail } = useThumbnailQuery({
         source,
         studyInstanceUid,
+        seriesInstanceUid,
+        sopInstanceUid,
         viewport: `${size},${size}`,
     });
     
@@ -25,7 +29,7 @@ export function TableStudyThumbnailCell({ source, studyInstanceUid, size = 64 }:
         return <Skeleton className="rounded" style={{ width: size, height: size }} />;
     }
 
-    if (!url || studyInstanceUid === "N/A") {
+    if (!url || studyInstanceUid === "N/A" || seriesInstanceUid === "N/A" || sopInstanceUid === "N/A") {
         return (
           <div
             className="bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500"
@@ -35,7 +39,6 @@ export function TableStudyThumbnailCell({ source, studyInstanceUid, size = 64 }:
           </div>
         );
     }
-
 
     return (
         <Image

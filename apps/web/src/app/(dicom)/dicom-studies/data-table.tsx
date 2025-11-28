@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
-import { TableStudyThumbnailCell } from "@/components/dicom/data-tables/table-study-thumbnail-cell";
+import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
@@ -248,7 +248,7 @@ export function DicomStudiesDataTable({
                 header: "Preview",
                 cell: ({ row }) => {
                     return (
-                        <TableStudyThumbnailCell
+                        <TableThumbnailCell
                             source={{
                                 type: "workspace",
                                 workspaceId,
