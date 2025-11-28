@@ -1,7 +1,7 @@
 "use client";
 
 import type { DicomStudyData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -9,10 +9,11 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
+import { TableStudyThumbnailCell } from "@/components/dicom/data-tables/table-study-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
@@ -27,7 +28,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -36,12 +36,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { downloadStudy } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
-import { getDicomStudyThumbnailQuery } from "@/react-query/queries/dicomThumbnail";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 
@@ -49,42 +47,6 @@ interface DicomStudiesTableProps {
     studies: DicomStudyData[];
     workspaceId: string;
     className?: string;
-}
-
-function ThumbnailCell({
-    workspaceId,
-    study,
-}: {
-    workspaceId: string;
-    study: DicomStudyData;
-}) {
-    const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
-
-    const { data: thumbnail, isLoading: isLoadingThumbnail } = useQuery({
-        ...getDicomStudyThumbnailQuery(workspaceId, studyInstanceUid, "64,64"),
-        enabled: studyInstanceUid !== "N/A",
-    });
-
-    const thumbnailUrl = useDicomThumbnail(thumbnail);
-
-    if (isLoadingThumbnail) {
-        return <Skeleton className="size-16 rounded" />;
-    }
-
-    return thumbnailUrl && studyInstanceUid !== "N/A" ? (
-        <Image
-            src={thumbnailUrl}
-            alt="DICOM Study Thumbnail"
-            width={64}
-            height={64}
-            className="size-16 object-cover rounded"
-            unoptimized
-        />
-    ) : (
-        <div className="size-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-            No image
-        </div>
-    );
 }
 
 function ActionsCell({
@@ -235,6 +197,8 @@ export function DicomStudiesDataTable({
         selectStudy,
     } = useDicomStudySelectionStore();
 
+    const generalColumns = useMemo(() => createStudyColumns(), []);
+
     const columns: ColumnDef<DicomStudyData>[] = useMemo(
         () => [
             {
@@ -284,9 +248,12 @@ export function DicomStudiesDataTable({
                 header: "Preview",
                 cell: ({ row }) => {
                     return (
-                        <ThumbnailCell
-                            study={row.original}
-                            workspaceId={workspaceId}
+                        <TableStudyThumbnailCell
+                            source={{
+                                type: "workspace",
+                                workspaceId,
+                            }}
+                            studyInstanceUid={row.original["0020000D"]?.Value?.[0] || ""}
                         />
                     );
                 },
@@ -306,66 +273,7 @@ export function DicomStudiesDataTable({
                 enableSorting: false,
                 enableHiding: false,
             },
-            {
-                accessorKey: "patientId",
-                header: "Patient ID",
-                cell: ({ row }) => {
-                    const patientId =
-                        row.original["00100020"]?.Value?.[0] || "N/A";
-                    return <div className="font-medium">{patientId}</div>;
-                },
-            },
-            {
-                accessorKey: "patientName",
-                header: "Patient Name",
-                cell: ({ row }) => {
-                    const patientName =
-                        row.original["00100010"]?.Value?.[0]?.Alphabetic ||
-                        "N/A";
-
-                    return <div>{patientName}</div>;
-                },
-            },
-            {
-                accessorKey: "patientBirthDate",
-                header: "Patient Birth Date",
-                cell: ({ row }) => {
-                    const patientBirthDate =
-                        row.original["00100030"]?.Value?.[0] || "N/A";
-                    return <div>{patientBirthDate}</div>;
-                },
-            },
-            {
-                accessorKey: "accessionNumber",
-                header: "Accession Number",
-                cell: ({ row }) => {
-                    const accessionNumber =
-                        row.original["00080050"]?.Value?.[0] || "N/A";
-                    return <div>{accessionNumber}</div>;
-                },
-            },
-            {
-                accessorKey: "modalitiesInStudy",
-                header: "Modalities In Study",
-                cell: ({ row }) => {
-                    const modalitiesInStudy =
-                        row.original["00080061"]?.Value?.join(", ") || "N/A";
-                    return <div>{modalitiesInStudy}</div>;
-                },
-            },
-            {
-                accessorKey: "studyInstanceUid",
-                header: "Study Instance UID",
-                cell: ({ row }) => {
-                    const studyInstanceUid =
-                        row.original["0020000D"]?.Value?.[0] || "N/A";
-                    return (
-                        <div className="font-mono text-sm">
-                            {studyInstanceUid}
-                        </div>
-                    );
-                },
-            },
+            ...generalColumns,
             {
                 id: "actions",
                 enableHiding: false,
@@ -387,6 +295,7 @@ export function DicomStudiesDataTable({
             getSelectedCount,
             isStudySelected,
             toggleStudySelection,
+            generalColumns,
         ],
     );
 

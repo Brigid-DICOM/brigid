@@ -26,5 +26,6 @@ export const getDicomStudyThumbnailQuery = (
         }
 
         return response.blob();
-    }
+    },
+    staleTime: 30 * 60 * 1000,
 })
