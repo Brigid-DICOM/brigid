@@ -19,7 +19,6 @@ const retrieveShareInstanceRoute = new Hono().get(
     zValidator("header", wadoRsHeaderSchema),
     zValidator("query", wadoRsQueryParamSchema),
     zValidator("param", z.object({
-        workspaceId: z.string().describe("The ID of the workspace"),
         studyInstanceUid: z.string().describe("The study instance UID"),
         seriesInstanceUid: z.string().describe("The series instance UID"),
         sopInstanceUid: z.string().describe("The sop instance UID"),
