@@ -59,6 +59,7 @@ export const wadoRsQueryParamSchema = z.object({
         .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb", "displayp3"])),
     viewport: wadoRsViewportSchema.optional(),
     frameNumber: positiveNumberQuerySchema.optional(),
+    password: z.string().optional().describe("The password of the share link if the share link is protected"),
 });
 
 const wadoRsBaseAcceptEnum = z.enum([

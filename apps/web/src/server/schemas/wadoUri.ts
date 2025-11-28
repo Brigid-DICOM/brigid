@@ -127,6 +127,7 @@ export const wadoUriQueryParamSchema = z.object({
         .string()
         .default("no")
         .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb", "displayp3"])),
+    password: z.string().optional().describe("The password of the share link if the share link is protected"),
 }).superRefine((input, ctx) => {
     const windowCenterAbsent = input.windowCenter === undefined;
     const windowWidthAbsent = input.windowWidth === undefined;
