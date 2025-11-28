@@ -7,7 +7,7 @@ export type DownloadStatus = "pending" | "downloading" | "completed" | "failed" 
 
 export interface DownloadTask {
     id: string;
-    workspaceId: string;
+    workspaceId?: string;
     studyInstanceUid: string;
     seriesInstanceUid?: string;
     sopInstanceUid?: string;

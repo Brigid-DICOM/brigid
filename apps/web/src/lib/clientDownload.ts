@@ -3,7 +3,7 @@ import { useDownloadManagerStore } from "@/stores/download-manager-store";
 
 interface DownloadConfig {
     taskParams: {
-        workspaceId: string;
+        workspaceId?: string;
         studyInstanceUid: string;
         seriesInstanceUid?: string;
         sopInstanceUid?: string;
@@ -441,3 +441,356 @@ export const cancelDownload = (taskId: string) => {
 
     updateTaskStatus(taskId, "cancelled");
 };
+
+// #region share download
+
+interface DownloadShareStudyOptions {
+    token: string;
+    studyInstanceUid: string;
+    filename?: string;
+    password?: string;
+}
+
+export const downloadShareStudy = async (
+    options: DownloadShareStudyOptions,
+): Promise<string> => {
+    const { token, studyInstanceUid, filename, password } = options;
+
+    const config: DownloadConfig = {
+        taskParams: {
+            studyInstanceUid,
+        },
+        defaultFilename: filename || `study-${studyInstanceUid}.zip`,
+        apiRequest: (abortController) =>
+            apiClient.api.share[":token"].studies[
+                ":studyInstanceUid"
+            ].$get(
+                {
+                    header: {
+                        accept: "application/zip",
+                    },
+                    param: {
+                        token,
+                        studyInstanceUid,
+                    },
+                    query: {
+                        password,
+                    },
+                },
+                {
+                    init: {
+                        signal: abortController.signal,
+                    },
+                },
+            ),
+        errorMessage: "Failed to download study",
+    };
+
+    return downloadDicomResource(config, filename);
+};
+
+export const downloadShareMultipleStudies = async (
+    token: string,
+    studyInstanceUids: string[],
+    password?: string,
+): Promise<string[]> => {
+    const downloadPromises = studyInstanceUids.map(
+        (studyInstanceUid, index) => {
+            const filename = `study-${index + 1}-${studyInstanceUid}.zip`;
+            return downloadShareStudy({
+                token,
+                studyInstanceUid,
+                filename,
+                password,
+            });
+        },
+    );
+
+    try {
+        return await Promise.all(downloadPromises);
+    } catch (error) {
+        console.error("Failed to download multiple studies", error);
+        throw error;
+    }
+};
+
+interface DownloadShareSeriesOptions {
+    token: string;
+    studyInstanceUid: string;
+    seriesInstanceUid: string;
+    filename?: string;
+    password?: string;
+}
+
+export const downloadShareSeries = async (
+    options: DownloadShareSeriesOptions,
+): Promise<string> => {
+    const { token, studyInstanceUid, seriesInstanceUid, filename, password } = options;
+
+    const config: DownloadConfig = {
+        taskParams: {
+            studyInstanceUid,
+            seriesInstanceUid,
+        },
+        defaultFilename: filename || `series-${seriesInstanceUid}.zip`,
+        apiRequest: (abortController) =>
+            apiClient.api.share[":token"].studies[
+                ":studyInstanceUid"
+            ].series[":seriesInstanceUid"].$get(
+                {
+                    header: {
+                        accept: "application/zip",
+                    },
+                    param: {
+                        token,
+                        studyInstanceUid,
+                        seriesInstanceUid,
+                    },
+                    query: {
+                        password,
+                    },
+                },
+                {
+                    init: {
+                        signal: abortController.signal,
+                    },
+                },
+            ),
+        errorMessage: "Failed to download series",
+    };
+    
+    return downloadDicomResource(config, filename);
+};
+
+export const downloadShareMultipleSeries = async (
+    token: string,
+    studyInstanceUid: string,
+    seriesInstanceUids: string[],
+    password?: string,
+): Promise<string[]> => {
+    const downloadPromises = seriesInstanceUids.map(
+        (seriesInstanceUid, index) => {
+            const filename = `series-${index + 1}-${seriesInstanceUid}.zip`;
+            return downloadShareSeries({
+                token,
+                studyInstanceUid,
+                seriesInstanceUid,
+                filename,
+                password,
+            });
+        },
+    );
+
+    try {
+        return await Promise.all(downloadPromises);
+    } catch (error) {
+        console.error("Failed to download multiple series", error);
+        throw error;
+    }
+};
+
+interface DownloadShareInstanceOptions {
+    token: string;
+    studyInstanceUid: string;
+    seriesInstanceUid: string;
+    sopInstanceUid: string;
+    filename?: string;
+    password?: string;
+}
+
+export const downloadShareInstance = async (
+    options: DownloadShareInstanceOptions,
+): Promise<string> => {
+    const { token, studyInstanceUid, seriesInstanceUid, sopInstanceUid, filename, password } = options;
+
+    const config: DownloadConfig = {
+        taskParams: {
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+        },
+        defaultFilename: filename || `instance-${sopInstanceUid}.dcm`,
+        apiRequest: (abortController) =>
+            apiClient.api.share[":token"]["wado-uri"].$get(
+                {
+                    param: {
+                        token,
+                    },
+                    query: {
+                        studyUID: studyInstanceUid,
+                        seriesUID: seriesInstanceUid,
+                        objectUID: sopInstanceUid,
+                        requestType: "WADO",
+                        contentType: "application/dicom",
+                        password,
+                    },
+                },
+                {
+                    init: {
+                        signal: abortController.signal,
+                    },
+                },
+            ),
+        errorMessage: "Failed to download instance",
+    };
+    return downloadDicomResource(config, filename);
+};
+
+export const downloadShareInstanceAsJpg = async (
+    options: DownloadShareInstanceOptions,
+): Promise<string> => {
+    const { token, studyInstanceUid, seriesInstanceUid, sopInstanceUid, filename, password } = options;
+
+    const config: DownloadConfig = {
+        taskParams: {
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+        },
+        defaultFilename: filename || `instance-${sopInstanceUid}.jpg`,
+        apiRequest: (abortController) =>
+            apiClient.api.share[":token"]["wado-uri"].$get(
+                {
+                    param: {
+                        token,
+                    },
+                    query: {
+                        studyUID: studyInstanceUid,
+                        seriesUID: seriesInstanceUid,
+                        objectUID: sopInstanceUid,
+                        requestType: "WADO",
+                        contentType: "image/jpeg",
+                        password,
+                    },
+                },
+                {
+                    init: {
+                        signal: abortController.signal,
+                    },
+                },
+            ),
+        errorMessage: "Failed to download instance as jpg",
+    };
+    return downloadDicomResource(config, filename);
+};
+
+export const downloadShareInstanceAsPng = async (
+    options: DownloadShareInstanceOptions,
+): Promise<string> => {
+    const { token, studyInstanceUid, seriesInstanceUid, sopInstanceUid, filename, password } = options;
+
+    const config: DownloadConfig = {
+        taskParams: {
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+        },
+        defaultFilename: filename || `instance-${sopInstanceUid}.png`,
+        apiRequest: (abortController) =>
+            apiClient.api.share[":token"]["wado-uri"].$get(
+                {
+                    param: {
+                        token,
+                    },
+                    query: {
+                        studyUID: studyInstanceUid,
+                        seriesUID: seriesInstanceUid,
+                        objectUID: sopInstanceUid,
+                        requestType: "WADO",
+                        contentType: "image/png",
+                        password,
+                    },
+                },
+                {
+                    init: {
+                        signal: abortController.signal,
+                    },
+                },
+            ),
+        errorMessage: "Failed to download instance as png",
+    };
+    return downloadDicomResource(config, filename);
+};
+
+export const downloadShareMultipleInstances = async (
+    token: string,
+    studyInstanceUid: string,
+    seriesInstanceUid: string,
+    sopInstanceUids: string[],
+    password?: string,
+): Promise<string[]> => {
+    const downloadPromises = sopInstanceUids.map((sopInstanceUid, index) => {
+        const filename = `instance-${index + 1}-${sopInstanceUid}.dcm`;
+        return downloadShareInstance({
+            token,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+            filename,
+            password,
+        });
+    });
+
+    try {
+        return await Promise.all(downloadPromises);
+    } catch (error) {
+        console.error("Failed to download multiple instances", error);
+        throw error;
+    }
+};
+
+export const downloadShareMultipleInstancesAsJpg = async (
+    token: string,
+    studyInstanceUid: string,
+    seriesInstanceUid: string,
+    sopInstanceUids: string[],
+    password?: string,
+): Promise<string[]> => {
+    const downloadPromises = sopInstanceUids.map((sopInstanceUid, index) => {
+        const filename = `instance-${index + 1}-${sopInstanceUid}.jpg`;
+        return downloadShareInstanceAsJpg({
+            token,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+            filename,
+            password,
+        });
+    });
+
+    try {
+        return await Promise.all(downloadPromises);
+    } catch (error) {
+        console.error("Failed to download multiple instances as jpg", error);
+        throw error;
+    }
+};
+
+export const downloadShareMultipleInstancesAsPng = async (
+    token: string,
+    studyInstanceUid: string,
+    seriesInstanceUid: string,
+    sopInstanceUids: string[],
+    password?: string,
+): Promise<string[]> => {
+    const downloadPromises = sopInstanceUids.map((sopInstanceUid, index) => {
+        const filename = `instance-${index + 1}-${sopInstanceUid}.png`;
+        return downloadShareInstanceAsPng({
+            token,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+            filename,
+            password,
+        });
+    });
+
+    try {
+        return await Promise.all(downloadPromises);
+    } catch (error) {
+        console.error("Failed to download multiple instances as png", error);
+        throw error;
+    }
+};
+
+// #endregion share download

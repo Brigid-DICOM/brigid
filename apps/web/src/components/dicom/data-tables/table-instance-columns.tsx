@@ -30,7 +30,7 @@ export const createInstanceColumns = (): ColumnDef<DicomInstanceData>[] => {
             accessorKey: "sopClassUid",
             header: "SOP Class",
             cell: ({ row }) => (
-                <div className="font-mono text-xs truncate max-w-[200px]">
+                <div className="font-mono text-xs">
                     {row.original["00080016"]?.Value?.[0] || "N/A"}
                 </div>
             ),
@@ -39,7 +39,7 @@ export const createInstanceColumns = (): ColumnDef<DicomInstanceData>[] => {
             accessorKey: "sopInstanceUid",
             header: "SOP Instance UID",
             cell: ({ row }) => (
-                <div className="font-mono text-xs truncate max-w-[200px]">
+                <div className="font-mono text-xs">
                     {row.original["00080018"]?.Value?.[0] || "N/A"}
                 </div>
             ),
