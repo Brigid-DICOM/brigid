@@ -1,7 +1,7 @@
 "use client";
 
 import type { DicomSeriesData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -9,10 +9,11 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
+import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDeleteConfirmDialog } from "@/components/dicom/recycle/dicom-delete-confirm-dialog";
 import { DicomRecycleSeriesContextMenu } from "@/components/dicom/recycle/dicom-recycle-series-context-menu";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -33,12 +33,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
     deleteDicomSeriesMutation,
-    getDicomSeriesThumbnailQuery,
     restoreDicomSeriesMutation,
 } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
@@ -47,47 +45,6 @@ interface DicomRecycleSeriesTableProps {
     series: DicomSeriesData[];
     workspaceId: string;
     className?: string;
-}
-
-function ThumbnailCell({
-    workspaceId,
-    series,
-}: {
-    workspaceId: string;
-    series: DicomSeriesData;
-}) {
-    const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
-    const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
-
-    const { data: thumbnail, isLoading: isLoadingThumbnail } = useQuery(
-        getDicomSeriesThumbnailQuery(
-            workspaceId,
-            studyInstanceUid,
-            seriesInstanceUid,
-            "64,64",
-        ),
-    );
-
-    const thumbnailUrl = useDicomThumbnail(thumbnail);
-
-    if (isLoadingThumbnail) {
-        return <Skeleton className="size-16 rounded" />;
-    }
-
-    return thumbnailUrl && seriesInstanceUid !== "N/A" ? (
-        <Image
-            src={thumbnailUrl}
-            alt="DICOM Series Thumbnail"
-            width={64}
-            height={64}
-            className="size-16 object-cover rounded"
-            unoptimized
-        />
-    ) : (
-        <div className="size-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-            No image
-        </div>
-    );
 }
 
 function ActionsCell({
@@ -236,6 +193,8 @@ export function DicomRecycleSeriesDataTable({
         selectSeries,
     } = useDicomSeriesSelectionStore();
 
+    const generalColumns = useMemo(() => createSeriesColumns(), []);
+
     const columns: ColumnDef<DicomSeriesData>[] = useMemo(
         () => [
             {
@@ -287,70 +246,19 @@ export function DicomRecycleSeriesDataTable({
                 header: "Preview",
                 cell: ({ row }) => {
                     return (
-                        <ThumbnailCell
-                            series={row.original}
-                            workspaceId={workspaceId}
+                        <TableThumbnailCell
+                            source={{
+                                type: "workspace",
+                                workspaceId,
+                            }}
+                            studyInstanceUid={row.original["0020000D"]?.Value?.[0] || "N/A"}
+                            seriesInstanceUid={row.original["0020000E"]?.Value?.[0] || "N/A"}
+                            size={64}
                         />
                     );
                 },
             },
-            {
-                accessorKey: "modality",
-                header: "Modality",
-                cell: ({ row }) => {
-                    const modality = row.original["00080060"]?.Value?.[0] || "N/A";
-                    return <div>{modality}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesDescription",
-                header: "Series Description",
-                cell: ({ row }) => {
-                    const seriesDescription =
-                        row.original["0008103E"]?.Value?.[0] || "N/A";
-                    return <div>{seriesDescription}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesDate",
-                header: "Series Date",
-                cell: ({ row }) => {
-                    const seriesDate =
-                        row.original["00080021"]?.Value?.[0] || "N/A";
-                    return <div>{seriesDate}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesNumber",
-                header: "Series Number",
-                cell: ({ row }) => {
-                    const seriesNumber =
-                        row.original["00200011"]?.Value?.[0] || "N/A";
-                    return <div>{seriesNumber}</div>;
-                },
-            },
-            {
-                accessorKey: "numberOfSeriesRelatedInstances",
-                header: "Related Instances",
-                cell: ({ row }) => {
-                    const numberOfSeriesRelatedInstances =
-                        row.original["00201209"]?.Value?.[0] || "N/A";
-                    return <div>{numberOfSeriesRelatedInstances}</div>;
-                },
-            },
-            {
-                accessorKey: "seriesInstanceUid",
-                header: "Series Instance UID",
-                cell: ({ row }) => {
-                    const seriesInstanceUid =
-                        row.original["0020000E"]?.Value?.[0] || "N/A";
-                    return (
-                        <div className="font-mono text-sm">
-                            {seriesInstanceUid}
-                        </div>
-                    );
-                },
-            },
+            ...generalColumns,
             {
                 id: "actions",
                 enableHiding: false,
@@ -372,6 +280,7 @@ export function DicomRecycleSeriesDataTable({
             getSelectedCount,
             isSeriesSelected,
             toggleSeriesSelection,
+            generalColumns,
         ],
     );
 

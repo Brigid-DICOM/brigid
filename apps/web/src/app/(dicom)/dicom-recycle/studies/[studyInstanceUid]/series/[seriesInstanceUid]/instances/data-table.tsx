@@ -1,7 +1,7 @@
 "use client";
 
 import type { DicomInstanceData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -9,9 +9,10 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { createInstanceColumns } from "@/components/dicom/data-tables/table-instance-columns";
+import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDeleteConfirmDialog } from "@/components/dicom/recycle/dicom-delete-confirm-dialog";
 import { DicomRecycleInstanceContextMenu } from "@/components/dicom/recycle/dicom-recycle-instance-context-menu";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -32,12 +32,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
     deleteDicomInstanceMutation, 
-    getDicomInstanceThumbnailQuery,
     restoreDicomInstanceMutation
 } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
@@ -46,50 +44,6 @@ interface DicomRecycleInstancesTableProps {
     instances: DicomInstanceData[];
     workspaceId: string;
     className?: string;
-}
-
-function ThumbnailCell({
-    workspaceId,
-    instance,
-}: {
-    workspaceId: string;
-    instance: DicomInstanceData;
-}) {
-    const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
-    const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
-    const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
-
-    const { data: thumbnail, isLoading: isLoadingThumbnail } = useQuery({
-        ...getDicomInstanceThumbnailQuery(
-            workspaceId,
-            studyInstanceUid,
-            seriesInstanceUid,
-            sopInstanceUid,
-            "64,64",
-        ),
-        enabled: sopInstanceUid !== "N/A",
-    });
-
-    const thumbnailUrl = useDicomThumbnail(thumbnail);
-
-    if (isLoadingThumbnail) {
-        return <Skeleton className="size-16 rounded" />;
-    }
-
-    return thumbnailUrl && sopInstanceUid !== "N/A" ? (
-        <Image
-            src={thumbnailUrl}
-            alt="DICOM Instance Thumbnail"
-            width={64}
-            height={64}
-            className="size-16 object-cover rounded"
-            unoptimized
-        />
-    ) : (
-        <div className="size-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-            No image
-        </div>
-    );
 }
 
 function ActionsCell({
@@ -223,6 +177,8 @@ export function DicomRecycleInstancesDataTable({
         selectInstance,
     } = useDicomInstanceSelectionStore();
 
+    const generalColumns = useMemo(() => createInstanceColumns(), []);
+
     const columns: ColumnDef<DicomInstanceData>[] = useMemo(
         () => [
             {
@@ -270,61 +226,23 @@ export function DicomRecycleInstancesDataTable({
             },
             {
                 accessorKey: "thumbnail",
-                header: "Thumbnail",
+                header: "Preview",
                 cell: ({ row }) => {
                     return (
-                        <ThumbnailCell
-                            workspaceId={workspaceId}
-                            instance={row.original}
+                        <TableThumbnailCell
+                            source={{
+                                type: "workspace",
+                                workspaceId,
+                            }}
+                            studyInstanceUid={row.original["0020000D"]?.Value?.[0] || "N/A"}
+                            seriesInstanceUid={row.original["0020000E"]?.Value?.[0] || "N/A"}
+                            sopInstanceUid={row.original["00080018"]?.Value?.[0] || "N/A"}
+                            size={64}
                         />
                     );
                 },
             },
-            {
-                accessorKey: "instanceNumber",
-                header: "Instance Number",
-                cell: ({ row }) => {
-                    const instanceNumber =
-                        row.original["00200013"]?.Value?.[0] || "N/A";
-                    return <div>{instanceNumber}</div>;
-                },
-            },
-            {
-                accessorKey: "acquisitionDate",
-                header: "Acquisition Date",
-                cell: ({ row }) => {
-                    const acquisitionDate =
-                        row.original["00080022"]?.Value?.[0] || "N/A";
-                    return <div>{acquisitionDate}</div>;
-                },
-            },
-            {
-                accessorKey: "contentDate",
-                header: "Content Date",
-                cell: ({ row }) => {
-                    const contentDate =
-                        row.original["00080023"]?.Value?.[0] || "N/A";
-                    return <div>{contentDate}</div>;
-                },
-            },
-            {
-                accessorKey: "sopInstanceUid",
-                header: "SOP Instance UID",
-                cell: ({ row }) => {
-                    const sopInstanceUid =
-                        row.original["00080018"]?.Value?.[0] || "N/A";
-                    return <div>{sopInstanceUid}</div>;
-                },
-            },
-            {
-                accessorKey: "sopClassUid",
-                header: "SOP Class UID",
-                cell: ({ row }) => {
-                    const sopClassUid =
-                        row.original["00080016"]?.Value?.[0] || "N/A";
-                    return <div>{sopClassUid}</div>;
-                },
-            },
+            ...generalColumns,
             {
                 accessorKey: "actions",
                 header: "Actions",
@@ -346,6 +264,7 @@ export function DicomRecycleInstancesDataTable({
             getSelectedCount,
             isInstanceSelected,
             toggleInstanceSelection,
+            generalColumns,
         ],
     );
 
