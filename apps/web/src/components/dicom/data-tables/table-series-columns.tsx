@@ -31,7 +31,7 @@ export const createSeriesColumns = (): ColumnDef<DicomSeriesData>[] => {
         },
         {
             accessorKey: "seriesNumber",
-            header: "Series Number",
+            header: "Series #",
             cell: ({ row }) => {
                 const seriesNumber =
                     row.original["00200011"]?.Value?.[0] || "N/A";
