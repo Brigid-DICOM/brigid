@@ -4,7 +4,7 @@ import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { TagEntity } from "@brigid/database/src/entities/tag.entity";
 import { TAG_TARGET_TYPE, TagAssignmentEntity, type TagTargetType } from "@brigid/database/src/entities/tagAssignment.entity";
-import type { EntityManager } from "typeorm";
+import { type EntityManager, In } from "typeorm";
 
 export class TagService {
     private readonly entityManager: EntityManager;
@@ -191,5 +191,131 @@ export class TagService {
             }
         
         return await queryBuilder.getMany();
+    }
+
+    /**
+     * 批次處理 tags：如果 tag 不存在則建立，存在則更新，最後 assign 到所有 targets
+     * Batch process tags: create if not exists, update if exists, then assign to all targets
+     * @param options 
+     */
+    async upsertAndAssignTags(options: {
+        workspaceId: string;
+        tags: { name: string, color: string }[];
+        targets: { targetType: TagTargetType, targetId: string }[];
+    }) {
+        const results: {
+            tag: TagEntity;
+            assignments: TagAssignmentEntity[];
+            created: boolean
+        }[] = [];
+
+        for (const tagInput of options.tags) {
+            // Find existing tag by name
+            let tag = await this.entityManager.findOne(TagEntity, {
+                where: {
+                    workspaceId: options.workspaceId,
+                    name: tagInput.name
+                }
+            });
+
+            let created = false;
+
+            if (tag) {
+                if (tag.color !== tagInput.color) {
+                    tag.color = tagInput.color;
+                    tag = await this.entityManager.save(TagEntity, tag);
+                }
+            } else {
+                tag = new TagEntity();
+                tag.name = tagInput.name;
+                tag.color = tagInput.color;
+                tag.workspaceId = options.workspaceId;
+                tag = await this.entityManager.save(TagEntity, tag);
+                created = true;
+            }
+
+            // 先將所有 target 的 assignment 找出來，並快取到 map 當中
+            // 如果 target 已經有 assignment，則直接使用快取的 assignment，避免重新建立
+            const targetIds = options.targets.map(target => target.targetId);
+            const existingAssignments = await this.entityManager.find(TagAssignmentEntity, {
+                where: {
+                    tagId: tag.id,
+                    targetId: In(targetIds),
+                    workspaceId: options.workspaceId
+                }
+            });
+            const existingAssignmentMap = new Map<string, TagAssignmentEntity>();
+            for (const a of existingAssignments) {
+                existingAssignmentMap.set(a.targetId, a);
+            }
+
+            const assignments: TagAssignmentEntity[] = [];
+
+            for (const target of options.targets) {
+                const cachedAssignment = existingAssignmentMap.get(target.targetId);
+
+                if (cachedAssignment) {
+                    assignments.push(cachedAssignment);
+                    continue;
+                }
+
+                const targetExists = await this.verifyTargetExists({
+                    workspaceId: options.workspaceId,
+                    targetType: target.targetType,
+                    targetId: target.targetId
+                });
+                if (!targetExists) continue;
+                
+                const assignment = new TagAssignmentEntity();
+                assignment.tagId = tag.id;
+                assignment.targetType = target.targetType;
+                assignment.targetId = target.targetId;
+                assignment.workspaceId = options.workspaceId;
+
+                const savedAssignment = await this.entityManager.save(TagAssignmentEntity, assignment);
+                assignments.push(savedAssignment);
+            }
+
+            results.push({
+                tag,
+                assignments,
+                created
+            });
+        }
+
+        return results;
+    }
+
+    private async verifyTargetExists(options: {
+        workspaceId: string;
+        targetType: TagTargetType;
+        targetId: string;
+    }) {
+        let targetEntity: typeof StudyEntity | typeof SeriesEntity | typeof InstanceEntity;
+        let targetIdField: string;
+
+        switch (options.targetType) {
+            case TAG_TARGET_TYPE.STUDY:
+                targetEntity = StudyEntity;
+                targetIdField = "studyInstanceUid";
+                break;
+            case TAG_TARGET_TYPE.SERIES:
+                targetEntity = SeriesEntity;
+                targetIdField = "seriesInstanceUid";
+                break;
+            case TAG_TARGET_TYPE.INSTANCE:
+                targetEntity = InstanceEntity;
+                targetIdField = "sopInstanceUid";
+                break;
+            default:
+                throw new Error(`Invalid target type: ${options.targetType}`);
+        }
+
+        return await this.entityManager.exists(targetEntity, {
+            where: {
+                [targetIdField]: options.targetId,
+                workspaceId: options.workspaceId
+            },
+        });
     }
 }

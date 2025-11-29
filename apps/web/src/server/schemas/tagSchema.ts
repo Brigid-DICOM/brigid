@@ -22,6 +22,21 @@ export const removeTagAssignmentSchema = z.object({
     assignmentId: z.uuid()
 });
 
+export const shareAssignTagSchema = z.object({
+    tags: z.array(
+        z.object({
+            name: z.string().min(1).max(255),
+            color: hexColorSchema,
+        })
+    ).min(1).describe("Tags to create/update and assign"),
+    targets: z.array(
+        z.object({
+            targetType: z.enum(["study", "series", "instance"]),
+            targetId: z.string().min(1),
+        })
+    ).min(1).describe("Targets to assign tags to"),
+})
+
 export type CreateTagPayload = z.infer<typeof createTagSchema>;
 export type UpdateTagPayload = z.infer<typeof updateTagSchema>;
 export type AssignTagPayload = z.infer<typeof assignTagSchema>;
