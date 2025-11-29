@@ -35,7 +35,8 @@ export const shareAssignTagSchema = z.object({
             targetId: z.string().min(1),
         })
     ).min(1).describe("Targets to assign tags to"),
-})
+    password: z.string().optional().describe("The password for the share link"),
+});
 
 export type CreateTagPayload = z.infer<typeof createTagSchema>;
 export type UpdateTagPayload = z.infer<typeof updateTagSchema>;

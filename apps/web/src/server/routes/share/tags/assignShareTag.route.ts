@@ -22,8 +22,8 @@ const assignShareTagRoute = new Hono().post(
             token: z.string().describe("The share link token"),
         }),
     ),
-    zValidator("json", shareAssignTagSchema),
     setUserMiddleware,
+    zValidator("json", shareAssignTagSchema),
     verifyShareLinkToken,
     verifyShareLinkPermission(SHARE_PERMISSIONS.UPDATE),
     async (c) => {
@@ -46,7 +46,6 @@ const assignShareTagRoute = new Hono().post(
                 403,
             );
         }
-        
 
         const tagService = new TagService();
         const results = await tagService.upsertAndAssignTags({
