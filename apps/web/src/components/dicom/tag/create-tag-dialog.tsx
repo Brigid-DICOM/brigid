@@ -1,7 +1,7 @@
 "use client";
 
 import type { TagTargetType } from "@brigid/database/src/entities/tagAssignment.entity";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import type React from "react";
@@ -180,7 +180,6 @@ export function CreateTagDialog({
     }
 
     const handleOpenChange = (open: boolean) => {
-        console.log("handleOpenChange", open);
         if (!open) {
             setTagName("");
             setSelectedColor(PRESET_COLORS[0]);

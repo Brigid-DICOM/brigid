@@ -10,15 +10,17 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createInstanceColumns } from "@/components/dicom/data-tables/table-instance-columns";
+import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,9 +36,13 @@ import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { downloadShareInstance } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getShareInstanceThumbnailQuery } from "@/react-query/queries/publicShare";
+import { SHARE_PERMISSIONS } from "@/server/const/share.const";
+import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { SharedDicomInstanceContextMenu } from "../shared-dicom-instance-context-menu";
+import { ShareCreateTagDialog } from "../tag/share-create-tag-dialog";
+import { ShareTagDropdownSub } from "../tag/share-tag-dropdown-sub";
 
 interface SharedDicomInstancesDataTableProps {
     instances: DicomInstanceData[];
@@ -96,15 +102,23 @@ function ActionsCell({
     instance,
     token,
     password,
+    publicPermissions = 0,
 }: {
     instance: DicomInstanceData;
     token: string;
     password?: string;
+    publicPermissions?: number;
 }) {
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
+
+    const canUpdate = hasPermission(
+        publicPermissions,
+        SHARE_PERMISSIONS.UPDATE,
+    );
 
     const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -143,25 +157,47 @@ function ActionsCell({
         });
     }
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="size-8 p-0">
-                    <span className="sr-only">Open Menu</span>
-                    <MoreHorizontalIcon className="size-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleCopySopInstanceUid}>
-                    Copy SOP Instance UID
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                    Open in BlueLight Viewer
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDownload}>
-                    Download Instance
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="size-8 p-0">
+                        <span className="sr-only">Open Menu</span>
+                        <MoreHorizontalIcon className="size-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleCopySopInstanceUid}>
+                        Copy SOP Instance UID
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                        Open in BlueLight Viewer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownload}>
+                        Download Instance
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    
+                    {canUpdate && (
+                        <ShareTagDropdownSub 
+                            token={token}
+                            targetType="instance"
+                            targetId={sopInstanceUid}
+                            password={password}
+                            onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                        />
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <ShareCreateTagDialog 
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                token={token}
+                targetType="instance"
+                targetId={sopInstanceUid}
+                password={password}
+            />
+        </>
     );
 }
 
@@ -242,6 +278,21 @@ export function SharedDicomInstancesDataTable({
                     />
                 ),
             },
+            {
+                accessorKey: "tags",
+                header: "Tags",
+                cell: ({ row }) => (
+                    <DicomDataTableTagCell
+                        mode="share"
+                        token={token}
+                        targetType="instance"
+                        targetId={row.original["00080018"]?.Value?.[0] || ""}
+                        password={password}
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            },
             ...generalColumns,
             {
                 id: "actions",
@@ -251,6 +302,7 @@ export function SharedDicomInstancesDataTable({
                         instance={row.original}
                         token={token}
                         password={password}
+                        publicPermissions={publicPermissions}
                     />
                 ),
             },
@@ -265,6 +317,7 @@ export function SharedDicomInstancesDataTable({
             isInstanceSelected,
             toggleInstanceSelection,
             generalColumns,
+            publicPermissions
         ],
     );
 

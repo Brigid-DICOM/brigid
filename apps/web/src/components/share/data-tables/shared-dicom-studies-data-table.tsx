@@ -9,19 +9,24 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
+import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { downloadShareStudy } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
+import { SHARE_PERMISSIONS } from "@/server/const/share.const";
+import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { SharedDicomStudyContextMenu } from "../shared-dicom-study-context-menu";
+import { ShareCreateTagDialog } from "../tag/share-create-tag-dialog";
+import { ShareTagDropdownSub } from "../tag/share-tag-dropdown-sub";
 
 interface SharedDicomStudiesDataTableProps {
     studies: DicomStudyData[];
@@ -35,15 +40,23 @@ function ActionsCell({
     token,
     study,
     password,
+    publicPermissions = 0,
 }: {
     token: string;
     study: DicomStudyData;
     password?: string
+    publicPermissions?: number;
 }) {
     const router = useRouter();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { clearSelection } = useDicomStudySelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
+
+    const canUpdate = hasPermission(
+        publicPermissions,
+        SHARE_PERMISSIONS.UPDATE,
+    );
 
     const handleEnterSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -76,28 +89,53 @@ function ActionsCell({
     }
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant={"ghost"}
-                    className="size-8 p-0"
-                >
-                    <span className="sr-only">Open Menu</span>
-                    <MoreHorizontalIcon className="size-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleEnterSeries}>
-                    Enter Series
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                    Open in BlueLight Viewer
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDownloadStudy}>
-                    Download Study
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant={"ghost"}
+                        className="size-8 p-0"
+                    >
+                        <span className="sr-only">Open Menu</span>
+                        <MoreHorizontalIcon className="size-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleEnterSeries}>
+                        Enter Series
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                        Open in BlueLight Viewer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownloadStudy}>
+                        Download Study
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {canUpdate && (
+                        <ShareTagDropdownSub 
+                        token={token}
+                        targetType="study"
+                        targetId={studyInstanceUid}
+                        password={password}
+                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                        />
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            {canUpdate && (
+                <ShareCreateTagDialog 
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    token={token}
+                    targetType="study"
+                    targetId={studyInstanceUid}
+                    password={password}
+                />
+            )}
+        </>
     )
 }
 
@@ -162,12 +200,31 @@ export function SharedDicomStudiesDataTable({
                 />
             ),
         },
+        {
+            accessorKey: "tags",
+            header: "Tags",
+            cell: ({ row }) => (
+                <DicomDataTableTagCell
+                    mode="share"
+                    token={token}
+                    targetType="study"
+                    targetId={row.original["0020000D"]?.Value?.[0] || ""}
+                />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
         ...generalColumns,
         {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => (
-                <ActionsCell study={row.original} token={token} password={password} />
+                <ActionsCell 
+                    study={row.original}
+                    token={token}
+                    password={password}
+                    publicPermissions={publicPermissions}
+                />
             ),
         },
     ], [
@@ -179,7 +236,8 @@ export function SharedDicomStudiesDataTable({
         getSelectedCount,
         isStudySelected,
         toggleStudySelection,
-        generalColumns
+        generalColumns,
+        publicPermissions
     ]);
 
     const table = useReactTable({

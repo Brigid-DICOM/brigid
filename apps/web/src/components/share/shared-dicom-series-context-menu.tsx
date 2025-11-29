@@ -4,7 +4,6 @@ import {
     CornerDownLeftIcon,
     DownloadIcon,
     EyeIcon,
-    TagIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -24,6 +23,8 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
+import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
 
 interface SharedDicomSeriesContextMenuProps {
     children: React.ReactNode;
@@ -107,61 +108,80 @@ export function SharedDicomSeriesContextMenu({
     };
 
     return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-            <ContextMenuContent className="w-56">
-                {selectedIds.length === 1 && (
-                    <>
-                        <ContextMenuItem
-                            onClick={handleEnterInstances}
-                            className="flex items-center space-x-2"
-                        >
-                            <CornerDownLeftIcon className="size-4" />
-                            <span>Enter Instances</span>
-                        </ContextMenuItem>
+        <>
+            <ContextMenu>
+                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+                <ContextMenuContent className="w-56">
+                    {selectedIds.length === 1 && (
+                        <>
+                            <ContextMenuItem
+                                onClick={handleEnterInstances}
+                                className="flex items-center space-x-2"
+                            >
+                                <CornerDownLeftIcon className="size-4" />
+                                <span>Enter Instances</span>
+                            </ContextMenuItem>
 
-                        <ContextMenuItem
-                            onClick={handleOpenBlueLightViewer}
-                            className="flex items-center space-x-2"
-                        >
-                            <EyeIcon className="size-4" />
-                            <span>Open in BlueLight Viewer</span>
-                        </ContextMenuItem>
+                            <ContextMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                                className="flex items-center space-x-2"
+                            >
+                                <EyeIcon className="size-4" />
+                                <span>Open in BlueLight Viewer</span>
+                            </ContextMenuItem>
 
-                        <ContextMenuItem
-                            onClick={handleDownloadSelected}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
+                            <ContextMenuItem
+                                onClick={handleDownloadSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
 
-                        {canUpdate && (
-                            <>
-                                <ContextMenuSeparator />
+                            {canUpdate && (
+                                <>
+                                    <ContextMenuSeparator />
 
-                                {/* TODO: 實作 Share 模式的 tag management dialog */}
-                            </>
-                        )}
-                    </>
-                )}
+                                    <ShareTagContextMenuSub
+                                        token={token}
+                                        targetType="series"
+                                        targetId={seriesInstanceUid}
+                                        password={password}
+                                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                                    />
+                                </>
+                            )}
+                        </>
+                    )}
 
-                {selectedIds.length > 1 && (
-                    <>
-                        <ContextMenuLabel>
-                            Selected Items ({selectedIds.length})
-                        </ContextMenuLabel>
+                    {selectedIds.length > 1 && (
+                        <>
+                            <ContextMenuLabel>
+                                Selected Items ({selectedIds.length})
+                            </ContextMenuLabel>
 
-                        <ContextMenuItem
-                            onClick={handleDownloadSelected}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
-                    </>
-                )}
-            </ContextMenuContent>
-        </ContextMenu>
+                            <ContextMenuItem
+                                onClick={handleDownloadSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
+                </ContextMenuContent>
+            </ContextMenu>
+
+            {canUpdate && (
+                <ShareCreateTagDialog 
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    token={token}
+                    targetType="series"
+                    targetId={seriesInstanceUid}
+                    password={password}
+                />
+            )}
+        </>
     );
 }

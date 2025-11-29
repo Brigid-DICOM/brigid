@@ -1,12 +1,9 @@
 "use client";
 
 import {
-    CornerDownLeftIcon,
     DownloadIcon,
     EyeIcon,
-    TagIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +18,7 @@ import {
     ContextMenuSubTrigger,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { 
+import {
     downloadShareMultipleInstances,
     downloadShareMultipleInstancesAsJpg,
     downloadShareMultipleInstancesAsPng,
@@ -31,6 +28,8 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
+import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
 
 interface SharedDicomInstanceContextMenuProps {
     children: React.ReactNode;
@@ -75,8 +74,8 @@ const DownloadSubMenuItems = ({
                 <span>PNG</span>
             </ContextMenuItem>
         </>
-    )
-}
+    );
+};
 
 export function SharedDicomInstanceContextMenu({
     children,
@@ -88,26 +87,28 @@ export function SharedDicomInstanceContextMenu({
     publicPermissions,
 }: SharedDicomInstanceContextMenuProps) {
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
-    const router = useRouter();
     const { open } = useBlueLightViewerStore();
 
-    const { getSelectedInstanceIds, clearSelection } = useDicomInstanceSelectionStore();
+    const { getSelectedInstanceIds, clearSelection } =
+        useDicomInstanceSelectionStore();
     const selectedIds = getSelectedInstanceIds();
 
-    const canUpdate = hasPermission(publicPermissions, SHARE_PERMISSIONS.UPDATE);
+    const canUpdate = hasPermission(
+        publicPermissions,
+        SHARE_PERMISSIONS.UPDATE,
+    );
 
     const handleDicomDownload = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
         try {
-
             await downloadShareMultipleInstances(
                 token,
                 studyInstanceUid,
                 seriesInstanceUid,
                 selectedIds,
                 password,
-            )
+            );
         } catch (error) {
             console.error("Failed to download selected instances", error);
 
@@ -117,7 +118,7 @@ export function SharedDicomInstanceContextMenu({
 
             toast.error("Failed to download selected instances");
         }
-    }
+    };
 
     const handleJpgDownload = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -128,9 +129,12 @@ export function SharedDicomInstanceContextMenu({
                 studyInstanceUid,
                 seriesInstanceUid,
                 selectedIds,
-            )
+            );
         } catch (error) {
-            console.error("Failed to download selected instances as JPG", error);
+            console.error(
+                "Failed to download selected instances as JPG",
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
@@ -138,7 +142,7 @@ export function SharedDicomInstanceContextMenu({
 
             toast.error("Failed to download selected instances as JPG");
         }
-    }
+    };
 
     const handlePngDownload = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -149,9 +153,12 @@ export function SharedDicomInstanceContextMenu({
                 studyInstanceUid,
                 seriesInstanceUid,
                 selectedIds,
-            )
+            );
         } catch (error) {
-            console.error("Failed to download selected instances as PNG", error);
+            console.error(
+                "Failed to download selected instances as PNG",
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
@@ -159,7 +166,7 @@ export function SharedDicomInstanceContextMenu({
 
             toast.error("Failed to download selected instances as PNG");
         }
-    }
+    };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -172,22 +179,20 @@ export function SharedDicomInstanceContextMenu({
             sopInstanceUid,
             password,
         });
-    }
+    };
 
     useEffect(() => {
         return () => {
             clearSelection();
-        }
+        };
     }, [clearSelection]);
 
     return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>
-                {children}
-            </ContextMenuTrigger>
-            <ContextMenuContent className="w-56">
-                {selectedIds.length === 1 && (
-                    <>
+        <>
+            <ContextMenu>
+                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+                <ContextMenuContent className="w-56">
+                    {selectedIds.length === 1 && (
                         <ContextMenuItem
                             onClick={handleOpenBlueLightViewer}
                             className="flex items-center space-x-2"
@@ -195,57 +200,56 @@ export function SharedDicomInstanceContextMenu({
                             <EyeIcon className="size-4" />
                             <span>Open in BlueLight Viewer</span>
                         </ContextMenuItem>
+                    )}
 
-                        <ContextMenuSub>
-                            <ContextMenuSubTrigger>
-                                <DownloadIcon className="size-4 mr-4" />
-                                <span>Download</span>
-                            </ContextMenuSubTrigger>
-                            <ContextMenuSubContent>
-                                <DownloadSubMenuItems
-                                    onDicomDownload={handleDicomDownload}
-                                    onJpgDownload={handleJpgDownload}
-                                    onPngDownload={handlePngDownload}
-                                />
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
+                    {selectedIds.length > 1 && (
+                        <ContextMenuLabel>
+                            Selected Items ({selectedIds.length})
+                        </ContextMenuLabel>
+                    )}
 
-                        {canUpdate && (
-                            <>
-                                <ContextMenuSeparator />
+                    <ContextMenuSub>
+                        <ContextMenuSubTrigger>
+                            <DownloadIcon className="size-4 mr-4" />
+                            <span>Download</span>
+                        </ContextMenuSubTrigger>
+                        <ContextMenuSubContent>
+                            <DownloadSubMenuItems
+                                onDicomDownload={handleDicomDownload}
+                                onJpgDownload={handleJpgDownload}
+                                onPngDownload={handlePngDownload}
+                            />
+                        </ContextMenuSubContent>
+                    </ContextMenuSub>
 
-                                {/* TODO: 實作 Share 模式的 tag management dialog */}
-                            </>
-                        )}
-                    </>
-                )}
+                    {canUpdate && (
+                        <>
+                            <ContextMenuSeparator />
 
-                {selectedIds.length > 1 && (
-                    <>
-                        <ContextMenuSub>
-                            <ContextMenuSubTrigger>
-                                <DownloadIcon className="size-4 mr-4" />
-                                <span>Download</span>
-                            </ContextMenuSubTrigger>
-                            <ContextMenuSubContent>
-                                <DownloadSubMenuItems
-                                    onDicomDownload={handleDicomDownload}
-                                    onJpgDownload={handleJpgDownload}
-                                    onPngDownload={handlePngDownload}
-                                />
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
+                            <ShareTagContextMenuSub
+                                token={token}
+                                targetType="instance"
+                                targetId={sopInstanceUid}
+                                password={password}
+                                onOpenCreateTagDialog={() =>
+                                    setOpenCreateTagDialog(true)
+                                }
+                            />
+                        </>
+                    )}
+                </ContextMenuContent>
+            </ContextMenu>
 
-                        {canUpdate && (
-                            <>
-                                <ContextMenuSeparator />
-
-                                {/* TODO: 實作 Share 模式的 tag management dialog */}
-                            </>
-                        )}
-                    </>
-                )}
-            </ContextMenuContent>
-        </ContextMenu>
-    )
+            {canUpdate && (
+                <ShareCreateTagDialog
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    token={token}
+                    targetType="instance"
+                    targetId={sopInstanceUid}
+                    password={password}
+                />
+            )}
+        </>
+    );
 }

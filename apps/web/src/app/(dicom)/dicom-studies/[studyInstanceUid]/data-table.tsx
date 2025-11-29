@@ -281,6 +281,7 @@ export function DicomSeriesDataTable({
                 cell: ({ row }) => {
                     return (
                         <DicomDataTableTagCell
+                            mode="workspace"
                             workspaceId={workspaceId}
                             targetType="series"
                             targetId={

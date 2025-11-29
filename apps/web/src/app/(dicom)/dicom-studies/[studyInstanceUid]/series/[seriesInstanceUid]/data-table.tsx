@@ -254,6 +254,7 @@ export function DicomInstancesDataTable({
                 cell: ({ row }) => {
                     return (
                         <DicomDataTableTagCell
+                            mode="workspace"
                             workspaceId={workspaceId}
                             targetType="instance"
                             targetId={row.original["00080018"]?.Value?.[0] || ""}

@@ -266,6 +266,7 @@ export function DicomStudiesDataTable({
                 cell: ({ row }) => {
                     return (
                         <DicomDataTableTagCell
+                            mode="workspace"
                             workspaceId={workspaceId}
                             targetType="study"
                             targetId={row.original["0020000D"]?.Value?.[0] || ""}

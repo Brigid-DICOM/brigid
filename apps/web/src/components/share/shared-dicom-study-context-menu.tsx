@@ -1,10 +1,9 @@
 "use client";
 
-// TODO: 實作 share 模式的 tag management dialog
-
 import { CornerDownLeftIcon, DownloadIcon, EyeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
     ContextMenu,
@@ -20,6 +19,8 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
+import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
 
 interface SharedDicomStudyContextMenuProps {
     children: React.ReactNode;
@@ -34,24 +35,32 @@ export function SharedDicomStudyContextMenu({
     token,
     password,
     studyInstanceUid,
-    publicPermissions
+    publicPermissions,
 }: SharedDicomStudyContextMenuProps) {
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const router = useRouter();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { getSelectedStudyIds } = useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
 
-    const canUpdate = hasPermission(publicPermissions, SHARE_PERMISSIONS.UPDATE);
+    const canUpdate = hasPermission(
+        publicPermissions,
+        SHARE_PERMISSIONS.UPDATE,
+    );
 
     const handleEnterSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
 
-        const params = password ? `?password=${encodeURIComponent(password)}` : "";
+        const params = password
+            ? `?password=${encodeURIComponent(password)}`
+            : "";
         router.push(`/share/${token}/studies/${studyInstanceUid}${params}`);
-    }
+    };
 
-    const handleDownloadSelected = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleDownloadSelected = async (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
 
@@ -77,7 +86,7 @@ export function SharedDicomStudyContextMenu({
 
             toast.error("Failed to download selected studies");
         }
-    }
+    };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -88,66 +97,85 @@ export function SharedDicomStudyContextMenu({
             studyInstanceUid,
             password,
         });
-    }
+    };
 
     return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>
-                {children}
-            </ContextMenuTrigger>
+        <>
+            <ContextMenu>
+                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-            <ContextMenuContent className="w-56">
-                {selectedIds.length === 1 && (
-                    <>
-                        <ContextMenuItem
-                            onClick={handleEnterSeries}
-                            className="flex items-center space-x-2"
-                        >
-                            <CornerDownLeftIcon className="size-4" />
-                            <span>Enter Series</span>
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                            onClick={handleOpenBlueLightViewer}
-                            className="flex items-center space-x-2"
-                        >
-                            <EyeIcon className="size-4" />
-                            <span>Open in BlueLight Viewer</span>
-                        </ContextMenuItem>
+                <ContextMenuContent className="w-56">
+                    {selectedIds.length === 1 && (
+                        <>
+                            <ContextMenuItem
+                                onClick={handleEnterSeries}
+                                className="flex items-center space-x-2"
+                            >
+                                <CornerDownLeftIcon className="size-4" />
+                                <span>Enter Series</span>
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                                className="flex items-center space-x-2"
+                            >
+                                <EyeIcon className="size-4" />
+                                <span>Open in BlueLight Viewer</span>
+                            </ContextMenuItem>
 
-                        <ContextMenuItem
-                            onClick={handleDownloadSelected}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
+                            <ContextMenuItem
+                                onClick={handleDownloadSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
 
-                        {canUpdate && (
-                            <>
-                                <ContextMenuSeparator />
+                            {canUpdate && (
+                                <>
+                                    <ContextMenuSeparator />
 
-                                {/* TODO: 實作 Share 模式的 tag management dialog */}
-                            </>
-                        )}
-                    </>
-                )}
+                                    <ShareTagContextMenuSub
+                                        token={token}
+                                        targetType="study"
+                                        targetId={studyInstanceUid as string}
+                                        password={password}
+                                        onOpenCreateTagDialog={() =>
+                                            setOpenCreateTagDialog(true)
+                                        }
+                                    />
+                                </>
+                            )}
+                        </>
+                    )}
 
-                {selectedIds.length > 1 && (
-                    <>
-                        <ContextMenuLabel>
-                            Selected Item ({selectedIds.length})
-                        </ContextMenuLabel>
+                    {selectedIds.length > 1 && (
+                        <>
+                            <ContextMenuLabel>
+                                Selected Item ({selectedIds.length})
+                            </ContextMenuLabel>
 
-                        <ContextMenuItem
-                            onClick={handleDownloadSelected}
-                            className="flex items-center space-x-2"
-                        >
-                            <DownloadIcon className="size-4" />
-                            <span>Download</span>
-                        </ContextMenuItem>
-                    </>
-                )}
-            </ContextMenuContent>
-        </ContextMenu>
-    )
+                            <ContextMenuItem
+                                onClick={handleDownloadSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>Download</span>
+                            </ContextMenuItem>
+                        </>
+                    )}
+                </ContextMenuContent>
+            </ContextMenu>
+            
+            {canUpdate && (
+                <ShareCreateTagDialog
+                open={openCreateTagDialog}
+                onOpenChange={setOpenCreateTagDialog}
+                token={token}
+                targetType="study"
+                    targetId={studyInstanceUid as string}
+                    password={password}
+                />
+            )}
+        </>
+    );
 }

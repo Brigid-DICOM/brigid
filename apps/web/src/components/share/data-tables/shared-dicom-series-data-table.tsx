@@ -9,16 +9,18 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
+import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -31,9 +33,13 @@ import {
 } from "@/components/ui/table";
 import { downloadShareSeries } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
+import { SHARE_PERMISSIONS } from "@/server/const/share.const";
+import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { SharedDicomSeriesContextMenu } from "../shared-dicom-series-context-menu";
+import { ShareCreateTagDialog } from "../tag/share-create-tag-dialog";
+import { ShareTagDropdownSub } from "../tag/share-tag-dropdown-sub";
 
 interface SharedDicomSeriesDataTableProps {
     series: DicomSeriesData[];
@@ -47,16 +53,24 @@ function ActionsCell({
     series,
     token,
     password,
+    publicPermissions = 0,
 }: {
     series: DicomSeriesData;
     token: string;
     password?: string;
+    publicPermissions?: number;
 }) {
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
+    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { clearSelection } = useDicomSeriesSelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
+
+    const canUpdate = hasPermission(
+        publicPermissions,
+        SHARE_PERMISSIONS.UPDATE,
+    );
 
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -100,25 +114,48 @@ function ActionsCell({
     }
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="size-8 p-0">
-                    <span className="sr-only">Open Menu</span>
-                    <MoreHorizontalIcon className="size-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleEnterInstances}>
-                    Enter Instances
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                    Open in BlueLight Viewer
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDownload}>
-                    Download Series
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="size-8 p-0">
+                        <span className="sr-only">Open Menu</span>
+                        <MoreHorizontalIcon className="size-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleEnterInstances}>
+                        Enter Instances
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                        Open in BlueLight Viewer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownload}>
+                        Download Series
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {canUpdate && (
+                        <ShareTagDropdownSub 
+                            token={token}
+                            targetType="series"
+                            targetId={seriesInstanceUid}
+                            password={password}
+                            onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                        />
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            {canUpdate && (
+                <ShareCreateTagDialog 
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    token={token}
+                    targetType="series"
+                    targetId={seriesInstanceUid}
+                    password={password}
+                />
+            )}
+        </>
     );
 }
 
@@ -199,6 +236,21 @@ export function SharedDicomSeriesDataTable({
                     />
                 ),
             },
+            {
+                accessorKey: "tags",
+                header: "Tags",
+                cell: ({ row }) => (
+                    <DicomDataTableTagCell
+                        mode="share"
+                        token={token}
+                        targetType="series"
+                        targetId={row.original["0020000E"]?.Value?.[0] || ""}
+                        password={password}
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            },
             ...generalColumns,
             {
                 id: "actions",
@@ -208,6 +260,7 @@ export function SharedDicomSeriesDataTable({
                         series={row.original}
                         token={token}
                         password={password}
+                        publicPermissions={publicPermissions}
                     />
                 ),
             },
@@ -222,6 +275,7 @@ export function SharedDicomSeriesDataTable({
             isSeriesSelected,
             toggleSeriesSelection,
             generalColumns,
+            publicPermissions,
         ],
     );
 
