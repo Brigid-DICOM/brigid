@@ -2,7 +2,6 @@
 
 import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
-import { CheckIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
@@ -13,7 +12,7 @@ import { getTargetTagsQuery } from "@/react-query/queries/tag";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { Card, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
-import { DicomCardTagBadge } from "./dicom-card-tag-badge";
+import { DicomCardHeaderTagsDisplay } from "./dicom-card-header-tags-display";
 import { DicomSeriesContextMenu } from "./dicom-series-context-menu";
 import { DicomRecycleSeriesContextMenu } from "./recycle/dicom-recycle-series-context-menu";
 
@@ -105,28 +104,12 @@ export function DicomSeriesCard({
                 onContextMenu={handleContextMenu}
                 onDoubleClick={handleDoubleClick}
             >
-                <div className="flex items-stretch justify-between px-2 py-1.5 bg-white/50 backdrop-blur-sm border-b border-gray-100 leading-none">
-                    <div className="flex-1 flex min-w-0 items-center">
-                        {tags?.data && tags?.data.length > 0 ? (
-                            <DicomCardTagBadge tags={tags.data} maxDisplay={2} />
-                        ): (
-                            <div className="h-5" />
-                        )}
-
-                        {isLoadingTags && (
-                            <Skeleton className="h-5 w-7 rounded-full" />
-                        )}
-                    </div>
-
-                    
-                    {isSelected && (
-                        <div className="ml-2 flex-shrink-0">
-                            <div className="bg-primary text-white rounded-full p-1.5 shadow-md">
-                                <CheckIcon className="size-2" />
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <DicomCardHeaderTagsDisplay 
+                    tags={tags?.data ?? []}
+                    isLoadingTags={isLoadingTags}
+                    isSelected={isSelected}
+                    maxTagDisplay={2}
+                />
 
                 <div className="aspect-square w-full bg-gray-100 flex items-center justify-center mb-4">
                     {isLoadingThumbnail ? (
