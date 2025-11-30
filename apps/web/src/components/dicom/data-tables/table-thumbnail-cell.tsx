@@ -41,6 +41,7 @@ export function TableThumbnailCell({ source, studyInstanceUid, seriesInstanceUid
     }
 
     return (
+      <div className="flex justify-center items-center" style={{ width: size, height: size }}>
         <Image
           src={url}
           alt="DICOM Thumbnail"
@@ -49,5 +50,6 @@ export function TableThumbnailCell({ source, studyInstanceUid, seriesInstanceUid
           className="object-cover rounded"
           unoptimized
         />
+      </div>
     );
 }
