@@ -22,35 +22,25 @@ export const retrieveStudyInstancesHandler = async (
 ) => {
     try {
         const { workspaceId, studyInstanceUid, accept } = params;
+        const limit = env.QUERY_MAX_LIMIT;
+
+        const instances: InstanceEntity[] = [];
+        let batch: InstanceEntity[] = [];
+
+        let lastUpdatedAt: Date | undefined;
+        let lastId: string | undefined;
+        let keepPaging = true;
 
         const studyService = new StudyService();
-        const study = await studyService.getStudyByUid({
+        batch = await studyService.getStudyInstancesByCursor({
             workspaceId,
             studyInstanceUid,
+            limit,
+            lastUpdatedAt,
+            lastId,
         });
 
-        if (!study) {
-            return c.json(
-                {
-                    message: "Study not found",
-                },
-                404,
-            );
-        }
-
-        const limit = env.QUERY_MAX_LIMIT;
-        let offset = 0;
-        const instances: InstanceEntity[] = [];
-        let { instances: studyInstances, hasNextPage } =
-            await studyService.getStudyInstances({
-                workspaceId,
-                studyInstanceUid,
-                limit,
-                offset,
-            });
-        instances.push(...studyInstances);
-
-        if (instances.length === 0) {
+        if (batch.length === 0) {
             return c.json(
                 {
                     message: `Instances not found, study instance UID: ${studyInstanceUid}`,
@@ -59,16 +49,37 @@ export const retrieveStudyInstancesHandler = async (
             );
         }
 
-        while (hasNextPage) {
-            offset += limit;
-            const result = await studyService.getStudyInstances({
+        instances.push(...batch);
+
+        if (batch.length === limit) {
+            const lastInstance = batch[batch.length - 1];
+            lastUpdatedAt = lastInstance.updatedAt;
+            lastId = lastInstance.id;
+        } else {
+            keepPaging = false;
+        }
+
+        while (keepPaging) {
+            const nextBatch = await studyService.getStudyInstancesByCursor({
                 workspaceId,
                 studyInstanceUid,
                 limit,
-                offset,
+                lastUpdatedAt,
+                lastId,
             });
-            instances.push(...result.instances);
-            hasNextPage = result.hasNextPage;
+            
+            if (nextBatch.length < limit) {
+                keepPaging = false;
+            }
+
+            if (nextBatch.length > 0) {
+                instances.push(...nextBatch);
+                const lastInstance = nextBatch[nextBatch.length - 1];
+                lastUpdatedAt = lastInstance.updatedAt;
+                lastId = lastInstance.id;
+            } else {
+                keepPaging = false;
+            }
         }
 
         const handlers = [new ZipHandler(), new MultipartHandler()];

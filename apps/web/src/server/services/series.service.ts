@@ -198,4 +198,33 @@ export class SeriesService {
             count: modality.count,
         }));
     }
+
+    async getSeriesInstancesByCursor(options: {
+        workspaceId: string;
+        studyInstanceUid: string;
+        seriesInstanceUid: string;
+        limit: number;
+        lastUpdatedAt?: Date;
+        lastId?: string
+    }) {
+        const { workspaceId, studyInstanceUid, seriesInstanceUid, limit, lastUpdatedAt, lastId } = options;
+        const queryBuilder = this.entityManager
+            .createQueryBuilder(InstanceEntity, "instance")
+            .where("instance.workspaceId = :workspaceId", { workspaceId })
+            .andWhere("instance.studyInstanceUid = :studyInstanceUid", { studyInstanceUid })
+            .andWhere("instance.seriesInstanceUid = :seriesInstanceUid", { seriesInstanceUid })
+            .orderBy("instance.updatedAt", "ASC")
+            .addOrderBy("instance.id", "ASC")
+            .take(limit);
+            
+        if (lastUpdatedAt && lastId) {
+            queryBuilder.andWhere(
+                `(instance.updatedAt > :lastUpdatedAt OR (instance.updatedAt = :lastUpdatedAt AND instance.id > :lastId))`,
+                { lastUpdatedAt, lastId }
+            )
+        }
+
+        // !這裡只返回資料，不計算總數 (count)
+        return await queryBuilder.getMany();
+    }
 }

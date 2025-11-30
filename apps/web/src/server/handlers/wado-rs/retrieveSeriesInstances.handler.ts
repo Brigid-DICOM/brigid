@@ -24,38 +24,26 @@ export const retrieveSeriesInstancesHandler = async (
     try {
         const { workspaceId, studyInstanceUid, seriesInstanceUid, accept } =
             params;
+        const limit = env.QUERY_MAX_LIMIT;
 
+        const instances: InstanceEntity[] = [];
+        let batch: InstanceEntity[] = [];
+        
+        let lastUpdatedAt: Date | undefined;
+        let lastId: string | undefined;
+        let keepPaging = true;
+        
         const seriesService = new SeriesService();
-        const series = await seriesService.getSeriesByUid({
+        batch = await seriesService.getSeriesInstancesByCursor({
             workspaceId,
             studyInstanceUid,
             seriesInstanceUid,
+            limit,
+            lastUpdatedAt,
+            lastId,
         });
-        if (!series) {
-            return c.json(
-                {
-                    ok: false,
-                    data: null,
-                    error: "Series not found",
-                },
-                404,
-            );
-        }
-
-        const limit = env.QUERY_MAX_LIMIT;
-        let offset = 0;
-        const instances: InstanceEntity[] = [];
-        let { instances: seriesInstances, hasNextPage } =
-            await seriesService.getSeriesInstances({
-                workspaceId,
-                studyInstanceUid,
-                seriesInstanceUid,
-                limit,
-                offset,
-            });
-        instances.push(...seriesInstances);
-
-        if (instances.length === 0) {
+        
+        if (batch.length === 0) {
             return c.json(
                 {
                     message: `Instances not found, series instance UID: ${seriesInstanceUid}`,
@@ -64,17 +52,38 @@ export const retrieveSeriesInstancesHandler = async (
             );
         }
 
-        while (hasNextPage) {
-            offset += limit;
-            const result = await seriesService.getSeriesInstances({
+        instances.push(...batch);
+
+        if (batch.length === limit) {
+            const lastInstance = batch[batch.length - 1];
+            lastUpdatedAt = lastInstance.updatedAt;
+            lastId = lastInstance.id;
+        } else {
+            keepPaging = false;
+        }
+
+        while (keepPaging) {
+            const nextBatch = await seriesService.getSeriesInstancesByCursor({
                 workspaceId,
                 studyInstanceUid,
                 seriesInstanceUid,
                 limit,
-                offset,
+                lastUpdatedAt,
+                lastId,
             });
-            instances.push(...result.instances);
-            hasNextPage = result.hasNextPage;
+
+            if (nextBatch.length < limit) {
+                keepPaging = false;
+            }
+
+            if (nextBatch.length > 0) {
+                instances.push(...nextBatch);
+                const lastInstance = nextBatch[nextBatch.length - 1];
+                lastUpdatedAt = lastInstance.updatedAt;
+                lastId = lastInstance.id;
+            } else {
+                keepPaging = false;
+            }
         }
 
         const handlers = [new ZipHandler(), new MultipartHandler()];
