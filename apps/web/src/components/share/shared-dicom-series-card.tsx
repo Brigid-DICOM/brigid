@@ -10,7 +10,9 @@ import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getShareSeriesThumbnailQuery } from "@/react-query/queries/publicShare";
+import { getTargetShareTagsQuery } from "@/react-query/queries/share-tag";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomSeriesContextMenu } from "./shared-dicom-series-context-menu";
 
@@ -64,6 +66,10 @@ export function SharedDicomSeriesCard({
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
+    const { data: tags, isLoading: isLoadingTags } = useQuery(
+        getTargetShareTagsQuery(token, "series", seriesInstanceUid, password ?? undefined)
+    );
+
     const handleDoubleClick = () => {
         if (effectiveStudyUid) {
             const params = password ? `?password=${encodeURIComponent(password)}` : "";
@@ -88,7 +94,7 @@ export function SharedDicomSeriesCard({
           seriesInstanceUid={seriesInstanceUid}
           publicPermissions={publicPermissions}
         >
-                <Card
+            <Card
                 className={cn(
                     "w-full max-w-sm",
                     "overflow-hidden",
@@ -108,6 +114,13 @@ export function SharedDicomSeriesCard({
                 onContextMenu={handleContextMenu}
                 onDoubleClick={onDoubleClick}
             >
+                <DicomCardHeaderTagsDisplay 
+                    tags={tags?.data ?? []}
+                    isLoadingTags={isLoadingTags}
+                    isSelected={isSelected}
+                    maxTagDisplay={2}
+                />
+
                 {/* Thumbnail */}
                 <div className="aspect-square w-full bg-gray-100 flex items-center justify-center">
                     {isLoadingThumbnail ? (

@@ -9,7 +9,9 @@ import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getShareInstanceThumbnailQuery } from "@/react-query/queries/publicShare";
+import { getTargetShareTagsQuery } from "@/react-query/queries/share-tag";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomInstanceContextMenu } from "./shared-dicom-instance-context-menu";
 
@@ -67,6 +69,10 @@ export function SharedDicomInstanceCard({
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
+    const { data: tags, isLoading: isLoadingTags } = useQuery(
+        getTargetShareTagsQuery(token, "instance", sopInstanceUid, password ?? undefined)
+    )
+
     const { handleCardClick, handleContextMenu } = useDicomCardSelection({
         itemId: sopInstanceUid,
         isSelected,
@@ -103,6 +109,13 @@ export function SharedDicomInstanceCard({
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
             >
+                <DicomCardHeaderTagsDisplay 
+                    tags={tags?.data ?? []}
+                    isLoadingTags={isLoadingTags}
+                    isSelected={isSelected}
+                    maxTagDisplay={2}
+                />
+
                 {/* Thumbnail */}
                 <div className="aspect-square w-full bg-gray-100 flex items-center justify-center">
                     {isLoadingThumbnail ? (

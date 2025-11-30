@@ -10,7 +10,9 @@ import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
 import { getShareStudyThumbnailQuery } from "@/react-query/queries/publicShare";
+import { getTargetShareTagsQuery } from "@/react-query/queries/share-tag";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomStudyContextMenu } from "./shared-dicom-study-context-menu";
 
@@ -60,6 +62,10 @@ export function SharedDicomStudyCard({
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
+    const { data: tags, isLoading: isLoadingTags } = useQuery(
+        getTargetShareTagsQuery(token, "study", studyInstanceUid, password ?? undefined)
+    );
+
     const handleDoubleClick = () => {
         const params = password ? `?password=${encodeURIComponent(password)}` : "";
         router.push(`/share/${token}/studies/${studyInstanceUid}${params}`);
@@ -104,6 +110,13 @@ export function SharedDicomStudyCard({
                 onContextMenu={handleContextMenu}
                 onDoubleClick={onDoubleClick}
             >
+                <DicomCardHeaderTagsDisplay 
+                    tags={tags?.data ?? []}
+                    isLoadingTags={isLoadingTags}
+                    isSelected={isSelected}
+                    maxTagDisplay={2}
+                />
+
                 {/* Thumbnail */}
                 <div className="aspect-square w-full bg-gray-100 flex items-center justify-center">
                     {isLoadingThumbnail ? (
