@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { DownloadIcon, Share2Icon, Trash2Icon } from "lucide-react";
+import { DownloadIcon, EyeIcon, Share2Icon, Trash2Icon } from "lucide-react";
 import { nanoid } from "nanoid";
 import type React from "react";
 import { useState } from "react";
@@ -29,6 +29,7 @@ import {
 import { closeContextMenu } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { ShareManagementDialog } from "../share/share-management-dialog";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
@@ -92,6 +93,7 @@ export function DicomInstanceContextMenu({
     const queryClient = getQueryClient();
     const { getSelectedInstanceIds, clearSelection } =
         useDicomInstanceSelectionStore();
+    const { open: openBlueLightViewer } = useBlueLightViewerStore();
 
     const selectedIds = getSelectedInstanceIds();
 
@@ -181,6 +183,16 @@ export function DicomInstanceContextMenu({
         },
     });
 
+    const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        openBlueLightViewer({
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+        });
+    }
+
     const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
@@ -199,6 +211,13 @@ export function DicomInstanceContextMenu({
                 <ContextMenuContent className="w-56">
                     {selectedIds.length === 1 && (
                         <>
+                            <ContextMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                                className="flex items-center space-x-2"
+                            >
+                                <EyeIcon className="size-4" />
+                                <span>Open in BlueLight Viewer</span>
+                            </ContextMenuItem>
                             <ContextMenuSub>
                                 <ContextMenuSubTrigger>
                                     <DownloadIcon className="size-4 mr-4" />

@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { cookies } from "next/headers";
+import { BlueLightViewerDialog } from "@/components/dicom/bluelight-viewer-dialog";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
@@ -39,6 +40,8 @@ export default async function DicomInstancesSeriesPage({ params }: DicomInstance
                 studyInstanceUid={studyInstanceUid}
                 seriesInstanceUid={seriesInstanceUid}
             />
+
+            <BlueLightViewerDialog />
         </HydrationBoundary>
     );
 }

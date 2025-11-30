@@ -39,6 +39,7 @@ import { downloadInstance } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
+import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 
 interface DicomInstancesTableProps {
@@ -57,6 +58,7 @@ function ActionsCell({
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
+    const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
@@ -104,6 +106,15 @@ function ActionsCell({
         navigator.clipboard.writeText(sopInstanceUid);
     };
 
+    const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        openBlueLightViewer({
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+        });
+    }
+
     const handleRecycleInstance = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         setShowRecycleConfirmDialog(true);
@@ -129,8 +140,12 @@ function ActionsCell({
 
                     <DropdownMenuSeparator />
 
+                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                        Open in BlueLight Viewer
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem onClick={handleDownloadInstance}>
-                        Download Instance
+                        Download
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
@@ -145,7 +160,7 @@ function ActionsCell({
                     <DropdownMenuSeparator />
 
                     <DropdownMenuItem onClick={handleRecycleInstance}>
-                        Recycle Instance
+                        Recycle
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
