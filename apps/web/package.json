@@ -53,7 +53,7 @@
     "embla-carousel-react": "^8.6.0",
     "fs-extra": "^11.3.2",
     "hasha": "^7.0.0",
-    "hono": "^4.9.9",
+    "hono": "^4.10.7",
     "hono-openapi": "^1.1.0",
     "java-bridge": "^2.8.0",
     "jsonpath-plus": "^10.3.0",
