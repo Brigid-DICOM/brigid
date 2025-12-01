@@ -31,13 +31,16 @@ export const searchStudySeriesQueryParamSchema = searchStudiesQueryParamSchema.e
     SeriesTime: timeRangeSchema.optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.SeriesTime.tag]: timeRangeSchema.optional(),
 
+    SeriesDescription: z.string().optional(),
+    [DICOM_TAG_KEYWORD_REGISTRY.SeriesDescription.tag]: z.string().optional(),
+
     PerformedProcedureStepStartDate: dateRangeSchema.optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartDate.tag]: dateRangeSchema.optional(),
 
     PerformedProcedureStepStartTime: timeRangeSchema.optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartTime.tag]: timeRangeSchema.optional(),
 
-    "RequestAttributesSequence.ScheduleProcedureStepID": z.string().optional(),
+    "RequestAttributesSequence.ScheduledProcedureStepID": z.string().optional(),
     [NESTED_TAG_KEYS.RequestAttributesSequence_ScheduledProcedureStepID]: z.string().optional(),
     
     "RequestAttributesSequence.RequestedProcedureID": z.string().optional(),
