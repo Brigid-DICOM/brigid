@@ -8,7 +8,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";

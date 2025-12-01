@@ -4,7 +4,7 @@ import type { DicomStudyData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { FolderIcon } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";

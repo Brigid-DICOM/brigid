@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AppSidebar } from "@/components/app-sidebar";
-import { DownloadTaskList } from "@/components/download/download-task-list";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import NextTopLoader from "nextjs-toploader";
+import { Suspense } from "react";
+import Loading from "@/components/loading";
 import { Toaster } from "@/components/ui/sonner";
-import { UploadTaskList } from "@/components/upload/upload-task-list";
 import Providers from "./providers";
 
 const geistSans = Geist({
@@ -34,12 +32,18 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <Providers>
-                    {children}
-                </Providers>
+                <Suspense fallback={<Loading />}>
+                    <NextTopLoader 
+                        color="var(--primary)"
+                        showSpinner={false}
+                    />
+                    
+                    <Providers>
+                        {children}
+                    </Providers>
 
-                <Toaster richColors />
-
+                    <Toaster richColors />
+                </Suspense>
             </body>
         </html>
     );

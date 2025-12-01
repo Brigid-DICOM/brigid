@@ -5,7 +5,7 @@ import {
     DownloadIcon,
     EyeIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
