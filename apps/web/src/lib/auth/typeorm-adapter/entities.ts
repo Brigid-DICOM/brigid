@@ -56,13 +56,13 @@ export class AccountEntity {
     @Column({ type: "uuid" })
     userId!: string;
 
-    @Column()
+    @Column({ type: "varchar" })
     type!: string;
 
-    @Column()
+    @Column({ type: "varchar" })
     provider!: string;
 
-    @Column()
+    @Column({ type: "varchar" })
     providerAccountId!: string;
 
     @Column({ type: "varchar", nullable: true })
@@ -105,13 +105,13 @@ export class SessionEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @Column({ unique: true })
+    @Column({ type: "varchar", unique: true })
     sessionToken!: string;
 
     @Column({ type: "uuid" })
     userId!: string;
 
-    @Column({ transformer: transformer.date })
+    @Column({ type: "varchar", transformer: transformer.date })
     expires!: string;
 
     @ManyToOne(
@@ -126,12 +126,12 @@ export class VerificationTokenEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @Column()
+    @Column({ type: "varchar" })
     token!: string;
 
-    @Column()
+    @Column({ type: "varchar" })
     identifier!: string;
 
-    @Column({ transformer: transformer.date })
+    @Column({ type: "varchar", transformer: transformer.date })
     expires!: string;
 }
