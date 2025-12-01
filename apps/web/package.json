@@ -63,6 +63,7 @@
     "nanoid": "^5.1.6",
     "next": "15.5.4",
     "next-themes": "^0.4.6",
+    "nextjs-toploader": "^3.9.17",
     "pg": "^8.16.3",
     "raccoon-dcm4che-bridge": "^0.7.0",
     "react": "19.1.0",
