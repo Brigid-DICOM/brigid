@@ -25,7 +25,7 @@ const searchStudySeriesInstancesRoute = new Hono().get(
     zValidator("query", searchStudySeriesInstancesQueryParamSchema),
     async (c) => {
         const workspaceId = c.req.param("workspaceId");
-        const queryParams = c.req.query();
+        const queryParams = c.req.valid("query");
 
         const queryBuilder = new DicomSearchInstanceQueryBuilder();
         const instances = await queryBuilder.execQuery({
