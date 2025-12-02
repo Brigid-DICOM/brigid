@@ -56,6 +56,7 @@ const createShareLinkRoute = new Hono().post(
                 workspaceId,
                 targetType: payload.targetType,
                 targetIds: payload.targetIds,
+                name: payload.name,
                 publicPermissions: payload.publicPermissions,
                 requiredPassword: payload.requiredPassword,
                 password: payload.password,

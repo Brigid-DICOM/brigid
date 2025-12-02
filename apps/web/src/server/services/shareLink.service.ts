@@ -104,6 +104,7 @@ export class ShareLinkService {
         workspaceId: string;
         targetType: "study" | "series" | "instance";
         targetIds: string[];
+        name?: string;
         publicPermissions: SharePermissionsType;
         requiredPassword: boolean;
         password?: string;
@@ -117,6 +118,7 @@ export class ShareLinkService {
         shareLink.workspaceId = options.workspaceId;
         shareLink.publicPermissions = options.publicPermissions;
         shareLink.requiredPassword = options.requiredPassword;
+        shareLink.name = options.name ?? `shared ${options.targetType}`;
 
         if (options.requiredPassword && options.password) {
             shareLink.passwordHash = await this.hashPassword(options.password);
@@ -263,6 +265,7 @@ export class ShareLinkService {
     async updateShareLink(options: {
         shareLinkId: string;
         creatorId: string;
+        name?: string;
         publicPermissions?: SharePermissionsType;
         requiredPassword?: boolean;
         password?: string;
@@ -281,6 +284,10 @@ export class ShareLinkService {
             workspaceId: shareLink.workspaceId,
             userId: options.creatorId,
         });
+
+        if (options.name !== undefined) {
+            shareLink.name = options.name;
+        }
 
         if (options.publicPermissions !== undefined) {
             shareLink.publicPermissions = options.publicPermissions;

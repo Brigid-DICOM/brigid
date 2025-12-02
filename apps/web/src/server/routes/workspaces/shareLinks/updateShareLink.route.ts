@@ -56,6 +56,7 @@ const updateShareLinkRoute = new Hono().patch(
             const updatedShareLink = await shareLinkService.updateShareLink({
                 shareLinkId,
                 creatorId: userId,
+                name: payload.name,
                 publicPermissions: payload.publicPermissions,
                 requiredPassword: payload.requiredPassword,
                 password: payload.password,

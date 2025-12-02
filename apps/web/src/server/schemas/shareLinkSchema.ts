@@ -6,6 +6,11 @@ export const createShareLinkSchema = z.object({
         .enum(["study", "series", "instance"])
         .describe("The type of the target"),
     targetIds: z.array(z.string()).describe("The IDs of the targets"),
+    name: z
+        .string()
+        .max(255)
+        .optional()
+        .describe("The name of the share link"),
     publicPermissions: z
         .number()
         .min(0)
@@ -45,6 +50,11 @@ export const createShareLinkSchema = z.object({
 });
 
 export const updateShareLinkSchema = z.object({
+    name: z
+        .string()
+        .max(255)
+        .optional()
+        .describe("The name of the share link"),
     expiresInSec: z
         .number()
         .optional()
