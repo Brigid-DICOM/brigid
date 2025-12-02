@@ -422,13 +422,7 @@ export class ShareLinkService {
            .leftJoinAndSelect("shareLink.targets", "targets")
            .leftJoinAndSelect("shareLink.recipients", "recipients")
            .where("shareLink.workspaceId = :workspaceId", { workspaceId: options.workspaceId })
-           .andWhere(
-                (subQuery) => {
-                    return subQuery
-                    .where("shareLink.creatorId = :userId", { userId: options.userId })
-                    .orWhere("recipients.userId = :userId", { userId: options.userId });
-                }
-            )
+           .andWhere("shareLink.creatorId = :userId", { userId: options.userId })
             .orderBy("shareLink.createdAt", "DESC")
             .skip((options.page - 1) * options.limit)
             .take(options.limit);
