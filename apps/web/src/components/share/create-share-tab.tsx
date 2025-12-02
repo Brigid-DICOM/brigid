@@ -41,6 +41,7 @@ export function CreateShareTab({
     onSuccess,
 }: CreateShareTabProps) {
     const queryClient = getQueryClient();
+    const [name, setName] = useState("");
     const [publicPermissions, setPublicPermissions] = useState(
         SHARE_PERMISSIONS.READ,
     );
@@ -59,6 +60,7 @@ export function CreateShareTab({
                 json: {
                     targetType,
                     targetIds,
+                    name: name.trim() ?? `shared ${targetType}`,
                     publicPermissions: publicPermissions,
                     requiredPassword,
                     password: requiredPassword ? password : undefined,
@@ -152,10 +154,23 @@ export function CreateShareTab({
         setExpiresInSec(null);
         setDescription("");
         setSelectedUsers([]);
+        setName("");
     }
 
     return (
         <div className="space-y-6 py-4">
+            <div className="space-y-3">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                    type="text"
+                    id="name"
+                    placeholder="Enter name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={255}
+                />
+            </div>
+
             <div className="space-y-3">
                 <Label htmlFor="public-permissions">Public Permissions</Label>
                 <SharePermissionDropdown

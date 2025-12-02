@@ -27,6 +27,7 @@ interface ManageShareTabProps {
 
 interface ShareLink {
     id: string;
+    name?: string;
     token: string;
     publicPermissions: number;
     requiredPassword: boolean;
@@ -324,6 +325,22 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                             position: "bottom-center",
                         });
                     }}
+                />
+            </div>
+
+            <div className="space-y-3">
+                <Label>Name</Label>
+                <Input
+                    type="text"
+                    placeholder="Enter name"
+                    value={updatedShare.name ?? editingShare.name ?? ""}
+                    onChange={(e) => {
+                        setUpdatedShare((prev) => ({
+                            ...prev,
+                            name: e.target.value.trim() ?? undefined,
+                        }));
+                    }}
+                    maxLength={255}
                 />
             </div>
 
