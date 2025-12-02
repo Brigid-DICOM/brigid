@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import { numberQuerySchema } from "@/server/schemas/numberQuerySchema";
 import {
     wadoRsMultipleFramesHeaderSchema,
@@ -19,6 +22,9 @@ const retrieveRenderedFramesRoute = new Hono().get(
             "Retrieve Transaction Rendered Frames, ref: [Retrieve Transaction Rendered Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-3)",
         tags: ["WADO-RS"],
     }),
+    verifyAuthMiddleware,
+    verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator("header", wadoRsRenderedFramesHeaderSchema),
     zValidator(
         "param",

@@ -6,8 +6,11 @@ import {
 import {
     z
 } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { retrieveStudyInstancesHandler } from "@/server/handlers/wado-rs/retrieveStudyInstances.handler";
 import { cleanupTempFiles } from "@/server/middlewares/cleanupTempFiles.middleware";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import { wadoRsHeaderSchema, wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
 
 const retrieveStudyInstancesRoute = new Hono()
@@ -18,6 +21,9 @@ const retrieveStudyInstancesRoute = new Hono()
         description: "Retrieve DICOM study instances (WADO-RS), ref: [Retrieve Transaction Study Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-1)",
         tags: ["WADO-RS"]
     }),
+    verifyAuthMiddleware,
+    verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator("header", wadoRsHeaderSchema),
     zValidator("query", wadoRsQueryParamSchema),
     zValidator("param", z.object({

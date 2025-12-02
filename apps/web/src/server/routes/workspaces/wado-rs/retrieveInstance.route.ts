@@ -3,6 +3,7 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { retrieveInstanceHandler } from "@/server/handlers/wado-rs/retrieveInstance.handler";
 import { cleanupTempFiles } from "@/server/middlewares/cleanupTempFiles.middleware";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import { wadoRsHeaderSchema, wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
 
 const retrieveInstanceRoute = new Hono()
@@ -14,6 +15,7 @@ const retrieveInstanceRoute = new Hono()
             "Retrieve DICOM instance (WADO-RS), ref: [Retrieve Transaction Instance Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-1)",
         tags: ["WADO-RS"]
     }),
+    verifyAuthMiddleware,
     zValidator(
         "header",
         wadoRsHeaderSchema

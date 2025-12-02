@@ -7,6 +7,9 @@ import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import tmp from "tmp";
 import { z } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { StudyService } from "@/server/services/study.service";
 import { DicomJsonBinaryDataUtils } from "@/server/utils/dicom/dicomJsonBinaryDataUtils";
@@ -25,6 +28,9 @@ const retrieveStudyMetadataRoute = new Hono()
             "Retrieve Study Metadata (WADO-RS), ref: [Retrieve Transaction Metadata Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-2)",
         tags: ["WADO-RS"]
     }),
+    verifyAuthMiddleware,
+    verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator("param", z.object({
         workspaceId: z.string().describe("The ID of the workspace"),
         studyInstanceUid: z.string().describe("The study instance UID")

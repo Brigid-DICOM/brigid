@@ -8,6 +8,9 @@ import {
 } from "hono-openapi";
 import tmp from "tmp";
 import { z } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { InstanceService } from "@/server/services/instance.service";
 import { DicomJsonBinaryDataUtils } from "@/server/utils/dicom/dicomJsonBinaryDataUtils";
@@ -26,6 +29,9 @@ const retrieveInstanceMetadataRoute = new Hono()
             "Retrieve Instance Metadata (WADO-RS), ref: [Retrieve Transaction Metadata Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-2)",
         tags: ["WADO-RS"]
     }),
+    verifyAuthMiddleware,
+    verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator(
         "param",
         z.object({

@@ -4,6 +4,9 @@ import {
     validator as zValidator
 } from "hono-openapi";
 import { z } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import {
     wadoRsMultipleFramesHeaderSchema,
     wadoRsQueryParamSchema,
@@ -18,6 +21,9 @@ const retrieveRenderedInstancesRoute = new Hono().get(
             "Retrieve Transaction Rendered Instances, ref: [Retrieve Transaction Rendered Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-3)",
         tags: ["WADO-RS"],
     }),
+    verifyAuthMiddleware,
+    verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator("header", wadoRsMultipleFramesHeaderSchema),
     zValidator("param", z.object({
         workspaceId: z.string().describe("The ID of the workspace"),

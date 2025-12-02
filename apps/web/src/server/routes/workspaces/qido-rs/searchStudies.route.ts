@@ -2,7 +2,9 @@ import type { DicomTag } from "@brigid/types";
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
-import { verifyWorkspaceExists } from "@/server/middlewares/workspace.middleware";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import { searchStudiesQueryParamSchema } from "@/server/schemas/searchStudies";
 import { DicomSearchStudyQueryBuilder } from "@/server/services/qido-rs/dicomSearchStudyQueryBuilder";
 
@@ -13,7 +15,9 @@ const searchStudiesRoute = new Hono().get(
             "Search for DICOM studies (QIDO-RS), ref: [Search Transaction](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.6)",
         tags: ["QIDO-RS"],
     }),
+    verifyAuthMiddleware,
     verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator(
         "param",
         z.object({

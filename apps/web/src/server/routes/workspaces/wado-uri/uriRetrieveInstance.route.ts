@@ -6,7 +6,10 @@ import {
 import {
     z
 } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { uriRetrieveInstanceHandler } from "@/server/handlers/wado-uri/uriRetrieveInstance.handler";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import { wadoUriQueryParamSchema } from "@/server/schemas/wadoUri";
 
 const uriRetrieveInstanceRoute = new Hono()
@@ -16,6 +19,9 @@ const uriRetrieveInstanceRoute = new Hono()
         description: "Retrieve DICOM instance (WADO-URI), ref: [URI Service](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#chapter_9)",
         tags: ["WADO-URI"]
     }),
+    verifyAuthMiddleware,
+    verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator("query", wadoUriQueryParamSchema),
     zValidator("param", z.object({
         workspaceId: z.string().describe("The ID of the workspace")

@@ -6,6 +6,9 @@ import {
     validator as zValidator
 } from "hono-openapi";
 import { z } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
 import { numberQuerySchema } from "@/server/schemas/numberQuerySchema";
 import { InstanceService } from "@/server/services/instance.service";
 import type { DicomSource } from "@/server/types/dicom/convert";
@@ -22,6 +25,9 @@ const retrieveFramePixelDataRoute = new Hono()
         description: "Retrieve frame pixel data (WADO-RS), ref: [ Retrieve Transaction Pixel Data Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1.6-1)",
         tags: ["WADO-RS"]
     }),
+    verifyAuthMiddleware,
+    verifyWorkspaceExists,
+    verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator(
         "header",
         z.object({
