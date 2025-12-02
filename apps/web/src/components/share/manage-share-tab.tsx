@@ -5,6 +5,7 @@ import { formatDistanceToNow, isPast } from "date-fns";
 import { ClockIcon, CopyIcon, EditIcon, EyeIcon, LockIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { toggleSharePermission } from "@/lib/share/sharePermissionUtils";
 import { apiClient } from "@/react-query/apiClient";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getTargetShareLinksQuery } from "@/react-query/queries/share";
@@ -330,11 +331,11 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                 <Label>Public Permissions</Label>
                 <SharePermissionDropdown
                     mode="public"
-                    publicPermissions={editingShare.publicPermissions}
+                    publicPermissions={updatedShare.publicPermissions ?? editingShare.publicPermissions ?? 0}
                     onTogglePermission={(permission) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
-                            publicPermissions: permission,
+                            publicPermissions: toggleSharePermission(prev.publicPermissions ?? editingShare.publicPermissions ?? 0, permission),
                         }));
                     }}
                     id="public-permissions"
