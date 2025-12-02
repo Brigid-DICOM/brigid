@@ -34,6 +34,9 @@ export class ShareLinkEntity {
     })
     publicPermissions!: number;
 
+    @Column({ type: "varchar", length: 255, nullable: true })
+    name?: string | null;
+
     @Column({ type: "int", default: 0 })
     accessCount!: number;
 
