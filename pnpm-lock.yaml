@@ -187,8 +187,8 @@ importers:
         specifier: ^8.16.3
         version: 8.16.3
       raccoon-dcm4che-bridge:
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: ^0.7.1
+        version: 0.7.1
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -2726,6 +2726,10 @@ packages:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
     hasBin: true
 
+  glob@10.5.0:
+    resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
+    hasBin: true
+
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
     deprecated: Glob versions prior to v9 are no longer supported
@@ -3323,8 +3327,8 @@ packages:
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
 
-  raccoon-dcm4che-bridge@0.7.0:
-    resolution: {integrity: sha512-/TEmxW3NshiEbIFBpu44dZ0SI8A20nfnObN3L+nrz8VAj5106QZHcEB/uMOaS+2DJ6Vl87q88p+4ItZTd9k2Xg==}
+  raccoon-dcm4che-bridge@0.7.1:
+    resolution: {integrity: sha512-rU2Q0RUbHp5QMd6dd1Sd6+XOfHjnNB+kew7k/iSNPBS5MkmHzS4dOYi+v2GPP/5PrUXdfcv9fb21M408BmHyFw==}
 
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
@@ -6449,6 +6453,15 @@ snapshots:
       package-json-from-dist: 1.0.1
       path-scurry: 1.11.1
 
+  glob@10.5.0:
+    dependencies:
+      foreground-child: 3.3.1
+      jackspeak: 3.4.3
+      minimatch: 9.0.5
+      minipass: 7.1.2
+      package-json-from-dist: 1.0.1
+      path-scurry: 1.11.1
+
   glob@7.2.3:
     dependencies:
       fs.realpath: 1.0.0
@@ -7031,9 +7044,9 @@ snapshots:
 
   quansync@0.2.11: {}
 
-  raccoon-dcm4che-bridge@0.7.0:
+  raccoon-dcm4che-bridge@0.7.1:
     dependencies:
-      glob: 10.4.5
+      glob: 10.5.0
       java-bridge: 2.8.0
 
   rc@1.2.8:
