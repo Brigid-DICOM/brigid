@@ -124,8 +124,12 @@ describe("Share Links Routes", () => {
             const json = await response.json();
             expect(json.ok).toBe(true);
             expect(json.data).toBeDefined();
-            expect(json.data).toHaveLength(1);
-            expect(json.data[0].targets).toHaveLength(1);
+            expect(json.data).toHaveProperty("shareLinks");
+            expect(json.data.shareLinks).toHaveLength(1);
+            expect(json.data).toHaveProperty("hasNextPage");
+            expect(json.data).toHaveProperty("total");
+            expect(json.data).toHaveProperty("page");
+            expect(json.data).toHaveProperty("limit");
         });
     });
 

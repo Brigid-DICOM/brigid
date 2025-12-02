@@ -414,23 +414,32 @@ export class ShareLinkService {
     async getUserShareLinks(options: {
         userId: string;
         workspaceId: string;
+        page: number;
+        limit: number;
     }) {
-        const shareLinks = await this.entityManager
-        .createQueryBuilder(ShareLinkEntity, "shareLink")
-        .leftJoinAndSelect("shareLink.targets", "targets")
-        .leftJoinAndSelect("shareLink.recipients", "recipients")
-        .where("shareLink.workspaceId = :workspaceId", { workspaceId: options.workspaceId })
-        .andWhere(
-            (subQuery) => {
-                return subQuery
-                .where("shareLink.creatorId = :userId", { userId: options.userId })
-                .orWhere("recipients.userId = :userId", { userId: options.userId });
-            }
-        )
-        .orderBy("shareLink.createdAt", "DESC")
-        .getMany();
+        const queryBuilder = this.entityManager
+           .createQueryBuilder(ShareLinkEntity, "shareLink")
+           .leftJoinAndSelect("shareLink.targets", "targets")
+           .leftJoinAndSelect("shareLink.recipients", "recipients")
+           .where("shareLink.workspaceId = :workspaceId", { workspaceId: options.workspaceId })
+           .andWhere(
+                (subQuery) => {
+                    return subQuery
+                    .where("shareLink.creatorId = :userId", { userId: options.userId })
+                    .orWhere("recipients.userId = :userId", { userId: options.userId });
+                }
+            )
+            .orderBy("shareLink.createdAt", "DESC")
+            .skip((options.page - 1) * options.limit)
+            .take(options.limit);
 
-        return shareLinks;
+        const [shareLinks, total] = await queryBuilder.getManyAndCount();
+
+        return {
+            shareLinks,
+            total,
+            hasNextPage: total > options.page * options.limit,
+        };
     }
 
     async deleteShareLink(options: {

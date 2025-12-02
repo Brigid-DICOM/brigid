@@ -29,9 +29,17 @@ const getShareLinksRoute = new Hono().get(
             workspaceId: z.string().describe("The ID of the workspace"),
         }),
     ),
+    zValidator(
+        "query",
+        z.object({
+            page: z.coerce.number().min(1).default(1).describe("The page number"),
+            limit: z.coerce.number().min(1).max(100).default(10).describe("The number of items per page"),
+        })
+    ),
     async (c) => {
         try {
             const { workspaceId } = c.req.valid("param");
+            const { page, limit } = c.req.valid("query");
             const authUser = c.get("authUser");
             const userId = authUser?.user?.id;
 
@@ -47,15 +55,23 @@ const getShareLinksRoute = new Hono().get(
             }
 
             const shareLinkService = new ShareLinkService();
-            const shareLinks = await shareLinkService.getUserShareLinks({
+            const { shareLinks, hasNextPage, total } = await shareLinkService.getUserShareLinks({
                 userId,
                 workspaceId,
+                page,
+                limit
             });
 
             return c.json(
                 {
                     ok: true,
-                    data: shareLinks,
+                    data: {
+                        shareLinks,
+                        hasNextPage,
+                        total,
+                        page,
+                        limit
+                    },
                     error: null,
                 },
                 200,
