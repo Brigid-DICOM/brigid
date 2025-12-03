@@ -436,6 +436,7 @@ export class ShareLinkService {
            .createQueryBuilder(ShareLinkEntity, "shareLink")
            .leftJoinAndSelect("shareLink.targets", "targets")
            .leftJoinAndSelect("shareLink.recipients", "recipients")
+           .leftJoinAndSelect("recipients.user", "user")
            .where("shareLink.workspaceId = :workspaceId", { workspaceId: options.workspaceId })
            .andWhere("shareLink.creatorId = :userId", { userId: options.userId })
             .orderBy("shareLink.createdAt", "DESC")
