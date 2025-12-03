@@ -1,7 +1,13 @@
 import env from "@brigid/env";
 import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
+import { describeRoute, validator as zValidator } from "hono-openapi";
+import { z } from "zod";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import {
+    verifyWorkspaceExists,
+    verifyWorkspacePermission,
+} from "@/server/middlewares/workspace.middleware";
 import { WorkspaceService } from "@/server/services/workspace.service";
 import getBlueLightConfigRoute from "./bl/getConfig.route";
 import deleteInstancesRoute from "./dicom/delete/deleteInstances.route";
@@ -37,107 +43,158 @@ import retrieveStudyThumbnailRoute from "./wado-rs/thumbnail/retrieveStudyThumbn
 import uriRetrieveInstanceRoute from "./wado-uri/uriRetrieveInstance.route";
 
 const workspacesRoute = new Hono()
-.route("/", stowRsRoute)
-.route("/", retrieveStudyInstancesRoute)
-.route("/", retrieveInstanceRoute)
-.route("/", retrieveSeriesInstancesRoute)
-.route("/", uriRetrieveInstanceRoute)
-.route("/", searchStudiesRoute)
-.route("/", searchStudySeriesRoute)
-.route("/", searchStudySeriesInstancesRoute)
-.route("/", searchSeriesRoute)
-.route("/", searchInstancesRoute)
-.route("/", retrieveFramePixelDataRoute)
-.route("/", retrieveRenderedFramesRoute)
-.route("/", retrieveRenderedInstancesRoute)
-.route("/", retrieveInstanceMetadataRoute)
-.route("/", retrieveSeriesMetadataRoute)
-.route("/", retrieveStudyMetadataRoute)
-.route("/", retrieveInstanceThumbnailRoute)
-.route("/", retrieveSeriesThumbnailRoute)
-.route("/", retrieveStudyThumbnailRoute)
-.route("/", getStatsRoute)
-.route("/", recycleInstancesRoute)
-.route("/", recycleSeriesRoute)
-.route("/", recycleStudyRoute)
-.route("/", restoreInstancesRoute)
-.route("/", restoreSeriesRoute)
-.route("/", restoreStudyRoute)
-.route("/", deleteInstancesRoute)
-.route("/", deleteSeriesRoute)
-.route("/", deleteStudiesRoute)
-.route("/", getBlueLightConfigRoute)
-// tags routes
-.route("/", tagRoute)
-// share link routes
-.route("/", shareLinkRoute)
-// workspace routes
-.get(
-    "/workspaces",
-    describeRoute({
-        description: "Get all workspaces",
-        tags: ["Workspaces"]
-    }),
-    verifyAuthMiddleware,
-    async (c) => {
-        const workspaceService = new WorkspaceService();
-        const authUser = c.get("authUser");
+    .route("/", stowRsRoute)
+    .route("/", retrieveStudyInstancesRoute)
+    .route("/", retrieveInstanceRoute)
+    .route("/", retrieveSeriesInstancesRoute)
+    .route("/", uriRetrieveInstanceRoute)
+    .route("/", searchStudiesRoute)
+    .route("/", searchStudySeriesRoute)
+    .route("/", searchStudySeriesInstancesRoute)
+    .route("/", searchSeriesRoute)
+    .route("/", searchInstancesRoute)
+    .route("/", retrieveFramePixelDataRoute)
+    .route("/", retrieveRenderedFramesRoute)
+    .route("/", retrieveRenderedInstancesRoute)
+    .route("/", retrieveInstanceMetadataRoute)
+    .route("/", retrieveSeriesMetadataRoute)
+    .route("/", retrieveStudyMetadataRoute)
+    .route("/", retrieveInstanceThumbnailRoute)
+    .route("/", retrieveSeriesThumbnailRoute)
+    .route("/", retrieveStudyThumbnailRoute)
+    .route("/", getStatsRoute)
+    .route("/", recycleInstancesRoute)
+    .route("/", recycleSeriesRoute)
+    .route("/", recycleStudyRoute)
+    .route("/", restoreInstancesRoute)
+    .route("/", restoreSeriesRoute)
+    .route("/", restoreStudyRoute)
+    .route("/", deleteInstancesRoute)
+    .route("/", deleteSeriesRoute)
+    .route("/", deleteStudiesRoute)
+    .route("/", getBlueLightConfigRoute)
+    // tags routes
+    .route("/", tagRoute)
+    // share link routes
+    .route("/", shareLinkRoute)
+    // workspace routes
+    .get(
+        "/workspaces",
+        describeRoute({
+            description: "Get all workspaces",
+            tags: ["Workspaces"],
+        }),
+        verifyAuthMiddleware,
+        async (c) => {
+            const workspaceService = new WorkspaceService();
+            const authUser = c.get("authUser");
 
-        if (!authUser?.user) {
-            return c.json({
-                message: "Unauthorized"
-            }, 401);
-        }
-
-        if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
-            const workspaces = await workspaceService.getUserWorkspace(authUser.user.id);
-
-            return c.json({
-                workspaces
-            });
-        }
-
-        const workspaces = await workspaceService.getUserWorkspace(authUser.user.id);
-        return c.json({
-            workspaces
-        });
-    }
-)
-.get(
-    "/workspaces/default",
-    describeRoute({
-        description: "Get default workspace",
-        tags: ["Workspaces"]
-    }),
-    verifyAuthMiddleware,
-    async (c) => {
-        const authUser = c.get("authUser");
-        const userId = authUser?.user?.id;
-        if (!userId) {
-            return c.json({
-                message: "Unauthorized"
-            }, 401);
-        }
-
-        const workspaceService = new WorkspaceService();
-
-        const defaultWorkspace = await workspaceService.getDefaultWorkspace(userId);
-        if (!defaultWorkspace) {
-            return c.json({
-                message: "Default workspace not found"
-            }, 404);
-        }
-
-        return c.json({
-            workspace: {
-                id: defaultWorkspace.id,
-                name: defaultWorkspace.name,
-                ownerId: defaultWorkspace.ownerId,
-                createdAt: defaultWorkspace.createdAt,
-                updatedAt: defaultWorkspace.updatedAt
+            if (!authUser?.user) {
+                return c.json(
+                    {
+                        message: "Unauthorized",
+                    },
+                    401,
+                );
             }
-        });
-    }
-);
+
+            if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
+                const workspaces = await workspaceService.getUserWorkspace(
+                    authUser.user.id,
+                );
+
+                return c.json({
+                    workspaces,
+                });
+            }
+
+            const workspaces = await workspaceService.getUserWorkspace(
+                authUser.user.id,
+            );
+            return c.json({
+                workspaces,
+            });
+        },
+    )
+    .get(
+        "/workspaces/default",
+        describeRoute({
+            description: "Get default workspace",
+            tags: ["Workspaces"],
+        }),
+        verifyAuthMiddleware,
+        async (c) => {
+            const authUser = c.get("authUser");
+            const userId = authUser?.user?.id;
+            if (!userId) {
+                return c.json(
+                    {
+                        message: "Unauthorized",
+                    },
+                    401,
+                );
+            }
+
+            const workspaceService = new WorkspaceService();
+
+            const defaultWorkspace =
+                await workspaceService.getDefaultWorkspace(userId);
+            if (!defaultWorkspace) {
+                return c.json(
+                    {
+                        message: "Default workspace not found",
+                    },
+                    404,
+                );
+            }
+
+            return c.json({
+                workspace: {
+                    id: defaultWorkspace.id,
+                    name: defaultWorkspace.name,
+                    ownerId: defaultWorkspace.ownerId,
+                    createdAt: defaultWorkspace.createdAt,
+                    updatedAt: defaultWorkspace.updatedAt,
+                },
+            });
+        },
+    )
+    .get(
+        "/workspaces/:workspaceId",
+        describeRoute({
+            description: "Get workspace by ID",
+            tags: ["Workspaces"],
+        }),
+        verifyAuthMiddleware,
+        verifyWorkspaceExists,
+        verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
+        zValidator(
+            "param",
+            z.object({
+                workspaceId: z.string().describe("The ID of the workspace"),
+            }),
+        ),
+        async (c) => {
+            const { workspaceId } = c.req.valid("param");
+            const workspaceService = new WorkspaceService();
+            const workspace =
+                await workspaceService.getWorkspaceById(workspaceId);
+
+            if (!workspace) {
+                return c.json(
+                    {
+                        ok: false,
+                        data: null,
+                        error: "Workspace not found",
+                    },
+                    404,
+                );
+            }
+
+            return c.json({
+                workspace,
+            });
+        },
+    );
 
 export default workspacesRoute;
