@@ -1,3 +1,4 @@
+import { TAG_TARGET_TYPE } from "@brigid/database/src/entities/tagAssignment.entity";
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import z from "zod";
@@ -26,13 +27,14 @@ const getAllTagsRoute = new Hono().get(
     ),
     zValidator("query", z.object({
         name: z.string().optional().describe("The name of the tag"),
+        targetType: z.enum([TAG_TARGET_TYPE.STUDY, TAG_TARGET_TYPE.SERIES, TAG_TARGET_TYPE.INSTANCE]).optional().describe("The type of target"),
     })),
     async (c) => {
         const { workspaceId } = c.req.valid("param");
-        const { name } = c.req.valid("query");
+        const { name, targetType } = c.req.valid("query");
 
         const tagService = new TagService();
-        const tags = await tagService.getWorkspaceTags(workspaceId, name);
+        const tags = await tagService.getWorkspaceTags(workspaceId, name, targetType);
 
         return c.json(
             {

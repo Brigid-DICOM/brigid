@@ -1,10 +1,13 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { MultiSelect, type Option } from "@/components/ui/multi-select";
+import { apiClient } from "@/react-query/apiClient";
+import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
 import type { SearchLevel } from "./dicom-search-modal";
 import { SEARCH_FIELD_CONFIGS } from "./search-field-types";
 
@@ -29,9 +32,43 @@ export function DicomSearchConditionItem({
     onUpdate,
     onRemove,
 }: DicomSearchConditionItemProps) {
+    const { data: defaultWorkspace } = useQuery(getDefaultWorkspaceQuery());
+    const workspaceId = defaultWorkspace?.workspace?.id ?? "";
+
     const fieldConfig = SEARCH_FIELD_CONFIGS[level].find(
         (config) => config.key === condition.field,
     );
+
+    const { data: tags } = useQuery({
+        queryKey: ["tags", workspaceId, level],
+        queryFn: async () => {
+            if (!workspaceId) return [];
+
+            const targetTypeMap: Record<string, "study" | "series" | "instance"> = {
+                study: "study",
+                series: "series",
+                instance: "instance",
+                "recycle-study": "study",
+                "recycle-series": "series",
+                "recycle-instance": "instance"
+            };
+            
+            const res = await apiClient.api.workspaces[":workspaceId"].tags.$get({
+                param: { workspaceId },
+                query: { 
+                    targetType: targetTypeMap[level] 
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch tags");
+            }
+
+            return (await res.json()).data;
+        },
+        enabled: !!workspaceId && condition.field === "tagName",
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
 
     const renderValueInput = () => {
         if (!fieldConfig) {
@@ -83,10 +120,17 @@ export function DicomSearchConditionItem({
                     ? condition.value.split(",").filter(value => value.trim() !== "")
                     : [];
 
-                const options: Option[] = fieldConfig.options?.map((opt) => ({
+                let options: Option[] = fieldConfig.options?.map((opt) => ({
                     label: opt.label,
                     value: opt.value,
                 })) || [];
+
+                if (condition.field === "tagName") {
+                    options = tags?.map((tag) => ({
+                        label: tag.name,
+                        value: tag.name,
+                    })) || [];
+                }
 
                 return (
                     <MultiSelect 

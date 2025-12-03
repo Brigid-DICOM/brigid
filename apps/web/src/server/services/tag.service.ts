@@ -181,14 +181,23 @@ export class TagService {
         });
     }
 
-    async getWorkspaceTags(workspaceId: string, name?: string) {
+    async getWorkspaceTags(workspaceId: string, name?: string, targetType?: TagTargetType) {
         const queryBuilder = this.entityManager
             .createQueryBuilder(TagEntity, "tag")
             .where("tag.workspaceId = :workspaceId", { workspaceId })
 
         if (name) {
             queryBuilder.andWhere("tag.name = :name", { name });
-            }
+        }
+
+        if (targetType) {
+            queryBuilder.innerJoin(
+                "tag.assignments",
+                "assignment",
+                "assignment.targetType = :targetType",
+                { targetType }
+            );
+        }
         
         return await queryBuilder.getMany();
     }

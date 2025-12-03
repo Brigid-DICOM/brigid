@@ -17,6 +17,12 @@ export interface SearchFieldConfig {
 
 const baseStudyFields: SearchFieldConfig[] = [
     {
+        key: "tagName",
+        label: "Tag Name",
+        type: "select",
+        placeholder: "Select Tags",
+    },
+    {
         key: "PatientID",
         label: "Patient ID",
         type: "text",
@@ -52,6 +58,12 @@ const baseStudyFields: SearchFieldConfig[] = [
 ];
 
 const baseSeriesFields: SearchFieldConfig[] = [
+    {
+        key: "tagName",
+        label: "Tag Name",
+        type: "select",
+        placeholder: "Select Tags",
+    },
     { 
         key: "Modality", 
         label: "Modality", 
@@ -76,6 +88,12 @@ const baseSeriesFields: SearchFieldConfig[] = [
 ];
 
 const baseInstanceFields: SearchFieldConfig[] = [
+    {
+        key: "tagName",
+        label: "Tag Name",
+        type: "select",
+        placeholder: "Select Tags",
+    },
     { key: "ContentDate", label: "Content Date", type: "dateRange" },
     { key: "SOPClassUID", label: "SOP Class UID", type: "text" },
     { key: "SOPInstanceUID", label: "SOP Instance UID", type: "text" },
