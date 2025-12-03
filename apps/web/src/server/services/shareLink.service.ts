@@ -329,9 +329,9 @@ export class ShareLinkService {
                     {
                         shareLinkId: shareLink.id,
                         userId: recipient.userId,
-                                            permissions: recipient.permissions,
+                        permissions: recipient.permissions,
                     },
-{
+                    {
                         conflictPaths: ["shareLinkId", "userId"],
                         skipUpdateIfNoValuesChanged: true,
                     }
@@ -443,6 +443,30 @@ export class ShareLinkService {
             .skip((options.page - 1) * options.limit)
             .take(options.limit);
 
+        const [shareLinks, total] = await queryBuilder.getManyAndCount();
+
+        return {
+            shareLinks,
+            total,
+            hasNextPage: total > options.page * options.limit,
+        };
+    }
+
+    async getUserReceivedShareLinks(options: {
+        userId: string;
+        page: number;
+        limit: number;
+    }) {
+        const queryBuilder = this.entityManager
+            .createQueryBuilder(ShareLinkEntity, "shareLink")
+            .leftJoinAndSelect("shareLink.targets", "targets")
+            .leftJoinAndSelect("shareLink.recipients", "recipients")
+            .leftJoinAndSelect("recipients.user", "user")
+            .where("recipients.userId = :userId", { userId: options.userId })
+            .orderBy("shareLink.createdAt", "DESC")
+            .skip((options.page - 1) * options.limit)
+            .take(options.limit);
+        
         const [shareLinks, total] = await queryBuilder.getManyAndCount();
 
         return {

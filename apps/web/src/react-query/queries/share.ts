@@ -131,3 +131,40 @@ export const getUserShareLinksQuery = ({
         enabled: !!workspaceId,
     });
 };
+
+export const getUserReceivedShareLinksQuery = ({
+    page = 1,
+    limit = 10,
+    cookie,
+}: {
+    page?: number;
+    limit?: number;
+    cookie?: string;
+}) => {
+    return queryOptions({
+        queryKey: ["user-received-share-links", page, limit],
+        queryFn: async () => {
+            const headers: HeadersInit = {};
+            if (typeof window === "undefined" && typeof cookie === "string") {
+                headers.cookie = cookie;
+            }
+
+            const response = await apiClient.api["share-links"].received.$get({
+                query: {
+                    page: page.toString(),
+                    limit: limit.toString(),
+                }
+            }, {
+                headers: headers
+            });
+
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch user received share links");
+            }
+
+            return await response.json();
+        },
+        staleTime: 5 * 60 * 1000,
+    });
+};
