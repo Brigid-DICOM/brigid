@@ -17,6 +17,7 @@ import { UserSelector } from "./user-selector";
 
 export interface ShareLinkFormData {
     id: string;
+    creatorId: string;
     name?: string;
     token: string;
     publicPermissions: number;

@@ -54,6 +54,7 @@ interface ShareLinkData {
         targetType: "study" | "series" | "instance";
         targetId: string;
     }>;
+    creatorId: string;
 }
 
 interface ShareLinkCardProps {
@@ -92,6 +93,7 @@ export function ShareLinkCard({
                     expiresInSec: shareLink.expiresInSec,
                     expiresAt: shareLink.expiresAt,
                     recipients: shareLink.recipients,
+                    creatorId: shareLink.creatorId,
                 }}
                 onDeleted={onDeleted}
             >
@@ -149,6 +151,7 @@ export function ShareLinkCard({
                                     expiresInSec: shareLink.expiresInSec,
                                     expiresAt: shareLink.expiresAt,
                                     recipients: shareLink.recipients,
+                                    creatorId: shareLink.creatorId,
                                 }}
                                 workspaceId={workspaceId}
                                 onDeleted={onDeleted}

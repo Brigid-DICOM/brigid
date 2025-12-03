@@ -1,22 +1,21 @@
 "use client";
 
-import {
-    CopyIcon,
-    EditIcon,
-    ExternalLinkIcon,
-    Trash2Icon
-} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { CopyIcon, EditIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuSeparator,
-    ContextMenuTrigger
+    ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { closeContextMenu } from "@/lib/utils";
+import { authSessionQuery } from "@/react-query/queries/session";
+import { SHARE_PERMISSIONS } from "@/server/const/share.const";
+import { hasPermission } from "@/server/utils/sharePermissions";
 import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
 import { ShareLinkEditDialog } from "./share-link-edit-dialog";
 import type { ShareLinkFormData } from "./share-link-edit-form";
@@ -37,7 +36,17 @@ export function ShareLinkContextMenu({
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+    const { data: userSession } = useQuery(authSessionQuery());
+
     const shareUrl = `${window.location.origin}/share/${shareLink.token}`;
+
+    const isCreator = useMemo(() => {
+        return userSession?.user?.id === shareLink.creatorId;
+    }, [userSession, shareLink.creatorId]);
+    
+    const canEdit = useMemo(() => {
+        return hasPermission(shareLink.publicPermissions, SHARE_PERMISSIONS.UPDATE) || isCreator;
+    }, [shareLink.publicPermissions, isCreator]);
 
     const handleOpenShare = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -52,7 +61,6 @@ export function ShareLinkContextMenu({
         toast.success("Share link copied to clipboard");
     };
 
-    
     const handleEdit = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
@@ -87,23 +95,27 @@ export function ShareLinkContextMenu({
                         <span>Copy Link</span>
                     </ContextMenuItem>
 
-                    <ContextMenuItem
-                        onClick={handleEdit}
-                        className="flex items-center gap-2"
-                    >
-                        <EditIcon className="size-4" />
-                        <span>Edit</span>
-                    </ContextMenuItem>
+                    {canEdit && (
+                        <ContextMenuItem
+                            onClick={handleEdit}
+                            className="flex items-center gap-2"
+                        >
+                            <EditIcon className="size-4" />
+                            <span>Edit</span>
+                        </ContextMenuItem>
+                    )}
 
                     <ContextMenuSeparator />
 
-                    <ContextMenuItem
-                        onClick={handleDelete}
-                        className="flex items-center gap-2 text-destructive focus:text-destructive"
-                    >
-                        <Trash2Icon className="size-4" />
-                        <span>Delete</span>
-                    </ContextMenuItem>
+                    {isCreator && (
+                        <ContextMenuItem
+                            onClick={handleDelete}
+                            className="flex items-center gap-2 text-destructive focus:text-destructive"
+                        >
+                            <Trash2Icon className="size-4" />
+                            <span>Delete</span>
+                        </ContextMenuItem>
+                    )}
                 </ContextMenuContent>
             </ContextMenu>
 

@@ -97,6 +97,7 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
                                         targetType: target.targetType as "study" | "series" | "instance",
                                         targetId: target.targetId,
                                     })),
+                                    creatorId: shareLink.creatorId,
                                 }}
                                 workspaceId={workspaceId}
                                 onDeleted={handleShareDeleted}
