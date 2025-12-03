@@ -322,18 +322,33 @@ export class ShareLinkService {
         );
 
         if (options.recipientPermissions) {
+
             for (const recipient of options.recipientPermissions) {
-                await this.entityManager.update(
+                await this.entityManager.upsert(
                     ShareLinkRecipientEntity,
                     {
                         shareLinkId: shareLink.id,
                         userId: recipient.userId,
+                                            permissions: recipient.permissions,
                     },
-                    {
-                        permissions: recipient.permissions,
-                    },
+{
+                        conflictPaths: ["shareLinkId", "userId"],
+                        skipUpdateIfNoValuesChanged: true,
+                    }
                 );
             }
+
+            const recipients = await this.entityManager.find(ShareLinkRecipientEntity, {
+                where: {
+                    shareLinkId: shareLink.id,
+                },
+            });
+
+            const recipientsToDelete = recipients.filter((recipient) => 
+                !options.recipientPermissions?.some((r) => r.userId === recipient.userId)
+            );
+
+            await this.entityManager.remove(ShareLinkRecipientEntity, recipientsToDelete);
         }
 
         return updatedShareLink;
