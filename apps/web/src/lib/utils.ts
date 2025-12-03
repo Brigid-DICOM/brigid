@@ -26,3 +26,17 @@ export function closeContextMenu() {
     menu.dispatchEvent(escEvent);
   });
 }
+
+export function closeDropdownMenu() {
+  const openDropdownMenus = document.querySelectorAll("[data-radix-menu-content]");
+  openDropdownMenus.forEach((menu) => {
+    const escEvent = new KeyboardEvent("keydown", {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      bubbles: true,
+      cancelable: true,
+    });
+    menu.dispatchEvent(escEvent);
+  });
+}

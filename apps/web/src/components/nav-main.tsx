@@ -1,6 +1,6 @@
 "use client";
 
-import { DatabaseIcon, GaugeIcon, Trash2Icon, UploadIcon } from "lucide-react";
+import { DatabaseIcon, GaugeIcon, Share2Icon, Trash2Icon, UploadIcon } from "lucide-react";
 import Link from "next/link";
 import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 
@@ -40,6 +40,13 @@ export function NavMain() {
                         <SidebarMenuButton tooltip={"Upload DICOM"}>
                             <UploadIcon className="size-4" />
                             <Link href="/dicom-upload" className="w-full">Upload DICOM</Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem key="my shares">
+                        <SidebarMenuButton tooltip="My Shares">
+                            <Share2Icon className="size-4" />
+                            <Link href="/my-shares" className="w-full">My Shares</Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

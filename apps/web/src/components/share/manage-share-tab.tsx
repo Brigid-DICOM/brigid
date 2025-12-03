@@ -89,7 +89,7 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
         onSuccess: () => {
             toast.success("Share link updated successfully");
             queryClient.invalidateQueries({
-                queryKey: ["share-links", targetType, targetIds.join(","), workspaceId],
+                queryKey: ["share-links", workspaceId, targetType, targetIds.join(",")],
             });
             setEditingShare(null);
             setUpdatedShare({});

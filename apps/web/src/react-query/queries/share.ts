@@ -15,9 +15,18 @@ export const getTargetShareLinksQuery = ({
     page?: number;
 }) => {
     return queryOptions({
-        queryKey: ["share-links", targetType, targetIds.join(","), workspaceId, limit, page],
+        queryKey: [
+            "share-links",
+            workspaceId,
+            targetType,
+            targetIds.join(","),
+            limit,
+            page,
+        ],
         queryFn: async () => {
-            const response = await apiClient.api.workspaces[":workspaceId"]["share-links"][":targetType"].$get({
+            const response = await apiClient.api.workspaces[":workspaceId"][
+                "share-links"
+            ][":targetType"].$get({
                 param: {
                     workspaceId,
                     targetType,
@@ -36,8 +45,8 @@ export const getTargetShareLinksQuery = ({
         },
         staleTime: 5 * 60 * 1000,
         enabled: !!targetType && !!targetIds.length && !!workspaceId,
-    })
-}
+    });
+};
 
 export const getTargetShareLinkCountQuery = ({
     targetType,
@@ -49,9 +58,16 @@ export const getTargetShareLinkCountQuery = ({
     workspaceId: string;
 }) => {
     return queryOptions({
-        queryKey: ["share-link-count", targetType, targetIds.join(","), workspaceId],
+        queryKey: [
+            "share-link-count",
+            targetType,
+            targetIds.join(","),
+            workspaceId,
+        ],
         queryFn: async () => {
-            const response = await apiClient.api.workspaces[":workspaceId"]["share-links"][":targetType"].count.$get({
+            const response = await apiClient.api.workspaces[":workspaceId"][
+                "share-links"
+            ][":targetType"].count.$get({
                 param: {
                     workspaceId,
                     targetType,
@@ -70,4 +86,48 @@ export const getTargetShareLinkCountQuery = ({
         staleTime: 5 * 60 * 1000,
         enabled: !!targetType && !!targetIds.length && !!workspaceId,
     });
-}
+};
+
+export const getUserShareLinksQuery = ({
+    workspaceId,
+    page = 1,
+    limit = 10,
+    cookie,
+}: {
+    workspaceId: string;
+    page?: number;
+    limit?: number;
+    cookie?: string;
+}) => {
+    return queryOptions({
+        queryKey: ["user-share-links", workspaceId, page, limit],
+        queryFn: async () => {
+            const headers: HeadersInit = {};
+            if (typeof window === "undefined" && typeof cookie === "string") {
+                headers.cookie = cookie;
+            }
+
+            const response = await apiClient.api.workspaces[":workspaceId"][
+                "share-links"
+            ].$get({
+                param: {
+                    workspaceId,
+                },
+                query: {
+                    page: page.toString(),
+                    limit: limit.toString(),
+                },
+            }, {
+                headers: headers
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch user share links");
+            }
+
+            return await response.json();
+        },
+        staleTime: 5 * 60 * 1000,
+        enabled: !!workspaceId,
+    });
+};
