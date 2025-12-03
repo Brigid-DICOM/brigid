@@ -177,6 +177,18 @@ export class WorkspaceService {
         }));
     }
 
+    async getUserWorkspaceById(userId: string, workspaceId: string) {
+        const userWorkspace = await this.userWorkspaceRepository.findOne({
+            where: {
+                userId,
+                workspaceId
+            },
+            relations: ["workspace"]
+        });
+
+        return userWorkspace;
+    }
+
     async getUserWorkspacePermissions(userId: string, workspaceId: string) {
         const userWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
@@ -188,7 +200,7 @@ export class WorkspaceService {
         return userWorkspace?.permissions ?? 0;
     }
 
-    async getDefaultWorkspace(userId: string) {
+    async getDefaultUserWorkspace(userId: string) {
         const userWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
                 userId,
@@ -197,6 +209,6 @@ export class WorkspaceService {
             relations: ["workspace"]
         });
 
-        return userWorkspace?.workspace ?? null;
+        return userWorkspace;
     }
 }

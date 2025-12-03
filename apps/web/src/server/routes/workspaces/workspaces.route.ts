@@ -138,7 +138,7 @@ const workspacesRoute = new Hono()
             const workspaceService = new WorkspaceService();
 
             const defaultWorkspace =
-                await workspaceService.getDefaultWorkspace(userId);
+                await workspaceService.getDefaultUserWorkspace(userId);
             if (!defaultWorkspace) {
                 return c.json(
                     {
@@ -150,9 +150,14 @@ const workspacesRoute = new Hono()
 
             return c.json({
                 workspace: {
-                    id: defaultWorkspace.id,
-                    name: defaultWorkspace.name,
-                    ownerId: defaultWorkspace.ownerId,
+                    id: defaultWorkspace.workspace.id,
+                    name: defaultWorkspace.workspace.name,
+                    ownerId: defaultWorkspace.workspace.ownerId,
+                    membership: {
+                        role: defaultWorkspace.role,
+                        permissions: defaultWorkspace.permissions,
+                        isDefault: defaultWorkspace.isDefault,
+                    },
                     createdAt: defaultWorkspace.createdAt,
                     updatedAt: defaultWorkspace.updatedAt,
                 },
@@ -176,11 +181,22 @@ const workspacesRoute = new Hono()
         ),
         async (c) => {
             const { workspaceId } = c.req.valid("param");
-            const workspaceService = new WorkspaceService();
-            const workspace =
-                await workspaceService.getWorkspaceById(workspaceId);
+            const authUser = c.get("authUser");
+            const userId = authUser?.user?.id;
+            if (!userId) {
+                return c.json(
+                    {
+                        message: "Unauthorized",
+                    },
+                    401,
+                );
+            }
 
-            if (!workspace) {
+            const workspaceService = new WorkspaceService();
+            const userWorkspace =
+                await workspaceService.getUserWorkspaceById(userId, workspaceId);
+
+            if (!userWorkspace) {
                 return c.json(
                     {
                         ok: false,
@@ -192,7 +208,18 @@ const workspacesRoute = new Hono()
             }
 
             return c.json({
-                workspace,
+                workspace: {
+                    id: userWorkspace.workspace.id,
+                    name: userWorkspace.workspace.name,
+                    ownerId: userWorkspace.workspace.ownerId,
+                    membership: {
+                        role: userWorkspace.role,
+                        permissions: userWorkspace.permissions,
+                        isDefault: userWorkspace.isDefault,
+                    },
+                    createdAt: userWorkspace.workspace.createdAt,
+                    updatedAt: userWorkspace.workspace.updatedAt,
+                },
             });
         },
     );
