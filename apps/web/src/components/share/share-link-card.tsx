@@ -95,42 +95,51 @@ export function ShareLinkCard({
                 }}
                 onDeleted={onDeleted}
             >
-                <fieldset
-                    onClick={() => setShowDetailsDialog(true)}
-                    className={cn(
-                        "flex items-center gap-4 p-4",
-                        "bg-card rounded-lg",
-                        "hover:bg-accent/50 transition-colors cursor-pointer",
-                        className,
-                    )}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setShowDetailsDialog(true);
-                        }
-                    }}
-                >
-                    {/* Left: File Icon */}
-                    <div className="flex-shrink-0">
-                        <FolderIcon className="h-10 w-10 text-amber-500" />
-                    </div>
-
-                    {/* Center: Name & Created Time */}
-                    <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-foreground truncate">
-                            {displayName}
+                <div className={cn(
+                    "relative",
+                    className
+                )}>
+                    <button
+                        type="button"
+                        onClick={() => setShowDetailsDialog(true)}
+                        className={cn(
+                            "w-full flex items-center gap-4 p-4 text-left",
+                            "bg-card rounded-lg",
+                            "hover:bg-accent/50 transition-colors cursor-pointer",
+                        )}
+                    >
+                        {/* Left: File Icon */}
+                        <div className="flex-shrink-0">
+                            <FolderIcon className="h-10 w-10 text-amber-500" />
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                            {formattedDate}
+
+                        {/* Center: Name & Created Time */}
+                        <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-foreground truncate">
+                                {displayName}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                                {formattedDate}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Right: Dropdown Menu & Access Count */}
-                    <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                        {/* Spacer for dropdown area */}
+                        <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                            {/* Placeholder for dropdown button size */}
+                            <div className="h-6 w-6" />
+                            {/* Access Count */}
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                                <EyeIcon className="h-4 w-4" />
+                                <span className="text-sm">
+                                    {shareLink.accessCount}
+                                </span>
+                            </div>
+                        </div>
+                    </button>
 
-                        <button type="button" onClick={(e) => e.stopPropagation()}>
-                            {/* Dropdown Menu Button */}
-                            <ShareLinkDropdownMenu
+                    <div className="absolute top-4 right-4">
+                        {/* Dropdown Menu Button */}
+                        <ShareLinkDropdownMenu
                                 shareLink={{
                                     id: shareLink.id,
                                     name: shareLink.name,
@@ -153,18 +162,8 @@ export function ShareLinkCard({
                                     <EllipsisVerticalIcon className="h-4 w-4" />
                                 </Button>
                             </ShareLinkDropdownMenu>
-                        </button>
-                        
-
-                        {/* Access Count */}
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                            <EyeIcon className="h-4 w-4" />
-                            <span className="text-sm">
-                                {shareLink.accessCount}
-                            </span>
-                        </div>
                     </div>
-                </fieldset>
+                </div>
             </ShareLinkContextMenu>
 
             <ShareLinkDetailsDialog
