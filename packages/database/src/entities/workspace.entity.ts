@@ -1,6 +1,7 @@
 import {
     Column,
     CreateDateColumn,
+    DeleteDateColumn,
     Entity,
     JoinColumn, 
     ManyToOne,
@@ -28,6 +29,9 @@ export class WorkspaceEntity {
    
     @UpdateDateColumn({ type: getDateTimeType() })
     updatedAt!: Date;
+
+    @DeleteDateColumn({ type: getDateTimeType(), nullable: true })
+    deletedAt!: Date | null;
 
     @ManyToOne("user", "workspaces", { onDelete: "CASCADE" })
     @JoinColumn({ name: "ownerId", referencedColumnName: "id" })

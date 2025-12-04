@@ -18,3 +18,4 @@ export { ChangeTagTargetIdToString1763545308303 } from "./1763545308303-changeTa
 export { ChangeTagAssignmentUqIdx1763710517185 } from "./1763710517185-changeTagAssignmentUqIdx";
 export { CreateShareLinkTables1763731186544 } from "./1763731186544-createShareLinkTables";
 export { AddNameColumnToShareLink1764653977927 } from "./1764653977927-addNameColumnToShareLink";
+export { AddDeletedAtToWorkspace1764837781160 } from "./1764837781160-addDeletedAtToWorkspace";
