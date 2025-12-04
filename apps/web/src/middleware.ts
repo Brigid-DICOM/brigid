@@ -33,9 +33,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
     matcher: [
         "/",
-        "/dicom-recycle/:path*",
-        "/dicom-upload/:path*",
-        "/dicom-studies/:path*",
+        "/:workspaceId/dicom-recycle/:path*",
+        "/:workspaceId/dicom-upload/:path*",
+        "/:workspaceId/dicom-studies/:path*",
         "/auth/signin"
     ]
 }

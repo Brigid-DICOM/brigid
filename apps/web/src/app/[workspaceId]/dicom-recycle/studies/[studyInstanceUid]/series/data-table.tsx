@@ -1,29 +1,29 @@
 "use client";
 
-import type { DicomStudyData } from "@brigid/types";
+import type { DicomSeriesData } from "@brigid/types";
 import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
     getCoreRowModel,
-    useReactTable
+    useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
+import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDeleteConfirmDialog } from "@/components/dicom/recycle/dicom-delete-confirm-dialog";
-import { DicomRecycleStudyContextMenu } from "@/components/dicom/recycle/dicom-recycle-study-context-menu";
+import { DicomRecycleSeriesContextMenu } from "@/components/dicom/recycle/dicom-recycle-series-context-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
     Table,
@@ -35,101 +35,108 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { 
-    deleteDicomStudyMutation, restoreDicomStudyMutation
- } from "@/react-query/queries/dicomStudy";
-import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import {
+    deleteDicomSeriesMutation,
+    restoreDicomSeriesMutation,
+} from "@/react-query/queries/dicomSeries";
+import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
-interface DicomRecycleStudiesTableProps {
-    studies: DicomStudyData[];
+interface DicomRecycleSeriesTableProps {
+    series: DicomSeriesData[];
     workspaceId: string;
     className?: string;
 }
 
 function ActionsCell({
-    study,
+    series,
     workspaceId,
 }: {
-    study: DicomStudyData;
+    series: DicomSeriesData;
     workspaceId: string;
 }) {
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
-    const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
-    const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
+    const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
+    const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
 
-    const { mutate: restoreDicomStudy } = useMutation({
-        ...restoreDicomStudyMutation({
+    const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
+
+    const { mutate: restoreDicomSeries } = useMutation({
+        ...restoreDicomSeriesMutation({
             workspaceId,
-            studyIds: [studyInstanceUid],
+            seriesIds: [seriesInstanceUid],
         }),
         onMutate: () => {
-            toast.loading("Restoring DICOM study...", {
-                id: `restore-${studyInstanceUid}`,
+            toast.loading("Restoring DICOM series...", {
+                id: `restore-${seriesInstanceUid}`,
             });
         },
         onSuccess: () => {
-            toast.success("DICOM study restored successfully");
-            toast.dismiss(`restore-${studyInstanceUid}`);
+            toast.success("DICOM series restored successfully");
+            toast.dismiss(`restore-${seriesInstanceUid}`);
             queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
+                queryKey: ["dicom-series", workspaceId],
             });
-            deselectStudy(studyInstanceUid);
+            deselectSeries(seriesInstanceUid);
         },
         onError: () => {
-            toast.error("Failed to restore DICOM study");
-            toast.dismiss(`restore-${studyInstanceUid}`);
+            toast.error("Failed to restore DICOM series");
+            toast.dismiss(`restore-${seriesInstanceUid}`);
         },
     });
 
-    const { mutate: deleteDicomStudy } = useMutation({
-        ...deleteDicomStudyMutation({
+    const { mutate: deleteDicomSeries } = useMutation({
+        ...deleteDicomSeriesMutation({
             workspaceId,
-            studyIds: [studyInstanceUid],
+            seriesIds: [seriesInstanceUid],
         }),
         onMutate: () => {
-            toast.loading("Deleting DICOM study...", {
-                id: `delete-${studyInstanceUid}`,
+            toast.loading("Deleting DICOM series...", {
+                id: `delete-${seriesInstanceUid}`,
             });
         },
         onSuccess: () => {
-            toast.success("DICOM study deleted successfully");
-            toast.dismiss(`delete-${studyInstanceUid}`);
+            toast.success("DICOM series deleted successfully");
+            toast.dismiss(`delete-${seriesInstanceUid}`);
             queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
+                queryKey: ["dicom-series", workspaceId],
             });
-            deselectStudy(studyInstanceUid);
+            deselectSeries(seriesInstanceUid);
         },
         onError: () => {
-            toast.error("Failed to delete DICOM study");
-            toast.dismiss(`delete-${studyInstanceUid}`);
+            toast.error("Failed to delete DICOM series");
+            toast.dismiss(`delete-${seriesInstanceUid}`);
         },
     });
 
-    const handleEnterSeries = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         clearSelection();
-        router.push(`/dicom-recycle/studies/${studyInstanceUid}/series`);
+        router.push(
+            `/${workspaceId}/dicom-recycle/studies/${studyInstanceUid}/series/${seriesInstanceUid}/instances`,
+        );
     };
-    
-    const handleCopyStudyInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(studyInstanceUid);
-    }
 
-    const handleRestoreStudy = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleCopySeriesInstanceUid = (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.stopPropagation();
-        restoreDicomStudy();
-    }
+        navigator.clipboard.writeText(seriesInstanceUid);
+    };
 
-    const handleDeleteStudy = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleRestoreSeries = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        restoreDicomSeries();
+    };
+
+    const handleDeleteSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         setShowDeleteConfirmDialog(true);
-    }
+    };
 
     const handleConfirmDelete = () => {
-        deleteDicomStudy();
+        deleteDicomSeries();
     }
 
     return (
@@ -142,19 +149,20 @@ function ActionsCell({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEnterSeries}>
-                        Enter Series
+                    <DropdownMenuItem onClick={handleEnterInstances}>
+                        Enter Instances
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
-                        Copy Study Instance UID
+                    <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
+                        Copy Series Instance UID
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={handleRestoreStudy}>
+                    <DropdownMenuItem onClick={handleRestoreSeries}>
                         Restore
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDeleteStudy}>
+
+                    <DropdownMenuItem onClick={handleDeleteSeries}>
                         Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -163,31 +171,31 @@ function ActionsCell({
             <DicomDeleteConfirmDialog 
                 open={showDeleteConfirmDialog}
                 onOpenChange={setShowDeleteConfirmDialog}
-                dicomLevel="study"
+                dicomLevel="series"
                 selectedCount={1}
                 onConfirm={handleConfirmDelete}
             />
         </>
-    )
+    );
 }
 
-export function DicomRecycleStudiesDataTable({
-    studies,
+export function DicomRecycleSeriesDataTable({
+    series,
     workspaceId,
     className,
-}: DicomRecycleStudiesTableProps) {
+}: DicomRecycleSeriesTableProps) {
     const {
-        toggleStudySelection,
-        isStudySelected,
+        toggleSeriesSelection,
+        isSeriesSelected,
         clearSelection,
         selectAll,
         getSelectedCount,
-        selectStudy
-    } = useDicomStudySelectionStore();
+        selectSeries,
+    } = useDicomSeriesSelectionStore();
 
-    const generalColumns = useMemo(() => createStudyColumns(), []);
+    const generalColumns = useMemo(() => createSeriesColumns(), []);
 
-    const columns: ColumnDef<DicomStudyData>[] = useMemo(
+    const columns: ColumnDef<DicomSeriesData>[] = useMemo(
         () => [
             {
                 id: "select",
@@ -195,15 +203,17 @@ export function DicomRecycleStudiesDataTable({
                     <Checkbox
                         checked={
                             getSelectedCount() > 0 &&
-                            getSelectedCount() === studies.length
+                            getSelectedCount() === series.length
                         }
                         onCheckedChange={(value) => {
                             const isChecked = !!value;
+
                             if (isChecked) {
                                 selectAll(
-                                    studies.map(
-                                        (study) =>
-                                            study["0020000D"]?.Value?.[0] || "",
+                                    series.map(
+                                        (series) =>
+                                            series["0020000E"]?.Value?.[0] ||
+                                            "",
                                     ),
                                 );
                             } else {
@@ -214,21 +224,22 @@ export function DicomRecycleStudiesDataTable({
                     />
                 ),
                 cell: ({ row }) => {
-                    const studyInstanceUid = row.original["0020000D"]?.Value?.[0] || "";
-                    const isSelected = isStudySelected(studyInstanceUid);
+                    const seriesInstanceUid =
+                        row.original["0020000E"]?.Value?.[0] || "";
+                    const isSelected = isSeriesSelected(seriesInstanceUid);
 
                     return (
                         <Checkbox
                             checked={isSelected}
                             onCheckedChange={() => {
-                                toggleStudySelection(studyInstanceUid, true);
+                                toggleSeriesSelection(seriesInstanceUid, true);
                             }}
-                            aria-label="Select study"
+                            aria-label="Select series"
                         />
-                    )
+                    );
                 },
                 enableSorting: false,
-                enableHiding: false
+                enableHiding: false,
             },
             {
                 accessorKey: "thumbnail",
@@ -241,33 +252,40 @@ export function DicomRecycleStudiesDataTable({
                                 workspaceId,
                             }}
                             studyInstanceUid={row.original["0020000D"]?.Value?.[0] || "N/A"}
+                            seriesInstanceUid={row.original["0020000E"]?.Value?.[0] || "N/A"}
+                            size={64}
                         />
-                    )
-                }
+                    );
+                },
             },
             ...generalColumns,
             {
                 id: "actions",
                 enableHiding: false,
                 cell: ({ row }) => {
-                    return <ActionsCell study={row.original} workspaceId={workspaceId} />;
-                }
-            }
+                    return (
+                        <ActionsCell
+                            series={row.original}
+                            workspaceId={workspaceId}
+                        />
+                    );
+                },
+            },
         ],
         [
             workspaceId,
-            studies,
+            series,
             clearSelection,
             selectAll,
             getSelectedCount,
-            isStudySelected,
-            toggleStudySelection,
+            isSeriesSelected,
+            toggleSeriesSelection,
             generalColumns,
-        ]
+        ],
     );
 
     const table = useReactTable({
-        data: studies,
+        data: series,
         columns,
         getCoreRowModel: getCoreRowModel(),
         enableRowSelection: false,
@@ -275,9 +293,9 @@ export function DicomRecycleStudiesDataTable({
 
     const handleRowClick = (
         e: React.MouseEvent<HTMLTableRowElement>,
-        study: DicomStudyData,
+        series: DicomSeriesData,
     ) => {
-        const studyInstanceUid = study["0020000D"]?.Value?.[0] || "";
+        const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "";
 
         if (e.button !== 0) return;
 
@@ -292,8 +310,8 @@ export function DicomRecycleStudiesDataTable({
         }
 
         e.preventDefault();
-        toggleStudySelection(studyInstanceUid, true);
-    }
+        toggleSeriesSelection(seriesInstanceUid, true);
+    };
 
     return (
         <div className={cn("w-full", className)}>
@@ -301,13 +319,16 @@ export function DicomRecycleStudiesDataTable({
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow  key={headerGroup.id}>
-                                {headerGroup.headers.map(header => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
                                     <TableHead key={header.id}>
-                                        {header.isPlaceholder ? null : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext(),
-                                        )}
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef
+                                                      .header,
+                                                  header.getContext(),
+                                              )}
                                     </TableHead>
                                 ))}
                             </TableRow>
@@ -315,14 +336,19 @@ export function DicomRecycleStudiesDataTable({
                     </TableHeader>
                     <TableBody>
                         {table.getRowModel().rows.length ? (
-                            table.getRowModel().rows.map(row => {
-                                const studyInstanceUid = row.original["0020000D"]?.Value?.[0] || "";
-                                const isSelected = isStudySelected(studyInstanceUid);
+                            table.getRowModel().rows.map((row) => {
+                                const studyInstanceUid =
+                                    row.original["0020000D"]?.Value?.[0] || "";
+                                const seriesInstanceUid =
+                                    row.original["0020000E"]?.Value?.[0] || "";
+                                const isSelected =
+                                    isSeriesSelected(seriesInstanceUid);
 
                                 return (
-                                    <DicomRecycleStudyContextMenu
+                                    <DicomRecycleSeriesContextMenu
                                         key={row.id}
                                         workspaceId={workspaceId}
+                                        studyInstanceUid={studyInstanceUid}
                                     >
                                         <TableRow
                                             data-dicom-card
@@ -330,15 +356,21 @@ export function DicomRecycleStudiesDataTable({
                                                 "cursor-pointer select-none transition-colors",
                                                 isSelected && "bg-accent/50",
                                             )}
-                                            onClick={(e) => 
+                                            onClick={(e) =>
                                                 handleRowClick(e, row.original)
                                             }
                                             onContextMenu={() => {
                                                 if (getSelectedCount() === 0) {
-                                                    selectStudy(studyInstanceUid);
-                                                } else if (getSelectedCount() === 1) {
+                                                    selectSeries(
+                                                        seriesInstanceUid,
+                                                    );
+                                                } else if (
+                                                    getSelectedCount() === 1
+                                                ) {
                                                     clearSelection();
-                                                    selectStudy(studyInstanceUid);
+                                                    selectSeries(
+                                                        seriesInstanceUid,
+                                                    );
                                                 }
                                             }}
                                         >
@@ -347,20 +379,22 @@ export function DicomRecycleStudiesDataTable({
                                                 .map((cell) => (
                                                     <TableCell key={cell.id}>
                                                         {flexRender(
-                                                            cell.column.columnDef.cell,
+                                                            cell.column
+                                                                .columnDef.cell,
                                                             cell.getContext(),
                                                         )}
                                                     </TableCell>
-                                                ))
-
-                                            }
+                                                ))}
                                         </TableRow>
-                                    </DicomRecycleStudyContextMenu>
-                                )
+                                    </DicomRecycleSeriesContextMenu>
+                                );
                             })
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
                                     No results.
                                 </TableCell>
                             </TableRow>
@@ -369,5 +403,5 @@ export function DicomRecycleStudiesDataTable({
                 </Table>
             </div>
         </div>
-    )
+    );
 }

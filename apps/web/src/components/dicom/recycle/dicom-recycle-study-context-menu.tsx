@@ -101,7 +101,7 @@ export function DicomRecycleStudyContextMenu({
         e.preventDefault();
         clearSelection();
         closeContextMenu();
-        router.push(`/dicom-recycle/studies/${selectedIds[0]}/series`);
+        router.push(`/${workspaceId}/dicom-recycle/studies/${selectedIds[0]}/series`);
     }
 
     const handleRestoreStudies = (e: React.MouseEvent<HTMLDivElement>) => {

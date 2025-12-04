@@ -2,12 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { MultiSelect, type Option } from "@/components/ui/multi-select";
 import { apiClient } from "@/react-query/apiClient";
-import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import type { SearchLevel } from "./dicom-search-modal";
 import { SEARCH_FIELD_CONFIGS } from "./search-field-types";
 
@@ -32,8 +33,7 @@ export function DicomSearchConditionItem({
     onUpdate,
     onRemove,
 }: DicomSearchConditionItemProps) {
-    const { data: defaultWorkspace } = useQuery(getDefaultWorkspaceQuery());
-    const workspaceId = defaultWorkspace?.workspace?.id ?? "";
+    const workspaceId = useWorkspaceStore(useShallow((state) => state.workspace?.id));
 
     const fieldConfig = SEARCH_FIELD_CONFIGS[level].find(
         (config) => config.key === condition.field,

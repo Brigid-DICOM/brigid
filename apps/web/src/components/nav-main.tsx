@@ -9,6 +9,7 @@ import {
     UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -19,6 +20,8 @@ import {
 } from "./ui/sidebar";
 
 export function NavMain() {
+    const workspaceId = useParams<{ workspaceId: string }>().workspaceId;
+
     return (
         <SidebarGroup>
             <SidebarGroupContent>
@@ -26,7 +29,7 @@ export function NavMain() {
                     <SidebarMenuItem key="dashboard">
                         <SidebarMenuButton tooltip="Dashboard">
                             <GaugeIcon className="size-4" />
-                            <Link href="/" className="w-full">
+                            <Link href={`/${workspaceId}`} className="w-full">
                                 Dashboard
                             </Link>
                         </SidebarMenuButton>
@@ -35,7 +38,7 @@ export function NavMain() {
                     <SidebarMenuItem key="dicom instances management">
                         <SidebarMenuButton tooltip="DICOM Instances Management">
                             <DatabaseIcon className="size-4" />
-                            <Link href="/dicom-studies" className="w-full">
+                            <Link href={`/${workspaceId}/dicom-studies`} className="w-full">
                                 DICOM Instances
                             </Link>
                         </SidebarMenuButton>
@@ -45,7 +48,7 @@ export function NavMain() {
                         <SidebarMenuButton tooltip="DICOM Recycle">
                             <Trash2Icon className="size-4" />
                             <Link
-                                href="/dicom-recycle/studies"
+                                href={`/${workspaceId}/dicom-recycle/studies`}
                                 className="w-full"
                             >
                                 DICOM Recycle
@@ -56,7 +59,7 @@ export function NavMain() {
                     <SidebarMenuItem key="dicom upload">
                         <SidebarMenuButton tooltip={"Upload DICOM"}>
                             <UploadIcon className="size-4" />
-                            <Link href="/dicom-upload" className="w-full">
+                            <Link href={`/${workspaceId}/dicom-upload`} className="w-full">
                                 Upload DICOM
                             </Link>
                         </SidebarMenuButton>
@@ -65,7 +68,7 @@ export function NavMain() {
                     <SidebarMenuItem key="my shares">
                         <SidebarMenuButton tooltip="My Shares">
                             <Share2Icon className="size-4" />
-                            <Link href="/my-shares" className="w-full">
+                            <Link href={`/${workspaceId}/my-shares`} className="w-full">
                                 My Shares
                             </Link>
                         </SidebarMenuButton>
@@ -76,7 +79,7 @@ export function NavMain() {
                     <SidebarMenuItem key="share with me">
                         <SidebarMenuButton tooltip="Share With Me">
                             <UsersIcon className="size-4" />
-                            <Link href="/share-with-me" className="w-full">
+                            <Link href={`/${workspaceId}/share-with-me`} className="w-full">
                                 Share With Me
                             </Link>
                         </SidebarMenuButton>

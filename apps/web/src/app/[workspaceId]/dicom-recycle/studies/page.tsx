@@ -3,18 +3,21 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { cookies } from "next/headers";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
-import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
 import DicomRecycleStudiesContent from "./content";
 
-export default async function DicomRecycleStudiesPage() {
+interface DicomRecycleStudiesPageProps {
+    params: Promise<{
+        workspaceId: string;
+    }>;
+}
+
+export default async function DicomRecycleStudiesPage({ params }: DicomRecycleStudiesPageProps) {
+    const { workspaceId } = await params;
     const cookieStore = await cookies();
     const queryClient = getQueryClient();
-    const defaultWorkspace = await queryClient.fetchQuery(getDefaultWorkspaceQuery(
-        cookieStore.toString()
-    ));
     await queryClient.prefetchQuery(
         getDicomStudyQuery({
-            workspaceId: defaultWorkspace?.workspace?.id ?? "",
+            workspaceId: workspaceId,
             offset: 0,
             limit: 10,
             deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
@@ -24,7 +27,7 @@ export default async function DicomRecycleStudiesPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <DicomRecycleStudiesContent workspaceId={defaultWorkspace?.workspace?.id ?? ""} />
+            <DicomRecycleStudiesContent workspaceId={workspaceId} />
         </HydrationBoundary>
     );
 }

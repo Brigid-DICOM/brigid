@@ -3,17 +3,20 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { authSessionQuery } from "@/react-query/queries/session";
-import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
 import DicomUploadContent from "./content";
 
-export default async function DicomUploadPage() {
+interface DicomUploadPageProps {
+    params: Promise<{
+        workspaceId: string;
+    }>;
+}
+
+export default async function DicomUploadPage({ params }: DicomUploadPageProps) {
+    const { workspaceId } = await params;
     const cookieStore = await cookies();
     const queryClient = getQueryClient();
     const session = await queryClient.fetchQuery(
         authSessionQuery(cookieStore.toString()),
-    );
-    const defaultWorkspace = await queryClient.fetchQuery(
-        getDefaultWorkspaceQuery(cookieStore.toString()),
     );
 
     if (!session) {
@@ -22,7 +25,7 @@ export default async function DicomUploadPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <DicomUploadContent workspaceId={defaultWorkspace?.workspace?.id} />
+            <DicomUploadContent workspaceId={workspaceId} />
         </HydrationBoundary>
     );
 }

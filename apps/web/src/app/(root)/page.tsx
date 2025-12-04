@@ -1,38 +1,28 @@
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { authSessionQuery } from "@/react-query/queries/session";
-import { getDicomStatsQuery } from "@/react-query/queries/stats";
 import { getDefaultWorkspaceQuery } from "@/react-query/queries/workspace";
-import HomeContent from "./content";
 
-export default async function Home() {
-    const cookieStore = await cookies();
+export default async function RootPage() {
     const queryClient = getQueryClient();
-    const session = await queryClient.fetchQuery(
-        authSessionQuery(cookieStore.toString()),
-    );
-    const defaultWorkspace = await queryClient.fetchQuery(
-        getDefaultWorkspaceQuery(cookieStore.toString()),
-    );
-    await queryClient.prefetchQuery(
-        getDefaultWorkspaceQuery(cookieStore.toString()),
-    );
-    await queryClient.prefetchQuery(
-        getDicomStatsQuery({
-            workspaceId: defaultWorkspace?.workspace?.id ?? "",
-            cookie: cookieStore.toString(),
-        }),
-    );
+    const cookieStore = await cookies();
 
-    if (!session) {
-        return redirect("/api/auth/signin");
+    let redirectUrl = "/api/auth/signin";
+    try {
+        const data = await queryClient.fetchQuery(
+            getDefaultWorkspaceQuery(cookieStore.toString())
+        );
+
+        const defaultId = data?.workspace?.id
+        
+        if (defaultId) {
+            redirectUrl = `/${defaultId}`;
+        }
+    } catch {
+        // go to signin page
+        redirect(redirectUrl);
+    } finally {
+        // go to workspace root page (dashboard)
+        redirect(redirectUrl);
     }
-
-    return (
-        <HydrationBoundary state={dehydrate(queryClient)}>
-            <HomeContent />
-        </HydrationBoundary>
-    );
 }

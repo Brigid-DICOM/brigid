@@ -100,7 +100,7 @@ export function DicomRecycleSeriesContextMenu({
         closeContextMenu();
         clearSelection();
         router.push(
-            `/dicom-recycle/studies/${studyInstanceUid}/series/${selectedIds[0]}/instances`,
+            `/${workspaceId}/dicom-recycle/studies/${studyInstanceUid}/series/${selectedIds[0]}/instances`,
         );
     };
 

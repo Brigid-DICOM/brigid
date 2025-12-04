@@ -235,7 +235,7 @@ export default function DicomRecycleSeriesContent({
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8 flex flex-col items-start space-x-4">
                 <div className="flex flex-1 items-center space-x-4">
-                    <Link href={`/dicom-recycle/studies`}>
+                    <Link href={`/${workspaceId}/dicom-recycle/studies`}>
                         <Button 
                             variant="outline" 
                             className="flex items-center"

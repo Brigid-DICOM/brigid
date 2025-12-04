@@ -68,7 +68,7 @@ export function DicomSeriesCard({
         toggleSelection: toggleSeriesSelection,
         selectItem: selectSeries,
         clearSelection,
-        onDoubleClick: () => router.push(`/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`),
+        onDoubleClick: () => router.push(`/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`),
     });
 
     const ContextMenu = type === "management" ? (

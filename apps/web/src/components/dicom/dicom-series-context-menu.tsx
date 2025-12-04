@@ -78,7 +78,7 @@ export function DicomSeriesContextMenu({
     const handleEnterInstances = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        router.push(`/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`);
+        router.push(`/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`);
     }
 
     const handleDownloadThis = async (e: React.MouseEvent<HTMLDivElement>) => {

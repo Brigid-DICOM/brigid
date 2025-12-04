@@ -243,7 +243,7 @@ export default function DicomInstancesContent({
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8 flex flex-col items-start space-x-4">
                 <div className="flex flex-1 items-center space-x-4">
-                    <Link href={`/dicom-studies/${studyInstanceUid}`}>
+                    <Link href={`/${workspaceId}/dicom-studies/${studyInstanceUid}`}>
                         <Button 
                             variant="outline" 
                             className="flex items-center"
