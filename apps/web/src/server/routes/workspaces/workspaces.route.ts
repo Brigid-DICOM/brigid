@@ -325,7 +325,7 @@ const workspacesRoute = new Hono()
         }),
         verifyAuthMiddleware,
         verifyWorkspaceExists,
-        verifyWorkspacePermission(WORKSPACE_PERMISSIONS.DELETE),
+        verifyWorkspacePermission(WORKSPACE_PERMISSIONS.MANAGE),
         zValidator(
             "param",
             z.object({
