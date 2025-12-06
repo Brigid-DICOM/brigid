@@ -333,10 +333,27 @@ const workspacesRoute = new Hono()
             })
         ),
         async (c) => {
+            const authUser = c.get("authUser");
+            const userId = authUser?.user?.id;
+
+            if (!userId) {
+                return c.json({
+                    message: "Unauthorized",
+                }, 401);
+            }
+
             const { workspaceId } = c.req.valid("param");
             
             const workspaceService = new WorkspaceService();
             await workspaceService.deleteWorkspace(workspaceId);
+
+            const workspaces = await workspaceService.getUserWorkspaces(userId);
+            if (workspaces.length === 0) {
+                await workspaceService.createDefaultWorkspace({
+                    userId,
+                    userName: authUser?.user?.name ?? undefined,
+                });
+            }
 
             return c.json({
                 ok: true
