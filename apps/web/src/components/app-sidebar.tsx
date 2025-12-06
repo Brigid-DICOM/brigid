@@ -5,6 +5,7 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { authSessionQuery } from "@/react-query/queries/session";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { NavWorkspace } from "./nav-workspace";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 
 export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
@@ -20,7 +21,7 @@ export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         <Sidebar {...props}>
             <SidebarHeader>
                 <SidebarMenu>
-                    <SidebarMenuItem>
+                    <SidebarMenuItem className="mb-2">
                         <SidebarMenuButton
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
@@ -31,6 +32,8 @@ export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+
+                    <NavWorkspace />
                 </SidebarMenu>
             </SidebarHeader>
 
