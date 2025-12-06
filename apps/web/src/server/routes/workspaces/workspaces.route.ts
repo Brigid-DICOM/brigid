@@ -1,4 +1,3 @@
-import env from "@brigid/env";
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
@@ -41,6 +40,7 @@ import retrieveInstanceThumbnailRoute from "./wado-rs/thumbnail/retrieveInstance
 import retrieveSeriesThumbnailRoute from "./wado-rs/thumbnail/retrieveSeriesThumbnail.route";
 import retrieveStudyThumbnailRoute from "./wado-rs/thumbnail/retrieveStudyThumbnail.route";
 import uriRetrieveInstanceRoute from "./wado-uri/uriRetrieveInstance.route";
+import workspaceMemberRoute from "./workspaceMember.route";
 
 const workspacesRoute = new Hono()
     .route("/", stowRsRoute)
@@ -98,17 +98,7 @@ const workspacesRoute = new Hono()
                 );
             }
 
-            if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
-                const workspaces = await workspaceService.getUserWorkspace(
-                    authUser.user.id,
-                );
-
-                return c.json({
-                    workspaces,
-                });
-            }
-
-            const workspaces = await workspaceService.getUserWorkspace(
+            const workspaces = await workspaceService.getUserWorkspaces(
                 authUser.user.id,
             );
             return c.json({
@@ -222,6 +212,137 @@ const workspacesRoute = new Hono()
                 },
             });
         },
-    );
+    )
+    .post(
+        "/workspaces",
+        describeRoute({
+            description: "Create a new workspace",
+            tags: ["Workspaces"]
+        }),
+        verifyAuthMiddleware,
+        zValidator(
+            "json",
+            z.object({
+                name: z.string().min(1).max(255).describe("The name of the workspace"),
+            })
+        ),
+        async (c) => {
+            const { name } = c.req.valid("json");
+            const authUser = c.get("authUser");
+
+            if (!authUser?.user?.id) {
+                return c.json(
+                    {
+                        message: "Unauthorized",
+                    },
+                    401,
+                )
+            }
+
+            const workspaceService = new WorkspaceService();
+            const newWorkspace = await workspaceService.createWorkspaceForUser({
+                userId: authUser.user.id,
+                name
+            });
+
+            return c.json({
+                workspace: newWorkspace,
+            }, 201);
+        }
+    )
+    .put(
+        "/workspaces/:workspaceId/default",
+        describeRoute({
+            description: "Set a default workspace",
+            tags: ["Workspaces"]
+        }),
+        verifyAuthMiddleware,
+        verifyWorkspaceExists,
+        verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
+        zValidator(
+            "param",
+            z.object({
+                workspaceId: z.string().describe("The ID of the workspace"),
+            })
+        ),
+        async (c) => {
+            const { workspaceId } = c.req.valid("param");
+            const authUser = c.get("authUser");
+            const userId = authUser?.user?.id;
+            if (!userId) {
+                return c.json({
+                    message: "Unauthorized",
+                }, 401);
+            }
+
+            const workspaceService = new WorkspaceService();
+            await workspaceService.setUserDefaultWorkspace(userId, workspaceId);
+
+            return c.json({
+                ok: true
+            }, 200);
+        }
+    )
+    .patch(
+        "/workspaces/:workspaceId",
+        describeRoute({
+            description: "Update a workspace",
+            tags: ["Workspaces"]
+        }),
+        verifyAuthMiddleware,
+        verifyWorkspaceExists,
+        verifyWorkspacePermission(WORKSPACE_PERMISSIONS.UPDATE),
+        zValidator(
+            "param",
+            z.object({
+                workspaceId: z.string().describe("The ID of the workspace"),
+            })
+        ),
+        zValidator(
+            "json",
+            z.object({
+                name: z.string().min(1).max(255).optional(),
+            })
+        ),
+        async (c) => {
+            const { workspaceId } = c.req.valid("param");
+            const { name } = c.req.valid("json");
+            
+
+            const workspaceService = new WorkspaceService();
+            const updatedWorkspace = await workspaceService.updateWorkspace(workspaceId, { name });
+
+            return c.json({
+                workspace: updatedWorkspace,
+            }, 200);
+        }
+    )
+    .delete(
+        "/workspaces/:workspaceId",
+        describeRoute({
+            description: "Delete a workspace",
+            tags: ["Workspaces"]
+        }),
+        verifyAuthMiddleware,
+        verifyWorkspaceExists,
+        verifyWorkspacePermission(WORKSPACE_PERMISSIONS.DELETE),
+        zValidator(
+            "param",
+            z.object({
+                workspaceId: z.string().describe("The ID of the workspace"),
+            })
+        ),
+        async (c) => {
+            const { workspaceId } = c.req.valid("param");
+            
+            const workspaceService = new WorkspaceService();
+            await workspaceService.deleteWorkspace(workspaceId);
+
+            return c.json({
+                ok: true
+            }, 200);
+        }
+    )
+    .route("/", workspaceMemberRoute);
 
 export default workspacesRoute;
