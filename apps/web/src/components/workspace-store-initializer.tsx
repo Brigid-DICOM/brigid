@@ -20,7 +20,7 @@ export function WorkspaceStoreInitializer({
             setWorkspace({
                 id: workspaceId,
                 name: data?.workspace?.name ?? "",
-                memberShip: data?.workspace?.membership ?? {
+                membership: data?.workspace?.membership ?? {
                     role: "",
                     permissions: 0,
                     isDefault: false,

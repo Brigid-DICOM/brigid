@@ -7,7 +7,7 @@ interface Workspace {
     id: string;
     name: string;
     ownerId?: string;
-    memberShip: {
+    membership: {
         role: string;
         permissions: number;
         isDefault: boolean;
