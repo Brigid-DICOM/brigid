@@ -123,12 +123,20 @@ export const createWorkspaceMutation = () =>
         },
     });
 
-export const updateWorkspaceMutation = () => 
+export const updateWorkspaceMutation = () =>
     mutationOptions({
-        mutationFn: async ({ workspaceId, name }: { workspaceId: string, name: string }) => {
-            const response = await apiClient.api.workspaces[":workspaceId"].$patch({
+        mutationFn: async ({
+            workspaceId,
+            name,
+        }: {
+            workspaceId: string;
+            name: string;
+        }) => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].$patch({
                 param: { workspaceId },
-                json: { name }
+                json: { name },
             });
 
             if (!response.ok) {
@@ -136,14 +144,16 @@ export const updateWorkspaceMutation = () =>
             }
 
             return response.json();
-        }
+        },
     });
 
 export const deleteWorkspaceMutation = () =>
     mutationOptions({
         mutationFn: async (workspaceId: string) => {
-            const response = await apiClient.api.workspaces[":workspaceId"].$delete({
-                param: { workspaceId }
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].$delete({
+                param: { workspaceId },
             });
 
             if (!response.ok) {
@@ -151,18 +161,23 @@ export const deleteWorkspaceMutation = () =>
             }
 
             return response.json();
-        }
-    })
+        },
+    });
 
 export const addWorkspaceMembersMutation = () => {
     return mutationOptions({
-        mutationFn: async ({ workspaceId, users }: {
+        mutationFn: async ({
+            workspaceId,
+            users,
+        }: {
             workspaceId: string;
-            users: { userId: string; role: string }[]
+            users: { userId: string; role: string }[];
         }) => {
-            const response = await apiClient.api.workspaces[":workspaceId"].members.$post({
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].members.$post({
                 param: { workspaceId },
-                json: { users }
+                json: { users },
             });
 
             if (!response.ok) {
@@ -170,11 +185,14 @@ export const addWorkspaceMembersMutation = () => {
             }
 
             return response.json();
-        }
-    })
-}
+        },
+    });
+};
 
-export const getWorkspaceMembersQuery = (workspaceId: string, cookie?: string) => {
+export const getWorkspaceMembersQuery = (
+    workspaceId: string,
+    cookie?: string,
+) => {
     return queryOptions({
         queryKey: ["workspace", workspaceId, "members"],
         queryFn: async () => {
@@ -183,7 +201,9 @@ export const getWorkspaceMembersQuery = (workspaceId: string, cookie?: string) =
                 headers.cookie = cookie;
             }
 
-            const response = await apiClient.api.workspaces[":workspaceId"].members.$get({
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].members.$get({
                 param: { workspaceId },
             });
 
@@ -194,18 +214,23 @@ export const getWorkspaceMembersQuery = (workspaceId: string, cookie?: string) =
             return response.json();
         },
         enabled: !!workspaceId,
-    })
-}
+    });
+};
 
-export const updateWorkspaceMembersMutation = () => 
+export const updateWorkspaceMembersMutation = () =>
     mutationOptions({
-        mutationFn: async ({ workspaceId, users }: {
+        mutationFn: async ({
+            workspaceId,
+            users,
+        }: {
             workspaceId: string;
-            users: { userId: string; role: string }[]
+            users: { userId: string; role: string }[];
         }) => {
-            const response = await apiClient.api.workspaces[":workspaceId"].members.batch.$patch({
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].members.batch.$patch({
                 param: { workspaceId },
-                json: { users }
+                json: { users },
             });
 
             if (!response.ok) {
@@ -213,16 +238,23 @@ export const updateWorkspaceMembersMutation = () =>
             }
 
             return response.json();
-        }
-    })
+        },
+    });
 
-
-export const removeWorkspaceMembersMutation = () => 
+export const removeWorkspaceMembersMutation = () =>
     mutationOptions({
-        mutationFn: async ({ workspaceId, userIds }: { workspaceId: string, userIds: string[] }) => {
-            const response = await apiClient.api.workspaces[":workspaceId"].members["batch-delete"].$post({
+        mutationFn: async ({
+            workspaceId,
+            userIds,
+        }: {
+            workspaceId: string;
+            userIds: string[];
+        }) => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].members["batch-delete"].$post({
                 param: { workspaceId },
-                json: { userIds }
+                json: { userIds },
             });
 
             if (!response.ok) {
@@ -230,5 +262,22 @@ export const removeWorkspaceMembersMutation = () =>
             }
 
             return response.json();
-        }
-    })
+        },
+    });
+
+export const leaveWorkspaceMutation = () =>
+    mutationOptions({
+        mutationFn: async (workspaceId: string) => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].members.leave.$delete({
+                param: { workspaceId },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to leave workspace");
+            }
+
+            return response.json();
+        },
+    });

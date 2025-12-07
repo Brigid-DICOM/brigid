@@ -166,8 +166,38 @@ const workspaceMemberRoute = new Hono()
             const { userIds } = c.req.valid("json");
 
             const workspaceService = new WorkspaceService();
-            
+
             await workspaceService.removeMembers(workspaceId, userIds);
+            return c.json({ ok: true }, 200);
+        },
+    )
+    .delete(
+        "/workspaces/:workspaceId/members/leave",
+        describeRoute({
+            description: "Leave a workspace",
+            tags: ["Workspaces"],
+        }),
+        verifyAuthMiddleware,
+        verifyWorkspaceExists,
+        verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
+        zValidator(
+            "param",
+            z.object({
+                workspaceId: z.string().describe("The ID of the workspace"),
+            }),
+        ),
+        async (c) => {
+            const { workspaceId } = c.req.valid("param");
+            const authUser = c.get("authUser");
+            const userId = authUser?.user?.id;
+
+            if (!userId) {
+                return c.json({ error: "User not found" }, 404);
+            }
+
+            const workspaceService = new WorkspaceService();
+            await workspaceService.removeMember(workspaceId, userId);
+
             return c.json({ ok: true }, 200);
         },
     );

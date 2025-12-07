@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
     deleteWorkspaceMutation,
+    leaveWorkspaceMutation,
     updateWorkspaceMutation,
 } from "@/react-query/queries/workspace";
 
@@ -29,6 +30,9 @@ interface WorkspaceGeneralSettingsProps {
     workspace: {
         id: string;
         name: string;
+        membership: {
+            role: string;
+        };
     };
     onClose: () => void;
 }
@@ -43,6 +47,7 @@ export function WorkspaceGeneralSettings({
 
     const updateWorkspace = useMutation(updateWorkspaceMutation());
     const deleteWorkspace = useMutation(deleteWorkspaceMutation());
+    const { mutateAsync: leaveWorkspace, isPending: isLeavingWorkspace } = useMutation(leaveWorkspaceMutation());
 
     useEffect(() => {
         setName(workspace.name);
@@ -91,6 +96,27 @@ export function WorkspaceGeneralSettings({
         }
     };
 
+    const handleLeaveWorkspace = async () => {
+        try {
+            await leaveWorkspace(workspace.id);
+            await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+
+            toast.success("You have left the workspace", {
+                position: "bottom-center",
+            });
+            onClose();
+
+            router.push("/");
+        } catch (error) {
+            console.error("Failed to leave workspace", error);
+            toast.error("Failed to leave workspace", {
+                position: "bottom-center",
+            });
+        } finally {
+            onClose();
+        }
+    }
+
     return (
         <div className="flex h-full flex-col">
             <div className="flex-1 gap-6 overflow-y-auto p-6">
@@ -130,7 +156,40 @@ export function WorkspaceGeneralSettings({
                         <Separator />
                     </div>
 
-                    <div className="grid gap-2">
+                    {workspace.membership.role !== "owner" && (
+                        <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant={"destructive"} size="sm">
+                                        Leave Workspace
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Are you sure you want to leave this workspace?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            You will lose access to all workspace resources and data.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleLeaveWorkspace}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        >
+                                            {isLeavingWorkspace ? "Leaving..." : "Leave"}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    )}
+
+                    {workspace.membership.role === "owner" && <div className="grid gap-2">
                         <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-1 mb-2">
@@ -146,7 +205,9 @@ export function WorkspaceGeneralSettings({
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant={"destructive"} size="sm">
+                                    <Button 
+                                        variant={"destructive"} size="sm"
+                                    >
                                         Delete Workspace
                                     </Button>
                                 </AlertDialogTrigger>
@@ -179,7 +240,7 @@ export function WorkspaceGeneralSettings({
                                 </AlertDialogContent>
                             </AlertDialog>
                         </div>
-                    </div>
+                    </div>}
                 </div>
             </div>
 
