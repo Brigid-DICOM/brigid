@@ -12,6 +12,7 @@ import { MoreHorizontalIcon } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDeleteConfirmDialog } from "@/components/dicom/recycle/dicom-delete-confirm-dialog";
@@ -38,7 +39,10 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { 
     deleteDicomStudyMutation, restoreDicomStudyMutation
  } from "@/react-query/queries/dicomStudy";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface DicomRecycleStudiesTableProps {
     studies: DicomStudyData[];
@@ -58,6 +62,10 @@ function ActionsCell({
     const router = useRouter();
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
+    const workspace = useWorkspaceStore(useShallow(state => state.workspace));
+
+    const canRead = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
+    const canDelete = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
 
     const { mutate: restoreDicomStudy } = useMutation({
         ...restoreDicomStudyMutation({
@@ -142,21 +150,29 @@ function ActionsCell({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEnterSeries}>
-                        Enter Series
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
-                        Copy Study Instance UID
-                    </DropdownMenuItem>
+                    {canRead && (
+                        <>
+                            <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
+                                Copy Study Instance UID
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleEnterSeries}>
+                                Enter Series
+                            </DropdownMenuItem>
+                        </>
+                    )}
 
-                    <DropdownMenuSeparator />
+                    {canDelete && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={handleRestoreStudy}>
-                        Restore
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDeleteStudy}>
-                        Delete
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleRestoreStudy}>
+                                Restore
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDeleteStudy}>
+                                Delete
+                            </DropdownMenuItem>
+                        </>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 

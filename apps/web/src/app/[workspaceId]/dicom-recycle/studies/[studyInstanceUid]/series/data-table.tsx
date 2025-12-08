@@ -12,6 +12,7 @@ import { MoreHorizontalIcon } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDeleteConfirmDialog } from "@/components/dicom/recycle/dicom-delete-confirm-dialog";
@@ -39,7 +40,10 @@ import {
     deleteDicomSeriesMutation,
     restoreDicomSeriesMutation,
 } from "@/react-query/queries/dicomSeries";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface DicomRecycleSeriesTableProps {
     series: DicomSeriesData[];
@@ -59,6 +63,10 @@ function ActionsCell({
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
+    const workspace = useWorkspaceStore(useShallow(state => state.workspace));
+
+    const canRead = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
+    const canDelete = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
 
     const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
 
@@ -149,22 +157,31 @@ function ActionsCell({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEnterInstances}>
-                        Enter Instances
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
-                        Copy Series Instance UID
-                    </DropdownMenuItem>
+                    {canRead && (
+                        <>
+                            <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
+                                Copy Series Instance UID
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleEnterInstances}>
+                                Enter Instances
+                            </DropdownMenuItem>
+                        </>
+                    )}
 
-                    <DropdownMenuSeparator />
+                    {canDelete && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={handleRestoreSeries}>
-                        Restore
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleRestoreSeries}>
+                                Restore
+                            </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={handleDeleteSeries}>
-                        Delete
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDeleteSeries}>
+                                Delete
+                            </DropdownMenuItem>
+                        </>
+                    )}
+
                 </DropdownMenuContent>
             </DropdownMenu>
 

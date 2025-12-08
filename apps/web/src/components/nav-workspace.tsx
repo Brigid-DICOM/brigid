@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getWorkspaceByIdQuery, getWorkspacesQuery, setDefaultWorkspaceMutation } from "@/react-query/queries/workspace";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from "./ui/sidebar";
 import { CreateWorkspaceDialog } from "./workspace/create-workspace-dialog";
 import { InviteMemberDialog } from "./workspace/invite-member-dialog";
@@ -53,6 +55,8 @@ export function NavWorkspace() {
     }
 
     if (!activeWorkspace) return null;
+
+    const canInvite = hasPermission(activeWorkspace.membership.permissions, WORKSPACE_PERMISSIONS.INVITE);
 
     return (
         <>
@@ -108,13 +112,13 @@ export function NavWorkspace() {
                             <SettingsIcon className="size-4 text-muted-foreground ml-1" />
                             <span>Settings</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        {canInvite && <DropdownMenuItem 
                             className="gap-2 p-2 cursor-pointer"
                             onClick={() => setShowInviteMemberDialog(true)}
                         >
                             <UserPlusIcon className="size-4 text-muted-foreground ml-1" />
                             <span>Invite members</span>
-                        </DropdownMenuItem>
+                        </DropdownMenuItem>}
 
                         <DropdownMenuSeparator />
 

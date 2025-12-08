@@ -12,6 +12,7 @@ import { MoreHorizontalIcon } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
@@ -40,8 +41,11 @@ import { downloadSeries } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface DicomSeriesTableProps {
     series: DicomSeriesData[];
@@ -64,6 +68,26 @@ function ActionsCell({
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
+    const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
+
+    const canRecycle =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.DELETE,
+        );
+    const canRead =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.READ,
+        );
+    const canUpdate =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.UPDATE,
+        );
 
     const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
 
@@ -112,11 +136,21 @@ function ActionsCell({
     };
 
     const handleRecycleSeries = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!canRecycle) {
+            toast.error("You do not have permission to recycle DICOM series");
+            return;
+        }
+
         e.stopPropagation();
         setShowRecycleConfirmDialog(true);
     };
 
     const handleConfirmRecycle = () => {
+        if (!canRecycle) {
+            toast.error("You do not have permission to recycle DICOM series");
+            return;
+        }
+
         recycleDicomSeries();
     };
 
@@ -138,56 +172,73 @@ function ActionsCell({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEnterInstances}>
-                        Enter Instances
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        Open in BlueLight Viewer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
-                        Copy Series Instance UID
-                    </DropdownMenuItem>
+                    {canRead && (
+                        <>
+                            <DropdownMenuItem
+                                onClick={handleCopySeriesInstanceUid}
+                            >
+                                Copy Series Instance UID
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleEnterInstances}>
+                                Enter Instances
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                            >
+                                Open in BlueLight Viewer
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDownloadSeries}>
+                                Download
+                            </DropdownMenuItem>
+                        </>
+                    )}
 
-                    <DropdownMenuSeparator />
+                    {canUpdate && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={handleDownloadSeries}>
-                        Download Series
-                    </DropdownMenuItem>
+                            <TagDropdownSub
+                                workspaceId={workspaceId}
+                                targetId={seriesInstanceUid}
+                                targetType="series"
+                                onOpenCreateTagDialog={() =>
+                                    setOpenCreateTagDialog(true)
+                                }
+                            />
+                        </>
+                    )}
 
-                    <DropdownMenuSeparator />
+                    {canRecycle && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <TagDropdownSub
-                        workspaceId={workspaceId}
-                        targetId={seriesInstanceUid}
-                        targetType="series"
-                        onOpenCreateTagDialog={() =>
-                            setOpenCreateTagDialog(true)
-                        }
-                    />
-
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem onClick={handleRecycleSeries}>
-                        Recycle Series
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleRecycleSeries}>
+                                Recycle Series
+                            </DropdownMenuItem>
+                        </>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <DicomRecycleConfirmDialog
-                open={showRecycleConfirmDialog}
-                onOpenChange={setShowRecycleConfirmDialog}
-                dicomLevel={"series"}
-                selectedCount={1}
-                onConfirm={handleConfirmRecycle}
-            />
+            {canRecycle && (
+                <DicomRecycleConfirmDialog
+                    open={showRecycleConfirmDialog}
+                    onOpenChange={setShowRecycleConfirmDialog}
+                    dicomLevel={"series"}
+                    selectedCount={1}
+                    onConfirm={handleConfirmRecycle}
+                />
+            )}
 
-            <CreateTagDialog
-                open={openCreateTagDialog}
-                onOpenChange={setOpenCreateTagDialog}
-                workspaceId={workspaceId}
-                targetType="series"
-                targetId={seriesInstanceUid}
-            />
+            {canUpdate && (
+                <CreateTagDialog
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    workspaceId={workspaceId}
+                    targetType="series"
+                    targetId={seriesInstanceUid}
+                />
+            )}
         </>
     );
 }

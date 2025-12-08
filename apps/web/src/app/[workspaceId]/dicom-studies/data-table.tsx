@@ -12,6 +12,7 @@ import { MoreHorizontalIcon } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
@@ -40,8 +41,11 @@ import { downloadStudy } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface DicomStudiesTableProps {
     studies: DicomStudyData[];
@@ -63,6 +67,11 @@ function ActionsCell({
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
+    const workspace = useWorkspaceStore(useShallow(state => state.workspace));
+
+    const canRecycle = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
+    const canRead = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
+    const canUpdate = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.UPDATE);
 
     const { mutate: recycleDicomStudy } = useMutation({
         ...recycleDicomStudyMutation({
@@ -108,11 +117,21 @@ function ActionsCell({
     };
 
     const handleRecycleStudy = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!canRecycle) {
+            toast.error("You do not have permission to recycle DICOM studies");
+            return;
+        }
+
         e.stopPropagation();
         setShowRecycleConfirmDialog(true);
     };
     
     const handleConfirmRecycle = () => {
+        if (!canRecycle) {
+            toast.error("You do not have permission to recycle DICOM studies");
+            return;
+        }
+
         recycleDicomStudy();
     }
 
@@ -133,54 +152,67 @@ function ActionsCell({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEnterSeries}>
-                        Enter Series
-                    </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        Open in BlueLight Viewer
-                    </DropdownMenuItem>
+                    {canRead && (
+                        <>
+                            <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
+                                Copy Study Instance UID
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleEnterSeries}>
+                                Enter Series
+                            </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
-                        Copy Study Instance UID
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                                Open in BlueLight Viewer
+                            </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleDownloadStudy}>
+                                Download
+                            </DropdownMenuItem>
+                        </>
+                    )}
 
-                    <DropdownMenuItem onClick={handleDownloadStudy}>
-                        Download Study
-                    </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                    {canUpdate && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <TagDropdownSub 
-                        workspaceId={workspaceId}
-                        targetId={studyInstanceUid}
-                        targetType="study"
-                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
-                    />
+                            <TagDropdownSub 
+                                workspaceId={workspaceId}
+                                targetId={studyInstanceUid}
+                                targetType="study"
+                                onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                            />
+                        </>
+                    )}
 
-                    <DropdownMenuItem onClick={handleRecycleStudy}>
-                        Recycle Study
-                    </DropdownMenuItem>
+                    {canRecycle && (
+                        <>
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuItem onClick={handleRecycleStudy}>
+                                Recycle Study
+                            </DropdownMenuItem>
+                        </>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <DicomRecycleConfirmDialog 
+            {canRecycle && <DicomRecycleConfirmDialog 
                 open={showRecycleConfirmDialog}
                 onOpenChange={setShowRecycleConfirmDialog}
                 dicomLevel={"study"}
                 selectedCount={1}
                 onConfirm={handleConfirmRecycle}
-            />
+            />}
 
-            <CreateTagDialog 
+            {canUpdate && <CreateTagDialog 
                 open={openCreateTagDialog}
                 onOpenChange={setOpenCreateTagDialog}
                 workspaceId={workspaceId}
                 targetType="study"
                 targetId={studyInstanceUid}
-            />
+            />}
         </>
     );
 }

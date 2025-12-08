@@ -11,6 +11,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { createInstanceColumns } from "@/components/dicom/data-tables/table-instance-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDeleteConfirmDialog } from "@/components/dicom/recycle/dicom-delete-confirm-dialog";
@@ -38,7 +39,10 @@ import {
     deleteDicomInstanceMutation, 
     restoreDicomInstanceMutation
 } from "@/react-query/queries/dicomInstance";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface DicomRecycleInstancesTableProps {
     instances: DicomInstanceData[];
@@ -58,6 +62,11 @@ function ActionsCell({
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
+
+    const workspace = useWorkspaceStore(useShallow(state => state.workspace));
+
+    const canRead = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
+    const canDelete = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
 
     const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -114,16 +123,31 @@ function ActionsCell({
 
 
     const handleRestoreInstance = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!canDelete) {
+            toast.error("You are not authorized to restore DICOM instances");
+            return;
+        }
+
         e.preventDefault();
         restoreDicomInstance();
     }
 
     const handleDeleteInstance = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!canDelete) {
+            toast.error("You are not authorized to delete DICOM instances");
+            return;
+        }
+
         e.preventDefault();
         setShowDeleteConfirmDialog(true);
     }
 
     const handleConfirmDelete = () => {
+        if (!canDelete) {
+            toast.error("You are not authorized to delete DICOM instances");
+            return;
+        }
+
         deleteDicomInstance();
     }
 
@@ -137,28 +161,34 @@ function ActionsCell({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleCopySopInstanceUid}>
-                        Copy SOP Instance UID
-                    </DropdownMenuItem>
+                    {canRead && (
+                        <DropdownMenuItem onClick={handleCopySopInstanceUid}>
+                            Copy SOP Instance UID
+                        </DropdownMenuItem>
+                    )}
 
-                    <DropdownMenuSeparator />
+                    {canDelete && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={handleRestoreInstance}>
-                        Restore
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDeleteInstance}>
-                        Delete
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleRestoreInstance}>
+                                Restore
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDeleteInstance}>
+                                Delete
+                            </DropdownMenuItem>
+                        </>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <DicomDeleteConfirmDialog 
+            {canDelete && <DicomDeleteConfirmDialog 
                 open={showDeleteConfirmDialog}
                 onOpenChange={setShowDeleteConfirmDialog}
                 dicomLevel="instance"
                 selectedCount={1}
                 onConfirm={handleConfirmDelete}
-            />
+            />}
         </>
     );
 }

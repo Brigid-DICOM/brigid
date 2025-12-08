@@ -20,6 +20,8 @@ import {
     SidebarTrigger,
     useSidebar,
 } from "@/components/ui/sidebar";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { WorkspaceGeneralSettings } from "./settings/workspace-general-settings";
 import { WorkspaceMembersSettings } from "./settings/workspace-members-settings";
 
@@ -29,6 +31,10 @@ interface SettingsDialogProps {
     workspace: {
         id: string;
         name: string;
+        membership: {
+            permissions: number;
+            role: string;
+        };
     };
 }
 
@@ -41,6 +47,8 @@ export function WorkspaceSettingsDialog({
 }: SettingsDialogProps) {
     const [activeTab, setActiveTab] = useState<SettingsTab>("general");
     const { isMobile } = useSidebar();
+
+    const canManageMembers = hasPermission(workspace.membership.permissions, WORKSPACE_PERMISSIONS.INVITE);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,7 +81,7 @@ export function WorkspaceSettingsDialog({
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
 
-                                        <SidebarMenuItem>
+                                        {canManageMembers && <SidebarMenuItem>
                                             <SidebarMenuButton
                                                 isActive={
                                                     activeTab === "members"
@@ -85,7 +93,7 @@ export function WorkspaceSettingsDialog({
                                                 <UsersIcon className="mr-2 size-4" />
                                                 <span>Members</span>
                                             </SidebarMenuButton>
-                                        </SidebarMenuItem>
+                                        </SidebarMenuItem>}
                                     </SidebarMenu>
                                 </SidebarGroupContent>
                             </SidebarGroup>
@@ -101,7 +109,7 @@ export function WorkspaceSettingsDialog({
                             />
                         )}
 
-                        {activeTab === "members" && (
+                        {activeTab === "members" && canManageMembers && (
                             <WorkspaceMembersSettings workspace={workspace} />
                         )}
                     </main>

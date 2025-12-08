@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { CornerDownLeftIcon, Trash2Icon, UndoIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useRouter } from "nextjs-toploader/app";
@@ -20,6 +20,9 @@ import {
     deleteDicomSeriesMutation,
     restoreDicomSeriesMutation,
 } from "@/react-query/queries/dicomSeries";
+import { getWorkspaceByIdQuery } from "@/react-query/queries/workspace";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { DicomDeleteConfirmDialog } from "./dicom-delete-confirm-dialog";
 
@@ -34,12 +37,25 @@ export function DicomRecycleSeriesContextMenu({
     workspaceId,
     studyInstanceUid,
 }: DicomRecycleSeriesContextMenuProps) {
-    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
+        useState(false);
     const router = useRouter();
     const queryClient = getQueryClient();
     const { getSelectedSeriesIds, clearSelection } =
         useDicomSeriesSelectionStore();
     const selectedIds = getSelectedSeriesIds();
+
+    const { data: workspaceData } = useQuery(
+        getWorkspaceByIdQuery(workspaceId),
+    );
+    const canRestore = hasPermission(
+        workspaceData?.workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.DELETE,
+    );
+    const canDelete = hasPermission(
+        workspaceData?.workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.DELETE,
+    );
 
     const { mutate: restoreDicomSeries } = useMutation({
         ...restoreDicomSeriesMutation({
@@ -119,7 +135,7 @@ export function DicomRecycleSeriesContextMenu({
     const handleConfirmDelete = () => {
         if (selectedIds.length === 0) return;
         deleteDicomSeries();
-    }
+    };
 
     return (
         <>
@@ -141,31 +157,37 @@ export function DicomRecycleSeriesContextMenu({
                         <span>Enter Instances</span>
                     </ContextMenuItem>
 
-                    <ContextMenuItem
-                        onClick={handleRestoreSeries}
-                        className="flex items-center space-x-2"
-                    >
-                        <UndoIcon className="size-4" />
-                        <span>Restore</span>
-                    </ContextMenuItem>
+                    {canRestore && (
+                        <ContextMenuItem
+                            onClick={handleRestoreSeries}
+                            className="flex items-center space-x-2"
+                        >
+                            <UndoIcon className="size-4" />
+                            <span>Restore</span>
+                        </ContextMenuItem>
+                    )}
 
-                    <ContextMenuItem
-                        onClick={handleDeleteSeries}
-                        className="flex items-center space-x-2"
-                    >
-                        <Trash2Icon className="size-4" />
-                        <span>Delete</span>
-                    </ContextMenuItem>
+                    {canDelete && (
+                        <ContextMenuItem
+                            onClick={handleDeleteSeries}
+                            className="flex items-center space-x-2"
+                        >
+                            <Trash2Icon className="size-4" />
+                            <span>Delete</span>
+                        </ContextMenuItem>
+                    )}
                 </ContextMenuContent>
             </ContextMenu>
 
-            <DicomDeleteConfirmDialog 
-                open={showDeleteConfirmDialog}
-                onOpenChange={setShowDeleteConfirmDialog}
-                dicomLevel="series"
-                selectedCount={selectedIds.length}
-                onConfirm={handleConfirmDelete}
-            />
+            {canDelete && (
+                <DicomDeleteConfirmDialog
+                    open={showDeleteConfirmDialog}
+                    onOpenChange={setShowDeleteConfirmDialog}
+                    dicomLevel="series"
+                    selectedCount={selectedIds.length}
+                    onConfirm={handleConfirmDelete}
+                />
+            )}
         </>
     );
 }

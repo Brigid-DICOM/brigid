@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -29,8 +30,11 @@ import {
 import { closeContextMenu } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { ShareManagementDialog } from "../share/share-management-dialog";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
@@ -87,13 +91,41 @@ export function DicomInstanceContextMenu({
     seriesInstanceUid,
     sopInstanceUid,
 }: DicomInstanceContextMenuProps) {
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
+        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
-    const [showShareManagementDialog, setShowShareManagementDialog] = useState(false);
+    const [showShareManagementDialog, setShowShareManagementDialog] =
+        useState(false);
     const queryClient = getQueryClient();
     const { getSelectedInstanceIds, clearSelection } =
         useDicomInstanceSelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
+    const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
+
+    const canRead =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.READ,
+        );
+    const canRecycle =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.DELETE,
+        );
+    const canUpdate =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.UPDATE,
+        );
+    const canShare =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.MANAGE,
+        );
 
     const selectedIds = getSelectedInstanceIds();
 
@@ -191,15 +223,25 @@ export function DicomInstanceContextMenu({
             seriesInstanceUid,
             sopInstanceUid,
         });
-    }
+    };
 
     const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!canRecycle) {
+            toast.error("You do not have permission to recycle DICOM instance");
+            return;
+        }
+
         e.preventDefault();
         closeContextMenu();
         setShowRecycleConfirmDialog(true);
     };
 
     const handleConfirmRecycle = () => {
+        if (!canRecycle) {
+            toast.error("You do not have permission to recycle DICOM instance");
+            return;
+        }
+
         recycleDicomInstance();
     };
 
@@ -211,68 +253,92 @@ export function DicomInstanceContextMenu({
                 <ContextMenuContent className="w-56">
                     {selectedIds.length === 1 && (
                         <>
-                            <ContextMenuItem
-                                onClick={handleOpenBlueLightViewer}
-                                className="flex items-center space-x-2"
-                            >
-                                <EyeIcon className="size-4" />
-                                <span>Open in BlueLight Viewer</span>
-                            </ContextMenuItem>
-                            <ContextMenuSub>
-                                <ContextMenuSubTrigger>
-                                    <DownloadIcon className="size-4 mr-4" />
-                                    <span>Download</span>
-                                </ContextMenuSubTrigger>
-                                <ContextMenuSubContent>
-                                    <DownloadSubMenuItems
-                                        onDicomDownload={() => {
-                                            closeContextMenu();
-                                            handleDicomDownload(selectedIds);
-                                        }}
-                                        onJpgDownload={() => {
-                                            closeContextMenu();
-                                            handleJpgDownload(selectedIds);
-                                        }}
-                                        onPngDownload={() => {
-                                            closeContextMenu();
-                                            handlePngDownload(selectedIds);
-                                        }}
+                            {canRead && (
+                                <>
+                                    <ContextMenuItem
+                                        onClick={handleOpenBlueLightViewer}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <EyeIcon className="size-4" />
+                                        <span>Open in BlueLight Viewer</span>
+                                    </ContextMenuItem>
+                                    <ContextMenuSub>
+                                        <ContextMenuSubTrigger>
+                                            <DownloadIcon className="size-4 mr-4" />
+                                            <span>Download</span>
+                                        </ContextMenuSubTrigger>
+                                        <ContextMenuSubContent>
+                                            <DownloadSubMenuItems
+                                                onDicomDownload={() => {
+                                                    closeContextMenu();
+                                                    handleDicomDownload(
+                                                        selectedIds,
+                                                    );
+                                                }}
+                                                onJpgDownload={() => {
+                                                    closeContextMenu();
+                                                    handleJpgDownload(
+                                                        selectedIds,
+                                                    );
+                                                }}
+                                                onPngDownload={() => {
+                                                    closeContextMenu();
+                                                    handlePngDownload(
+                                                        selectedIds,
+                                                    );
+                                                }}
+                                            />
+                                        </ContextMenuSubContent>
+                                    </ContextMenuSub>
+                                </>
+                            )}
+
+                            {canUpdate && (
+                                <>
+                                    <ContextMenuSeparator />
+
+                                    <TagContextMenuSub
+                                        workspaceId={workspaceId}
+                                        targetType="instance"
+                                        targetId={sopInstanceUid}
+                                        onOpenCreateTagDialog={() =>
+                                            setOpenCreateTagDialog(true)
+                                        }
                                     />
-                                </ContextMenuSubContent>
-                            </ContextMenuSub>
+                                </>
+                            )}
 
-                            <ContextMenuSeparator />
+                            {canShare && (
+                                <>
+                                    <ContextMenuSeparator />
 
-                            <TagContextMenuSub 
-                                workspaceId={workspaceId}
-                                targetType="instance"
-                                targetId={sopInstanceUid}
-                                onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
-                            />
+                                    <ContextMenuItem
+                                        className="flex items-center space-x-2"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            closeContextMenu();
+                                            setShowShareManagementDialog(true);
+                                        }}
+                                    >
+                                        <Share2Icon className="size-4" />
+                                        <span>Share</span>
+                                    </ContextMenuItem>
+                                </>
+                            )}
 
-                            <ContextMenuSeparator />
+                            {canRecycle && (
+                                <>
+                                    <ContextMenuSeparator />
 
-                            <ContextMenuItem
-                                className="flex items-center space-x-2"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    closeContextMenu();
-                                    setShowShareManagementDialog(true);
-                                }}
-                            >
-                                <Share2Icon className="size-4" />
-                                <span>Share</span>
-                            </ContextMenuItem>
-
-                            <ContextMenuSeparator />
-                            
-                            <ContextMenuItem
-                                onClick={handleRecycle}
-                                className="flex items-center space-x-2"
-                            >
-                                <Trash2Icon className="size-4" />
-                                <span>Recycle</span>
-                            </ContextMenuItem>
+                                    <ContextMenuItem
+                                        onClick={handleRecycle}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <Trash2Icon className="size-4" />
+                                        <span>Recycle</span>
+                                    </ContextMenuItem>
+                                </>
+                            )}
                         </>
                     )}
 
@@ -281,80 +347,99 @@ export function DicomInstanceContextMenu({
                             <ContextMenuLabel>
                                 Selected Items ({selectedIds.length})
                             </ContextMenuLabel>
-                            <ContextMenuSub>
-                                <ContextMenuSubTrigger>
-                                    <DownloadIcon className="size-4 mr-2" />
-                                    <span>Download</span>
-                                </ContextMenuSubTrigger>
-                                <ContextMenuSubContent>
-                                    <DownloadSubMenuItems
-                                        onDicomDownload={() => {
+
+                            {canRead && (
+                                <ContextMenuSub>
+                                    <ContextMenuSubTrigger>
+                                        <DownloadIcon className="size-4 mr-2" />
+                                        <span>Download</span>
+                                    </ContextMenuSubTrigger>
+                                    <ContextMenuSubContent>
+                                        <DownloadSubMenuItems
+                                            onDicomDownload={() => {
+                                                closeContextMenu();
+                                                handleDicomDownload(
+                                                    selectedIds,
+                                                );
+                                            }}
+                                            onJpgDownload={() => {
+                                                closeContextMenu();
+                                                handleJpgDownload(selectedIds);
+                                            }}
+                                            onPngDownload={() => {
+                                                closeContextMenu();
+                                                handlePngDownload(selectedIds);
+                                            }}
+                                        />
+                                    </ContextMenuSubContent>
+                                </ContextMenuSub>
+                            )}
+
+                            {canShare && (
+                                <>
+                                    <ContextMenuSeparator />
+
+                                    <ContextMenuItem
+                                        className="flex items-center space-x-2"
+                                        onClick={(e) => {
+                                            e.preventDefault();
                                             closeContextMenu();
-                                            handleDicomDownload(selectedIds);
+                                            setShowShareManagementDialog(true);
                                         }}
-                                        onJpgDownload={() => {
-                                            closeContextMenu();
-                                            handleJpgDownload(selectedIds);
-                                        }}
-                                        onPngDownload={() => {
-                                            closeContextMenu();
-                                            handlePngDownload(selectedIds);
-                                        }}
-                                    />
-                                </ContextMenuSubContent>
-                            </ContextMenuSub>
+                                    >
+                                        <Share2Icon className="size-4" />
+                                        <span>Share</span>
+                                    </ContextMenuItem>
+                                </>
+                            )}
 
-                            <ContextMenuSeparator />
+                            {canRecycle && (
+                                <>
+                                    <ContextMenuSeparator />
 
-                            <ContextMenuItem
-                                className="flex items-center space-x-2"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    closeContextMenu();
-                                    setShowShareManagementDialog(true);
-                                }}
-                            >
-                                <Share2Icon className="size-4" />
-                                <span>Share</span>
-                            </ContextMenuItem>
-
-                            <ContextMenuSeparator />
-
-                            <ContextMenuItem
-                                onClick={handleRecycle}
-                                className="flex items-center"
-                            >
-                                <Trash2Icon className="size-4" />
-                                <span>Recycle</span>
-                            </ContextMenuItem>
+                                    <ContextMenuItem
+                                        onClick={handleRecycle}
+                                        className="flex items-center"
+                                    >
+                                        <Trash2Icon className="size-4" />
+                                        <span>Recycle</span>
+                                    </ContextMenuItem>
+                                </>
+                            )}
                         </>
                     )}
                 </ContextMenuContent>
             </ContextMenu>
 
-            <DicomRecycleConfirmDialog 
-                open={showRecycleConfirmDialog}
-                onOpenChange={setShowRecycleConfirmDialog}
-                dicomLevel={"instance"}
-                selectedCount={selectedIds.length}
-                onConfirm={handleConfirmRecycle}
-            />
+            {canRecycle && (
+                <DicomRecycleConfirmDialog
+                    open={showRecycleConfirmDialog}
+                    onOpenChange={setShowRecycleConfirmDialog}
+                    dicomLevel={"instance"}
+                    selectedCount={selectedIds.length}
+                    onConfirm={handleConfirmRecycle}
+                />
+            )}
 
-            <CreateTagDialog 
-                open={openCreateTagDialog}
-                onOpenChange={setOpenCreateTagDialog}
-                workspaceId={workspaceId}
-                targetType="instance"
-                targetId={sopInstanceUid}
-            />
+            {canUpdate && (
+                <CreateTagDialog
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    workspaceId={workspaceId}
+                    targetType="instance"
+                    targetId={sopInstanceUid}
+                />
+            )}
 
-            <ShareManagementDialog 
-                open={showShareManagementDialog}
-                onOpenChange={setShowShareManagementDialog}
-                workspaceId={workspaceId}
-                targetType="instance"
-                targetIds={selectedIds}
-            />
+            {canShare && (
+                <ShareManagementDialog
+                    open={showShareManagementDialog}
+                    onOpenChange={setShowShareManagementDialog}
+                    workspaceId={workspaceId}
+                    targetType="instance"
+                    targetIds={selectedIds}
+                />
+            )}
         </>
     );
 }

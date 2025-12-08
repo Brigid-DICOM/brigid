@@ -2,7 +2,7 @@
 
 import type { DicomInstanceData } from "@brigid/types";
 import { useMutation } from "@tanstack/react-query";
-import {    
+import {
     type ColumnDef,
     flexRender,
     getCoreRowModel,
@@ -11,6 +11,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { createInstanceColumns } from "@/components/dicom/data-tables/table-instance-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
@@ -39,8 +40,11 @@ import { downloadInstance } from "@/lib/clientDownload";
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface DicomInstancesTableProps {
     instances: DicomInstanceData[];
@@ -55,13 +59,35 @@ function ActionsCell({
     instance: DicomInstanceData;
     workspaceId: string;
 }) {
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
+        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
+
+    const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
+
+    const canRecycle =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.DELETE,
+        );
+    const canRead =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.READ,
+        );
+    const canUpdate =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.UPDATE,
+        );
 
     const { mutate: recycleDicomInstance } = useMutation({
         ...recycleDicomInstanceMutation({
@@ -113,16 +139,30 @@ function ActionsCell({
             seriesInstanceUid,
             sopInstanceUid,
         });
-    }
+    };
 
     const handleRecycleInstance = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!canRecycle) {
+            toast.error(
+                "You do not have permission to recycle DICOM instances",
+            );
+            return;
+        }
+
         e.stopPropagation();
         setShowRecycleConfirmDialog(true);
     };
 
     const handleConfirmRecycle = () => {
+        if (!canRecycle) {
+            toast.error(
+                "You do not have permission to recycle DICOM instances",
+            );
+            return;
+        }
+
         recycleDicomInstance();
-    }
+    };
 
     return (
         <>
@@ -134,52 +174,72 @@ function ActionsCell({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleCopySopInstanceUid}>
-                        Copy SOP Instance UID
-                    </DropdownMenuItem>
+                    {canRead && (
+                        <>
+                            <DropdownMenuItem
+                                onClick={handleCopySopInstanceUid}
+                            >
+                                Copy SOP Instance UID
+                            </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                            >
+                                Open in BlueLight Viewer
+                            </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        Open in BlueLight Viewer
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDownloadInstance}>
+                                Download
+                            </DropdownMenuItem>
+                        </>
+                    )}
 
-                    <DropdownMenuItem onClick={handleDownloadInstance}>
-                        Download
-                    </DropdownMenuItem>
+                    {canUpdate && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <DropdownMenuSeparator />
+                            <TagDropdownSub
+                                workspaceId={workspaceId}
+                                targetId={sopInstanceUid}
+                                targetType="instance"
+                                onOpenCreateTagDialog={() =>
+                                    setOpenCreateTagDialog(true)
+                                }
+                            />
+                        </>
+                    )}
 
-                    <TagDropdownSub 
-                        workspaceId={workspaceId}
-                        targetId={sopInstanceUid}
-                        targetType="instance"
-                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
-                    />
+                    {canRecycle && (
+                        <>
+                            <DropdownMenuSeparator />
 
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem onClick={handleRecycleInstance}>
-                        Recycle
-                    </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleRecycleInstance}>
+                                Recycle
+                            </DropdownMenuItem>
+                        </>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <DicomRecycleConfirmDialog 
-                open={showRecycleConfirmDialog}
-                onOpenChange={setShowRecycleConfirmDialog}
-                dicomLevel={"instance"}
-                selectedCount={1}
-                onConfirm={handleConfirmRecycle}
-            />
+            {canRecycle && (
+                <DicomRecycleConfirmDialog
+                    open={showRecycleConfirmDialog}
+                    onOpenChange={setShowRecycleConfirmDialog}
+                    dicomLevel={"instance"}
+                    selectedCount={1}
+                    onConfirm={handleConfirmRecycle}
+                />
+            )}
 
-            <CreateTagDialog 
-                open={openCreateTagDialog}
-                onOpenChange={setOpenCreateTagDialog}
-                workspaceId={workspaceId}
-                targetType="instance"
-                targetId={sopInstanceUid}
-            />
+            {canUpdate && (
+                <CreateTagDialog
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    workspaceId={workspaceId}
+                    targetType="instance"
+                    targetId={sopInstanceUid}
+                />
+            )}
         </>
     );
 }
@@ -255,9 +315,15 @@ export function DicomInstancesDataTable({
                                 type: "workspace",
                                 workspaceId,
                             }}
-                            studyInstanceUid={row.original["0020000D"]?.Value?.[0] || "N/A"}
-                            seriesInstanceUid={row.original["0020000E"]?.Value?.[0] || "N/A"}
-                            sopInstanceUid={row.original["00080018"]?.Value?.[0] || "N/A"}
+                            studyInstanceUid={
+                                row.original["0020000D"]?.Value?.[0] || "N/A"
+                            }
+                            seriesInstanceUid={
+                                row.original["0020000E"]?.Value?.[0] || "N/A"
+                            }
+                            sopInstanceUid={
+                                row.original["00080018"]?.Value?.[0] || "N/A"
+                            }
                             size={64}
                         />
                     );
@@ -272,7 +338,9 @@ export function DicomInstancesDataTable({
                             mode="workspace"
                             workspaceId={workspaceId}
                             targetType="instance"
-                            targetId={row.original["00080018"]?.Value?.[0] || ""}
+                            targetId={
+                                row.original["00080018"]?.Value?.[0] || ""
+                            }
                         />
                     );
                 },

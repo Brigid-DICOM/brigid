@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
     DatabaseIcon,
     GaugeIcon,
@@ -10,6 +11,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { getWorkspaceByIdQuery } from "@/react-query/queries/workspace";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -22,29 +26,46 @@ import {
 export function NavMain() {
     const workspaceId = useParams<{ workspaceId: string }>().workspaceId;
 
+    const { data: workspaceData } = useQuery(getWorkspaceByIdQuery(workspaceId));
+    
+
+    const canRead = hasPermission(
+        workspaceData?.workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.READ
+    );
+    const canCreate = hasPermission(
+        workspaceData?.workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.CREATE
+    );
+    const canUpdate = hasPermission(
+        workspaceData?.workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.UPDATE
+    );
+
     return (
         <SidebarGroup>
             <SidebarGroupContent>
                 <SidebarMenu>
-                    <SidebarMenuItem key="dashboard">
+                    {canRead && <SidebarMenuItem key="dashboard">
                         <SidebarMenuButton tooltip="Dashboard">
                             <GaugeIcon className="size-4" />
                             <Link href={`/${workspaceId}`} className="w-full">
                                 Dashboard
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem>}
 
-                    <SidebarMenuItem key="dicom instances management">
+                    {/* 使用者擁有讀取權限即可瀏覽被放到回收桶的 DICOM 影像，但不能進行 restore/delete 操作 */}
+                    {canRead && <SidebarMenuItem key="dicom instances management">
                         <SidebarMenuButton tooltip="DICOM Instances Management">
                             <DatabaseIcon className="size-4" />
                             <Link href={`/${workspaceId}/dicom-studies`} className="w-full">
                                 DICOM Instances
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem>}
 
-                    <SidebarMenuItem key="dicom recycle">
+                    {canRead && <SidebarMenuItem key="dicom recycle">
                         <SidebarMenuButton tooltip="DICOM Recycle">
                             <Trash2Icon className="size-4" />
                             <Link
@@ -54,25 +75,25 @@ export function NavMain() {
                                 DICOM Recycle
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem>}
 
-                    <SidebarMenuItem key="dicom upload">
+                    {canCreate && <SidebarMenuItem key="dicom upload">
                         <SidebarMenuButton tooltip={"Upload DICOM"}>
                             <UploadIcon className="size-4" />
                             <Link href={`/${workspaceId}/dicom-upload`} className="w-full">
                                 Upload DICOM
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem>}
 
-                    <SidebarMenuItem key="my shares">
+                    {canUpdate && <SidebarMenuItem key="my shares">
                         <SidebarMenuButton tooltip="My Shares">
                             <Share2Icon className="size-4" />
                             <Link href={`/${workspaceId}/my-shares`} className="w-full">
                                 My Shares
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem>}
 
                     <SidebarSeparator />
 
