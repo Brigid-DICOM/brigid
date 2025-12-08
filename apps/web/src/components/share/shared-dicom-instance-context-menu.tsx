@@ -77,6 +77,32 @@ const DownloadSubMenuItems = ({
     );
 };
 
+const DownloadSubMenu = ({
+    onDicomDownload,
+    onJpgDownload,
+    onPngDownload,
+}: {
+    onDicomDownload: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onJpgDownload: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onPngDownload: (e: React.MouseEvent<HTMLDivElement>) => void;
+}) => {
+    return (
+        <ContextMenuSub>
+            <ContextMenuSubTrigger>
+                <DownloadIcon className="size-4 mr-4" />
+                <span>Download</span>
+            </ContextMenuSubTrigger>
+            <ContextMenuSubContent>
+                <DownloadSubMenuItems
+                    onDicomDownload={onDicomDownload}
+                    onJpgDownload={onJpgDownload}
+                    onPngDownload={onPngDownload}
+                />
+            </ContextMenuSubContent>
+        </ContextMenuSub>
+    );
+}
+
 export function SharedDicomInstanceContextMenu({
     children,
     token,
@@ -193,50 +219,53 @@ export function SharedDicomInstanceContextMenu({
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
                 <ContextMenuContent className="w-56">
                     {selectedIds.length === 1 && (
-                        <ContextMenuItem
-                            onClick={handleOpenBlueLightViewer}
-                            className="flex items-center space-x-2"
-                        >
-                            <EyeIcon className="size-4" />
-                            <span>Open in BlueLight Viewer</span>
-                        </ContextMenuItem>
-                    )}
+                        <>
+                            <ContextMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                                className="flex items-center space-x-2"
+                            >
+                                <EyeIcon className="size-4" />
+                                <span>Open in BlueLight Viewer</span>
+                            </ContextMenuItem>
 
-                    {selectedIds.length > 1 && (
-                        <ContextMenuLabel>
-                            Selected Items ({selectedIds.length})
-                        </ContextMenuLabel>
-                    )}
-
-                    <ContextMenuSub>
-                        <ContextMenuSubTrigger>
-                            <DownloadIcon className="size-4 mr-4" />
-                            <span>Download</span>
-                        </ContextMenuSubTrigger>
-                        <ContextMenuSubContent>
-                            <DownloadSubMenuItems
+                            <DownloadSubMenu 
                                 onDicomDownload={handleDicomDownload}
                                 onJpgDownload={handleJpgDownload}
                                 onPngDownload={handlePngDownload}
                             />
-                        </ContextMenuSubContent>
-                    </ContextMenuSub>
 
-                    {canUpdate && (
+                            {canUpdate && (
+                                <>
+                                    <ContextMenuSeparator />
+
+                                    <ShareTagContextMenuSub
+                                        token={token}
+                                        targetType="instance"
+                                        targetId={sopInstanceUid}
+                                        password={password}
+                                        onOpenCreateTagDialog={() =>
+                                            setOpenCreateTagDialog(true)
+                                        }
+                                    />
+                                </>
+                            )}
+                        </>
+                    )}
+
+                    {selectedIds.length > 1 && (
                         <>
-                            <ContextMenuSeparator />
-
-                            <ShareTagContextMenuSub
-                                token={token}
-                                targetType="instance"
-                                targetId={sopInstanceUid}
-                                password={password}
-                                onOpenCreateTagDialog={() =>
-                                    setOpenCreateTagDialog(true)
-                                }
+                            <ContextMenuLabel>
+                                Selected Items ({selectedIds.length})
+                            </ContextMenuLabel>
+                            
+                            <DownloadSubMenu 
+                                onDicomDownload={handleDicomDownload}
+                                onJpgDownload={handleJpgDownload}
+                                onPngDownload={handlePngDownload}
                             />
                         </>
                     )}
+
                 </ContextMenuContent>
             </ContextMenu>
 
