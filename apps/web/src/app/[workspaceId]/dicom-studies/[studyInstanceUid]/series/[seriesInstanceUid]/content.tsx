@@ -6,7 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
@@ -45,12 +45,20 @@ export default function DicomInstancesContent({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomInstancesContentProps) {
+    const isFirstRun = useRef(true);
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const queryClient = getQueryClient();
     const ITEM_PER_PAGE = 10;
     const { layoutMode } = useLayoutStore();
 
     const { getSearchConditionsForType, setSearchConditionsForType, setSearchType } = useGlobalSearchStore();
-    const searchConditions = getSearchConditionsForType("dicom-instance");
+    // 在 Hydration 完成前 (mounted 為 false)，使用空物件以確保與 Server Side 渲染一致
+    // Hydration 完成後 (mounted 為 true)，才使用 zustand store 中的狀態
+    const searchConditions = mounted ? getSearchConditionsForType("dicom-instance") : {};
 
     const {
         selectedInstanceIds,
@@ -74,8 +82,14 @@ export default function DicomInstancesContent({
     });
 
     useEffect(() => {
+        // 在初次渲染時，不同步 URL 的 searchParams，避免重複渲染
+        if (!mounted || isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
+        }
+
         syncSearchParamsToUrl(searchConditions);
-    }, [searchConditions, syncSearchParamsToUrl]);
+    }, [searchConditions, syncSearchParamsToUrl, mounted]);
 
     useEffect(() => {
         return () => clearSelection();

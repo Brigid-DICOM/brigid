@@ -296,30 +296,34 @@ export function DicomSeriesDataTable({
         () => [
             {
                 id: "select",
-                header: () => (
-                    <Checkbox
-                        checked={
-                            getSelectedCount() > 0 &&
-                            getSelectedCount() === series.length
-                        }
-                        onCheckedChange={(value) => {
-                            const isChecked = !!value;
+                header: ({ table }) => {
+                    const rows = table.getRowModel().rows;
 
-                            if (isChecked) {
-                                selectAll(
-                                    series.map(
-                                        (series) =>
-                                            series["0020000E"]?.Value?.[0] ||
-                                            "",
-                                    ),
-                                );
-                            } else {
-                                clearSelection();
+                    return (
+                        <Checkbox
+                            checked={
+                                getSelectedCount() > 0 &&
+                                getSelectedCount() === rows.length
                             }
-                        }}
-                        aria-label="Select all"
-                    />
-                ),
+                            onCheckedChange={(value) => {
+                                const isChecked = !!value;
+
+                                if (isChecked) {
+                                    selectAll(
+                                        rows.map(
+                                            (row) =>
+                                                row.original["0020000E"]?.Value?.[0] ||
+                                                "",
+                                        ),
+                                    );
+                                } else {
+                                    clearSelection();
+                                }
+                            }}
+                            aria-label="Select all"
+                        />
+                    );
+                },
                 cell: ({ row }) => {
                     const seriesInstanceUid =
                         row.original["0020000E"]?.Value?.[0] || "";
@@ -393,7 +397,6 @@ export function DicomSeriesDataTable({
         ],
         [
             workspaceId,
-            series,
             clearSelection,
             selectAll,
             getSelectedCount,

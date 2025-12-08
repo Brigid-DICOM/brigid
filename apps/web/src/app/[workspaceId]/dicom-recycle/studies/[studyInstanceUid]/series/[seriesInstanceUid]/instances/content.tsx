@@ -6,9 +6,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useShallow } from "zustand/react/shallow";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -41,6 +40,12 @@ export default function DicomRecycleInstancesContent({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomRecycleInstancesContentProps) {
+    const isFirstRun = useRef(true);
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+    
     const queryClient = getQueryClient();
     const ITEM_PER_PAGE = 10;
     const layoutMode = useLayoutStore((state) => state.layoutMode);
@@ -48,12 +53,9 @@ export default function DicomRecycleInstancesContent({
     const {
         setSearchConditionsForType,
         setSearchType,
+        getSearchConditionsForType,
     } = useGlobalSearchStore();
-    const {searchConditions} = useGlobalSearchStore(
-        useShallow((state) => ({
-            searchConditions: state.searchConditionsByType["dicom-recycle-instance"] || {},
-        }))
-    );
+    const searchConditions  = mounted ? getSearchConditionsForType("dicom-recycle-instance") : {};
 
     const {
         selectedInstanceIds,
@@ -85,10 +87,13 @@ export default function DicomRecycleInstancesContent({
     });
 
     useEffect(() => {
-        if (Object.keys(searchConditions).length > 0) {
-            syncSearchParamsToUrl(searchConditions);
+        if (!mounted || isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
         }
-    }, [searchConditions, syncSearchParamsToUrl]);
+
+        syncSearchParamsToUrl(searchConditions);
+    }, [searchConditions, syncSearchParamsToUrl, mounted]);
 
     useEffect(() => {
         return () => clearSelection();

@@ -207,28 +207,32 @@ export function DicomRecycleStudiesDataTable({
         () => [
             {
                 id: "select",
-                header: () => (
-                    <Checkbox
-                        checked={
-                            getSelectedCount() > 0 &&
-                            getSelectedCount() === studies.length
-                        }
-                        onCheckedChange={(value) => {
-                            const isChecked = !!value;
-                            if (isChecked) {
-                                selectAll(
-                                    studies.map(
-                                        (study) =>
-                                            study["0020000D"]?.Value?.[0] || "",
-                                    ),
-                                );
-                            } else {
-                                clearSelection();
+                header: ({ table }) => {
+                    const rows = table.getRowModel().rows;
+
+                    return (
+                        <Checkbox
+                            checked={
+                                getSelectedCount() > 0 &&
+                                getSelectedCount() === rows.length
                             }
-                        }}
-                        aria-label="Select all"
-                    />
-                ),
+                            onCheckedChange={(value) => {
+                                const isChecked = !!value;
+                                if (isChecked) {
+                                    selectAll(
+                                        rows.map(
+                                            (row) =>
+                                                row.original["0020000D"]?.Value?.[0] || "",
+                                        ),
+                                    );
+                                } else {
+                                    clearSelection();
+                                }
+                            }}
+                            aria-label="Select all"
+                        />
+                    );
+                },
                 cell: ({ row }) => {
                     const studyInstanceUid = row.original["0020000D"]?.Value?.[0] || "";
                     const isSelected = isStudySelected(studyInstanceUid);
@@ -272,7 +276,6 @@ export function DicomRecycleStudiesDataTable({
         ],
         [
             workspaceId,
-            studies,
             clearSelection,
             selectAll,
             getSelectedCount,

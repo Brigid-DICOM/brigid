@@ -5,7 +5,7 @@ import type { DicomStudyData } from "@brigid/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
@@ -33,11 +33,17 @@ interface DicomStudiesContentProps {
 export default function DicomStudiesContent({
     workspaceId,
 }: DicomStudiesContentProps) {
+    const isFirstRun = useRef(true);
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
     const searchParams = useSearchParams();
     const { getSearchConditionsForType, setSearchConditionsForType, setSearchType } = useGlobalSearchStore();
-    const searchConditions = getSearchConditionsForType("dicom-study");
+    const searchConditions = mounted ? getSearchConditionsForType("dicom-study") : {};
 
     const { layoutMode } = useLayoutStore();
     const { close: closeBlueLightViewer, open: openBlueLightViewer } = useBlueLightViewerStore();
@@ -75,8 +81,13 @@ export default function DicomStudiesContent({
     });
 
     useEffect(() => {
+        if (!mounted || isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
+        }
+
         syncSearchParamsToUrl(searchConditions);
-    }, [searchConditions, syncSearchParamsToUrl]);
+    }, [searchConditions, syncSearchParamsToUrl, mounted]);
 
     useEffect(() => {
         return () => {

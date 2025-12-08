@@ -6,7 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { nanoid } from "zod";
 import { EmptyState } from "@/components/common/empty-state";
@@ -38,6 +38,12 @@ export default function DicomSeriesContent({
     workspaceId,
     studyInstanceUid,
 }: DicomSeriesContentProps) {
+    const isFirstRun = useRef(true);
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+    
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
     const searchParams = useSearchParams();
@@ -47,7 +53,7 @@ export default function DicomSeriesContent({
         setSearchConditionsForType,
         setSearchType
     } = useGlobalSearchStore();
-    const searchConditions = getSearchConditionsForType("dicom-series");
+    const searchConditions = mounted ? getSearchConditionsForType("dicom-series") : {};
 
     const { layoutMode } = useLayoutStore();
     const { close: closeBlueLightViewer, open: openBlueLightViewer } = useBlueLightViewerStore();
@@ -84,8 +90,13 @@ export default function DicomSeriesContent({
     });
 
     useEffect(() => {
+        if (!mounted || isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
+        }
+
         syncSearchParamsToUrl(searchConditions);
-    }, [searchConditions, syncSearchParamsToUrl]);
+    }, [searchConditions, syncSearchParamsToUrl, mounted]);
 
     useEffect(() => {
         return () => {

@@ -5,7 +5,7 @@ import type { DicomSeriesData } from "@brigid/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { nanoid } from "zod";
 import { useShallow } from "zustand/react/shallow";
@@ -39,17 +39,17 @@ export default function DicomRecycleSeriesContent({
     workspaceId,
     studyInstanceUid,
 }: DicomRecycleSeriesContentProps) {
+    const isFirstRun = useRef(true);
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
 
-    const { setSearchConditionsForType, setSearchType } =
+    const { setSearchConditionsForType, setSearchType, getSearchConditionsForType } =
         useGlobalSearchStore();
-    const { searchConditions } = useGlobalSearchStore(
-        useShallow((state) => ({
-            searchConditions:
-                state.searchConditionsByType["dicom-recycle-series"] || {},
-        })),
-    );
+    const searchConditions  = mounted ? getSearchConditionsForType("dicom-recycle-series") : {};
 
     const { layoutMode } = useLayoutStore(
         useShallow((state) => ({
@@ -87,10 +87,13 @@ export default function DicomRecycleSeriesContent({
     });
 
     useEffect(() => {
-        if (Object.keys(searchConditions).length > 0) {
-            syncSearchParamsToUrl(searchConditions);
+        if (!mounted || isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
         }
-    }, [searchConditions, syncSearchParamsToUrl]);
+
+        syncSearchParamsToUrl(searchConditions);
+    }, [searchConditions, syncSearchParamsToUrl, mounted]);
 
     useEffect(() => {
         return () => clearSelection();

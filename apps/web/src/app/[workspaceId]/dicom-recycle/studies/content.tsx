@@ -4,7 +4,7 @@ import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomStudyData } from "@brigid/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { EmptyState } from "@/components/common/empty-state";
@@ -34,15 +34,17 @@ interface DicomRecycleStudiesContentProps {
 export default function DicomRecycleStudiesContent({
     workspaceId,
 }: DicomRecycleStudiesContentProps) {
+    const isFirstRun = useRef(true);
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+    
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
-    const { setSearchConditionsForType, setSearchType } =
+    const { setSearchConditionsForType, setSearchType, getSearchConditionsForType } =
         useGlobalSearchStore();
-    const { searchConditions } = useGlobalSearchStore(
-        useShallow((state) => ({
-            searchConditions: state.searchConditionsByType["dicom-recycle-study"] || {},
-        })),
-    );
+    const searchConditions = mounted ? getSearchConditionsForType("dicom-recycle-study") : {};
 
     const { layoutMode } = useLayoutStore(
         useShallow((state) => ({
@@ -83,10 +85,13 @@ export default function DicomRecycleStudiesContent({
     });
 
     useEffect(() => {
-        if (Object.keys(searchConditions).length > 0) {
-            syncSearchParamsToUrl(searchConditions);
+        if (!mounted || isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
         }
-    }, [searchConditions, syncSearchParamsToUrl]);
+
+        syncSearchParamsToUrl(searchConditions);
+    }, [searchConditions, syncSearchParamsToUrl, mounted]);
 
     useEffect(() => {
         return () => clearSelection();

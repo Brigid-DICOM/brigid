@@ -296,29 +296,33 @@ export function DicomInstancesDataTable({
         () => [
             {
                 id: "select",
-                header: () => (
-                    <Checkbox
-                        checked={
-                            getSelectedCount() > 0 &&
-                            getSelectedCount() === instances.length
-                        }
-                        onCheckedChange={(value) => {
-                            const isChecked = !!value;
-                            if (isChecked) {
-                                selectAll(
-                                    instances.map(
-                                        (instance) =>
-                                            instance["00080018"]?.Value?.[0] ||
-                                            "",
-                                    ),
-                                );
-                            } else {
-                                clearSelection();
+                header: ({table}) => {
+                    const rows = table.getRowModel().rows;
+
+                    return (
+                        <Checkbox
+                            checked={
+                                getSelectedCount() > 0 &&
+                                getSelectedCount() === rows.length
                             }
-                        }}
-                        aria-label="Select all"
-                    />
-                ),
+                            onCheckedChange={(value) => {
+                                const isChecked = !!value;
+                                if (isChecked) {
+                                    selectAll(
+                                        rows.map(
+                                            (row) =>
+                                                row.original["00080018"]?.Value?.[0] ||
+                                                "",
+                                        ),
+                                    );
+                                } else {
+                                    clearSelection();
+                                }
+                            }}
+                            aria-label="Select all"
+                        />
+                    );
+                },
                 cell: ({ row }) => {
                     const sopInstanceUid =
                         row.original["00080018"]?.Value?.[0] || "";
@@ -395,7 +399,6 @@ export function DicomInstancesDataTable({
         ],
         [
             workspaceId,
-            instances,
             clearSelection,
             selectAll,
             getSelectedCount,

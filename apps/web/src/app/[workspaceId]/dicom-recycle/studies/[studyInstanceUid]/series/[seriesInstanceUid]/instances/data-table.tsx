@@ -213,19 +213,22 @@ export function DicomRecycleInstancesDataTable({
         () => [
             {
                 id: "select",
-                header: () => (
+                header: ({ table }) => {
+                    const rows = table.getRowModel().rows;
+
+                    return (
                     <Checkbox
                         checked={
                             getSelectedCount() > 0 &&
-                            getSelectedCount() === instances.length
+                            getSelectedCount() === rows.length
                         }
                         onCheckedChange={(value) => {
                             const isChecked = !!value;
                             if (isChecked) {
                                 selectAll(
-                                    instances.map(
-                                        (instance) =>
-                                            instance["00080018"]?.Value?.[0] ||
+                                    rows.map(
+                                        (row) =>
+                                            row.original["00080018"]?.Value?.[0] ||
                                             "",
                                     ),
                                 );
@@ -234,8 +237,9 @@ export function DicomRecycleInstancesDataTable({
                             }
                         }}
                         aria-label="Select all"
-                    />
-                ),
+                        />
+                    );
+                },
                 cell: ({ row }) => {
                     const sopInstanceUid =
                         row.original["00080018"]?.Value?.[0] || "";
@@ -288,7 +292,6 @@ export function DicomRecycleInstancesDataTable({
         ],
         [
             workspaceId,
-            instances,
             clearSelection,
             selectAll,
             getSelectedCount,
