@@ -20,6 +20,7 @@ import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-conf
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
 import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
+import { ShareManagementDialog } from "@/components/share/share-management-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -38,7 +39,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { downloadStudy } from "@/lib/clientDownload";
-import { cn } from "@/lib/utils";
+import { closeDropdownMenu, cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
@@ -61,6 +62,7 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
+    const [showShareManagementDialog, setShowShareManagementDialog] = useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
@@ -72,6 +74,7 @@ function ActionsCell({
     const canRecycle = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
     const canRead = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
     const canUpdate = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.UPDATE);
+    const canShare = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.MANAGE);
 
     const { mutate: recycleDicomStudy } = useMutation({
         ...recycleDicomStudyMutation({
@@ -186,12 +189,26 @@ function ActionsCell({
                         </>
                     )}
 
+                    {canShare && (
+                        <>
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuItem onClick={(e) => {
+                                e.preventDefault();
+                                closeDropdownMenu();
+                                setShowShareManagementDialog(true);
+                            }} >
+                                Share
+                            </DropdownMenuItem>
+                        </>
+                    )}
+
                     {canRecycle && (
                         <>
                             <DropdownMenuSeparator />
 
                             <DropdownMenuItem onClick={handleRecycleStudy}>
-                                Recycle Study
+                                Recycle
                             </DropdownMenuItem>
                         </>
                     )}
@@ -213,6 +230,16 @@ function ActionsCell({
                 targetType="study"
                 targetId={studyInstanceUid}
             />}
+
+            {canShare && (
+                <ShareManagementDialog 
+                    open={showShareManagementDialog}
+                    onOpenChange={setShowShareManagementDialog}
+                    workspaceId={workspaceId}
+                    targetType="study"
+                    targetIds={[studyInstanceUid]}
+                />
+            )}
         </>
     );
 }
