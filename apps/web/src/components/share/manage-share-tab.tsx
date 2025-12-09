@@ -2,13 +2,22 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow, isPast } from "date-fns";
-import { ClockIcon, CopyIcon, EditIcon, EyeIcon, LockIcon, Trash2Icon } from "lucide-react";
+import {
+    ClockIcon,
+    CopyIcon,
+    EditIcon,
+    EyeIcon,
+    LockIcon,
+    Trash2Icon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { usePagination } from "@/hooks/use-pagination";
 import { toggleSharePermission } from "@/lib/share/sharePermissionUtils";
 import { apiClient } from "@/react-query/apiClient";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getTargetShareLinksQuery } from "@/react-query/queries/share";
+import { PaginationControls } from "../common/pagination-controls";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -47,12 +56,21 @@ interface ShareLink {
     }>;
 }
 
-export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageShareTabProps) {
+export function ManageShareTab({
+    workspaceId,
+    targetType,
+    targetIds,
+}: ManageShareTabProps) {
     const queryClient = getQueryClient();
     const [editingShare, setEditingShare] = useState<ShareLink | null>(null);
     const [updatedShare, setUpdatedShare] = useState<Partial<ShareLink>>({});
-    const [targetIdToDelete, setTargetIdToDelete] = useState<string | null>(null);
-    const [showDeleteConfirmDialogOpen, setShowDeleteConfirmDialogOpen] = useState(false);
+    const [targetIdToDelete, setTargetIdToDelete] = useState<string | null>(
+        null,
+    );
+    const [showDeleteConfirmDialogOpen, setShowDeleteConfirmDialogOpen] =
+        useState(false);
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
+        usePagination();
 
     const recipients = useMemo(() => {
         const share = updatedShare.recipients ?? editingShare?.recipients ?? [];
@@ -63,21 +81,31 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
         }));
     }, [editingShare, updatedShare]);
 
-    const {data: shareLinks, isLoading} = useQuery(
+    const { data: shareLinks, isLoading } = useQuery(
         getTargetShareLinksQuery({
             targetType,
             targetIds: targetIds,
             workspaceId,
             limit: 10,
-            page: 1,
-        })
-    )
+            page: currentPage + 1,
+        }),
+    );
 
-    const {mutate: updateShareLink, isPending: isUpdating} = useMutation({
-        mutationFn: async ({ shareLinkId, updates }: { shareLinkId: string, updates: Partial<ShareLink> }) => {
-            const response = await apiClient.api.workspaces[":workspaceId"]["share-links"][":shareLinkId"].$patch({
+    const canGoNext = !!shareLinks?.data.hasNextPage;
+
+    const { mutate: updateShareLink, isPending: isUpdating } = useMutation({
+        mutationFn: async ({
+            shareLinkId,
+            updates,
+        }: {
+            shareLinkId: string;
+            updates: Partial<ShareLink>;
+        }) => {
+            const response = await apiClient.api.workspaces[":workspaceId"][
+                "share-links"
+            ][":shareLinkId"].$patch({
                 param: { workspaceId, shareLinkId },
-                json: updates
+                json: updates,
             });
 
             if (!response.ok) {
@@ -89,16 +117,21 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
         onSuccess: () => {
             toast.success("Share link updated successfully");
             queryClient.invalidateQueries({
-                queryKey: ["share-links", workspaceId, targetType, targetIds.join(",")],
+                queryKey: [
+                    "share-links",
+                    workspaceId,
+                    targetType,
+                    targetIds.join(","),
+                ],
             });
             setEditingShare(null);
             setUpdatedShare({});
         },
         onError: () => {
             toast.error("Failed to update share link");
-        }
+        },
     });
-    
+
     const copyShareLink = (token: string) => {
         const shareUrl = `${window.location.origin}/share/${token}`;
         navigator.clipboard.writeText(shareUrl);
@@ -108,7 +141,7 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
     const isExpired = (expiresAt: Date | undefined) => {
         if (!expiresAt) return false;
         return isPast(new Date(expiresAt));
-    }
+    };
 
     if (!editingShare) {
         return (
@@ -119,13 +152,16 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                     </div>
                 ) : shareLinks?.data.shareLinks.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                        No share links yet. Create one in the "Create Share" tab.
+                        No share links yet. Create one in the "Create Share"
+                        tab.
                     </div>
                 ) : (
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                         {shareLinks?.data.shareLinks.map((share) => {
                             const expired = isExpired(
-                                share.expiresAt ? new Date(share.expiresAt) : undefined
+                                share.expiresAt
+                                    ? new Date(share.expiresAt)
+                                    : undefined,
                             );
 
                             return (
@@ -151,10 +187,18 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                                                     <LockIcon className="w-3 h-3 text-gray-500" />
                                                 )}
 
-                                                {share.publicPermissions === 0 ? (
-                                                    <Badge variant="outline">Private</Badge>
+                                                {share.publicPermissions ===
+                                                0 ? (
+                                                    <Badge variant="outline">
+                                                        Private
+                                                    </Badge>
                                                 ) : (
-                                                    <Badge variant="outline" className="bg-blue-500 text-white">Public</Badge>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="bg-blue-500 text-white"
+                                                    >
+                                                        Public
+                                                    </Badge>
                                                 )}
                                             </div>
 
@@ -175,23 +219,37 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                                                 {share.expiresAt && (
                                                     <span
                                                         className={`flex items-center gap-1 ${
-                                                            expired ? "text-red-500" : ""
+                                                            expired
+                                                                ? "text-red-500"
+                                                                : ""
                                                         }`}
                                                     >
                                                         <ClockIcon className="w-3 h-3" />
                                                         {expired
                                                             ? "Expired"
                                                             : `Expires ${formatDistanceToNow(
-                                                                  new Date(share.expiresAt),
-                                                                  { addSuffix: true }
+                                                                  new Date(
+                                                                      share.expiresAt,
+                                                                  ),
+                                                                  {
+                                                                      addSuffix: true,
+                                                                  },
                                                               )}`}
                                                     </span>
                                                 )}
 
-                                                {share.recipients.length > 0 && (
+                                                {share.recipients.length >
+                                                    0 && (
                                                     <span>
-                                                        {share.recipients.length} recipient
-                                                        {share.recipients.length > 1 ? "s" : ""}
+                                                        {
+                                                            share.recipients
+                                                                .length
+                                                        }{" "}
+                                                        recipient
+                                                        {share.recipients
+                                                            .length > 1
+                                                            ? "s"
+                                                            : ""}
                                                     </span>
                                                 )}
                                             </div>
@@ -216,7 +274,9 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                                                 size="sm"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setEditingShare(share as ShareLink);
+                                                    setEditingShare(
+                                                        share as ShareLink,
+                                                    );
                                                     setUpdatedShare({});
                                                 }}
                                                 title="Edit share link"
@@ -229,8 +289,12 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                                                 size="sm"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setTargetIdToDelete(share.id);
-                                                    setShowDeleteConfirmDialogOpen(true);
+                                                    setTargetIdToDelete(
+                                                        share.id,
+                                                    );
+                                                    setShowDeleteConfirmDialogOpen(
+                                                        true,
+                                                    );
                                                 }}
                                                 title="Delete share link"
                                                 className="text-red-500 hover:text-red-600"
@@ -246,23 +310,40 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                 )}
 
                 {targetIdToDelete && (
-                    <ShareDeleteConfirmDialog 
+                    <ShareDeleteConfirmDialog
                         open={showDeleteConfirmDialogOpen}
                         onOpenChange={setShowDeleteConfirmDialogOpen}
                         shareLinkId={targetIdToDelete}
                         workspaceId={workspaceId}
                         onSuccess={() => {
                             queryClient.invalidateQueries({
-                                queryKey: ["share-links", targetType, targetIds.join(","), workspaceId],
+                                queryKey: [
+                                    "share-links",
+                                    targetType,
+                                    targetIds.join(","),
+                                    workspaceId,
+                                ],
                             });
                             queryClient.invalidateQueries({
-                                queryKey: ["share-link-count", targetType, targetIds.join(","), workspaceId],
+                                queryKey: [
+                                    "share-link-count",
+                                    targetType,
+                                    targetIds.join(","),
+                                    workspaceId,
+                                ],
                             });
                             setShowDeleteConfirmDialogOpen(false);
                             setTargetIdToDelete(null);
                         }}
                     />
                 )}
+
+                <PaginationControls
+                    canGoPrevious={canGoPrevious}
+                    canGoNext={canGoNext}
+                    onPrevious={handlePreviousPage}
+                    onNext={handleNextPage}
+                />
             </div>
         );
     }
@@ -281,11 +362,16 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
 
     const handleSelectUser = (user: ShareLink["recipients"][number]) => {
         setUpdatedShare((prev) => {
-            const existing = prev.recipients?.find((u) => u.userId === user.userId);
+            const existing = prev.recipients?.find(
+                (u) => u.userId === user.userId,
+            );
             if (existing) {
                 return {
                     ...prev,
-                    recipients: prev.recipients?.map((u) => (u.userId === user.userId ? user : u)) ?? [],
+                    recipients:
+                        prev.recipients?.map((u) =>
+                            u.userId === user.userId ? user : u,
+                        ) ?? [],
                 };
             }
             return {
@@ -299,10 +385,11 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
         setUpdatedShare((prev) => {
             return {
                 ...prev,
-                recipients: prev.recipients?.filter((u) => u.userId !== userId) ?? [],
+                recipients:
+                    prev.recipients?.filter((u) => u.userId !== userId) ?? [],
             };
         });
-    }
+    };
 
     return (
         <div className="space-y-6 py-4">
@@ -320,7 +407,9 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                     readOnly
                     className="cursor-pointer hover:bg-gray-100"
                     onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/share/${editingShare.token}`);
+                        navigator.clipboard.writeText(
+                            `${window.location.origin}/share/${editingShare.token}`,
+                        );
                         toast.success("Share link copied to clipboard", {
                             position: "bottom-center",
                         });
@@ -348,18 +437,27 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                 <Label>Public Permissions</Label>
                 <SharePermissionDropdown
                     mode="public"
-                    publicPermissions={updatedShare.publicPermissions ?? editingShare.publicPermissions ?? 0}
+                    publicPermissions={
+                        updatedShare.publicPermissions ??
+                        editingShare.publicPermissions ??
+                        0
+                    }
                     onTogglePermission={(permission) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
-                            publicPermissions: toggleSharePermission(prev.publicPermissions ?? editingShare.publicPermissions ?? 0, permission),
+                            publicPermissions: toggleSharePermission(
+                                prev.publicPermissions ??
+                                    editingShare.publicPermissions ??
+                                    0,
+                                permission,
+                            ),
                         }));
                     }}
                     id="public-permissions"
                 />
             </div>
 
-            <UserSelector 
+            <UserSelector
                 selected={recipients}
                 onSelect={handleSelectUser}
                 onRemove={handleRemoveUser}
@@ -369,7 +467,10 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                 <div className="flex items-center space-x-2">
                     <Checkbox
                         id="editRequiredPassword"
-                        checked={updatedShare.requiredPassword ?? editingShare.requiredPassword}
+                        checked={
+                            updatedShare.requiredPassword ??
+                            editingShare.requiredPassword
+                        }
                         onCheckedChange={(checked) => {
                             setUpdatedShare((prev) => ({
                                 ...prev,
@@ -378,12 +479,16 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                         }}
                         disabled={isUpdating}
                     />
-                    <Label htmlFor="editRequiredPassword" className="font-normal">
+                    <Label
+                        htmlFor="editRequiredPassword"
+                        className="font-normal"
+                    >
                         Require Password Protection
                     </Label>
                 </div>
 
-                {(updatedShare.requiredPassword ?? editingShare.requiredPassword) && (
+                {(updatedShare.requiredPassword ??
+                    editingShare.requiredPassword) && (
                     <Input
                         type="password"
                         placeholder="Enter new password (leave blank to keep current)"
@@ -402,8 +507,12 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
 
             <div className="space-y-3">
                 <Label htmlFor="editExpiresInSec">Expires In</Label>
-                <ShareExpirationDropdown 
-                    expiresInSec={updatedShare.expiresInSec ?? editingShare.expiresInSec ?? null}
+                <ShareExpirationDropdown
+                    expiresInSec={
+                        updatedShare.expiresInSec ??
+                        editingShare.expiresInSec ??
+                        null
+                    }
                     onSelect={(expiresInSec) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
@@ -417,7 +526,9 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
             <div className="flex gap-2">
                 <Button
                     onClick={handleUpdate}
-                    disabled={isUpdating || Object.keys(updatedShare).length === 0}
+                    disabled={
+                        isUpdating || Object.keys(updatedShare).length === 0
+                    }
                     className="flex-1"
                 >
                     {isUpdating ? "Updating..." : "Update"}
@@ -434,5 +545,5 @@ export function ManageShareTab({ workspaceId, targetType, targetIds }: ManageSha
                 </Button>
             </div>
         </div>
-    )
+    );
 }
