@@ -290,8 +290,6 @@ export default function DicomInstancesContent({
                     onSelectAll={handleSelectAll}
                     onClearSelection={clearSelection}
                     onRecycle={() => recycleDicomInstances()}
-                    multiDownloadLabel="Download Selected Instances"
-                    multiRecycleLabel="Recycle Selected Instances"
                     downloadOptions={downloadOptions}
                     dicomLevel="instance"
                 />

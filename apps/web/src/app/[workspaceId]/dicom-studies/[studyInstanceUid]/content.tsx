@@ -236,8 +236,6 @@ export default function DicomSeriesContent({
                     onClearSelection={clearSelection}
                     onDownload={() => handleDownload(selectedIds)}
                     onRecycle={() => recycleDicomSeries()}
-                    multiRecycleLabel="Recycle Selected Series"
-                    multiDownloadLabel="Download Selected Series"
                     dicomLevel="series"
                 />
             )}

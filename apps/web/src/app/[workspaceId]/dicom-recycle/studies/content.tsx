@@ -246,8 +246,6 @@ export default function DicomRecycleStudiesContent({
                         onClearSelection={clearSelection}
                         onRestore={handleRestore}
                         onDelete={handleDelete}
-                        multiRestoreLabel="Restore Selected Studies"
-                        multiDeleteLabel="Delete Selected Studies"
                         dicomLevel="study"
                     />
                 </>

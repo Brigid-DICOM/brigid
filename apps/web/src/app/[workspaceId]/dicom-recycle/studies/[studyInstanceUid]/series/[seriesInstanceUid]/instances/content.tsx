@@ -261,8 +261,6 @@ export default function DicomRecycleInstancesContent({
                     onClearSelection={clearSelection}
                     onRestore={handleRestore}
                     onDelete={handleDelete}
-                    multiRestoreLabel="Restore Selected Instances"
-                    multiDeleteLabel="Delete Selected Instances"
                     dicomLevel="instance"
                 />
             )}

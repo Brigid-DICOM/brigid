@@ -1,6 +1,7 @@
-import { Grid3x3Icon, ListIcon, Trash2Icon, UndoIcon } from "lucide-react";
+import { Grid3x3Icon, ListChecksIcon, ListIcon, Trash2Icon, UndoIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { type LayoutMode, useLayoutStore } from "@/stores/layout-store";
 import { DicomDeleteConfirmDialog } from "./dicom-delete-confirm-dialog";
 
@@ -11,8 +12,6 @@ interface DicomRecycleSelectionControlBarProps {
     onClearSelection: () => void;
     onRestore: () => void;
     onDelete: () => void;
-    multiRestoreLabel?: string;
-    multiDeleteLabel?: string;
     dicomLevel: "study" | "series" | "instance";
 }
 
@@ -23,8 +22,6 @@ export function DicomRecycleSelectionControlBar({
     onClearSelection,
     onRestore,
     onDelete,
-    multiRestoreLabel,
-    multiDeleteLabel,
     dicomLevel,
 }: DicomRecycleSelectionControlBarProps) {
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
@@ -48,54 +45,56 @@ export function DicomRecycleSelectionControlBar({
     return (
         <>
             <div className="flex items-center mb-6 p-4 bg-muted rounded-lg gap-6">
-                <div className="flex items-center space-x-4">
-                    <Button variant={"outline"} size="sm" onClick={onSelectAll}>
-                        {isAllSelected ? "取消全選" : "全選"}
-                    </Button>
-                    {selectedCount > 0 && (
-                        <Button
-                            variant={"outline"}
-                            size="sm"
-                            onClick={onClearSelection}
-                        >
-                            清除選取
-                        </Button>
-                    )}
-                </div>
-
-                <div className="flex items-center space-x-4">
-                    {selectedCount > 0 && (
-                        <>
-                            <span className="text-sm text-gray-600">
-                                已選取 {selectedCount} 筆
-                            </span>
-
+                <ButtonGroup>
+                    <ButtonGroup>
+                        {selectedCount > 0 && (
                             <Button
                                 variant={"outline"}
                                 size="sm"
-                                onClick={onRestore}
-                                className="flex items-center"
+                                onClick={onClearSelection}
+                                title="清除選取"
                             >
-                                <UndoIcon className="size-4" />
-                                <span>
-                                    {multiRestoreLabel} ({selectedCount})
-                                </span>
+                                <XIcon className="size-4" />
                             </Button>
-
+                        )}
+                        {!isAllSelected && (
                             <Button
-                                variant={"destructive"}
+                                variant={"outline"}
                                 size="sm"
-                                onClick={handleDelete}
-                                className="flex items-center"
+                                onClick={onSelectAll}
+                                title="全選"
                             >
-                                <Trash2Icon className="size-4" />
-                                <span>
-                                    {multiDeleteLabel} ({selectedCount})
-                                </span>
+                                <ListChecksIcon className="size-4" />
                             </Button>
-                        </>
-                    )}
-                </div>
+                        )}
+                        {selectedCount > 0 && (
+                            <ButtonGroupText className="bg-background">
+                                {selectedCount} 筆
+                            </ButtonGroupText>
+                        )}
+                    </ButtonGroup>
+
+                    <ButtonGroup>
+                        <Button
+                            variant={"outline"}
+                            size="sm"
+                            onClick={onRestore}
+                            title="Restore"
+                        >
+                            <UndoIcon className="size-4" />
+                        </Button>
+
+                        <Button
+                            variant={"outline"}
+                            size="sm"
+                            onClick={handleDelete}
+                            title="Delete"
+                        >
+                            <Trash2Icon className="size-4 text-destructive" />
+                        </Button>
+                    </ButtonGroup>
+                </ButtonGroup>
+
 
                 <div className="flex items-end justify-end ml-auto">
                     <Button

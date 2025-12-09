@@ -269,8 +269,6 @@ export default function DicomRecycleSeriesContent({
                     onClearSelection={clearSelection}
                     onRestore={handleRestore}
                     onDelete={handleDelete}
-                    multiRestoreLabel="Restore Selected Series"
-                    multiDeleteLabel="Delete Selected Series"
                     dicomLevel="series"
                 />
             )}

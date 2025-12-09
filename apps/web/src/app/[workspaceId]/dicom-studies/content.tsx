@@ -207,8 +207,6 @@ export default function DicomStudiesContent({
                     onClearSelection={clearSelection}
                     onDownload={() => handleDownload(selectedIds)}
                     onRecycle={handleRecycle}
-                    multiRecycleLabel="Recycle Selected Studies"
-                    multiDownloadLabel="Download Selected Studies"
                     dicomLevel="study"
                 />
             )}
