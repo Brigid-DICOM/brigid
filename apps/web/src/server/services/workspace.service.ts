@@ -3,6 +3,7 @@ import { UserWorkspaceEntity } from "@brigid/database/src/entities/userWorkspace
 import { WorkspaceEntity } from "@brigid/database/src/entities/workspace.entity";
 import { In, IsNull, type Repository } from "typeorm";
 import { v5 as uuidV5 } from "uuid";
+import { z } from "zod";
 import { NAMESPACE_FOR_UUID } from "../const/dicom.const";
 import { ROLE_PERMISSION_TEMPLATES } from "../const/workspace.const";
 import { UserService } from "./user.service";
@@ -128,6 +129,9 @@ export class WorkspaceService {
     }
 
     async getWorkspaceById(workspaceId: string) {
+        const { success } = z.uuid().safeParse(workspaceId);
+        if (!success) return null;
+
         return await this.workspaceRepository.findOne({
             where: {
                 id: workspaceId
@@ -192,6 +196,12 @@ export class WorkspaceService {
     }
 
     async getUserWorkspaceById(userId: string, workspaceId: string) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return null;
+
+        const { success: userIdSuccess } = z.uuid().safeParse(userId);
+        if (!userIdSuccess) return null;
+
         const userWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
                 userId,
@@ -207,6 +217,11 @@ export class WorkspaceService {
     }
 
     async setUserDefaultWorkspace(userId: string, workspaceId: string) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return;
+        const { success: userIdSuccess } = z.uuid().safeParse(userId);
+        if (!userIdSuccess) return;
+
         await this.userWorkspaceRepository.update(
             { userId },
             { isDefault: false }
@@ -219,6 +234,9 @@ export class WorkspaceService {
     }
 
     async updateWorkspace(workspaceId: string, data: { name?: string }) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return null;
+
         const workspace = await this.workspaceRepository.findOne({
             where: {
                 id: workspaceId
@@ -235,6 +253,11 @@ export class WorkspaceService {
     }
 
     async getUserWorkspacePermissions(userId: string, workspaceId: string) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return 0;
+        const { success: userIdSuccess } = z.uuid().safeParse(userId);
+        if (!userIdSuccess) return 0;
+
         const userWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
                 userId,
@@ -246,6 +269,9 @@ export class WorkspaceService {
     }
 
     async getDefaultUserWorkspace(userId: string) {
+        const { success: userIdSuccess } = z.uuid().safeParse(userId);
+        if (!userIdSuccess) return null;
+
         const userWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
                 userId,
@@ -285,6 +311,9 @@ export class WorkspaceService {
     }
 
     async getWorkspaceMembers(workspaceId: string) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return [];
+
         const members = await this.userWorkspaceRepository.find({
             where: {
                 workspaceId
@@ -305,6 +334,11 @@ export class WorkspaceService {
     }
 
     async addMember({ workspaceId, userId, role }: AddMemberParams) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return null;
+        const { success: userIdSuccess } = z.uuid().safeParse(userId);
+        if (!userIdSuccess) return null;
+
         const existing = await this.userWorkspaceRepository.findOne({
             where: {
                 workspaceId,
@@ -328,6 +362,9 @@ export class WorkspaceService {
     }
 
     async addMembers({ workspaceId, users }: AddMembersParams) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return [];
+
         // 1. Find existing members to avoid duplicates
         const existingUsers = await this.userWorkspaceRepository.find({
             where: {
@@ -359,6 +396,9 @@ export class WorkspaceService {
     }
 
     async updateMembers({ workspaceId, users }: AddMembersParams) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return { count: 0 };
+
         // 因為每個成員的角色可能會不同，所以使用 Promise.all 來併行更新所有成員
         const updatePromises = users.map(async (user) => {
             const permissions = ROLE_PERMISSION_TEMPLATES[user.role];
@@ -378,6 +418,11 @@ export class WorkspaceService {
     }
 
     async removeMember(workspaceId: string, userId: string) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return;
+        const { success: userIdSuccess } = z.uuid().safeParse(userId);
+        if (!userIdSuccess) return;
+
         const workspace = await this.getWorkspaceById(workspaceId);
         if (workspace && workspace.ownerId === userId) {
             throw new Error("Owner cannot be removed from their own workspace");
@@ -387,6 +432,11 @@ export class WorkspaceService {
     }
 
     async removeMembers(workspaceId: string, userIds: string[]) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return;
+        const { success: userIdsSuccess } = z.array(z.uuid()).safeParse(userIds);
+        if (!userIdsSuccess) return;
+
         const workspace = await this.getWorkspaceById(workspaceId);
 
         if (workspace && userIds.includes(workspace.ownerId)) {
@@ -400,6 +450,11 @@ export class WorkspaceService {
     }
 
     async updateMemberRole(workspaceId: string, userId: string, role: keyof typeof ROLE_PERMISSION_TEMPLATES) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return;
+        const { success: userIdSuccess } = z.uuid().safeParse(userId);
+        if (!userIdSuccess) return;
+
         const permissions = ROLE_PERMISSION_TEMPLATES[role];
 
         if (permissions === undefined) {
@@ -415,6 +470,9 @@ export class WorkspaceService {
     }
 
     async deleteWorkspace(workspaceId: string) {
+        const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
+        if (!workspaceIdSuccess) return;
+
         await this.workspaceRepository.softDelete({ id: workspaceId });
 
         await this.userWorkspaceRepository.delete({ workspaceId });
