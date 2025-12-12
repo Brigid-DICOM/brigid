@@ -149,15 +149,15 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label>{t("shareLink.editDialog.form.name")}</Label>
+                <Label>{t("shareLink.form.name")}</Label>
                 <Input
                     type="text"
-                    placeholder={t("shareLink.editDialog.form.namePlaceholder")}
+                    placeholder={t("shareLink.form.namePlaceholder")}
                     value={updatedShare.name ?? shareLink.name ?? ""}
                     onChange={(e) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
-                            name: e.target.value.trim() || undefined,
+                            name: e.target.value || undefined,
                         }));
                     }}
                     maxLength={255}
@@ -165,7 +165,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label>{t("shareLink.editDialog.form.publicPermissionsLabel")}</Label>
+                <Label>{t("shareLink.form.publicPermissionsLabel")}</Label>
                 <SharePermissionDropdown
                     mode="public"
                     publicPermissions={updatedShare.publicPermissions ?? shareLink.publicPermissions ?? 0}
@@ -202,14 +202,14 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                         disabled={isUpdating}
                     />
                     <Label htmlFor="editRequiredPassword" className="font-normal">
-                        {t("shareLink.editDialog.form.requiredPasswordLabel")}
+                        {t("shareLink.form.requiredPasswordLabel")}
                     </Label>
                 </div>
 
                 {(updatedShare.requiredPassword ?? shareLink.requiredPassword) && (
                     <Input
                         type="password"
-                        placeholder={t("shareLink.editDialog.form.passwordPlaceholder")}
+                        placeholder={t("shareLink.form.passwordPlaceholder")}
                         onChange={(e) => {
                             if (e.target.value) {
                                 setUpdatedShare((prev) => ({
@@ -224,7 +224,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="editExpiresInSec">{t("shareLink.editDialog.form.expiresInLabel")}</Label>
+                <Label htmlFor="editExpiresInSec">{t("shareLink.form.expiresInLabel")}</Label>
                 <ShareExpirationDropdown
                     expiresInSec={updatedShare.expiresInSec ?? shareLink.expiresInSec ?? null}
                     onSelect={(expiresInSec) => {
@@ -238,14 +238,14 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label>{t("shareLink.editDialog.form.descriptionLabel")}</Label>
+                <Label>{t("shareLink.form.descriptionLabel")}</Label>
                 <Textarea
-                    placeholder={t("shareLink.editDialog.form.descriptionPlaceholder")}
+                    placeholder={t("shareLink.form.descriptionPlaceholder")}
                     value={updatedShare.description ?? shareLink.description ?? ""}
                     onChange={(e) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
-                            description: e.target.value.trim() || undefined,
+                            description: e.target.value || undefined,
                         }));
                     }}
                     maxLength={255}

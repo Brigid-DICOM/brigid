@@ -338,18 +338,20 @@
             "edit": "Edit",
             "delete": "Delete"
         },
+        "form": {
+            "name": "Name",
+            "namePlaceholder": "Enter name",
+            "publicPermissionsLabel": "Public Permissions",
+            "requiredPasswordLabel": "Require Password Protection",
+            "passwordPlaceholder": "Enter new password (leave blank to keep current)",
+            "expiresInLabel": "Expires In",
+            "descriptionLabel": "Description",
+            "descriptionPlaceholder": "Add a note about this share...",
+            "creating": "Creating...",
+            "create": "Create Share Link"
+        },
         "editDialog": {
-            "title": "Edit Share Link",
-            "form": {
-                "name": "Name",
-                "namePlaceholder": "Enter name",
-                "publicPermissionsLabel": "Public Permissions",
-                "requiredPasswordLabel": "Require Password Protection",
-                "passwordPlaceholder": "Enter new password (leave blank to keep current)",
-                "expiresInLabel": "Expires In",
-                "descriptionLabel": "Description",
-                "descriptionPlaceholder": "Add a note about this share..."
-            }
+            "title": "Edit Share Link"
         },
         "deleteConfirmDialog": {
             "title": "Delete Share Link",
@@ -361,7 +363,9 @@
             "shareLinkUpdatedError": "Failed to update share link",
             "shareLinkDeleted": "Share link deleted successfully",
             "shareLinkDeletedError": "Failed to delete share link",
-            "shareLinkCopied": "Share link copied to clipboard"
+            "shareLinkCopied": "Share link copied to clipboard",
+            "pleaseSelectAtLeastOneTarget": "Please select at least one target",
+            "passwordRequired": "Password is required"
         },
         "permissions": {
             "read": "Read",
@@ -381,5 +385,16 @@
             "success": "Member invited successfully",
             "error": "Failed to invite member"
         }
+    },
+    "shareManagementDialog": {
+        "title": "Share Management",
+        "description": "Manage share links for {{targetType}}",
+        "create": "Create Share",
+        "manage": "Manage Shares",
+        "noShares": "No shares found",
+        "shareLinkCount": "{{count}} share links",
+        "shareLinkCountLoading": "Loading share link count...",
+        "shareLinkCountError": "Failed to load share link count",
+        "shareLinkCountEmpty": "No share links found"
     }
 }

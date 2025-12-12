@@ -338,17 +338,19 @@
             "edit": "編輯",
             "delete": "刪除"
         },
+        "form": {
+            "name": "名稱",
+            "namePlaceholder": "輸入名稱",
+            "publicPermissionsLabel": "公開權限",
+            "requiredPasswordLabel": "需要密碼保護",
+            "passwordPlaceholder": "輸入新密碼 (留空則保持現有密碼)",
+            "descriptionLabel": "描述",
+            "descriptionPlaceholder": "新增此分享的註解",
+            "creating": "建立中...",
+            "create": "建立分享連結"
+        },
         "editDialog": {
-            "title": "編輯分享連結",
-            "form": {
-                "name": "名稱",
-                "namePlaceholder": "輸入名稱",
-                "publicPermissionsLabel": "公開權限",
-                "requiredPasswordLabel": "需要密碼保護",
-                "passwordPlaceholder": "輸入新密碼 (留空則保持現有密碼)",
-                "descriptionLabel": "描述",
-                "descriptionPlaceholder": "新增此分享的註解"
-            }
+            "title": "編輯分享連結"
         },
         "deleteConfirmDialog": {
             "title": "確認刪除分享連結",
@@ -360,7 +362,9 @@
             "shareLinkUpdatedError": "更新分享連結失敗",
             "shareLinkDeleted": "分享連結刪除成功",
             "shareLinkDeletedError": "刪除分享連結失敗",
-            "shareLinkCopied": "分享連結已複製到剪貼簿"
+            "shareLinkCopied": "分享連結已複製到剪貼簿",
+            "pleaseSelectAtLeastOneTarget": "請至少選擇一個目標",
+            "passwordRequired": "密碼是必填的"
         },
         "permissions": {
             "read": "檢視",
@@ -380,5 +384,16 @@
             "success": "成員邀請成功",
             "error": "邀請成員失敗"
         }
+    },
+    "shareManagementDialog": {
+        "title": "分享管理",
+        "description": "管理 {{targetType}} 的分享連結",
+        "create": "建立分享",
+        "manage": "管理分享",
+        "noShares": "尚無分享連結",
+        "shareLinkCount": "{{count}} 個分享連結",
+        "shareLinkCountLoading": "載入分享連結數量中...",
+        "shareLinkCountError": "載入分享連結數量失敗",
+        "shareLinkCountEmpty": "尚無分享連結"
     }
 }

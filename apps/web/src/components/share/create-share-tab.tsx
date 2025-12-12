@@ -3,6 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,7 @@ export function CreateShareTab({
     targetIds,
     onSuccess,
 }: CreateShareTabProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [name, setName] = useState("");
     const [publicPermissions, setPublicPermissions] = useState(
@@ -80,7 +82,7 @@ export function CreateShareTab({
             return await response.json();
         },
         onSuccess: (data) => {
-            toast.success("Share link created successfully", {
+            toast.success(t("shareLink.messages.shareLinkCreated"), {
                 position: "bottom-center",
             });
             queryClient.invalidateQueries({
@@ -92,14 +94,14 @@ export function CreateShareTab({
 
             const shareUrl = `${window.location.origin}/share/${data?.data?.token ?? ""}`;
             navigator.clipboard.writeText(shareUrl);
-            toast.success("Share link copied to clipboard", {
+            toast.success(t("shareLink.messages.shareLinkCopied"), {
                 position: "bottom-center",
             });
             resetForm();
             onSuccess?.();
         },
         onError: (error) => {
-            toast.error("Failed to create share link", {
+            toast.error(t("shareLink.messages.shareLinkCreatedError"), {
                 position: "bottom-center",
             });
             console.error(error);
@@ -131,14 +133,14 @@ export function CreateShareTab({
 
     const handleSubmit = () => {
         if (targetIds.length === 0) {
-            toast.error("Please select at least one target", {
+            toast.error(t("shareLink.messages.pleaseSelectAtLeastOneTarget"), {
                 position: "bottom-center",
             });
             return;
         }
 
         if (requiredPassword && !password.trim()) {
-            toast.error("Password is required", {
+            toast.error(t("shareLink.messages.passwordRequired"), {
                 position: "bottom-center",
             });
             return;
@@ -160,11 +162,11 @@ export function CreateShareTab({
     return (
         <div className="space-y-6 py-4">
             <div className="space-y-3">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("shareLink.form.name")}</Label>
                 <Input
                     type="text"
                     id="name"
-                    placeholder="Enter name"
+                    placeholder={t("shareLink.form.namePlaceholder")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     maxLength={255}
@@ -172,7 +174,7 @@ export function CreateShareTab({
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="public-permissions">Public Permissions</Label>
+                <Label htmlFor="public-permissions">{t("shareLink.form.publicPermissionsLabel")}</Label>
                 <SharePermissionDropdown
                     mode="public"
                     publicPermissions={publicPermissions}
@@ -196,14 +198,14 @@ export function CreateShareTab({
                             setRequiredPassword(checked as boolean)
                         }
                     />
-                    <Label htmlFor="required-password">Require Password</Label>
+                    <Label htmlFor="required-password">{t("shareLink.form.requiredPasswordLabel")}</Label>
                 </div>
 
                 {requiredPassword && (
                     <Input
                         type="password"
                         id="password"
-                        placeholder="Enter password"
+                        placeholder={t("shareLink.form.passwordPlaceholder")}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
@@ -211,7 +213,7 @@ export function CreateShareTab({
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="expires-in">Expires In</Label>
+                <Label htmlFor="expires-in">{t("shareLink.form.expiresInLabel")}</Label>
                 <ShareExpirationDropdown
                     expiresInSec={expiresInSec}
                     onSelect={setExpiresInSec}
@@ -220,10 +222,10 @@ export function CreateShareTab({
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("shareLink.form.descriptionLabel")}</Label>
                 <Textarea
                     id="description"
-                    placeholder="Add a note about this share..."
+                    placeholder={t("shareLink.form.descriptionPlaceholder")}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                 />
@@ -238,7 +240,7 @@ export function CreateShareTab({
                     (requiredPassword && !password.trim())
                 }
             >
-                {isPending ? "Creating..." : "Create Share Link"}
+                {isPending ? t("shareLink.form.creating") : t("shareLink.form.create")}
             </Button>
         </div>
     );

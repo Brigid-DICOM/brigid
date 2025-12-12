@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Share2Icon } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import {
     Dialog,
     DialogContent,
@@ -32,6 +33,7 @@ export function ShareManagementDialog({
     targetType,
     targetIds
 }: ShareManagementDialogProps) {
+    const { t } = useT("translation");
     const [activeTab, setActiveTab] = useState("create");
 
     const { data: shareLinkCount, isLoading: isLoadingShareLinkCount } = useQuery(
@@ -48,20 +50,20 @@ export function ShareManagementDialog({
             <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Share2Icon className="w-5 h-5" />
-                        Share Management
+                        {t("shareManagementDialog.title")}
                     </DialogTitle>
                     <DialogDescription>
-                        Manage share links for {targetType}
+                        {t("shareManagementDialog.description", { targetType })}
                     </DialogDescription>
                 </DialogHeader>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
                     <TabsList>
                         <TabsTrigger value="create">
-                            Create Share
+                            {t("shareManagementDialog.create")}
                         </TabsTrigger>
                         <TabsTrigger value="manage">
-                            Manage Shares
+                            {t("shareManagementDialog.manage")}
                             {isLoadingShareLinkCount ? 
                                 <Skeleton className="w-10 h-4" /> : 
                                 <Badge>{shareLinkCount?.data?.count}</Badge>
