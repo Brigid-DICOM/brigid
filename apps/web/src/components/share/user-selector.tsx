@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import Image from "next/image";
+import { useT } from "@/app/_i18n/client";
 import { 
     Command,
     CommandEmpty,
@@ -39,6 +40,7 @@ export function UserSelector({
     onSelect,
     onRemove,
 }: UserSelectorProps) {
+    const { t } = useT("translation");
     const {
         searchInput,
         setSearchInput,
@@ -76,12 +78,12 @@ export function UserSelector({
     return (
         <div className="space-y-4">
             <div>
-                <label className="text-sm font-medium" htmlFor="add-users">Add Users</label>
+                <label className="text-sm font-medium" htmlFor="add-users">{t("shareLink.userSelector.addUsers")}</label>
                 <div className="relative mt-2">
                     <Command className="bg-background border">
                         <CommandInput
                             id="add-users"
-                            placeholder="Search users by name or email..."
+                            placeholder={t("shareLink.userSelector.searchPlaceholder")}
                             value={searchInput}
                             onValueChange={setSearchInput}
                         />
@@ -95,7 +97,7 @@ export function UserSelector({
                         {searchInput && (
                             <CommandList className="absolute top-full left-0 right-0 z-10 mt-1 border rounded-md bg-background shadow-lg max-h-[200px]">
                                 {users.length === 0 ? (
-                                    <CommandEmpty>No users found.</CommandEmpty>
+                                    <CommandEmpty>{t("shareLink.userSelector.noUsersFound")}</CommandEmpty>
                                 ): (
                                     <CommandGroup>
                                         {users.map((user) => (
@@ -139,7 +141,7 @@ export function UserSelector({
 
             {selected.length > 0 && (
                 <div className="space-y-2">
-                    <p className="text-sm font-medium">Recipients</p>
+                    <p className="text-sm font-medium">{t("shareLink.userSelector.recipients")}</p>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                         {selected.map((user) => (
                             <div

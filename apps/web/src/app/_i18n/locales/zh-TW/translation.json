@@ -13,7 +13,15 @@
         "deleting": "刪除中...",
         "saveChanges": "儲存變更",
         "saving": "儲存中...",
-        "remove": "移除"
+        "remove": "移除",
+        "updating": "更新中...",
+        "update": "更新",
+        "expiration": {
+            "never": "永不",
+            "day": "天",
+            "days": "天",
+            "hour": "小時"
+        }
     },
     "auth": {
         "title": "Brigid - 登入",
@@ -315,6 +323,62 @@
             "multiple": "確定要將 {{count}} 個項目 ({{level}}) 永久刪除嗎？",
             "cancel": "取消",
             "confirm": "確認"
+        }
+    },
+    "myShares": {
+        "title": "我的分享內容",
+        "noData": "尚無分享內容。",
+        "refresh": "重新整理"
+    },
+    "shareLink": {
+        "title": "分享連結",
+        "menu": {
+            "openShare": "開啟分享",
+            "copyLink": "複製連結",
+            "edit": "編輯",
+            "delete": "刪除"
+        },
+        "editDialog": {
+            "title": "編輯分享連結",
+            "form": {
+                "name": "名稱",
+                "namePlaceholder": "輸入名稱",
+                "publicPermissionsLabel": "公開權限",
+                "requiredPasswordLabel": "需要密碼保護",
+                "passwordPlaceholder": "輸入新密碼 (留空則保持現有密碼)",
+                "descriptionLabel": "描述",
+                "descriptionPlaceholder": "新增此分享的註解"
+            }
+        },
+        "deleteConfirmDialog": {
+            "title": "確認刪除分享連結",
+            "description": "您確定要刪除這個分享連結嗎？"
+        },
+        "messages": {
+            "noChangesToUpdate": "沒有變更可以更新",
+            "shareLinkUpdated": "分享連結更新成功",
+            "shareLinkUpdatedError": "更新分享連結失敗",
+            "shareLinkDeleted": "分享連結刪除成功",
+            "shareLinkDeletedError": "刪除分享連結失敗",
+            "shareLinkCopied": "分享連結已複製到剪貼簿"
+        },
+        "permissions": {
+            "read": "檢視",
+            "readDesc": "允許檢視/下載 DICOM",
+            "update": "編輯",
+            "updateDesc": "允許編輯 DICOM 的 metadata (e.g. tags)"
+        },
+        "userSelector": {
+            "addUsers": "新增使用者",
+            "searchPlaceholder": "依姓名或電子郵件搜尋使用者...",
+            "noUsersFound": "找不到使用者。",
+            "selectedMembers": "已選取成員",
+            "recipients": "被分享者",
+            "cancel": "取消",
+            "invite": "邀請",
+            "inviting": "邀請中...",
+            "success": "成員邀請成功",
+            "error": "邀請成員失敗"
         }
     }
 }

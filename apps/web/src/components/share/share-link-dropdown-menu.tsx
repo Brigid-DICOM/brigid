@@ -2,9 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { CopyIcon, EditIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
+import { useParams } from "next/navigation";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,7 +21,6 @@ import { hasPermission } from "@/server/utils/sharePermissions";
 import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
 import { ShareLinkEditDialog } from "./share-link-edit-dialog";
 import type { ShareLinkFormData } from "./share-link-edit-form";
-import { useParams } from "next/navigation";
 
 interface ShareLinkDropdownMenuProps {
     children: React.ReactNode;
@@ -34,6 +35,7 @@ export function ShareLinkDropdownMenu({
     workspaceId,
     onDeleted,
 }: ShareLinkDropdownMenuProps) {
+    const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -62,7 +64,7 @@ export function ShareLinkDropdownMenu({
         e.preventDefault();
         closeDropdownMenu();
         navigator.clipboard.writeText(shareUrl);
-        toast.success("Share link copied to clipboard");
+        toast.success(t("shareLink.messages.shareLinkCopied"));
     };
 
     const handleEdit = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -90,7 +92,7 @@ export function ShareLinkDropdownMenu({
                         className="flex items-center gap-2"
                     >
                         <ExternalLinkIcon className="size-4" />
-                        <span>Open Share</span>
+                        <span>{t("shareLink.menu.openShare")}</span>
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
@@ -98,7 +100,7 @@ export function ShareLinkDropdownMenu({
                         className="flex items-center gap-2"
                     >
                         <CopyIcon className="size-4" />
-                        <span>Copy Link</span>
+                        <span>{t("shareLink.menu.copyLink")}</span>
                     </DropdownMenuItem>
 
                     {canEdit && (
@@ -107,7 +109,7 @@ export function ShareLinkDropdownMenu({
                             className="flex items-center gap-2"
                         >
                             <EditIcon className="size-4" />
-                            <span>Edit</span>
+                            <span>{t("shareLink.menu.edit")}</span>
                         </DropdownMenuItem>
                     )}
 
@@ -119,7 +121,7 @@ export function ShareLinkDropdownMenu({
                             className="flex items-center gap-2 text-destructive focus:text-destructive"
                         >
                             <Trash2Icon className="size-4" />
-                            <span>Delete</span>
+                            <span>{t("shareLink.menu.delete")}</span>
                         </DropdownMenuItem>
                     )}
                 </DropdownMenuContent>

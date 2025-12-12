@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon, RefreshCcwIcon } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { ShareLinkCard } from "@/components/share/share-link-card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ interface MySharesContentProps {
 }
 
 export default function MySharesContent({ workspaceId }: MySharesContentProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [page, setPage] = useState(1);
     const LIMIT = 10;
@@ -44,13 +46,14 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
             {/* Header */}
             <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold">
-                    My Shared Content
+                    {t("myShares.title")}
                 </h2>
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={handleRefresh}
                     disabled={isFetching}
+                    title={t("myShares.refresh")}
                 >
                     <RefreshCcwIcon className="size-4" />
                 </Button>
@@ -63,7 +66,7 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
                  </div>
             ): shareLinks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                    No shared content yet.
+                    {t("myShares.noData")}
                 </div>
             ): (
                 <>

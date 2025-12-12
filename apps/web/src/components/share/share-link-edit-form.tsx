@@ -1,8 +1,10 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -14,7 +16,6 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { ShareExpirationDropdown } from "./share-expiration-dropdown";
 import { SharePermissionDropdown } from "./share-permission-dropdown";
 import { UserSelector } from "./user-selector";
-import { useParams } from "next/navigation";
 
 export interface ShareLinkFormData {
     id: string;
@@ -46,6 +47,7 @@ interface ShareLinkEditFormProps {
 }
 
 export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel }: ShareLinkEditFormProps) {
+    const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const queryClient = getQueryClient();
     const [updatedShare, setUpdatedShare] = useState<Partial<ShareLinkFormData>>({});
@@ -74,7 +76,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             return await response.json();
         },
         onSuccess: () => {
-            toast.success("Share link updated successfully", {
+            toast.success(t("shareLink.messages.shareLinkUpdated"), {
                 position: "bottom-center",
             });
             queryClient.invalidateQueries({
@@ -86,7 +88,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             onSuccess?.();
         },
         onError: () => {
-            toast.error("Failed to update share link", {
+            toast.error(t("shareLink.messages.shareLinkUpdatedError"), {
                 position: "bottom-center",
             });
         }
@@ -94,7 +96,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
 
     const handleUpdate = () => {
         if (Object.keys(updatedShare).length === 0) {
-            toast.info("No changes to update", {
+            toast.info(t("shareLink.messages.noChangesToUpdate"), {
                 position: "bottom-center",
             });
             return;
@@ -132,23 +134,25 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
     return (
         <div className="space-y-6">
             <div className="space-y-3">
-                <Label>Share Link</Label>
+                <Label>{t("shareLink.title")}</Label>
                 <Input
                     value={`${window.location.origin}/${lng}/share/${shareLink.token}`}
                     readOnly
                     className="cursor-pointer hover:bg-muted"
                     onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/${lng}/share/${shareLink.token}`);
-                        toast.success("Share link copied to clipboard");
+                        toast.success(t("shareLink.messages.shareLinkCopied"), {
+                            position: "bottom-center",
+                        });
                     }}
                 />
             </div>
 
             <div className="space-y-3">
-                <Label>Name</Label>
+                <Label>{t("shareLink.editDialog.form.name")}</Label>
                 <Input
                     type="text"
-                    placeholder="Enter name"
+                    placeholder={t("shareLink.editDialog.form.namePlaceholder")}
                     value={updatedShare.name ?? shareLink.name ?? ""}
                     onChange={(e) => {
                         setUpdatedShare((prev) => ({
@@ -161,7 +165,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label>Public Permissions</Label>
+                <Label>{t("shareLink.editDialog.form.publicPermissionsLabel")}</Label>
                 <SharePermissionDropdown
                     mode="public"
                     publicPermissions={updatedShare.publicPermissions ?? shareLink.publicPermissions ?? 0}
@@ -198,14 +202,14 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                         disabled={isUpdating}
                     />
                     <Label htmlFor="editRequiredPassword" className="font-normal">
-                        Require Password Protection
+                        {t("shareLink.editDialog.form.requiredPasswordLabel")}
                     </Label>
                 </div>
 
                 {(updatedShare.requiredPassword ?? shareLink.requiredPassword) && (
                     <Input
                         type="password"
-                        placeholder="Enter new password (leave blank to keep current)"
+                        placeholder={t("shareLink.editDialog.form.passwordPlaceholder")}
                         onChange={(e) => {
                             if (e.target.value) {
                                 setUpdatedShare((prev) => ({
@@ -220,7 +224,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="editExpiresInSec">Expires In</Label>
+                <Label htmlFor="editExpiresInSec">{t("shareLink.editDialog.form.expiresInLabel")}</Label>
                 <ShareExpirationDropdown
                     expiresInSec={updatedShare.expiresInSec ?? shareLink.expiresInSec ?? null}
                     onSelect={(expiresInSec) => {
@@ -234,9 +238,9 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label>Description</Label>
+                <Label>{t("shareLink.editDialog.form.descriptionLabel")}</Label>
                 <Textarea
-                    placeholder="Add a note about this share..."
+                    placeholder={t("shareLink.editDialog.form.descriptionPlaceholder")}
                     value={updatedShare.description ?? shareLink.description ?? ""}
                     onChange={(e) => {
                         setUpdatedShare((prev) => ({

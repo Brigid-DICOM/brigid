@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -31,6 +32,7 @@ export function ShareDeleteConfirmDialog({
     shareLinkId,
     onSuccess,
 }: ShareDeleteConfirmDialogProps) {
+    const { t } = useT("translation");
     const { mutate: deleteShareLink, isPending: isDeleting } = useMutation({
         mutationFn: async (shareLinkId: string) => {
             const response = await apiClient.api.workspaces[":workspaceId"][
@@ -46,11 +48,11 @@ export function ShareDeleteConfirmDialog({
             return await response.json();
         },
         onSuccess: () => {
-            toast.success("Share link deleted successfully");
+            toast.success(t("shareLink.messages.shareLinkDeleted"));
             onSuccess?.();
         },
         onError: () => {
-            toast.error("Failed to delete share link");
+            toast.error(t("shareLink.messages.shareLinkDeletedError"));
         },
     });
 
@@ -62,13 +64,13 @@ export function ShareDeleteConfirmDialog({
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Share Link</AlertDialogTitle>
+                    <AlertDialogTitle>{t("shareLink.deleteConfirmDialog.title")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to delete this share link?
+                        {t("shareLink.deleteConfirmDialog.description")}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleConfirm}
                         disabled={isDeleting}
@@ -77,10 +79,10 @@ export function ShareDeleteConfirmDialog({
                         {isDeleting ? (
                             <>
                                 <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
-                                Deleting...
+                                {t("common.deleting")}
                             </>
                         ) : (
-                            "Delete"
+                            t("common.delete")
                         )}
                     </AlertDialogAction>
                 </AlertDialogFooter>

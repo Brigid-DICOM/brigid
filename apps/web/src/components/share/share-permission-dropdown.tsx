@@ -1,5 +1,8 @@
+"use client";
+
 import { ChevronDownIcon } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -33,6 +36,7 @@ type SharePermissionDropdownProps =
 }
 
 export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
+    const { t } = useT("translation");
     const id = props.id || nanoid();
     const permissions = props.mode === "public" ? props.publicPermissions : props.user.permissions;
 
@@ -67,10 +71,10 @@ export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
                     onSelect={(e) => e.preventDefault()}
                 >
                     <div className="flex items-center gap-2">
-                        <span className="whitespace-nowrap">Read</span>
+                        <span className="whitespace-nowrap">{t("shareLink.permissions.read")}</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        Allow to view/download the DICOM.
+                        {t("shareLink.permissions.readDesc")}
                     </p>
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
@@ -83,10 +87,10 @@ export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
                     onSelect={(e) => e.preventDefault()}
                 >
                     <div className="flex items-center gap-2">
-                        <span className="whitespace-nowrap">Update</span>
+                        <span className="whitespace-nowrap">{t("shareLink.permissions.update")}</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        Allow to edit the metadata of the DICOM.
+                        {t("shareLink.permissions.updateDesc")}
                     </p>
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>

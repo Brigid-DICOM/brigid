@@ -1,5 +1,9 @@
+"use client";
+
+import type { TFunction } from "i18next";
 import { CalendarIcon } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useT } from "@/app/_i18n/client";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -8,40 +12,42 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
 
-const EXPIRATION_OPTIONS = [
-    {
-        label: "Never",
-        value: null,
-    },
-    {
-        label: "1 Hour",
-        value: 60 * 60,
-    },
-    {
-        label: "1 Day",
-        value: 24 * 60 * 60,
-    },
-    {
-        label: "7 Days",
-        value: 7 * 24 * 60 * 60,
-    },
-    {
-        label: "15 Days",
-        value: 15 * 24 * 60 * 60,
-    },
-    {
-        label: "30 Days",
-        value: 30 * 24 * 60 * 60,
-    },
-    {
-        label: "60 Days",
-        value: 60 * 24 * 60 * 60,
-    },
-    {
-        label: "90 Days",
-        value: 90 * 24 * 60 * 60,
-    },
-];
+const getExpiration = (t: TFunction) => {
+    return [
+        {
+            label: t("common.expiration.never"),
+            value: null,
+        },
+        {
+            label: `1 ${t("common.expiration.hour")}`,
+            value: 60 * 60,
+        },
+        {
+            label: `1 ${t("common.expiration.day")}`,
+            value: 24 * 60 * 60,
+        },
+        {
+            label: `7 ${t("common.expiration.days")}`,
+            value: 7 * 24 * 60 * 60,
+        },
+        {
+            label: `15 ${t("common.expiration.days")}`,
+            value: 15 * 24 * 60 * 60,
+        },
+        {
+            label: `30 ${t("common.expiration.days")}`,
+            value: 30 * 24 * 60 * 60,
+        },
+        {
+            label: `60 ${t("common.expiration.days")}`,
+            value: 60 * 24 * 60 * 60,
+        },
+        {
+            label: `90 ${t("common.expiration.days")}`,
+            value: 90 * 24 * 60 * 60,
+        },
+    ]
+};
 
 interface ShareExpirationDropdownProps {
     expiresInSec: number | null;
@@ -54,6 +60,7 @@ export function ShareExpirationDropdown({
     onSelect,
     id,
 }: ShareExpirationDropdownProps) {
+    const { t } = useT("translation");
     const expirationId = id || nanoid();
 
     return (
@@ -64,7 +71,7 @@ export function ShareExpirationDropdown({
                     <span>
                         {expiresInSec
                             ? `${
-                                  EXPIRATION_OPTIONS.find(
+                                  getExpiration(t).find(
                                       (option) =>
                                           option.value ===
                                           expiresInSec
@@ -75,10 +82,10 @@ export function ShareExpirationDropdown({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-                {EXPIRATION_OPTIONS.map((option) => (
+                {getExpiration(t).map((option) => (
                     <DropdownMenuItem
                         key={option.value}
-                        onClick={() => onSelect(option.value)}
+                        onClick={() => onSelect(option.value ?? null)}
                     >
                         {option.label}
                     </DropdownMenuItem>

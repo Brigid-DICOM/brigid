@@ -2,9 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { CopyIcon, EditIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
+import { useParams } from "next/navigation";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -19,7 +21,6 @@ import { hasPermission } from "@/server/utils/sharePermissions";
 import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
 import { ShareLinkEditDialog } from "./share-link-edit-dialog";
 import type { ShareLinkFormData } from "./share-link-edit-form";
-import { useParams } from "next/navigation";
 
 interface ShareLinkContextMenuProps {
     children: React.ReactNode;
@@ -34,6 +35,7 @@ export function ShareLinkContextMenu({
     workspaceId,
     onDeleted,
 }: ShareLinkContextMenuProps) {
+    const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -60,7 +62,7 @@ export function ShareLinkContextMenu({
         e.preventDefault();
         closeContextMenu();
         navigator.clipboard.writeText(shareUrl);
-        toast.success("Share link copied to clipboard");
+        toast.success(t("shareLink.messages.shareLinkCopied"));
     };
 
     const handleEdit = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -86,7 +88,7 @@ export function ShareLinkContextMenu({
                         className="flex items-center gap-2"
                     >
                         <ExternalLinkIcon className="size-4" />
-                        <span>Open Share</span>
+                        <span>{t("shareLink.menu.openShare")}</span>
                     </ContextMenuItem>
 
                     <ContextMenuItem
@@ -94,7 +96,7 @@ export function ShareLinkContextMenu({
                         className="flex items-center gap-2"
                     >
                         <CopyIcon className="size-4" />
-                        <span>Copy Link</span>
+                        <span>{t("shareLink.menu.copyLink")}</span>
                     </ContextMenuItem>
 
                     {canEdit && (
@@ -103,7 +105,7 @@ export function ShareLinkContextMenu({
                             className="flex items-center gap-2"
                         >
                             <EditIcon className="size-4" />
-                            <span>Edit</span>
+                            <span>{t("shareLink.menu.edit")}</span>
                         </ContextMenuItem>
                     )}
 
@@ -115,26 +117,26 @@ export function ShareLinkContextMenu({
                             className="flex items-center gap-2 text-destructive focus:text-destructive"
                         >
                             <Trash2Icon className="size-4" />
-                            <span>Delete</span>
+                            <span>{t("shareLink.menu.delete")}</span>
                         </ContextMenuItem>
                     )}
                 </ContextMenuContent>
             </ContextMenu>
 
-            <ShareLinkEditDialog
+            {canEdit && <ShareLinkEditDialog
                 open={showEditDialog}
                 onOpenChange={setShowEditDialog}
                 shareLink={shareLink}
                 workspaceId={workspaceId}
-            />
+            />}
 
-            <ShareDeleteConfirmDialog
+            {isCreator && <ShareDeleteConfirmDialog
                 open={showDeleteDialog}
                 onOpenChange={setShowDeleteDialog}
                 shareLinkId={shareLink.id}
                 workspaceId={workspaceId}
                 onSuccess={onDeleted}
-            />
+            />}
         </>
     );
 }

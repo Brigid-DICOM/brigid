@@ -13,7 +13,15 @@
         "deleting": "Deleting...",
         "saveChanges": "Save Changes",
         "saving": "Saving...",
-        "remove": "Remove"
+        "remove": "Remove",
+        "updating": "Updating...",
+        "update": "Update",
+        "expiration": {
+            "never": "Never",
+            "day": "Day",
+            "days": "Days",
+            "hour": "Hour"
+        }
     },
     "auth": {
         "title": "Brigid - Sign In",
@@ -315,6 +323,63 @@
             "multiple": "Are you sure you want to permanently delete {{count}} {{level}}?",
             "cancel": "Cancel",
             "confirm": "Confirm"
+        }
+    },
+    "myShares": {
+        "title": "My Shared Content",
+        "noData": "No shared content yet.",
+        "refresh": "Refresh"
+    },
+    "shareLink": {
+        "title": "Share Link",
+        "menu": {
+            "openShare": "Open Share",
+            "copyLink": "Copy Link",
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "editDialog": {
+            "title": "Edit Share Link",
+            "form": {
+                "name": "Name",
+                "namePlaceholder": "Enter name",
+                "publicPermissionsLabel": "Public Permissions",
+                "requiredPasswordLabel": "Require Password Protection",
+                "passwordPlaceholder": "Enter new password (leave blank to keep current)",
+                "expiresInLabel": "Expires In",
+                "descriptionLabel": "Description",
+                "descriptionPlaceholder": "Add a note about this share..."
+            }
+        },
+        "deleteConfirmDialog": {
+            "title": "Delete Share Link",
+            "description": "Are you sure you want to delete this share link?"
+        },
+        "messages": {
+            "noChangesToUpdate": "No changes to update",
+            "shareLinkUpdated": "Share link updated successfully",
+            "shareLinkUpdatedError": "Failed to update share link",
+            "shareLinkDeleted": "Share link deleted successfully",
+            "shareLinkDeletedError": "Failed to delete share link",
+            "shareLinkCopied": "Share link copied to clipboard"
+        },
+        "permissions": {
+            "read": "Read",
+            "readDesc": "Allow to view/download the DICOM",
+            "update": "Update",
+            "updateDesc": "Allow to edit the metadata of the DICOM (e.g. tags)"
+        },
+        "userSelector": {
+            "addUsers": "Add Users",
+            "searchPlaceholder": "Search users by name or email...",
+            "noUsersFound": "No users found.",
+            "selectedMembers": "Selected Members",
+            "recipients": "Recipients",
+            "cancel": "Cancel",
+            "invite": "Invite",
+            "inviting": "Inviting...",
+            "success": "Member invited successfully",
+            "error": "Failed to invite member"
         }
     }
 }
