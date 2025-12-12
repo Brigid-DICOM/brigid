@@ -62,6 +62,7 @@ const updateShareLinkRoute = new Hono().patch(
                 password: payload.password,
                 expiresInSec: payload.expiresInSec,
                 recipientPermissions: payload.recipients,
+                description: payload.description,
             });
 
             if (!updatedShareLink) {

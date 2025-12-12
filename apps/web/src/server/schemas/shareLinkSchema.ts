@@ -74,6 +74,10 @@ export const updateShareLinkSchema = z.object({
         .max(SHARE_PERMISSIONS.FULL)
         .optional()
         .describe("The public permissions"),
+    description: z
+        .string()
+        .optional()
+        .describe("The description of the share link"),
     recipients: z
         .array(
             z.object({

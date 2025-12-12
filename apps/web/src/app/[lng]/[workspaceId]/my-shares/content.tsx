@@ -101,6 +101,7 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
                                         targetId: target.targetId,
                                     })),
                                     creatorId: shareLink.creatorId,
+                                    description: shareLink.description ?? undefined,
                                 }}
                                 workspaceId={workspaceId}
                                 onDeleted={handleShareDeleted}

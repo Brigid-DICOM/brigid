@@ -43,6 +43,7 @@ interface ShareLinkData {
     name?: string;
     token: string;
     accessCount: number;
+    description?: string;
     createdAt: Date;
     publicPermissions: number;
     requiredPassword: boolean;
@@ -94,6 +95,7 @@ export function ShareLinkCard({
                     expiresAt: shareLink.expiresAt,
                     recipients: shareLink.recipients,
                     creatorId: shareLink.creatorId,
+                    description: shareLink.description,
                 }}
                 onDeleted={onDeleted}
             >
@@ -152,6 +154,7 @@ export function ShareLinkCard({
                                     expiresAt: shareLink.expiresAt,
                                     recipients: shareLink.recipients,
                                     creatorId: shareLink.creatorId,
+                                    description: shareLink.description,
                                 }}
                                 workspaceId={workspaceId}
                                 onDeleted={onDeleted}

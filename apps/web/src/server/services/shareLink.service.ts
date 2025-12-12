@@ -271,6 +271,7 @@ export class ShareLinkService {
         password?: string;
         expiresInSec?: number;
         recipientPermissions?: Array<{ userId: string; permissions: number }>;
+        description?: string;
     }) {
         const shareLink = await this.entityManager.findOne(ShareLinkEntity, {
             where: { id: options.shareLinkId },
@@ -314,6 +315,10 @@ export class ShareLinkService {
             } else {
                 shareLink.expiresAt = null;
             }
+        }
+
+        if (options.description !== undefined) {
+            shareLink.description = options.description;
         }
 
         const updatedShareLink = await this.entityManager.save(
