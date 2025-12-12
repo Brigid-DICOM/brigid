@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow, isPast } from "date-fns";
 import {
     ClockIcon,
@@ -10,24 +10,18 @@ import {
     LockIcon,
     Trash2Icon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { usePagination } from "@/hooks/use-pagination";
-import { toggleSharePermission } from "@/lib/share/sharePermissionUtils";
-import { apiClient } from "@/react-query/apiClient";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { getTargetShareLinksQuery } from "@/react-query/queries/share";
 import { PaginationControls } from "../common/pagination-controls";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
-import { ShareExpirationDropdown } from "./share-expiration-dropdown";
-import { SharePermissionDropdown } from "./share-permission-dropdown";
-import { UserSelector } from "./user-selector";
-import { useParams } from "next/navigation";
+import { ShareLinkEditForm } from "./share-link-edit-form";
 
 interface ManageShareTabProps {
     workspaceId: string;
@@ -37,6 +31,7 @@ interface ManageShareTabProps {
 
 interface ShareLink {
     id: string;
+    creatorId: string;
     name?: string;
     token: string;
     publicPermissions: number;
@@ -63,9 +58,9 @@ export function ManageShareTab({
     targetIds,
 }: ManageShareTabProps) {
     const { lng } = useParams<{ lng: string }>();
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [editingShare, setEditingShare] = useState<ShareLink | null>(null);
-    const [updatedShare, setUpdatedShare] = useState<Partial<ShareLink>>({});
     const [targetIdToDelete, setTargetIdToDelete] = useState<string | null>(
         null,
     );
@@ -73,15 +68,6 @@ export function ManageShareTab({
         useState(false);
     const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
         usePagination();
-
-    const recipients = useMemo(() => {
-        const share = updatedShare.recipients ?? editingShare?.recipients ?? [];
-        return share.map((recipient) => ({
-            userId: recipient.userId,
-            permissions: recipient.permissions,
-            user: recipient.user,
-        }));
-    }, [editingShare, updatedShare]);
 
     const { data: shareLinks, isLoading } = useQuery(
         getTargetShareLinksQuery({
@@ -94,45 +80,6 @@ export function ManageShareTab({
     );
 
     const canGoNext = !!shareLinks?.data.hasNextPage;
-
-    const { mutate: updateShareLink, isPending: isUpdating } = useMutation({
-        mutationFn: async ({
-            shareLinkId,
-            updates,
-        }: {
-            shareLinkId: string;
-            updates: Partial<ShareLink>;
-        }) => {
-            const response = await apiClient.api.workspaces[":workspaceId"][
-                "share-links"
-            ][":shareLinkId"].$patch({
-                param: { workspaceId, shareLinkId },
-                json: updates,
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to update share link");
-            }
-
-            return await response.json();
-        },
-        onSuccess: () => {
-            toast.success("Share link updated successfully");
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "share-links",
-                    workspaceId,
-                    targetType,
-                    targetIds.join(","),
-                ],
-            });
-            setEditingShare(null);
-            setUpdatedShare({});
-        },
-        onError: () => {
-            toast.error("Failed to update share link");
-        },
-    });
 
     const copyShareLink = (token: string) => {
         const shareUrl = `${window.location.origin}/${lng}/share/${token}`;
@@ -279,7 +226,6 @@ export function ManageShareTab({
                                                     setEditingShare(
                                                         share as ShareLink,
                                                     );
-                                                    setUpdatedShare({});
                                                 }}
                                                 title="Edit share link"
                                             >
@@ -350,202 +296,25 @@ export function ManageShareTab({
         );
     }
 
-    const handleUpdate = () => {
-        if (Object.keys(updatedShare).length === 0) {
-            toast.info("No changes to update");
-            return;
-        }
-
-        updateShareLink({
-            shareLinkId: editingShare.id,
-            updates: updatedShare,
-        });
-    };
-
-    const handleSelectUser = (user: ShareLink["recipients"][number]) => {
-        setUpdatedShare((prev) => {
-            const existing = prev.recipients?.find(
-                (u) => u.userId === user.userId,
-            );
-            if (existing) {
-                return {
-                    ...prev,
-                    recipients:
-                        prev.recipients?.map((u) =>
-                            u.userId === user.userId ? user : u,
-                        ) ?? [],
-                };
-            }
-            return {
-                ...prev,
-                recipients: [...(prev.recipients ?? []), user],
-            };
-        });
-    };
-
-    const handleRemoveUser = (userId: string) => {
-        setUpdatedShare((prev) => {
-            return {
-                ...prev,
-                recipients:
-                    prev.recipients?.filter((u) => u.userId !== userId) ?? [],
-            };
-        });
-    };
-
     return (
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 max-h-[600px] overflow-y-auto">
             <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Edit Share Link</h3>
+                <h3 className="font-semibold">{t("shareLink.editDialog.title")}</h3>
                 <p className="text-xs text-gray-500 mt-1">
                     Token: {editingShare.token.slice(0, 16)}...
                 </p>
             </div>
 
-            <div className="space-y-3">
-                <Label>Share Link</Label>
-                <Input
-                    value={`${window.location.origin}/${lng}/share/${editingShare.token}`}
-                    readOnly
-                    className="cursor-pointer hover:bg-gray-100"
-                    onClick={() => {
-                        navigator.clipboard.writeText(
-                            `${window.location.origin}/${lng}/share/${editingShare.token}`,
-                        );
-                        toast.success("Share link copied to clipboard", {
-                            position: "bottom-center",
-                        });
-                    }}
-                />
-            </div>
-
-            <div className="space-y-3">
-                <Label>Name</Label>
-                <Input
-                    type="text"
-                    placeholder="Enter name"
-                    value={updatedShare.name ?? editingShare.name ?? ""}
-                    onChange={(e) => {
-                        setUpdatedShare((prev) => ({
-                            ...prev,
-                            name: e.target.value.trim() ?? undefined,
-                        }));
-                    }}
-                    maxLength={255}
-                />
-            </div>
-
-            <div className="space-y-3">
-                <Label>Public Permissions</Label>
-                <SharePermissionDropdown
-                    mode="public"
-                    publicPermissions={
-                        updatedShare.publicPermissions ??
-                        editingShare.publicPermissions ??
-                        0
-                    }
-                    onTogglePermission={(permission) => {
-                        setUpdatedShare((prev) => ({
-                            ...prev,
-                            publicPermissions: toggleSharePermission(
-                                prev.publicPermissions ??
-                                    editingShare.publicPermissions ??
-                                    0,
-                                permission,
-                            ),
-                        }));
-                    }}
-                    id="public-permissions"
-                />
-            </div>
-
-            <UserSelector
-                selected={recipients}
-                onSelect={handleSelectUser}
-                onRemove={handleRemoveUser}
+            <ShareLinkEditForm 
+                shareLink={editingShare}
+                workspaceId={workspaceId}
+                onSuccess={() => {
+                    setEditingShare(null);
+                }}
+                onCancel={() => {
+                    setEditingShare(null);
+                }}
             />
-
-            <div className="space-y-3 border-t pt-4">
-                <div className="flex items-center space-x-2">
-                    <Checkbox
-                        id="editRequiredPassword"
-                        checked={
-                            updatedShare.requiredPassword ??
-                            editingShare.requiredPassword
-                        }
-                        onCheckedChange={(checked) => {
-                            setUpdatedShare((prev) => ({
-                                ...prev,
-                                requiredPassword: checked as boolean,
-                            }));
-                        }}
-                        disabled={isUpdating}
-                    />
-                    <Label
-                        htmlFor="editRequiredPassword"
-                        className="font-normal"
-                    >
-                        Require Password Protection
-                    </Label>
-                </div>
-
-                {(updatedShare.requiredPassword ??
-                    editingShare.requiredPassword) && (
-                    <Input
-                        type="password"
-                        placeholder="Enter new password (leave blank to keep current)"
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                setUpdatedShare((prev) => ({
-                                    ...prev,
-                                    password: e.target.value,
-                                }));
-                            }
-                        }}
-                        disabled={isUpdating}
-                    />
-                )}
-            </div>
-
-            <div className="space-y-3">
-                <Label htmlFor="editExpiresInSec">Expires In</Label>
-                <ShareExpirationDropdown
-                    expiresInSec={
-                        updatedShare.expiresInSec ??
-                        editingShare.expiresInSec ??
-                        null
-                    }
-                    onSelect={(expiresInSec) => {
-                        setUpdatedShare((prev) => ({
-                            ...prev,
-                            expiresInSec: expiresInSec ?? undefined,
-                        }));
-                    }}
-                    id="edit-expires-in"
-                />
-            </div>
-
-            <div className="flex gap-2">
-                <Button
-                    onClick={handleUpdate}
-                    disabled={
-                        isUpdating || Object.keys(updatedShare).length === 0
-                    }
-                    className="flex-1"
-                >
-                    {isUpdating ? "Updating..." : "Update"}
-                </Button>
-                <Button
-                    variant="outline"
-                    onClick={() => {
-                        setEditingShare(null);
-                        setUpdatedShare({});
-                    }}
-                    disabled={isUpdating}
-                >
-                    Cancel
-                </Button>
-            </div>
         </div>
     );
 }
