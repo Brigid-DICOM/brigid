@@ -109,6 +109,9 @@ export function InviteMemberDialog({
             setSearchInput("");
             onOpenChange(false);
             clearSearch();
+queryClient.invalidateQueries({
+                queryKey: ["workspace", workspaceId, "members"],
+            });
         } catch (error) {
             console.error("Failed to invite member", error);
             toast.error("Failed to invite member", {
