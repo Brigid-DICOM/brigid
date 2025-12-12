@@ -1,8 +1,15 @@
+"use client";
+
 import { Grid3x3Icon, ListChecksIcon, ListIcon, Trash2Icon, UndoIcon, XIcon } from "lucide-react";
 import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { hasPermission } from "@/server/utils/workspacePermissions";
 import { type LayoutMode, useLayoutStore } from "@/stores/layout-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { DicomDeleteConfirmDialog } from "./dicom-delete-confirm-dialog";
 
 interface DicomRecycleSelectionControlBarProps {
@@ -24,9 +31,14 @@ export function DicomRecycleSelectionControlBar({
     onDelete,
     dicomLevel,
 }: DicomRecycleSelectionControlBarProps) {
+    const { t } = useT("translation");
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
     const layoutMode = useLayoutStore((state) => state.layoutMode);
     const setLayoutMode = useLayoutStore((state) => state.setLayoutMode);
+    const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
+
+    const canRestore = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
+    const canDelete = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
 
     const handleLayoutChange = (mode: LayoutMode) => {
         setLayoutMode(mode);
@@ -52,7 +64,7 @@ export function DicomRecycleSelectionControlBar({
                                 variant={"outline"}
                                 size="sm"
                                 onClick={onClearSelection}
-                                title="清除選取"
+                                title={t("dicom.selectionControl.clearSelection")}
                             >
                                 <XIcon className="size-4" />
                             </Button>
@@ -62,37 +74,37 @@ export function DicomRecycleSelectionControlBar({
                                 variant={"outline"}
                                 size="sm"
                                 onClick={onSelectAll}
-                                title="全選"
+                                title={t("dicom.selectionControl.selectAll")}
                             >
                                 <ListChecksIcon className="size-4" />
                             </Button>
                         )}
                         {selectedCount > 0 && (
                             <ButtonGroupText className="bg-background">
-                                {selectedCount} 筆
+                                {t("dicom.selectionControl.selectedCount", { count: selectedCount })}
                             </ButtonGroupText>
                         )}
                     </ButtonGroup>
 
-                    <ButtonGroup>
-                        <Button
+                    {selectedCount > 0 && <ButtonGroup>
+                        {canRestore && <Button
                             variant={"outline"}
                             size="sm"
                             onClick={onRestore}
-                            title="Restore"
+                            title={t("dicom.selectionControl.restore")}
                         >
                             <UndoIcon className="size-4" />
-                        </Button>
+                        </Button>}
 
-                        <Button
+                        {canDelete && <Button
                             variant={"outline"}
                             size="sm"
                             onClick={handleDelete}
-                            title="Delete"
+                            title={t("dicom.selectionControl.delete")}
                         >
                             <Trash2Icon className="size-4 text-destructive" />
-                        </Button>
-                    </ButtonGroup>
+                        </Button>}
+                    </ButtonGroup>}
                 </ButtonGroup>
 
 

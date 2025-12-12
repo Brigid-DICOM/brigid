@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/app/_i18n/client";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -37,6 +38,7 @@ export function DicomDeleteConfirmDialog({
     selectedCount,
     onConfirm,
 }: DicomDeleteConfirmDialogProps) {
+    const { t } = useT("translation");
     const label = dicomLevelLabels[dicomLevel];
     const isSingle = selectedCount === 1;
     const itemLabel = isSingle ? label.singular : label.plural;
@@ -50,17 +52,18 @@ export function DicomDeleteConfirmDialog({
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>確認永久刪除</AlertDialogTitle>
+                    <AlertDialogTitle>{t("dicom.deleteConfirmDialog.title")}</AlertDialogTitle>
                     <AlertDialogDescription>
                         {isSingle
-                            ? `確定要將此項目 (${itemLabel}) 永久刪除嗎？`
-                            : `確定要將 ${selectedCount} 個項目 (${itemLabel}) 永久刪除嗎？`}
+                            ? t("dicom.deleteConfirmDialog.single", { level: itemLabel })
+                            : t("dicom.deleteConfirmDialog.multiple", { count: selectedCount, level: itemLabel })
+                        }
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogCancel>{t("dicom.deleteConfirmDialog.cancel")}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleConfirm}>
-                        確認
+                        {t("dicom.deleteConfirmDialog.confirm")}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

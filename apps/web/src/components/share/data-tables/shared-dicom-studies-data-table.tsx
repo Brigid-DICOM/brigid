@@ -8,9 +8,11 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
@@ -48,6 +50,8 @@ function ActionsCell({
     publicPermissions?: number;
 }) {
     const router = useRouter();
+    const { t } = useT("translation");
+    const { lng } = useParams<{ lng: string }>();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { clearSelection } = useDicomStudySelectionStore();
@@ -62,7 +66,7 @@ function ActionsCell({
         e.stopPropagation();
         clearSelection();
         const params = password ? `?password=${encodeURIComponent(password)}` : "";
-        router.push(`/share/${token}/studies/${studyInstanceUid}${params}`);
+        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}${params}`);
     }
 
     const handleDownloadStudy = async (e: React.MouseEvent<HTMLDivElement>) => {
@@ -74,8 +78,8 @@ function ActionsCell({
                 password,
             });
         } catch (error) {
-            console.error("Failed to download study", error);
-            toast.error("Failed to download study");
+            console.error(t("dicom.messages.failedToDownload", { level: "study" }), error);
+            toast.error(t("dicom.messages.failedToDownload", { level: "study" }));
         }
     }
 
@@ -96,19 +100,19 @@ function ActionsCell({
                         variant={"ghost"}
                         className="size-8 p-0"
                     >
-                        <span className="sr-only">Open Menu</span>
+                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
                         <MoreHorizontalIcon className="size-4" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={handleEnterSeries}>
-                        Enter Series
+                        {t("dicom.contextMenu.enterSeries")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        Open in BlueLight Viewer
+                        {t("dicom.contextMenu.openInBlueLight")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleDownloadStudy}>
-                        Download Study
+                        {t("dicom.contextMenu.download")}
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
@@ -146,6 +150,7 @@ export function SharedDicomStudiesDataTable({
     publicPermissions = 0,
     className
 }: SharedDicomStudiesDataTableProps) {
+    const { t } = useT("translation");
     const {
         toggleStudySelection,
         isStudySelected,
@@ -155,7 +160,7 @@ export function SharedDicomStudiesDataTable({
         selectStudy
     } = useDicomStudySelectionStore();
 
-    const generalColumns = useMemo(() => createStudyColumns(), []);
+    const generalColumns = useMemo(() => createStudyColumns(t), [t]);
 
     const columns: ColumnDef<DicomStudyData>[] = useMemo(() => [
         {
@@ -188,7 +193,7 @@ export function SharedDicomStudiesDataTable({
         },
         {
             accessorKey: "thumbnail",
-            header: "Preview",
+            header: t("dicom.columns.preview"),
             cell: ({ row }) => (
                 <TableThumbnailCell
                     source={{
@@ -202,7 +207,7 @@ export function SharedDicomStudiesDataTable({
         },
         {
             accessorKey: "tags",
-            header: "Tags",
+            header: t("dicom.columns.tags"),
             cell: ({ row }) => (
                 <DicomDataTableTagCell
                     mode="share"
@@ -237,7 +242,8 @@ export function SharedDicomStudiesDataTable({
         isStudySelected,
         toggleStudySelection,
         generalColumns,
-        publicPermissions
+        publicPermissions,
+        t
     ]);
 
     const table = useReactTable({
@@ -323,7 +329,7 @@ export function SharedDicomStudiesDataTable({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
+                                    {t("dicom.messages.noData", { level: "studies" })}
                                 </TableCell>
                             </TableRow>
                         )}

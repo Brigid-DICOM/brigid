@@ -3,7 +3,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -41,6 +43,7 @@ export function WorkspaceGeneralSettings({
     workspace,
     onClose,
 }: WorkspaceGeneralSettingsProps) {
+    const { t } = useT("translation");
     const [name, setName] = useState(workspace.name);
     const queryClient = getQueryClient();
     const router = useRouter();
@@ -65,12 +68,12 @@ export function WorkspaceGeneralSettings({
             await queryClient.invalidateQueries({
                 queryKey: ["workspace", workspace.id],
             });
-            toast.success("Workspace updated successfully", {
+            toast.success(t("workspaceSettings.messages.workspaceUpdated"), {
                 position: "bottom-center",
             });
         } catch (error) {
             console.error("Failed to update workspace", error);
-            toast.error("Failed to update workspace", {
+            toast.error(t("workspaceSettings.messages.workspaceUpdatedError"), {
                 position: "bottom-center",
             });
         } finally {
@@ -85,10 +88,12 @@ export function WorkspaceGeneralSettings({
 
             onClose();
             router.push("/");
-            toast.success("Workspace deleted");
+            toast.success(t("workspaceSettings.messages.workspaceDeleted"), {
+                position: "bottom-center",
+            });
         } catch (error) {
             console.error("Failed to delete workspace", error);
-            toast.error("Failed to delete workspace", {
+            toast.error(t("workspaceSettings.messages.workspaceDeletedError"), {
                 position: "bottom-center",
             });
         } finally {
@@ -101,7 +106,7 @@ export function WorkspaceGeneralSettings({
             await leaveWorkspace(workspace.id);
             await queryClient.invalidateQueries({ queryKey: ["workspaces"] });
 
-            toast.success("You have left the workspace", {
+            toast.success(t("workspaceSettings.messages.workspaceLeft"), {
                 position: "bottom-center",
             });
             onClose();
@@ -109,7 +114,7 @@ export function WorkspaceGeneralSettings({
             router.push("/");
         } catch (error) {
             console.error("Failed to leave workspace", error);
-            toast.error("Failed to leave workspace", {
+            toast.error(t("workspaceSettings.messages.workspaceLeftError"), {
                 position: "bottom-center",
             });
         } finally {
@@ -124,7 +129,7 @@ export function WorkspaceGeneralSettings({
                 <div className="grid gap-4">
                     <div className="space-y-1 flex items-center gap-2">
                         <h3 className="text-lg font-medium">
-                            Workspace Settings
+                            {t("workspaceSettings.generalTab.workspace.title")}
                         </h3>
                     </div>
 
@@ -132,11 +137,10 @@ export function WorkspaceGeneralSettings({
                     <div className="grid gap-2">
                         <div className="space-y-1">
                             <h4 className="text-sm font-medium leading-none">
-                                Workspace Name
+                                {t("workspaceSettings.generalTab.workspace.workspaceName.title")}
                             </h4>
                             <p className="text-sm text-muted-foreground">
-                                This is the name of your workspace. You can
-                                change it here.
+                                {t("workspaceSettings.generalTab.workspace.workspaceName.desc")}
                             </p>
                         </div>
                         <div className="flex gap-2">
@@ -152,7 +156,7 @@ export function WorkspaceGeneralSettings({
                 {/* Danger Zone */}
                 <div className="grid gap-4 mt-6">
                     <div className="space-y-1">
-                        <h3 className="text-lg font-medium">Danger Zone</h3>
+                        <h3 className="text-lg font-medium">{t("workspaceSettings.generalTab.workspace.dangerZone.title")}</h3>
                         <Separator />
                     </div>
 
@@ -161,27 +165,27 @@ export function WorkspaceGeneralSettings({
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button variant={"destructive"} size="sm">
-                                        Leave Workspace
+                                        {t("workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspace")}
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>
-                                            Are you sure you want to leave this workspace?
+                                            {t("workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspaceAlertTitle")}
                                         </AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            You will lose access to all workspace resources and data.
+                                            {t("workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspaceAlertDesc")}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>
-                                            Cancel
+                                            {t("common.cancel")}
                                         </AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={handleLeaveWorkspace}
                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         >
-                                            {isLeavingWorkspace ? "Leaving..." : "Leave"}
+                                            {isLeavingWorkspace ? t("common.leaving") : t("common.leave")}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -194,11 +198,10 @@ export function WorkspaceGeneralSettings({
                             <div className="flex items-center justify-between">
                                 <div className="space-y-1 mb-2">
                                     <p className="text-sm font-medium text-destructive">
-                                        Delete Workspace
+                                        {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspace")}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        Permanently delete this workspace and
-                                        all its data.
+                                        {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceDesc")}
                                     </p>
                                 </div>
                             </div>
@@ -208,32 +211,37 @@ export function WorkspaceGeneralSettings({
                                     <Button 
                                         variant={"destructive"} size="sm"
                                     >
-                                        Delete Workspace
+                                        {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspace")}
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>
-                                            Are you absolutely sure?
+                                            {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceAlertTitle")}
                                         </AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This
-                                            will permanently delete the
-                                            workspace{" "}
-                                            <strong>{workspace.name}</strong>{" "}
-                                            and remove all associated data.
+                                            <Trans
+                                                i18nKey="workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceAlertDesc"
+                                                components={{
+                                                    1: <strong />
+                                                }}
+                                                values={{
+                                                    workspaceName: workspace.name
+                                                }}
+                                                shouldUnescape={true}
+                                            />
                                         </AlertDialogDescription>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>
-                                                Cancel
+                                                {t("common.cancel")}
                                             </AlertDialogCancel>
                                             <AlertDialogAction
                                                 onClick={handleDeleteWorkspace}
                                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                             >
                                                 {deleteWorkspace.isPending
-                                                    ? "Deleting..."
-                                                    : "Delete"}
+                                                    ? t("common.deleting")
+                                                    : t("common.delete")}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogHeader>
@@ -247,10 +255,10 @@ export function WorkspaceGeneralSettings({
             <div className="border-t p-4 bg-background mt-auto">
                 <DialogFooter>
                     <Button variant={"outline"} onClick={onClose}>
-                        Cancel
+                        {t("common.cancel")}
                     </Button>
-                    <Button onClick={handleUpdateWorkspace}>
-                        Save Changes
+                    <Button onClick={handleUpdateWorkspace} disabled={updateWorkspace.isPending}>
+                        {updateWorkspace.isPending ? t("common.saving") : t("common.saveChanges")}
                     </Button>
                 </DialogFooter>
             </div>

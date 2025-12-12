@@ -8,6 +8,7 @@ import {
     XCircleIcon,
     XIcon,
 } from "lucide-react";
+import { useT } from "@/app/_i18n/client";
 import { formatFileSize } from "@/lib/utils";
 import {
     type UploadStatus,
@@ -20,6 +21,7 @@ import { Progress } from "../ui/progress";
 import { ScrollArea } from "../ui/scroll-area";
 
 export function UploadTaskListInLine() {
+    const { t } = useT("translation");
     const {
         tasks,
         removeTask,
@@ -69,19 +71,19 @@ export function UploadTaskListInLine() {
     const getStatusText = (status: UploadTask["status"]) => {
         switch (status) {
             case "validating":
-                return "驗證中";
+                return t("upload.status.validating");
             case "pending":
-                return "等待中";
+                return t("upload.status.pending");
             case "uploading":
-                return "上傳中";
+                return t("upload.status.uploading");
             case "completed":
-                return "完成";
+                return t("upload.status.completed");
             case "failed":
-                return "失敗";
+                return t("upload.status.failed");
             case "cancelled":
-                return "已取消";
+                return t("upload.status.cancelled");
             default:
-                return "未知";
+                return t("upload.status.unknown");
         }
     };
 
@@ -97,7 +99,7 @@ export function UploadTaskListInLine() {
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex text-sm font-medium items-center space-x-2">
                         <UploadIcon className="size-4" />
-                        <span>Uploading Tasks ({tasks.length})</span>
+                        <span>{t("upload.uploadingTasks")} ({tasks.length})</span>
                     </CardTitle>
 
                     {hasCompletedTasks && (
@@ -108,23 +110,23 @@ export function UploadTaskListInLine() {
                             className="h-8"
                         >
                             <Trash2Icon className="size-3 mr-1" />
-                            Clear Completed Tasks
+                            {t("upload.clearCompleted")}
                         </Button>
                     )}
                 </div>
 
                 <div className="flex gap-4 text-xs text-muted-foreground">
                     {activeTasksCount > 0 && (
-                        <span>正在上傳: {activeTasksCount}</span>
+                        <span>{t("upload.uploading")} {activeTasksCount}</span>
                     )}
                     {validCount > 0 && (
                         <span className="text-green-600">
-                            有效: {validCount}
+                            {t("upload.valid")} {validCount}
                         </span>
                     )}
                     {invalidCount > 0 && (
                         <span className="text-destructive">
-                            無效: {invalidCount}
+                            {t("upload.invalid")} {invalidCount}
                         </span>
                     )}
                 </div>

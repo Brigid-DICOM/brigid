@@ -2,6 +2,7 @@
 
 import { ChevronDownIcon, PlusIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -23,11 +24,12 @@ export function SearchFieldDropdownMenu({
     onSelect,
     existingFields,
 }: SearchFieldDropdownMenuProps) {
+    const { t } = useT("translation");
     const fields = SEARCH_FIELD_CONFIGS[level];
 
     const handleSelect = (field: string) => {
         if (existingFields.includes(field)) {
-            toast.warning("This field is already selected");
+            toast.warning(t("dicom.search.fieldAlreadySelected"));
             return;
         }
 
@@ -42,7 +44,7 @@ export function SearchFieldDropdownMenu({
                     className="flex items-center space-x-2"
                 >
                     <PlusIcon className="size-4" />
-                    <span>Add Field</span>
+                    <span>{t("dicom.search.addField")}</span>
                     <ChevronDownIcon className="size-4" />
                 </Button>
             </DropdownMenuTrigger>
@@ -56,7 +58,7 @@ export function SearchFieldDropdownMenu({
                             disabled={isDisabled}
                         >
                             {field.label}
-                            {isDisabled && " (Exists)"}
+                            {isDisabled && ` (${t("dicom.search.fieldExists")})`}
                         </DropdownMenuItem>
                     );
                 })}

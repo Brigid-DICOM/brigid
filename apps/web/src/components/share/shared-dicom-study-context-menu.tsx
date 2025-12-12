@@ -21,6 +21,8 @@ import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
 import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
+import { useParams } from "next/navigation";
+import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomStudyContextMenuProps {
     children: React.ReactNode;
@@ -40,6 +42,8 @@ export function SharedDicomStudyContextMenu({
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const router = useRouter();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
+    const { lng } = useParams<{ lng: string }>();
+    const { t } = useT("translation");
     const { getSelectedStudyIds } = useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
 
@@ -55,7 +59,7 @@ export function SharedDicomStudyContextMenu({
         const params = password
             ? `?password=${encodeURIComponent(password)}`
             : "";
-        router.push(`/share/${token}/studies/${studyInstanceUid}${params}`);
+        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}${params}`);
     };
 
     const handleDownloadSelected = async (
@@ -67,7 +71,7 @@ export function SharedDicomStudyContextMenu({
         const currentSelectedIds = getSelectedStudyIds();
 
         if (currentSelectedIds.length === 0) {
-            toast.error("Please select at least one study to download");
+            toast.error(t("dicom.messages.selectToDownload", { level: "study" }));
             return;
         }
 
@@ -78,13 +82,13 @@ export function SharedDicomStudyContextMenu({
                 password,
             );
         } catch (error) {
-            console.error("Failed to download selected studies", error);
+            console.error(t("dicom.messages.downloadSelectedError", { level: "studies" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download selected studies");
+            toast.error(t("dicom.messages.downloadSelectedError", { level: "studies" }));
         }
     };
 
@@ -104,7 +108,7 @@ export function SharedDicomStudyContextMenu({
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-56">
+                <ContextMenuContent className="w-60">
                     {selectedIds.length === 1 && (
                         <>
                             <ContextMenuItem
@@ -112,14 +116,14 @@ export function SharedDicomStudyContextMenu({
                                 className="flex items-center space-x-2"
                             >
                                 <CornerDownLeftIcon className="size-4" />
-                                <span>Enter Series</span>
+                                <span>{t("dicom.contextMenu.enterSeries")}</span>
                             </ContextMenuItem>
                             <ContextMenuItem
                                 onClick={handleOpenBlueLightViewer}
                                 className="flex items-center space-x-2"
                             >
                                 <EyeIcon className="size-4" />
-                                <span>Open in BlueLight Viewer</span>
+                                <span>{t("dicom.contextMenu.openInBlueLight")}</span>
                             </ContextMenuItem>
 
                             <ContextMenuItem
@@ -127,7 +131,7 @@ export function SharedDicomStudyContextMenu({
                                 className="flex items-center space-x-2"
                             >
                                 <DownloadIcon className="size-4" />
-                                <span>Download</span>
+                                <span>{t("dicom.contextMenu.download")}</span>
                             </ContextMenuItem>
 
                             {canUpdate && (
@@ -151,7 +155,7 @@ export function SharedDicomStudyContextMenu({
                     {selectedIds.length > 1 && (
                         <>
                             <ContextMenuLabel>
-                                Selected Item ({selectedIds.length})
+                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
                             </ContextMenuLabel>
 
                             <ContextMenuItem
@@ -159,7 +163,7 @@ export function SharedDicomStudyContextMenu({
                                 className="flex items-center space-x-2"
                             >
                                 <DownloadIcon className="size-4" />
-                                <span>Download</span>
+                                <span>{t("dicom.contextMenu.download")}</span>
                             </ContextMenuItem>
                         </>
                     )}

@@ -3,10 +3,12 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CornerDownLeftIcon, Trash2Icon, UndoIcon } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -37,6 +39,8 @@ export function DicomRecycleSeriesContextMenu({
     workspaceId,
     studyInstanceUid,
 }: DicomRecycleSeriesContextMenuProps) {
+    const { lng } = useParams<{ lng: string }>();
+    const { t } = useT("translation");
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
     const router = useRouter();
@@ -116,7 +120,7 @@ export function DicomRecycleSeriesContextMenu({
         closeContextMenu();
         clearSelection();
         router.push(
-            `/${workspaceId}/dicom-recycle/studies/${studyInstanceUid}/series/${selectedIds[0]}/instances`,
+            `/${lng}/${workspaceId}/dicom-recycle/studies/${studyInstanceUid}/series/${selectedIds[0]}/instances`,
         );
     };
 
@@ -142,10 +146,10 @@ export function DicomRecycleSeriesContextMenu({
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-56">
+                <ContextMenuContent className="w-60">
                     {selectedIds.length > 1 && (
                         <ContextMenuLabel>
-                            Selected Items ({selectedIds.length})
+                            {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
                         </ContextMenuLabel>
                     )}
 
@@ -154,7 +158,7 @@ export function DicomRecycleSeriesContextMenu({
                         className="flex items-center space-x-2"
                     >
                         <CornerDownLeftIcon className="size-4" />
-                        <span>Enter Instances</span>
+                        <span>{t("dicom.contextMenu.enterInstances")}</span>
                     </ContextMenuItem>
 
                     {canRestore && (
@@ -163,7 +167,7 @@ export function DicomRecycleSeriesContextMenu({
                             className="flex items-center space-x-2"
                         >
                             <UndoIcon className="size-4" />
-                            <span>Restore</span>
+                            <span>{t("dicom.contextMenu.restore")}</span>
                         </ContextMenuItem>
                     )}
 
@@ -173,7 +177,7 @@ export function DicomRecycleSeriesContextMenu({
                             className="flex items-center space-x-2"
                         >
                             <Trash2Icon className="size-4" />
-                            <span>Delete</span>
+                            <span>{t("dicom.contextMenu.delete")}</span>
                         </ContextMenuItem>
                     )}
                 </ContextMenuContent>

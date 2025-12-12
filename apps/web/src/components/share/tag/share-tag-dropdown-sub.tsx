@@ -18,6 +18,7 @@ import {
     removeShareTagAssignmentMutation,
 } from "@/react-query/queries/share-tag";
 import { useShareTagStore } from "@/stores/share-tag-store";
+import { useT } from "@/app/_i18n/client";
 
 interface ShareTagDropdownSubProps {
     token: string;
@@ -39,6 +40,7 @@ export function ShareTagDropdownSub({
     password,
     onOpenCreateTagDialog,
 }: ShareTagDropdownSubProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [optimisticUpdates, setOptimisticUpdates] = useState<
         Map<string, OptimisticState>
@@ -162,7 +164,7 @@ export function ShareTagDropdownSub({
                 }
                 return newMap;
             });
-            toast.error("新增標籤失敗");
+            toast.error(t("share.messages.failedToAssignTags"));
         },
     });
 
@@ -220,7 +222,7 @@ export function ShareTagDropdownSub({
                 }
                 return newMap;
             });
-            toast.error("移除標籤失敗");
+            toast.error(t("share.messages.failedToRemoveTags"));
         },
     });
 
@@ -270,14 +272,14 @@ export function ShareTagDropdownSub({
 
     return (
         <DropdownMenuSub>
-            <DropdownMenuSubTrigger>標籤</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>{t("dicom.tagContextMenu.tags")}</DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
                 <DropdownMenuItem
                     className="flex items-center space-x-2"
                     onClick={onOpenCreateTagDialog}
                 >
                     <TagsIcon className="size-4" />
-                    <span>建立標籤</span>
+                    <span>{t("dicom.tagContextMenu.createTag")}</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
@@ -285,7 +287,7 @@ export function ShareTagDropdownSub({
                 {isLoadingTags && (
                     <DropdownMenuItem className="flex items-center space-x-2">
                         <Loader2Icon className="size-4 animate-spin" />
-                        <span>Loading...</span>
+                        <span>{t("common.loading")}</span>
                     </DropdownMenuItem>
                 )}
 
@@ -294,7 +296,7 @@ export function ShareTagDropdownSub({
                         disabled
                         className="text-muted-foreground"
                     >
-                        尚無標籤
+                        <span>{t("dicom.tagContextMenu.noTags")}</span>
                     </DropdownMenuItem>
                 )}
 

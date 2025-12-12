@@ -1,0 +1,320 @@
+{
+    "common": {
+        "hello": "Hello",
+        "title": "Brigid",
+        "description": "Brigid PACS",
+        "pageNotFound": "Page Not Found",
+        "pageNotFoundDesc": "The page you are looking for does not exist.",
+        "goBackHome": "Go Back Home",
+        "loading": "Loading...",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "remove": "Remove"
+    },
+    "auth": {
+        "title": "Brigid - Sign In",
+        "description": "Brigid PACS Sign In",
+        "signIn": "Sign In",
+        "signOut": "Sign Out"
+    },
+    "dashboard": {
+        "title": "Brigid PACS | Dashboard",
+        "description": "Brigid PACS Dashboard to view patient, instance counts and modalities",
+        "patientCount": "Patient Count",
+        "instanceCount": "Instance Count",
+        "modalities": "Modalities",
+        "noModalitiesFound": "No modalities found"
+    },
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "dicomInstances": "DICOM Instances",
+        "dicomRecycle": "DICOM Recycle",
+        "uploadDicom": "Upload DICOM",
+        "myShares": "My Shares",
+        "shareWithMe": "Share With Me"
+    },
+    "navWorkspace": {
+        "settings": "Settings",
+        "inviteMembers": "Invite Members",
+        "workspaces": "Workspaces",
+        "noOtherWorkspaces": "No other workspaces",
+        "addWorkspace": "Add Workspace"
+    },
+    "workspaceSettings": {
+        "group": {
+            "workspace": "Workspace"
+        },
+        "preferencesTab": {
+            "title": "Preferences",
+            "Language": "Language",
+            "LanguageDesc": "Select your preferred language."
+        },
+        "generalTab": {
+            "workspace": {
+                "title": "Workspace Settings",
+                "workspaceName": {
+                    "title": "Workspace Name",
+                    "desc": "This is the name of your workspace. You can change it here."
+                },
+                "dangerZone": {
+                    "title": "Danger Zone",
+                    "leaveWorkspace": "Leave Workspace",
+                    "leaveWorkspaceAlertTitle": "Are you sure you want to leave this workspace?",
+                    "leaveWorkspaceAlertDesc": "You will lose access to all workspace resources and data.",
+                    "deleteWorkspace": "Delete Workspace",
+                    "deleteWorkspaceDesc": "Permanently delete this workspace and all its data.",
+                    "deleteWorkspaceAlertTitle": "Are you absolutely sure?",
+                    "deleteWorkspaceAlertDesc": "This action cannot be undone. This will permanently delete the workspace <1>\"{{workspaceName}}\"</1> and remove all associated data."
+                },
+                "leave": "Leave",
+                "leaving": "Leaving..."
+            }
+        },
+        "membersTab": {
+            "title": "Members",
+            "description": "Manage your workspace members",
+            "addMembers": "Add Members",
+            "addMembersDesc": "Add members to your workspace.",
+            "addMembersAlertTitle": "Are you sure you want to add this member?",
+            "addMembersAlertDesc": "This will give the member full access to the workspace, including inviting and managing members.",
+            "addMembersAlertCancel": "Cancel",
+            "addMembersAlertConfirm": "Add Member",
+            "removeMember": "Remove Member",
+            "removeMemberAlertTitle": "Are you sure you want to remove this member?",
+            "removeMemberAlertDesc": "This will remove the member's (<1>{{memberName}}</1>) access to the workspace, including inviting and managing members.",
+            "removeMemberAlertCancel": "Cancel",
+            "removeMemberAlertConfirm": "Remove Member"
+        },
+        "title": "Settings",
+        "description": "Manage your workspace settings",
+        "preferences": "Preferences",
+        "general": "General",
+        "members": "Members",
+        "messages": {
+            "workspaceUpdated": "Workspace updated successfully",
+            "workspaceUpdatedError": "Failed to update workspace",
+            "workspaceDeleted": "Workspace deleted successfully",
+            "workspaceDeletedError": "Failed to delete workspace",
+            "workspaceLeft": "You have left the workspace",
+            "workspaceLeftError": "Failed to leave workspace",
+            "memberRoleUpdated": "Member role updated successfully",
+            "memberRoleUpdatedError": "Failed to update member role",
+            "memberRemoved": "Member removed successfully",
+            "memberRemovedError": "Failed to remove member"
+        }
+    },
+    "inviteMember": {
+        "title": "Invite Members",
+        "description": "Invite new members to your workspace.",
+        "addUsers": "Add Users",
+        "searchPlaceholder": "Search users by name or email...",
+        "noUsersFound": "No users found.",
+        "selectedMembers": "Selected Members",
+        "cancel": "Cancel",
+        "invite": "Invite",
+        "inviting": "Inviting...",
+        "success": "Member invited successfully",
+        "error": "Failed to invite member",
+        "userAvatar": "User Avatar",
+        "roles": {
+            "admin": "Admin",
+            "adminDesc": "Full access to the workspace including inviting and managing members",
+            "maintainer": "Maintainer",
+            "maintainerDesc": "Can create, edit content and delete content",
+            "editor": "Editor",
+            "editorDesc": "Can create and edit content",
+            "viewer": "Viewer",
+            "viewerDesc": "Can view the workspace, but cannot create or edit content"
+        }
+    },
+    "createWorkspace": {
+        "title": "Create Workspace",
+        "description": "Create a new workspace to organize your medical imaging data.",
+        "name": "Name",
+        "placeholder": "e.g., Research Project A",
+        "cancel": "Cancel",
+        "create": "Create",
+        "creating": "Creating...",
+        "success": "Workspace created successfully",
+        "error": "Failed to create workspace"
+    },
+    "upload": {
+        "title": "DICOM Upload",
+        "description": "Upload DICOM files or folders to the workspace",
+        "dragAndDrop": "Drag and drop DICOM files or folder here",
+        "supportedFormats": "Supported multiple DICOM files and folders",
+        "selectFiles": "Select Files",
+        "selectFolder": "Select Folder",
+        "uploadingTasks": "Uploading Tasks",
+        "clearCompleted": "Clear Completed Tasks",
+        "uploading": "Uploading: {{count}}",
+        "valid": "Valid: {{count}}",
+        "invalid": "Invalid: {{count}}",
+        "uploadingCount": "Uploading {{count}} files",
+        "noActiveTasks": "No active upload tasks",
+        "status": {
+            "validating": "Validating",
+            "pending": "Pending",
+            "uploading": "Uploading",
+            "completed": "Completed",
+            "failed": "Failed",
+            "cancelled": "Cancelled",
+            "unknown": "Unknown"
+        },
+        "closeDialog": {
+            "title": "Close Upload List?",
+            "description": "There are {{uploadingCount}} files uploading and {{pendingCount}} files pending. Closing will cancel all ongoing uploads.",
+            "cancel": "Cancel",
+            "confirm": "Close"
+        }
+    },
+    "dicom": {
+        "selectionControl": {
+            "clearSelection": "Clear Selection",
+            "selectAll": "Select All",
+            "selectedCount": "{{count}} selected",
+            "download": "Download",
+            "recycle": "Recycle",
+            "restore": "Restore",
+            "delete": "Delete"
+        },
+        "contextMenu": {
+            "openMenu": "Open Menu",
+            "copy": "Copy",
+            "enterSeries": "Enter Series",
+            "enterInstances": "Enter Instances",
+            "openInBlueLight": "Open in BlueLight Viewer",
+            "download": "Download",
+            "share": "Share",
+            "recycle": "Recycle",
+            "restore": "Restore",
+            "delete": "Delete",
+            "selectedItems": "Selected Items ({{count}})",
+            "downloadFormat": {
+                "dicom": "DICOM",
+                "jpg": "JPG",
+                "png": "PNG"
+            }
+        },
+        "tagContextMenu": {
+            "tags": "Tags",
+            "createTag": "Create Tag",
+            "noTags": "No tags"
+        },
+        "recycleDialog": {
+            "title": "Confirm Recycle",
+            "single": "Are you sure you want to move this {{level}} to the recycle bin?",
+            "multiple": "Are you sure you want to move {{count}} {{level}} to the recycle bin?",
+            "cancel": "Cancel",
+            "confirm": "Confirm",
+            "levels": {
+                "study": { "singular": "Study", "plural": "Studies" },
+                "series": { "singular": "Series", "plural": "Series" },
+                "instance": { "singular": "Instance", "plural": "Instances" }
+            }
+        },
+        "messages": {
+            "recycling": "Recycling DICOM {{level}}...",
+            "recycleSuccess": "DICOM {{level}} recycled successfully",
+            "recycleError": "Failed to recycle DICOM {{level}}",
+            "restoring": "Restoring DICOM {{level}}...",
+            "restoreSuccess": "DICOM {{level}} restored successfully",
+            "restoreError": "Failed to restore DICOM {{level}}",
+            "deleting": "Deleting DICOM {{level}}...",
+            "deleteSuccess": "DICOM {{level}} deleted successfully",
+            "deleteError": "Failed to delete DICOM {{level}}",
+            "downloadError": "Failed to download {{level}}",
+            "downloadInstanceImageError": "Failed to download {{format}} image of DICOM instances",
+            "selectToDownload": "Please select at least one {{level}} to download",
+            "downloadSelectedError": "Failed to download selected {{level}}",
+            "noPermissionRecycle": "You do not have permission to recycle DICOM {{level}}",
+            "noPermissionRestore": "You do not have permission to restore DICOM {{level}}",
+            "noPermissionDelete": "You do not have permission to delete DICOM {{level}}",
+            "noData": "No {{level}} found",
+            "failedToRemoveTagAssignment": "Failed to remove tag assignment",
+            "failedToAssignTag": "Failed to assign tag"
+        },
+        "columns": {
+            "study": {
+                "patientId": "Patient ID",
+                "patientName": "Patient Name",
+                "patientBirthDate": "Patient Birth Date",
+                "accessionNumber": "Accession Number",
+                "modalitiesInStudy": "Modalities In Study",
+                "studyInstanceUid": "Study Instance UID",
+                "studyDate": "Study Date",
+                "description": "Study Description"
+            },
+            "series": {
+                "modality": "Modality",
+                "description": "Series Description",
+                "date": "Series Date",
+                "number": "Series #",
+                "relatedInstances": "Related Instances",
+                "seriesInstanceUid": "Series Instance UID"
+            },
+            "instance": {
+                "number": "Instance #",
+                "sopClassUid": "SOP Class UID",
+                "sopInstanceUid": "SOP Instance UID",
+                "acquisitionDate": "Acquisition Date",
+                "contentDate": "Content Date"
+            },
+            "noThumbnail": "No thumbnail available",
+            "thumbnail": "Thumbnail",
+            "preview": "Preview",
+            "tags": "Tags",
+            "actions": "Actions"
+        },
+        "search": {
+            "title": "Search",
+            "description": "Enter search criteria for {{level}}.",
+            "openSearch": "Open search...",
+            "addCondition": "Add Condition",
+            "clear": "Clear",
+            "clearAll": "Clear All",
+            "cancel": "Cancel",
+            "search": "Search",
+            "searching": "Searching...",
+            "addField": "Add Field",
+            "fieldExists": "Exists",
+            "fieldAlreadySelected": "This field is already selected",
+            "fields": {
+                "tagName": "Tag Name",
+                "PatientID": "Patient ID",
+                "PatientName": "Patient Name",
+                "StudyInstanceUID": "Study Instance UID",
+                "StudyDate": "Study Date",
+                "AccessionNumber": "Accession Number",
+                "ModalitiesInStudy": "Modalities In Study",
+                "ReferringPhysicianName": "Referring Physician Name",
+                "Modality": "Modality",
+                "SeriesInstanceUID": "Series Instance UID",
+                "SeriesNumber": "Series Number",
+                "SeriesDate": "Series Date",
+                "PerformedProcedureStepStartDate": "Performed Procedure Step Start Date",
+                "ContentDate": "Content Date",
+                "SOPClassUID": "SOP Class UID",
+                "SOPInstanceUID": "SOP Instance UID",
+                "InstanceNumber": "Instance Number",
+                "AcquisitionDate": "Acquisition Date"
+            },
+            "placeholders": {
+                "select": "Select {{label}}",
+                "enter": "Enter {{label}}",
+                "enterValue": "Enter value"
+            }
+        },
+        "deleteConfirmDialog": {
+            "title": "Confirm Permanent Delete",
+            "single": "Are you sure you want to permanently delete this {{level}}?",
+            "multiple": "Are you sure you want to permanently delete {{count}} {{level}}?",
+            "cancel": "Cancel",
+            "confirm": "Confirm"
+        }
+    }
+}

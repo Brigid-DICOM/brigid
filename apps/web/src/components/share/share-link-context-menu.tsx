@@ -19,6 +19,7 @@ import { hasPermission } from "@/server/utils/sharePermissions";
 import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
 import { ShareLinkEditDialog } from "./share-link-edit-dialog";
 import type { ShareLinkFormData } from "./share-link-edit-form";
+import { useParams } from "next/navigation";
 
 interface ShareLinkContextMenuProps {
     children: React.ReactNode;
@@ -33,12 +34,13 @@ export function ShareLinkContextMenu({
     workspaceId,
     onDeleted,
 }: ShareLinkContextMenuProps) {
+    const { lng } = useParams<{ lng: string }>();
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     const { data: userSession } = useQuery(authSessionQuery());
 
-    const shareUrl = `${window.location.origin}/share/${shareLink.token}`;
+    const shareUrl = `${window.location.origin}/${lng}/share/${shareLink.token}`;
 
     const isCreator = useMemo(() => {
         return userSession?.user?.id === shareLink.creatorId;

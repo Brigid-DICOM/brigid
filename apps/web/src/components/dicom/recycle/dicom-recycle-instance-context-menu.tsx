@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -38,6 +39,7 @@ export function DicomRecycleInstanceContextMenu({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomRecycleInstanceContextMenuProps) {
+    const { t } = useT("translation");
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
     const queryClient = getQueryClient();
@@ -134,10 +136,10 @@ export function DicomRecycleInstanceContextMenu({
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-56">
+                <ContextMenuContent className="w-60">
                     {selectedIds.length > 1 && (
                         <ContextMenuLabel>
-                            Selected Items ({selectedIds.length})
+                            {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
                         </ContextMenuLabel>
                     )}
 
@@ -147,7 +149,7 @@ export function DicomRecycleInstanceContextMenu({
                             className="flex items-center"
                         >
                             <UndoIcon className="size-4" />
-                            <span>Restore</span>
+                            <span>{t("dicom.contextMenu.restore")}</span>
                         </ContextMenuItem>
                     )}
 
@@ -157,7 +159,7 @@ export function DicomRecycleInstanceContextMenu({
                             className="flex items-center"
                         >
                             <Trash2Icon className="size-4" />
-                            <span>Delete</span>
+                            <span>{t("dicom.contextMenu.delete")}</span>
                         </ContextMenuItem>
                     )}
                 </ContextMenuContent>

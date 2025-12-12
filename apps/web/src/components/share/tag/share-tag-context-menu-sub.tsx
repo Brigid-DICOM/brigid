@@ -18,6 +18,7 @@ import {
     removeShareTagAssignmentMutation,
 } from "@/react-query/queries/share-tag";
 import { useShareTagStore } from "@/stores/share-tag-store";
+import { useT } from "@/app/_i18n/client";
 
 interface ShareTagContextMenuSubProps {
     token: string;
@@ -39,6 +40,7 @@ export function ShareTagContextMenuSub({
     password,
     onOpenCreateTagDialog,
 }: ShareTagContextMenuSubProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [optimisticUpdates, setOptimisticUpdates] = useState<
         Map<string, OptimisticState>
@@ -161,7 +163,7 @@ export function ShareTagContextMenuSub({
                 }
                 return newMap;
             });
-            toast.error("Failed to assign tags");
+            toast.error(t("share.messages.failedToAssignTags"));
         },
     });
 
@@ -217,7 +219,7 @@ export function ShareTagContextMenuSub({
                 }
                 return newMap;
             });
-            toast.error("Failed to remove tags");
+            toast.error(t("share.messages.failedToRemoveTags"));
         },
     });
 
@@ -269,7 +271,7 @@ export function ShareTagContextMenuSub({
         <ContextMenuSub>
             <ContextMenuSubTrigger className="flex items-center space-x-4">
                 <TagIcon className="size-4" />
-                <span>標籤</span>
+                <span>{t("dicom.tagContextMenu.tags")}</span>
             </ContextMenuSubTrigger>
             <ContextMenuSubContent>
                 <ContextMenuItem
@@ -277,7 +279,7 @@ export function ShareTagContextMenuSub({
                     onClick={onOpenCreateTagDialog}
                 >
                     <TagsIcon className="size-4" />
-                    <span>建立標籤</span>
+                    <span>{t("dicom.tagContextMenu.createTag")}</span>
                 </ContextMenuItem>
 
                 <ContextMenuSeparator />
@@ -285,7 +287,7 @@ export function ShareTagContextMenuSub({
                 {isLoadingTags && (
                     <ContextMenuItem className="flex items-center gap-2">
                         <Loader2Icon className="size-4 animate-spin" />
-                        <span>Loading...</span>
+                        <span>{t("common.loading")}</span>
                     </ContextMenuItem>
                 )}
 
@@ -294,7 +296,7 @@ export function ShareTagContextMenuSub({
                         disabled
                         className="text-muted-foreground"
                     >
-                        <span>No tags</span>
+                        <span>{t("dicom.tagContextMenu.noTags")}</span>
                     </ContextMenuItem>
                 )}
 

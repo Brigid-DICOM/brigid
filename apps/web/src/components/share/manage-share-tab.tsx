@@ -27,6 +27,7 @@ import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
 import { ShareExpirationDropdown } from "./share-expiration-dropdown";
 import { SharePermissionDropdown } from "./share-permission-dropdown";
 import { UserSelector } from "./user-selector";
+import { useParams } from "next/navigation";
 
 interface ManageShareTabProps {
     workspaceId: string;
@@ -61,6 +62,7 @@ export function ManageShareTab({
     targetType,
     targetIds,
 }: ManageShareTabProps) {
+    const { lng } = useParams<{ lng: string }>();
     const queryClient = getQueryClient();
     const [editingShare, setEditingShare] = useState<ShareLink | null>(null);
     const [updatedShare, setUpdatedShare] = useState<Partial<ShareLink>>({});
@@ -133,7 +135,7 @@ export function ManageShareTab({
     });
 
     const copyShareLink = (token: string) => {
-        const shareUrl = `${window.location.origin}/share/${token}`;
+        const shareUrl = `${window.location.origin}/${lng}/share/${token}`;
         navigator.clipboard.writeText(shareUrl);
         toast.success("Share link copied to clipboard");
     };
@@ -403,12 +405,12 @@ export function ManageShareTab({
             <div className="space-y-3">
                 <Label>Share Link</Label>
                 <Input
-                    value={`${window.location.origin}/share/${editingShare.token}`}
+                    value={`${window.location.origin}/${lng}/share/${editingShare.token}`}
                     readOnly
                     className="cursor-pointer hover:bg-gray-100"
                     onClick={() => {
                         navigator.clipboard.writeText(
-                            `${window.location.origin}/share/${editingShare.token}`,
+                            `${window.location.origin}/${lng}/share/${editingShare.token}`,
                         );
                         toast.success("Share link copied to clipboard", {
                             position: "bottom-center",

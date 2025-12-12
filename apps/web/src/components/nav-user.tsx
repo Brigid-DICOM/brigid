@@ -2,6 +2,7 @@
 
 import { EllipsisVerticalIcon, LogOutIcon } from "lucide-react";
 import Link from "next/link";
+import { useT } from "@/app/_i18n/client";
 import { Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "./ui/sidebar";
@@ -13,6 +14,7 @@ export function NavUser({ user }: {
         image: string;
     }
 }) {
+    const { t } = useT("translation");
     const { isMobile } = useSidebar();
 
     return (
@@ -64,7 +66,7 @@ export function NavUser({ user }: {
                         {process.env.NEXT_PUBLIC_ENABLE_AUTH && (
                             <DropdownMenuItem>
                                 <LogOutIcon className="mr-2 size-4" />
-                                <Link href="/api/auth/signout">Sign Out</Link>
+                                <Link href="/api/auth/signout">{t("auth.signOut")}</Link>
                             </DropdownMenuItem>
                         )}
                     </DropdownMenuContent>

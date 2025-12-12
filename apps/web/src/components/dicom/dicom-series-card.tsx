@@ -3,7 +3,9 @@
 import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
+import { useT } from "@/app/_i18n/client";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
@@ -31,6 +33,8 @@ export function DicomSeriesCard({
     className,
     type = "management",
 }: DicomSeriesCardProps) {
+    const { t } = useT("translation");
+    const { lng } = useParams<{ lng: string }>();
     const router = useRouter();
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
     const modality = series["00080060"]?.Value?.[0] || "N/A";
@@ -68,7 +72,7 @@ export function DicomSeriesCard({
         toggleSelection: toggleSeriesSelection,
         selectItem: selectSeries,
         clearSelection,
-        onDoubleClick: () => router.push(`/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`),
+        onDoubleClick: () => router.push(`/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`),
     });
 
     const ContextMenu = type === "management" ? (
@@ -117,7 +121,7 @@ export function DicomSeriesCard({
                     ) : thumbnailUrl ? (
                         <Image
                             src={thumbnailUrl}
-                            alt="DICOM Study Thumbnail"
+                            alt={t("dicom.columns.thumbnail")}
                             width={224}
                             height={224}
                             className={cn(
@@ -128,7 +132,7 @@ export function DicomSeriesCard({
                         />
                     ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            No thumbnail available
+                            {t("dicom.columns.noThumbnail")}
                         </div>
                     )}
                 </div>
@@ -137,14 +141,14 @@ export function DicomSeriesCard({
                     <div className="space-y-2">
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Modality:
+                                {t("dicom.columns.series.modality")}:
                             </span>
                             <div className="text-gray-900 truncate">{modality}</div>
                         </div>
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Series Description:
+                                {t("dicom.columns.series.description")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {seriesDescription}
@@ -153,7 +157,7 @@ export function DicomSeriesCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Series Date:
+                                {t("dicom.columns.series.date")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {seriesDate}
@@ -162,7 +166,7 @@ export function DicomSeriesCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Number of Series Related Instances:
+                                {t("dicom.columns.series.relatedInstances")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {numberOfSeriesRelatedInstances}

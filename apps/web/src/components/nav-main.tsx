@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useT } from "@/app/_i18n/client";
+import { fallbackLng } from "@/app/_i18n/settings";
 import { getWorkspaceByIdQuery } from "@/react-query/queries/workspace";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
@@ -25,9 +27,10 @@ import {
 
 export function NavMain() {
     const workspaceId = useParams<{ workspaceId: string }>().workspaceId;
+    const lng = useParams<{ lng: string }>().lng ?? fallbackLng;
+    const { t } = useT("translation");
 
     const { data: workspaceData } = useQuery(getWorkspaceByIdQuery(workspaceId));
-    
 
     const canRead = hasPermission(
         workspaceData?.workspace?.membership?.permissions ?? 0,
@@ -47,50 +50,50 @@ export function NavMain() {
             <SidebarGroupContent>
                 <SidebarMenu>
                     {canRead && <SidebarMenuItem key="dashboard">
-                        <SidebarMenuButton tooltip="Dashboard">
+                        <SidebarMenuButton tooltip={t("sidebar.dashboard")}>
                             <GaugeIcon className="size-4" />
-                            <Link href={`/${workspaceId}`} className="w-full">
-                                Dashboard
+                            <Link href={`/${lng}/${workspaceId}`} className="w-full">
+                                {t("sidebar.dashboard")}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>}
 
                     {/* 使用者擁有讀取權限即可瀏覽被放到回收桶的 DICOM 影像，但不能進行 restore/delete 操作 */}
                     {canRead && <SidebarMenuItem key="dicom instances management">
-                        <SidebarMenuButton tooltip="DICOM Instances Management">
+                        <SidebarMenuButton tooltip={t("sidebar.dicomInstances")}>
                             <DatabaseIcon className="size-4" />
-                            <Link href={`/${workspaceId}/dicom-studies`} className="w-full">
-                                DICOM Instances
+                            <Link href={`/${lng}/${workspaceId}/dicom-studies`} className="w-full">
+                                {t("sidebar.dicomInstances")}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>}
 
                     {canRead && <SidebarMenuItem key="dicom recycle">
-                        <SidebarMenuButton tooltip="DICOM Recycle">
+                        <SidebarMenuButton tooltip={t("sidebar.dicomRecycle")}>
                             <Trash2Icon className="size-4" />
                             <Link
-                                href={`/${workspaceId}/dicom-recycle/studies`}
+                                href={`/${lng}/${workspaceId}/dicom-recycle/studies`}
                                 className="w-full"
                             >
-                                DICOM Recycle
+                                {t("sidebar.dicomRecycle")}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>}
 
                     {canCreate && <SidebarMenuItem key="dicom upload">
-                        <SidebarMenuButton tooltip={"Upload DICOM"}>
+                        <SidebarMenuButton tooltip={t("sidebar.uploadDicom")}>
                             <UploadIcon className="size-4" />
-                            <Link href={`/${workspaceId}/dicom-upload`} className="w-full">
-                                Upload DICOM
+                            <Link href={`/${lng}/${workspaceId}/dicom-upload`} className="w-full">
+                                {t("sidebar.uploadDicom")}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>}
 
                     {canUpdate && <SidebarMenuItem key="my shares">
-                        <SidebarMenuButton tooltip="My Shares">
+                        <SidebarMenuButton tooltip={t("sidebar.myShares")}>
                             <Share2Icon className="size-4" />
-                            <Link href={`/${workspaceId}/my-shares`} className="w-full">
-                                My Shares
+                            <Link href={`/${lng}/${workspaceId}/my-shares`} className="w-full">
+                                {t("sidebar.myShares")}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>}
@@ -98,10 +101,10 @@ export function NavMain() {
                     <SidebarSeparator />
 
                     <SidebarMenuItem key="share with me">
-                        <SidebarMenuButton tooltip="Share With Me">
+                        <SidebarMenuButton tooltip={t("sidebar.shareWithMe")}>
                             <UsersIcon className="size-4" />
-                            <Link href={`/${workspaceId}/share-with-me`} className="w-full">
-                                Share With Me
+                            <Link href={`/${lng}/${workspaceId}/share-with-me`} className="w-full">
+                                {t("sidebar.shareWithMe")}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

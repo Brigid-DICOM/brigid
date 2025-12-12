@@ -30,6 +30,7 @@ import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
 import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
+import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomInstanceContextMenuProps {
     children: React.ReactNode;
@@ -50,6 +51,8 @@ const DownloadSubMenuItems = ({
     onJpgDownload: (e: React.MouseEvent<HTMLDivElement>) => void;
     onPngDownload: (e: React.MouseEvent<HTMLDivElement>) => void;
 }) => {
+    const { t } = useT("translation");
+
     return (
         <>
             <ContextMenuItem
@@ -57,7 +60,7 @@ const DownloadSubMenuItems = ({
                 className="flex items-center space-x-2"
             >
                 <DownloadIcon className="size-4" />
-                <span>DICOM</span>
+                <span>{t("dicom.contextMenu.downloadFormat.dicom")}</span>
             </ContextMenuItem>
             <ContextMenuItem
                 onClick={onJpgDownload}
@@ -86,11 +89,13 @@ const DownloadSubMenu = ({
     onJpgDownload: (e: React.MouseEvent<HTMLDivElement>) => void;
     onPngDownload: (e: React.MouseEvent<HTMLDivElement>) => void;
 }) => {
+    const { t } = useT("translation");
+
     return (
         <ContextMenuSub>
             <ContextMenuSubTrigger>
                 <DownloadIcon className="size-4 mr-4" />
-                <span>Download</span>
+                <span>{t("dicom.contextMenu.download")}</span>
             </ContextMenuSubTrigger>
             <ContextMenuSubContent>
                 <DownloadSubMenuItems
@@ -112,6 +117,7 @@ export function SharedDicomInstanceContextMenu({
     sopInstanceUid,
     publicPermissions,
 }: SharedDicomInstanceContextMenuProps) {
+    const { t } = useT("translation");
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { open } = useBlueLightViewerStore();
 
@@ -136,13 +142,13 @@ export function SharedDicomInstanceContextMenu({
                 password,
             );
         } catch (error) {
-            console.error("Failed to download selected instances", error);
+            console.error(t("dicom.messages.downloadSelectedError", { level: "instances" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download selected instances");
+            toast.error(t("dicom.messages.downloadSelectedError", { level: "instances" }));
         }
     };
 
@@ -157,16 +163,13 @@ export function SharedDicomInstanceContextMenu({
                 selectedIds,
             );
         } catch (error) {
-            console.error(
-                "Failed to download selected instances as JPG",
-                error,
-            );
+            console.error(t("dicom.messages.downloadInstanceImageError", { format: "JPG" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
-            }
+            }   
 
-            toast.error("Failed to download selected instances as JPG");
+            toast.error(t("dicom.messages.downloadInstanceImageError", { format: "JPG" }));
         }
     };
 
@@ -181,16 +184,12 @@ export function SharedDicomInstanceContextMenu({
                 selectedIds,
             );
         } catch (error) {
-            console.error(
-                "Failed to download selected instances as PNG",
-                error,
-            );
-
+            console.error(t("dicom.messages.downloadInstanceImageError", { format: "PNG" }), error);
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download selected instances as PNG");
+            toast.error(t("dicom.messages.downloadInstanceImageError", { format: "PNG" }));
         }
     };
 
@@ -217,7 +216,7 @@ export function SharedDicomInstanceContextMenu({
         <>
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-                <ContextMenuContent className="w-56">
+                <ContextMenuContent className="w-60">
                     {selectedIds.length === 1 && (
                         <>
                             <ContextMenuItem
@@ -225,7 +224,7 @@ export function SharedDicomInstanceContextMenu({
                                 className="flex items-center space-x-2"
                             >
                                 <EyeIcon className="size-4" />
-                                <span>Open in BlueLight Viewer</span>
+                                <span>{t("dicom.contextMenu.openInBlueLight")}</span>
                             </ContextMenuItem>
 
                             <DownloadSubMenu 
@@ -255,7 +254,7 @@ export function SharedDicomInstanceContextMenu({
                     {selectedIds.length > 1 && (
                         <>
                             <ContextMenuLabel>
-                                Selected Items ({selectedIds.length})
+                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
                             </ContextMenuLabel>
                             
                             <DownloadSubMenu 

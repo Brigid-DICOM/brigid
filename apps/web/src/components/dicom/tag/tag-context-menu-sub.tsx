@@ -16,6 +16,7 @@ import {
     getWorkspaceTagsQuery,
     removeTagAssignmentMutation,
 } from "@/react-query/queries/tag";
+import { useT } from "@/app/_i18n/client";
 
 interface TagContextMenuSubProps {
     workspaceId: string;
@@ -35,6 +36,7 @@ export function TagContextMenuSub({
     targetType,
     onOpenCreateTagDialog,
 }: TagContextMenuSubProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [optimisticUpdates, setOptimisticUpdates] = useState<
         Map<string, OptimisticState>
@@ -106,7 +108,7 @@ export function TagContextMenuSub({
                 newMap.delete(variables.tagId);
                 return newMap;
             });
-            toast.error("Failed to assign tag");
+            toast.error(t("dicom.messages.failedToAssignTag"));
         },
     });
 
@@ -175,7 +177,7 @@ export function TagContextMenuSub({
                     newMap.delete(tagId);
                     return newMap;
                 });
-                toast.error("Failed to remove tag assignment");
+                toast.error(t("dicom.messages.failedToRemoveTagAssignment"));
             },
         });
     };
@@ -196,7 +198,7 @@ export function TagContextMenuSub({
         <ContextMenuSub>
             <ContextMenuSubTrigger className="flex items-center space-x-4">
                 <TagIcon className="size-4" />
-                <span>標籤</span>
+                <span>{t("dicom.tagContextMenu.tags")}</span>
             </ContextMenuSubTrigger>
             <ContextMenuSubContent>
                 <ContextMenuItem
@@ -204,7 +206,7 @@ export function TagContextMenuSub({
                     onClick={onOpenCreateTagDialog}
                 >
                     <TagsIcon className="size-4" />
-                    <span>建立標籤</span>
+                    <span>{t("dicom.tagContextMenu.createTag")}</span>
                 </ContextMenuItem>
 
                 <ContextMenuSeparator />
@@ -212,7 +214,7 @@ export function TagContextMenuSub({
                 {isLoading && (
                     <ContextMenuItem className="flex items-center space-x-2">
                         <Loader2Icon className="size-4 animate-spin" />
-                        <span>Loading...</span>
+                        <span>{t("common.loading")}</span>
                     </ContextMenuItem>
                 )}
 

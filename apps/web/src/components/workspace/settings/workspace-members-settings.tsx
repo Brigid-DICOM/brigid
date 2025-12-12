@@ -4,7 +4,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -51,6 +53,7 @@ const ROLES = [
 export function WorkspaceMembersSettings({
     workspace,
 }: WorkspaceMembersSettingsProps) {
+    const { t } = useT("translation");
     const [showInviteMemberDialog, setShowInviteMemberDialog] = useState(false);
     const queryClient = getQueryClient();
 
@@ -72,12 +75,12 @@ export function WorkspaceMembersSettings({
             await queryClient.invalidateQueries({
                 queryKey: ["workspace", workspace.id, "members"],
             });
-            toast.success("Member role updated successfully", {
+            toast.success(t("workspaceSettings.messages.memberRoleUpdated"), {
                 position: "bottom-center",
             });
         } catch (error) {
             console.error("Failed to update member role", error);
-            toast.error("Failed to update member role", {
+            toast.error(t("workspaceSettings.messages.memberRoleUpdatedError"), {
                 position: "bottom-center",
             });
         }
@@ -93,12 +96,12 @@ export function WorkspaceMembersSettings({
             await queryClient.invalidateQueries({
                 queryKey: ["workspace", workspace.id, "members"],
             });
-            toast.success("Member removed successfully", {
+            toast.success(t("workspaceSettings.messages.memberRemoved"), {
                 position: "bottom-center",
             });
         } catch (error) {
             console.error("Failed to remove member", error);
-            toast.error("Failed to remove member", {
+            toast.error(t("workspaceSettings.messages.memberRemovedError"), {
                 position: "bottom-center",
             });
         }
@@ -109,9 +112,9 @@ export function WorkspaceMembersSettings({
             <div className="flex flex-col h-full">
                 <div className="p-6 pb-4 flex items-center justify-between shrink-0">
                     <div className="space-y-1">
-                        <h3 className="text-lg font-medium">Members</h3>
+                        <h3 className="text-lg font-medium">{t("workspaceSettings.membersTab.title")}</h3>
                         <p className="text-sm text-muted-foreground">
-                            Manage who has access to this workspace.
+                            {t("workspaceSettings.membersTab.description")}
                         </p>
                     </div>
                     <div className="flex h-full items-end">
@@ -120,7 +123,7 @@ export function WorkspaceMembersSettings({
                             size="sm"
                         >
                             <PlusIcon className="size-4" />
-                            Add Members
+                            {t("workspaceSettings.membersTab.addMembers")}
                         </Button>
                     </div>
                 </div>
@@ -201,22 +204,24 @@ export function WorkspaceMembersSettings({
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>
-                                                        Remove member?
+                                                        {t("workspaceSettings.membersTab.removeMemberAlertTitle")}
                                                     </AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        Are you sure you want to
-                                                        remove{" "}
-                                                        <strong>
-                                                            {member.name}
-                                                        </strong>{" "}
-                                                        from this workspace?
-                                                        They will lose access to
-                                                        all resources.
+                                                        <Trans 
+                                                            i18nKey="workspaceSettings.membersTab.removeMemberAlertDesc"
+                                                            components={{
+                                                                1: <strong />
+                                                            }}
+                                                            values={{
+                                                                memberName: member.name
+                                                            }}
+                                                            shouldUnescape={true}
+                                                        />
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>
-                                                        Cancel
+                                                        {t("common.cancel")}
                                                     </AlertDialogCancel>
                                                     <AlertDialogAction
                                                         onClick={() =>
@@ -226,7 +231,7 @@ export function WorkspaceMembersSettings({
                                                         }
                                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                     >
-                                                        Remove
+                                                        {t("common.remove")}
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>

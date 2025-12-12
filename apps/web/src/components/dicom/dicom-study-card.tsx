@@ -3,7 +3,9 @@
 import type { DicomStudyData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
+import { useT } from "@/app/_i18n/client";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
@@ -29,6 +31,8 @@ export function DicomStudyCard({
     className,
     type = "management",
 }: DicomStudyCardProps) {
+    const { t } = useT("translation");
+    const { lng } = useParams<{ lng: string }>();
     const router = useRouter();
     const patientId = study["00100020"]?.Value?.[0] || "N/A";
     const patientName = study["00100010"]?.Value?.[0]?.Alphabetic || "N/A";
@@ -55,7 +59,7 @@ export function DicomStudyCard({
         toggleSelection: toggleStudySelection,
         selectItem: selectStudy,
         clearSelection,
-        onDoubleClick: () => router.push(`/${workspaceId}/dicom-studies/${studyInstanceUid}`),
+        onDoubleClick: () => router.push(`/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}`),
     });
 
     const ContextMenu = type === "management" ? (
@@ -105,7 +109,7 @@ export function DicomStudyCard({
                     ) : thumbnailUrl ? (
                         <Image
                             src={thumbnailUrl}
-                            alt="DICOM Study Thumbnail"
+                            alt={t("dicom.columns.thumbnail")}
                             width={224}
                             height={224}
                             className={cn(
@@ -116,7 +120,7 @@ export function DicomStudyCard({
                         />
                     ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            No thumbnail available
+                            {t("dicom.columns.noThumbnail")}
                         </div>
                     )}
                 </div>
@@ -125,7 +129,7 @@ export function DicomStudyCard({
                     <div className="space-y-2">
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Patient ID:
+                                {t("dicom.columns.study.patientId")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {patientId}
@@ -133,7 +137,7 @@ export function DicomStudyCard({
                         </div>
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Patient Name:
+                                {t("dicom.columns.study.patientName")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {patientName}
@@ -141,7 +145,7 @@ export function DicomStudyCard({
                         </div>
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Accession Number:
+                                {t("dicom.columns.study.accessionNumber")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {accessionNumber}

@@ -3,6 +3,7 @@
 import { UploadIcon } from "lucide-react";
 import type React from "react";
 import { useCallback, useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { validateDicomFiles } from "@/lib/dicom-validator";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -12,6 +13,7 @@ interface UploadAreaProps {
 }
 
 export function UploadArea({ onFilesSelected }: UploadAreaProps) {
+    const { t } = useT("translation");
     const [isDragging, setIsDragging] = useState(false);
 
     const handleDrop = useCallback(async (e: React.DragEvent) => {
@@ -92,11 +94,11 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
             <UploadIcon className="mx-auto size-12 text-muted-foreground mb-4" />
 
             <h3 className="text-lg font-semibold mb-2">
-                Drag and drop DICOM files or folder here
+                {t("upload.dragAndDrop")}
             </h3>
 
             <p className="text-sm text-muted-foreground mb-6">
-                Supported multiple DICOM files and folders
+                {t("upload.supportedFormats")}
             </p>
 
             <div className="flex gap-2 justify-center">
@@ -105,7 +107,7 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
                     asChild
                 >
                     <label htmlFor="file-input">
-                        選擇檔案
+                        {t("upload.selectFiles")}
                         <input
                             type="file"
                             id="file-input"
@@ -121,7 +123,7 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
                     variant={"outline"}
                 >
                     <label htmlFor="folder-input">
-                        選擇資料夾
+                        {t("upload.selectFolder")}
                         <input
                             type="file"
                             id="folder-input"

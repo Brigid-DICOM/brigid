@@ -8,9 +8,11 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
@@ -61,6 +63,8 @@ function ActionsCell({
     publicPermissions?: number;
 }) {
     const router = useRouter();
+    const { t } = useT("translation");
+    const { lng } = useParams<{ lng: string }>();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
@@ -79,7 +83,7 @@ function ActionsCell({
             ? `?password=${encodeURIComponent(password)}`
             : "";
         router.push(
-            `/share/${token}/studies/${studyInstanceUid}/series/${seriesInstanceUid}${params}`,
+            `/${lng}/share/${token}/studies/${studyInstanceUid}/series/${seriesInstanceUid}${params}`,
         );
     };
 
@@ -93,13 +97,13 @@ function ActionsCell({
                 password,
             });
         } catch (error) {
-            console.error("Failed to download series", error);
+            console.error(t("dicom.messages.failedToDownload", { level: "series" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download series");
+            toast.error(t("dicom.messages.failedToDownload", { level: "series" }));
         }
     };
 
@@ -118,19 +122,19 @@ function ActionsCell({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="size-8 p-0">
-                        <span className="sr-only">Open Menu</span>
+                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
                         <MoreHorizontalIcon className="size-4" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={handleEnterInstances}>
-                        Enter Instances
+                        {t("dicom.contextMenu.enterInstances")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        Open in BlueLight Viewer
+                        {t("dicom.contextMenu.openInBlueLight")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleDownload}>
-                        Download Series
+                        {t("dicom.contextMenu.download")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {canUpdate && (
@@ -166,6 +170,7 @@ export function SharedDicomSeriesDataTable({
     publicPermissions = 0,
     className,
 }: SharedDicomSeriesDataTableProps) {
+    const { t } = useT("translation");
     const {
         toggleSeriesSelection,
         isSeriesSelected,
@@ -175,7 +180,7 @@ export function SharedDicomSeriesDataTable({
         selectSeries,
     } = useDicomSeriesSelectionStore();
 
-    const generalColumns = useMemo(() => createSeriesColumns(), []);
+    const generalColumns = useMemo(() => createSeriesColumns(t), [t]);
 
     const columns: ColumnDef<DicomSeriesData>[] = useMemo(
         () => [
@@ -219,7 +224,7 @@ export function SharedDicomSeriesDataTable({
             },
             {
                 accessorKey: "thumbnail",
-                header: "Preview",
+                header: t("dicom.columns.preview"),
                 cell: ({ row }) => (
                     <TableThumbnailCell
                         source={{
@@ -238,7 +243,7 @@ export function SharedDicomSeriesDataTable({
             },
             {
                 accessorKey: "tags",
-                header: "Tags",
+                header: t("dicom.columns.tags"),
                 cell: ({ row }) => (
                     <DicomDataTableTagCell
                         mode="share"
@@ -276,6 +281,7 @@ export function SharedDicomSeriesDataTable({
             toggleSeriesSelection,
             generalColumns,
             publicPermissions,
+            t
         ],
     );
 
@@ -391,7 +397,7 @@ export function SharedDicomSeriesDataTable({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    {t("dicom.messages.noData", { level: "series" })}
                                 </TableCell>
                             </TableRow>
                         )}

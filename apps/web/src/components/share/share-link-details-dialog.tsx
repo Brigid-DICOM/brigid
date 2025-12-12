@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
+import { useParams } from "next/navigation";
 
 interface ShareLinkTarget {
     id: string;
@@ -49,6 +50,8 @@ export function ShareLinkDetailsDialog({
     targets,
     token,
 }: ShareLinkDetailsDialogProps) {
+    const { lng } = useParams<{ lng: string }>();
+
     return createPortal(
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -66,11 +69,11 @@ export function ShareLinkDetailsDialog({
                             Share Link URL
                         </span>
                         <Input
-                            value={`${window.location.origin}/share/${token}`}
+                            value={`${window.location.origin}/${lng}/share/${token}`}
                             readOnly
                             className="cursor-pointer hover:bg-muted"
                             onClick={() => {
-                                navigator.clipboard.writeText(`${window.location.origin}/share/${token}`);
+                                navigator.clipboard.writeText(`${window.location.origin}/${lng}/share/${token}`);
                                 toast.success("Share link copied", {
                                     position: "bottom-center",
                                 });

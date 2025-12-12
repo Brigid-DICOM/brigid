@@ -19,6 +19,7 @@ import { hasPermission } from "@/server/utils/sharePermissions";
 import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
 import { ShareLinkEditDialog } from "./share-link-edit-dialog";
 import type { ShareLinkFormData } from "./share-link-edit-form";
+import { useParams } from "next/navigation";
 
 interface ShareLinkDropdownMenuProps {
     children: React.ReactNode;
@@ -33,6 +34,7 @@ export function ShareLinkDropdownMenu({
     workspaceId,
     onDeleted,
 }: ShareLinkDropdownMenuProps) {
+    const { lng } = useParams<{ lng: string }>();
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -46,7 +48,7 @@ export function ShareLinkDropdownMenu({
         return hasPermission(shareLink.publicPermissions, SHARE_PERMISSIONS.UPDATE) || isCreator;
     }, [shareLink.publicPermissions, isCreator]);
 
-    const shareUrl = `${window.location.origin}/share/${shareLink.token}`;
+    const shareUrl = `${window.location.origin}/${lng}/share/${shareLink.token}`;
 
     const handleOpenShare = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();

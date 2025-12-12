@@ -12,7 +12,7 @@ type TagResponse = InferResponseType<
     ApiClient["api"]["workspaces"][":workspaceId"]["tags"][":targetType"][":targetId"]["$get"]
 >;
 
-type ResponseTagData = TagResponse["data"][number] | undefined;
+type ResponseTagData = Extract<TagResponse, { ok: true}>["data"][number] | undefined;
 
 interface DicomCardHeaderTagsDisplayProps {
     tags?: ResponseTagData[];

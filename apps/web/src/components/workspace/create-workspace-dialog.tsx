@@ -6,6 +6,7 @@ import type React from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -29,6 +30,7 @@ export function CreateWorkspaceDialog({
     open,
     onOpenChange,
 }: CreateWorkspaceDialogProps) {
+    const { t } = useT("translation");
     const [name, setName] = useState("");
     const router = useRouter();
     const queryClient = getQueryClient();
@@ -42,7 +44,7 @@ export function CreateWorkspaceDialog({
         try {
             const result = await createWorkspace.mutateAsync(name);
 
-            toast.success("Workspace created successfully");
+            toast.success(t("createWorkspace.success"));
             setName("");
             onOpenChange(false);
 
@@ -50,8 +52,8 @@ export function CreateWorkspaceDialog({
 
             router.push(`/${result.workspace.id}`);
         } catch (error) {
-            console.error("Failed to create workspace", error);
-            toast.error("Failed to create workspace");
+            console.error(t("createWorkspace.error"), error);
+            toast.error(t("createWorkspace.error"));
         }
     };
 
@@ -60,24 +62,23 @@ export function CreateWorkspaceDialog({
             <DialogContent className="sm:max-w-md">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Create Workspace</DialogTitle>
+                        <DialogTitle>{t("createWorkspace.title")}</DialogTitle>
                         <DialogDescription>
-                            Create a new workspace to organize your medical
-                            imaging data.
+                            {t("createWorkspace.description")}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">
-                                Name
+                                {t("createWorkspace.name")}
                             </Label>
                             <Input
                                 id="name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="col-span-3"
-                                placeholder="e.g., Research Project A"
+                                placeholder={t("createWorkspace.placeholder")}
                                 autoFocus
                             />
                         </div>
@@ -89,15 +90,15 @@ export function CreateWorkspaceDialog({
                             variant={"outline"}
                             onClick={() => onOpenChange(false)}
                         >
-                            Cancel
+                            {t("createWorkspace.cancel")}
                         </Button>
                         <Button
                             type="submit"
                             disabled={createWorkspace.isPending}
                         >
                             {createWorkspace.isPending
-                                ? "Creating..."
-                                : "Create"}
+                                ? t("createWorkspace.creating")
+                                : t("createWorkspace.create")}
                         </Button>
                     </DialogFooter>
                 </form>

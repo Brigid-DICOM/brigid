@@ -1,11 +1,12 @@
 import type { DicomSeriesData } from "@brigid/types";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { TFunction } from "i18next";
 
-export const createSeriesColumns = (): ColumnDef<DicomSeriesData>[] => {
+export const createSeriesColumns = (t: TFunction): ColumnDef<DicomSeriesData>[] => {
     return [
         {
             accessorKey: "modality",
-            header: "Modality",
+            header: t("dicom.columns.series.modality"),
             cell: ({ row }) => {
                 const modality = row.original["00080060"]?.Value?.[0] || "N/A";
                 return <div>{modality}</div>;
@@ -13,7 +14,7 @@ export const createSeriesColumns = (): ColumnDef<DicomSeriesData>[] => {
         },
         {
             accessorKey: "seriesDescription",
-            header: "Series Description",
+            header: t("dicom.columns.series.description"),
             cell: ({ row }) => {
                 const seriesDescription =
                     row.original["0008103E"]?.Value?.[0] || "N/A";
@@ -22,7 +23,7 @@ export const createSeriesColumns = (): ColumnDef<DicomSeriesData>[] => {
         },
         {
             accessorKey: "seriesDate",
-            header: "Series Date",
+            header: t("dicom.columns.series.date"),
             cell: ({ row }) => {
                 const seriesDate =
                     row.original["00080021"]?.Value?.[0] || "N/A";
@@ -31,7 +32,7 @@ export const createSeriesColumns = (): ColumnDef<DicomSeriesData>[] => {
         },
         {
             accessorKey: "seriesNumber",
-            header: "Series #",
+            header: t("dicom.columns.series.number"),
             cell: ({ row }) => {
                 const seriesNumber =
                     row.original["00200011"]?.Value?.[0] || "N/A";
@@ -40,7 +41,7 @@ export const createSeriesColumns = (): ColumnDef<DicomSeriesData>[] => {
         },
         {
             accessorKey: "numberOfSeriesRelatedInstances",
-            header: "Related Instances",
+            header: t("dicom.columns.series.relatedInstances"),
             cell: ({ row }) => {
                 const numberOfSeriesRelatedInstances =
                     row.original["00201209"]?.Value?.[0] || "N/A";
@@ -49,7 +50,7 @@ export const createSeriesColumns = (): ColumnDef<DicomSeriesData>[] => {
         },
         {
             accessorKey: "seriesInstanceUid",
-            header: "Series Instance UID",
+            header: t("dicom.columns.series.seriesInstanceUid"),
             cell: ({ row }) => {
                 const seriesInstanceUid =
                     row.original["0020000E"]?.Value?.[0] || "N/A";

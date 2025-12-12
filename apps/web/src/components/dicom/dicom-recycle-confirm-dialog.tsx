@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/app/_i18n/client";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -37,6 +38,7 @@ export function DicomRecycleConfirmDialog({
     selectedCount,
     onConfirm,
 }: DicomRecycleConfirmDialogProps) {
+    const { t } = useT("translation");
     const label = dicomLevelLabels[dicomLevel];
     const isSingle = selectedCount === 1;
     const itemLabel = isSingle ? label.singular : label.plural;
@@ -50,17 +52,18 @@ export function DicomRecycleConfirmDialog({
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>確認回收</AlertDialogTitle>
+                    <AlertDialogTitle>{t("dicom.recycleDialog.title")}</AlertDialogTitle>
                     <AlertDialogDescription>
                         {isSingle
-                            ? `確定要將此項目 (${itemLabel}) 移至回收桶嗎？`
-                            : `確定要將 ${selectedCount} 個項目 (${itemLabel}) 移至回收桶嗎？`}
+                            ? t("dicom.recycleDialog.single", { level: itemLabel })
+                            : t("dicom.recycleDialog.multiple", { count: selectedCount, level: itemLabel })
+                        }
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogCancel>{t("dicom.recycleDialog.cancel")}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleConfirm}>
-                        確認
+                        {t("dicom.recycleDialog.confirm")}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

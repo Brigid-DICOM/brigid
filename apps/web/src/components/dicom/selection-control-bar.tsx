@@ -7,6 +7,7 @@ import {
     XIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { type LayoutMode, useLayoutStore } from "@/stores/layout-store";
 import { Button } from "../ui/button";
@@ -44,6 +45,7 @@ export function SelectionControlBar({
     downloadOptions,
     dicomLevel,
 }: SelectionControlBarProps) {
+    const { t } = useT("translation");
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
         useState(false);
     const layoutMode = useLayoutStore((state) => state.layoutMode);
@@ -68,7 +70,7 @@ export function SelectionControlBar({
                                 variant={"outline"}
                                 size="sm"
                                 onClick={onClearSelection}
-                                title="清除選取"
+                                title={t("dicom.selectionControl.clearSelection")}
                             >
                                 <XIcon className="size-4" />
                             </Button>
@@ -78,14 +80,14 @@ export function SelectionControlBar({
                                 variant={"outline"}
                                 size="sm"
                                 onClick={onSelectAll}
-                                title="全選"
+                                title={t("dicom.selectionControl.selectAll")}
                             >
                                 <ListChecksIcon className="size-4" />
                             </Button>
                         )}
                         {selectedCount > 0 && (
                             <ButtonGroupText className="bg-background">
-                                {selectedCount} 筆
+                                {t("dicom.selectionControl.selectedCount", { count: selectedCount })}
                             </ButtonGroupText>
                         )}
                     </ButtonGroup>
@@ -99,7 +101,7 @@ export function SelectionControlBar({
                                             <Button
                                                 size={"sm"}
                                                 variant={"outline"}
-                                                title="Download"
+                                                title={t("dicom.selectionControl.download")}
                                             >
                                                 <DownloadIcon className="size-4" />
                                             </Button>
@@ -120,7 +122,7 @@ export function SelectionControlBar({
                                         onClick={onDownload}
                                         size="sm"
                                         variant={"outline"}
-                                        title="Download"
+                                        title={t("dicom.selectionControl.download")}
                                     >
                                         <DownloadIcon className="size-4" />
                                     </Button>
@@ -131,7 +133,7 @@ export function SelectionControlBar({
                                         onClick={handleRecycle}
                                         size="sm"
                                         variant={"outline"}
-                                        title="Recycle"
+                                        title={t("dicom.selectionControl.recycle")}
                                     >
                                         <Trash2Icon className="size-4 text-destructive" />
                                     </Button>

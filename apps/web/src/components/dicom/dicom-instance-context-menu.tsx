@@ -7,6 +7,7 @@ import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -91,6 +92,7 @@ export function DicomInstanceContextMenu({
     seriesInstanceUid,
     sopInstanceUid,
 }: DicomInstanceContextMenuProps) {
+    const { t } = useT("translation");
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
         useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
@@ -144,7 +146,7 @@ export function DicomInstanceContextMenu({
                 seriesInstanceUid,
                 ids,
             ),
-        errorMessage: "Failed to download instance",
+        errorMessage: t("dicom.messages.downloadError", { level: "instance" }),
     });
 
     const { handleDownload: handleJpgDownload } = useDownloadHandler({
@@ -162,7 +164,7 @@ export function DicomInstanceContextMenu({
                 seriesInstanceUid,
                 ids,
             ),
-        errorMessage: "Failed to download instance as jpg",
+        errorMessage: t("dicom.messages.downloadInstanceImageError", { format: "JPG" }),
     });
 
     const { handleDownload: handlePngDownload } = useDownloadHandler({
@@ -180,7 +182,7 @@ export function DicomInstanceContextMenu({
                 seriesInstanceUid,
                 ids,
             ),
-        errorMessage: "Failed to download instance as png",
+        errorMessage: t("dicom.messages.downloadInstanceImageError", { format: "PNG" }),
     });
 
     const { mutate: recycleDicomInstance } = useMutation({
@@ -192,12 +194,12 @@ export function DicomInstanceContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Recycling DICOM instance...", {
+            toast.loading(t("dicom.messages.recycling", { level: "instances" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM instance recycled successfully");
+            toast.success(t("dicom.messages.recycleSuccess", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
             clearSelection();
             queryClient.invalidateQueries({
@@ -210,7 +212,7 @@ export function DicomInstanceContextMenu({
             });
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to recycle DICOM instance");
+            toast.error(t("dicom.messages.recycleError", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -227,7 +229,7 @@ export function DicomInstanceContextMenu({
 
     const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canRecycle) {
-            toast.error("You do not have permission to recycle DICOM instance");
+            toast.error(t("dicom.messages.noPermissionRecycle", { level: "instances" }));
             return;
         }
 
@@ -238,7 +240,7 @@ export function DicomInstanceContextMenu({
 
     const handleConfirmRecycle = () => {
         if (!canRecycle) {
-            toast.error("You do not have permission to recycle DICOM instance");
+            toast.error(t("dicom.messages.noPermissionRecycle", { level: "instances" }));
             return;
         }
 
@@ -250,7 +252,7 @@ export function DicomInstanceContextMenu({
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-56">
+                <ContextMenuContent className="w-60">
                     {selectedIds.length === 1 && (
                         <>
                             {canRead && (
@@ -260,12 +262,12 @@ export function DicomInstanceContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <EyeIcon className="size-4" />
-                                        <span>Open in BlueLight Viewer</span>
+                                        <span>{t("dicom.contextMenu.openInBlueLight")}</span>
                                     </ContextMenuItem>
                                     <ContextMenuSub>
                                         <ContextMenuSubTrigger>
                                             <DownloadIcon className="size-4 mr-4" />
-                                            <span>Download</span>
+                                            <span>{t("dicom.contextMenu.download")}</span>
                                         </ContextMenuSubTrigger>
                                         <ContextMenuSubContent>
                                             <DownloadSubMenuItems
@@ -321,7 +323,7 @@ export function DicomInstanceContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>Share</span>
+                                        <span>{t("dicom.contextMenu.share")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -335,7 +337,7 @@ export function DicomInstanceContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>Recycle</span>
+                                        <span>{t("dicom.contextMenu.recycle")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -345,14 +347,14 @@ export function DicomInstanceContextMenu({
                     {selectedIds.length > 1 && (
                         <>
                             <ContextMenuLabel>
-                                Selected Items ({selectedIds.length})
+                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
                             </ContextMenuLabel>
 
                             {canRead && (
                                 <ContextMenuSub>
                                     <ContextMenuSubTrigger>
                                         <DownloadIcon className="size-4 mr-2" />
-                                        <span>Download</span>
+                                        <span>{t("dicom.contextMenu.download")}</span>
                                     </ContextMenuSubTrigger>
                                     <ContextMenuSubContent>
                                         <DownloadSubMenuItems
@@ -388,7 +390,7 @@ export function DicomInstanceContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>Share</span>
+                                        <span>{t("dicom.contextMenu.share")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -402,7 +404,7 @@ export function DicomInstanceContextMenu({
                                         className="flex items-center"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>Recycle</span>
+                                        <span>{t("dicom.contextMenu.recycle")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}

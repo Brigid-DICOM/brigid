@@ -5,6 +5,8 @@ import NextTopLoader from "nextjs-toploader";
 import { Suspense } from "react";
 import Loading from "@/components/loading";
 import { Toaster } from "@/components/ui/sonner";
+import { getT } from "./_i18n";
+import { languages } from "./_i18n/settings";
 import Providers from "./providers";
 
 const geistSans = Geist({
@@ -17,10 +19,18 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-    title: "Brigid",
-    description: "Brigid PACS",
-};
+export async function generateStaticParams() {
+    return languages.map((lng) => ({ lng }));
+}
+
+export async function generateMetadata() {
+    const { t } = await getT("translation");
+
+    return {
+        title: t("common.title"),
+        description: t("common.description"),
+    }
+}
 
 export default function RootLayout({
     children,

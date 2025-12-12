@@ -5,6 +5,7 @@ import { CheckIcon, ChevronsUpDownIcon, PlusIcon, SettingsIcon, UserPlusIcon } f
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { 
     DropdownMenu,
     DropdownMenuContent,
@@ -24,6 +25,7 @@ import { InviteMemberDialog } from "./workspace/invite-member-dialog";
 import { WorkspaceSettingsDialog } from "./workspace/workspace-settings-dialog";
 
 export function NavWorkspace() {
+    const { t } = useT("translation");
     const { isMobile } = useSidebar();
     const router = useRouter();
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -110,21 +112,21 @@ export function NavWorkspace() {
                             onClick={() => setShowSettingsDialog(true)}
                         >
                             <SettingsIcon className="size-4 text-muted-foreground ml-1" />
-                            <span>Settings</span>
+                            <span>{t("navWorkspace.settings")}</span>
                         </DropdownMenuItem>
                         {canInvite && <DropdownMenuItem 
                             className="gap-2 p-2 cursor-pointer"
                             onClick={() => setShowInviteMemberDialog(true)}
                         >
                             <UserPlusIcon className="size-4 text-muted-foreground ml-1" />
-                            <span>Invite members</span>
+                            <span>{t("navWorkspace.inviteMembers")}</span>
                         </DropdownMenuItem>}
 
                         <DropdownMenuSeparator />
 
                         {/* Other Workspaces List */}
                         <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            Workspaces
+                            {t("navWorkspace.workspaces")}
                         </DropdownMenuLabel>
                         {otherWorkspaces.length > 0 ? (
                             otherWorkspaces.map((workspace) => (
@@ -147,7 +149,7 @@ export function NavWorkspace() {
                             ))
                         ) : (
                             <DropdownMenuItem className="gap-2 p-2">
-                                <span className="text-muted-foreground">No other workspaces</span>
+                                <span className="text-muted-foreground">{t("navWorkspace.noOtherWorkspaces")}</span>
                             </DropdownMenuItem>
                         )}
                         
@@ -159,7 +161,7 @@ export function NavWorkspace() {
                             onClick={() => setShowCreateDialog(true)}
                         >
                             <PlusIcon className="ml-1 size-4" />
-                            <div className="font-medium">Add workspace</div>
+                            <div className="font-medium">{t("navWorkspace.addWorkspace")}</div>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

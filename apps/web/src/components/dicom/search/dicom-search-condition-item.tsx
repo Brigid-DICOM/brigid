@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ export function DicomSearchConditionItem({
     onUpdate,
     onRemove,
 }: DicomSearchConditionItemProps) {
+    const { t } = useT("translation");
     const workspaceId = useWorkspaceStore(useShallow((state) => state.workspace?.id));
 
     const fieldConfig = SEARCH_FIELD_CONFIGS[level].find(
@@ -74,7 +76,7 @@ export function DicomSearchConditionItem({
         if (!fieldConfig) {
             return (
                 <Input
-                    placeholder="Enter value"
+                    placeholder={t("dicom.search.placeholders.enterValue")}
                     value={condition.value}
                     onChange={(e) =>
                         onUpdate(condition.id, condition.field, e.target.value)
@@ -90,7 +92,7 @@ export function DicomSearchConditionItem({
                     <Input
                         placeholder={
                             fieldConfig.placeholder ||
-                            `Enter ${fieldConfig.label}`
+                            t("dicom.search.placeholders.enter", { label: t(`dicom.search.fields.${fieldConfig.key}`) })
                         }
                         value={condition.value}
                         onChange={(e) =>
@@ -140,7 +142,7 @@ export function DicomSearchConditionItem({
                             const value = selected.join(",");
                             onUpdate(condition.id, condition.field, value);
                         }}
-                        placeholder={`Select ${fieldConfig.label}`}
+                        placeholder={t("dicom.search.placeholders.select", { label: t(`dicom.search.fields.${fieldConfig.key}`) })}
                         className="flex-1"
                     />
                 );
@@ -149,7 +151,7 @@ export function DicomSearchConditionItem({
             default:
                 return (
                     <Input
-                        placeholder="輸入搜尋值"
+                        placeholder={t("dicom.search.placeholders.enterValue")}
                         value={condition.value}
                         onChange={(e) =>
                             onUpdate(

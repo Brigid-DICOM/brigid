@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import { 
     Dialog,
@@ -79,6 +80,7 @@ export function DicomSearchModal({
     level,
     onSearch,
 }: SearchModalProps) {
+    const { t } = useT("translation");
     const { getSearchConditionsForType } = useGlobalSearchStore();
     const [conditions, setConditions] = useState<SearchCondition[]>(createDefaultConditions(level));
 
@@ -144,10 +146,10 @@ export function DicomSearchModal({
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
-                        Search {level === "study" ? "Study" : level === "series" ? "Series" : "Instance"}
+                        {t("dicom.search.title")} {level === "study" ? "Study" : level === "series" ? "Series" : "Instance"}
                     </DialogTitle>
                     <DialogDescription>
-                        Enter search criteria for {level === "study" ? "studies" : level === "series" ? "series" : "instances"}.
+                        {t("dicom.search.description", { level: level === "study" ? "studies" : level === "series" ? "series" : "instances" })}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -181,7 +183,7 @@ export function DicomSearchModal({
                                 onClick={handleClearAll}
                                 className="text-xs"
                             >
-                                清除全部
+                                {t("search.clearAll")}
                             </Button>
                         )}
                     </div>
@@ -191,7 +193,7 @@ export function DicomSearchModal({
                             variant={"outline"}
                             onClick={() => onOpenChange(false)}
                         >
-                            取消
+                            {t("dicom.search.cancel")}
                         </Button>
                         <Button
                             variant={"default"}
@@ -200,7 +202,7 @@ export function DicomSearchModal({
                                 onOpenChange(false);
                             }}
                         >
-                            搜尋
+                            {t("dicom.search.search")}
                         </Button>
                     </div>
                 </DialogFooter>

@@ -15,6 +15,8 @@ import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-st
 import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomSeriesContextMenu } from "./shared-dicom-series-context-menu";
+import { useParams } from "next/navigation";
+import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomSeriesCardProps {
     series: DicomSeriesData;
@@ -34,7 +36,8 @@ export function SharedDicomSeriesCard({
     className,
 }: SharedDicomSeriesCardProps) {
     const router = useRouter();
-    
+    const { t } = useT("translation");
+    const { lng } = useParams<{ lng: string }>();
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
     const modality = series["00080060"]?.Value?.[0] || "N/A";
     const seriesDescription = series["0008103E"]?.Value?.[0] || "N/A";
@@ -73,7 +76,7 @@ export function SharedDicomSeriesCard({
     const handleDoubleClick = () => {
         if (effectiveStudyUid) {
             const params = password ? `?password=${encodeURIComponent(password)}` : "";
-            router.push(`/share/${token}/studies/${effectiveStudyUid}/series/${seriesInstanceUid}${params}`);
+            router.push(`/${lng}/share/${token}/studies/${effectiveStudyUid}/series/${seriesInstanceUid}${params}`);
         }
     }
 
@@ -128,7 +131,7 @@ export function SharedDicomSeriesCard({
                     ) : thumbnailUrl ? (
                         <Image 
                             src={thumbnailUrl}
-                            alt="DICOM Series Thumbnail"
+                            alt={t("dicom.columns.thumbnail")}
                             width={224}
                             height={224}
                             className="w-full h-full object-cover"
@@ -152,13 +155,13 @@ export function SharedDicomSeriesCard({
                                 {modality}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                                Series #{seriesNumber}
+                                {t("dicom.columns.series.number")}{seriesNumber}
                             </span>
                         </div>
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Description:
+                                {t("dicom.columns.series.description")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {seriesDescription}
@@ -167,7 +170,7 @@ export function SharedDicomSeriesCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Series Date:
+                                {t("dicom.columns.series.date")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {seriesDate}
@@ -176,7 +179,7 @@ export function SharedDicomSeriesCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Series UID:
+                                {t("dicom.columns.series.seriesInstanceUid")}:
                             </span>
                             <div className="text-foreground truncate text-xs font-mono">
                                 {seriesInstanceUid}

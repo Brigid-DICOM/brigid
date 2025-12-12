@@ -3,6 +3,7 @@
 import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { useT } from "@/app/_i18n/client";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export function DicomInstanceCard({
     className,
     type = "management",
 }: DicomInstanceCardProps) {
+    const { t } = useT("translation");
     const sopClassUid = instance["00080016"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
     const acquisitionDate = instance["00080022"]?.Value?.[0] || "N/A";
@@ -117,7 +119,7 @@ export function DicomInstanceCard({
                     ) : thumbnailUrl ? (
                         <Image
                             src={thumbnailUrl}
-                            alt="DICOM Study Thumbnail"
+                            alt={t("dicom.columns.thumbnail")}
                             width={224}
                             height={224}
                             className={cn(
@@ -128,7 +130,7 @@ export function DicomInstanceCard({
                         />
                     ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            No thumbnail available
+                            {t("dicom.columns.noThumbnail")}
                         </div>
                     )}
                 </div>
@@ -137,7 +139,7 @@ export function DicomInstanceCard({
                     <div className="space-y-2">
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Instance Number:
+                                {t("dicom.columns.instance.number")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {instanceNumber}
@@ -146,7 +148,7 @@ export function DicomInstanceCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                SOP Class UID:
+                                {t("dicom.columns.instance.sopClassUid")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {sopClassUid}
@@ -155,7 +157,7 @@ export function DicomInstanceCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                SOP Instance UID:
+                                {t("dicom.columns.instance.sopInstanceUid")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {sopInstanceUid}
@@ -164,7 +166,7 @@ export function DicomInstanceCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Acquisition Date:
+                                {t("dicom.columns.instance.acquisitionDate")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {acquisitionDate}
@@ -173,7 +175,7 @@ export function DicomInstanceCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-gray-600">
-                                Content Date:
+                                {t("dicom.columns.instance.contentDate")}:
                             </span>
                             <div className="text-gray-900 truncate">
                                 {contentDate}

@@ -14,6 +14,7 @@ import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selectio
 import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomInstanceContextMenu } from "./shared-dicom-instance-context-menu";
+import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomInstanceCardProps {
     instance: DicomInstanceData;
@@ -34,6 +35,7 @@ export function SharedDicomInstanceCard({
     publicPermissions = 0,
     className,
 }: SharedDicomInstanceCardProps) {
+    const { t } = useT("translation");
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
     const sopClassUid = instance["00080016"]?.Value?.[0] || "N/A";
     const instanceNumber = instance["00200013"]?.Value?.[0] || "N/A";
@@ -146,13 +148,13 @@ export function SharedDicomInstanceCard({
                         {/* Instance Number Badge */}
                         <div className="flex items-center gap-2">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                Instance #{instanceNumber}
+                                {t("dicom.columns.instance.number")}{instanceNumber}
                             </span>
                         </div>
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                SOP Instance UID:
+                                {t("dicom.columns.instance.sopInstanceUid")}:
                             </span>
                             <div className="text-foreground truncate text-xs font-mono">
                                 {sopInstanceUid}
@@ -161,7 +163,7 @@ export function SharedDicomInstanceCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                SOP Class UID:
+                                {t("dicom.columns.instance.sopClassUid")}:
                             </span>
                             <div className="text-foreground truncate text-xs font-mono">
                                 {sopClassUid}
@@ -170,7 +172,7 @@ export function SharedDicomInstanceCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Acquisition Date:
+                                {t("dicom.columns.instance.acquisitionDate")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {acquisitionDate}
@@ -179,7 +181,7 @@ export function SharedDicomInstanceCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Content Date:
+                                {t("dicom.columns.instance.contentDate")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {contentDate}

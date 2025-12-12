@@ -14,6 +14,7 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { ShareExpirationDropdown } from "./share-expiration-dropdown";
 import { SharePermissionDropdown } from "./share-permission-dropdown";
 import { UserSelector } from "./user-selector";
+import { useParams } from "next/navigation";
 
 export interface ShareLinkFormData {
     id: string;
@@ -45,6 +46,7 @@ interface ShareLinkEditFormProps {
 }
 
 export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel }: ShareLinkEditFormProps) {
+    const { lng } = useParams<{ lng: string }>();
     const queryClient = getQueryClient();
     const [updatedShare, setUpdatedShare] = useState<Partial<ShareLinkFormData>>({});
 
@@ -132,11 +134,11 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             <div className="space-y-3">
                 <Label>Share Link</Label>
                 <Input
-                    value={`${window.location.origin}/share/${shareLink.token}`}
+                    value={`${window.location.origin}/${lng}/share/${shareLink.token}`}
                     readOnly
                     className="cursor-pointer hover:bg-muted"
                     onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/share/${shareLink.token}`);
+                        navigator.clipboard.writeText(`${window.location.origin}/${lng}/share/${shareLink.token}`);
                         toast.success("Share link copied to clipboard");
                     }}
                 />

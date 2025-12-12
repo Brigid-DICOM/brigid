@@ -9,11 +9,13 @@ import {
     Trash2Icon,
 } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -49,6 +51,8 @@ export function DicomSeriesContextMenu({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomSeriesContextMenuProps) {
+    const { t } = useT("translation");
+    const { lng } = useParams<{ lng: string }>();
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
         useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
@@ -97,12 +101,12 @@ export function DicomSeriesContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Recycling DICOM series...", {
+            toast.loading(t("dicom.messages.recycling", { level: "series" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM series recycled successfully");
+            toast.success(t("dicom.messages.recycleSuccess", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId, studyInstanceUid],
@@ -110,7 +114,7 @@ export function DicomSeriesContextMenu({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to recycle DICOM series");
+            toast.error(t("dicom.messages.recycleError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -121,7 +125,7 @@ export function DicomSeriesContextMenu({
         e.preventDefault();
         closeContextMenu();
         router.push(
-            `/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`,
+            `/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`,
         );
     };
 
@@ -136,13 +140,13 @@ export function DicomSeriesContextMenu({
                 seriesInstanceUid,
             );
         } catch (error) {
-            console.error("Failed to download this series", error);
+            console.error(t("dicom.messages.downloadError", { level: "series" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download this series");
+            toast.error(t("dicom.messages.downloadError", { level: "series" }));
         }
     };
 
@@ -155,7 +159,7 @@ export function DicomSeriesContextMenu({
         const currentSelectedIds = getSelectedSeriesIds();
 
         if (currentSelectedIds.length === 0) {
-            toast.error("Please select at least one series to download");
+            toast.error(t("dicom.messages.selectToDownload", { level: "series" }));
             return;
         }
 
@@ -174,19 +178,19 @@ export function DicomSeriesContextMenu({
                 );
             }
         } catch (error) {
-            console.error("Failed to download selected series", error);
+            console.error(t("dicom.messages.downloadSelectedError", { level: "series" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download selected series");
+            toast.error(t("dicom.messages.downloadSelectedError", { level: "series" }));
         }
     };
 
     const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canRecycle) {
-            toast.error("You do not have permission to recycle DICOM series");
+            toast.error(t("dicom.messages.noPermissionRecycle", { level: "series" }));
             return;
         }
 
@@ -197,7 +201,7 @@ export function DicomSeriesContextMenu({
 
     const handleConfirmRecycle = () => {
         if (!canRecycle) {
-            toast.error("You do not have permission to recycle DICOM series");
+            toast.error(t("dicom.messages.noPermissionRecycle", { level: "series" }));
             return;
         }
 
@@ -218,7 +222,7 @@ export function DicomSeriesContextMenu({
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-56">
+                <ContextMenuContent className="w-60">
                     {selectedIds.length === 1 && (
                         <>
                             {canRead && (
@@ -228,21 +232,21 @@ export function DicomSeriesContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <CornerDownLeftIcon className="size-4" />
-                                        <span>Enter Instances</span>
+                                        <span>{t("dicom.contextMenu.enterInstances")}</span>
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         onClick={handleOpenBlueLightViewer}
                                         className="flex items-center space-x-2"
                                     >
                                         <EyeIcon className="size-4" />
-                                        <span>Open in BlueLight Viewer</span>
+                                        <span>{t("dicom.contextMenu.openInBlueLight")}</span>
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         onClick={handleDownloadThis}
                                         className="flex items-center space-x-2"
                                     >
                                         <DownloadIcon className="size-4" />
-                                        <span>Download</span>
+                                        <span>{t("dicom.contextMenu.download")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -275,7 +279,7 @@ export function DicomSeriesContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>Share</span>
+                                        <span>{t("dicom.contextMenu.share")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -289,7 +293,7 @@ export function DicomSeriesContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>Recycle</span>
+                                        <span>{t("dicom.contextMenu.recycle")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -299,7 +303,7 @@ export function DicomSeriesContextMenu({
                     {selectedIds.length > 1 && (
                         <>
                             <ContextMenuLabel>
-                                Selected Items ({selectedIds.length})
+                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
                             </ContextMenuLabel>
 
                             {canRead && (
@@ -308,7 +312,7 @@ export function DicomSeriesContextMenu({
                                     className="flex items-center space-x-2"
                                 >
                                     <DownloadIcon className="size-4" />
-                                    <span>Download</span>
+                                    <span>{t("dicom.contextMenu.download")}</span>
                                 </ContextMenuItem>
                             )}
 
@@ -324,7 +328,7 @@ export function DicomSeriesContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>Share</span>
+                                        <span>{t("dicom.contextMenu.share")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -338,7 +342,7 @@ export function DicomSeriesContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>Recycle</span>
+                                        <span>{t("dicom.contextMenu.recycle")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}

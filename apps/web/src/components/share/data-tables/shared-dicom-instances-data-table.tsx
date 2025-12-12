@@ -12,6 +12,7 @@ import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { createInstanceColumns } from "@/components/dicom/data-tables/table-instance-columns";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,7 @@ function ActionsCell({
     password?: string;
     publicPermissions?: number;
 }) {
+    const { t } = useT("translation");
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
@@ -136,13 +138,13 @@ function ActionsCell({
                 password,
             });
         } catch (error) {
-            console.error("Failed to download instance", error);
+            console.error(t("dicom.messages.failedToDownload", { level: "instance" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download instance");
+            toast.error(t("dicom.messages.failedToDownload", { level: "instance" }));
         }
     };
 
@@ -161,19 +163,19 @@ function ActionsCell({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="size-8 p-0">
-                        <span className="sr-only">Open Menu</span>
+                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
                         <MoreHorizontalIcon className="size-4" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={handleCopySopInstanceUid}>
-                        Copy SOP Instance UID
+                        {t("dicom.contextMenu.copy")} {t("dicom.columns.instance.sopInstanceUid")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        Open in BlueLight Viewer
+                        {t("dicom.contextMenu.openInBlueLight")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleDownload}>
-                        Download Instance
+                        {t("dicom.contextMenu.download")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     
@@ -208,6 +210,7 @@ export function SharedDicomInstancesDataTable({
     publicPermissions = 0,
     className,
 }: SharedDicomInstancesDataTableProps) {
+    const { t } = useT("translation");
     const {
         toggleInstanceSelection,
         isInstanceSelected,
@@ -217,7 +220,7 @@ export function SharedDicomInstancesDataTable({
         selectInstance,
     } = useDicomInstanceSelectionStore();
 
-    const generalColumns = useMemo(() => createInstanceColumns(), []);
+    const generalColumns = useMemo(() => createInstanceColumns(t), [t]);
 
     const columns: ColumnDef<DicomInstanceData>[] = useMemo(
         () => [
@@ -261,7 +264,7 @@ export function SharedDicomInstancesDataTable({
             },
             {
                 accessorKey: "thumbnail",
-                header: "Preview",
+                header: t("dicom.columns.preview"),
                 cell: ({ row }) => (
                     <ThumbnailCell
                         token={token}
@@ -280,7 +283,7 @@ export function SharedDicomInstancesDataTable({
             },
             {
                 accessorKey: "tags",
-                header: "Tags",
+                header: t("dicom.columns.tags"),
                 cell: ({ row }) => (
                     <DicomDataTableTagCell
                         mode="share"
@@ -317,7 +320,8 @@ export function SharedDicomInstancesDataTable({
             isInstanceSelected,
             toggleInstanceSelection,
             generalColumns,
-            publicPermissions
+            publicPermissions,
+            t
         ],
     );
 
@@ -436,7 +440,7 @@ export function SharedDicomInstancesDataTable({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    {t("dicom.messages.noData", { level: "instances" })}
                                 </TableCell>
                             </TableRow>
                         )}

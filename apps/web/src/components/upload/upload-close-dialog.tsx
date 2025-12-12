@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/app/_i18n/client";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -26,24 +27,25 @@ export function UploadCloseDialog({
     pendingCount,
     uploadingCount,
 }: UploadCloseDialogProps) {
+    const { t } = useT("translation");
+
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
-                        確定關閉上傳列表嗎？
+                        {t("upload.closeDialog.title")}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                        目前有 {uploadingCount} 個檔案正在上傳，{pendingCount}{" "}
-                        個檔案等待中。關閉將會取消所有進行中的上傳。
+                        {t("upload.closeDialog.description", { uploadingCount, pendingCount })}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>
-                        取消
+                        {t("upload.closeDialog.cancel")}
                     </AlertDialogCancel>
                     <AlertDialogAction onClick={onConfirm}>
-                        確定關閉
+                        {t("upload.closeDialog.confirm")}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

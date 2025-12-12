@@ -16,6 +16,7 @@ import {
     getWorkspaceTagsQuery,
     removeTagAssignmentMutation,
 } from "@/react-query/queries/tag";
+import { useT } from "@/app/_i18n/client";
 
 interface TagDropdownSubProps {
     workspaceId: string;
@@ -35,6 +36,7 @@ export function TagDropdownSub({
     targetType,
     onOpenCreateTagDialog,
 }: TagDropdownSubProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [optimisticUpdates, setOptimisticUpdates] = useState<
         Map<string, OptimisticState>
@@ -110,7 +112,7 @@ export function TagDropdownSub({
                 newMap.delete(variables.tagId);
                 return newMap;
             });
-            toast.error("Failed to assign tag");
+            toast.error(t("dicom.messages.failedToAssignTag"));
         },
     });
 
@@ -182,7 +184,7 @@ export function TagDropdownSub({
                         newMap.delete(tagId);
                         return newMap;
                     });
-                    toast.error("Failed to remove tag assignment");
+                    toast.error(t("dicom.messages.failedToRemoveTagAssignment"));
                 },
             },
         );
@@ -203,14 +205,14 @@ export function TagDropdownSub({
     return (
         <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-                標籤
+                {t("dicom.tagContextMenu.tags")}
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
                 <DropdownMenuItem
                     className="flex items-center space-x-2"
                     onClick={onOpenCreateTagDialog}
                 >
-                    建立標籤
+                    {t("dicom.tagContextMenu.createTag")}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
@@ -218,7 +220,7 @@ export function TagDropdownSub({
                 {isLoading && (
                     <DropdownMenuItem className="flex items-center space-x-2">
                         <Loader2Icon className="size-4 animate-spin" />
-                        <span>Loading...</span>
+                        <span>{t("common.loading")}</span>
                     </DropdownMenuItem>
                 )}
 

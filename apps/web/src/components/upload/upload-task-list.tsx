@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { formatFileSize } from "@/lib/utils";
 import {
     type UploadStatus,
@@ -24,6 +25,7 @@ import { Progress } from "../ui/progress";
 import { UploadCloseDialog } from "./upload-close-dialog";
 
 export function UploadTaskList() {
+    const { t } = useT("translation");
     const pathname = usePathname();
     const isUploadPage = pathname.startsWith("/dicom-upload");
 
@@ -108,19 +110,19 @@ export function UploadTaskList() {
     const getStatusText = (status: UploadTask["status"]) => {
         switch (status) {
             case "validating":
-                return "驗證中";
+                return t("upload.status.validating");
             case "pending":
-                return "等待中";
+                return t("upload.status.pending");
             case "uploading":
-                return "上傳中";
+                return t("upload.status.uploading");
             case "completed":
-                return "完成";
+                return t("upload.status.completed");
             case "failed":
-                return "失敗";
+                return t("upload.status.failed");
             case "cancelled":
-                return "已取消";
+                return t("upload.status.cancelled");
             default:
-                return "未知";
+                return t("upload.status.unknown");
         }
     }
 
@@ -137,7 +139,7 @@ export function UploadTaskList() {
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex text-sm font-medium items-center space-x-2">
                             <UploadIcon className="size-4" />
-                            <span>Uploading Tasks ({tasks.length})</span>
+                            <span>{t("upload.uploadingTasks")} ({tasks.length})</span>
                         </CardTitle>
 
                         <div className="flex items-center space-x-1">
@@ -146,7 +148,7 @@ export function UploadTaskList() {
                                 size="sm"
                                 onClick={handleCloseUploadList}
                                 className="size-6 p-0"
-                                title="Close Upload List"
+                                title={t("upload.closeUploadList")}
                             >
                                 <XIcon className="size-3" />
                             </Button>
@@ -170,7 +172,7 @@ export function UploadTaskList() {
                                    size="sm"
                                    onClick={clearCompletedTasks}
                                    className="size-6 p-0"
-                                   title="Clear Completed Tasks"
+                                   title={t("upload.clearCompletedTasks")}
                                 >
                                     <Trash2Icon className="size-3" />
                                 </Button>
@@ -180,7 +182,7 @@ export function UploadTaskList() {
 
                     {hasActiveTasks && (
                         <div className="text-xs text-muted-foreground">
-                            Uploading {activeTasksCount} files
+                            {t("upload.uploading")} {activeTasksCount} {t("upload.files")}
                         </div>
                     )}
                 </CardHeader>
@@ -249,7 +251,7 @@ export function UploadTaskList() {
 
                         {tasks.length === 0 && (
                             <div className="text-center text-sm text-muted-foreground py-4">
-                                No active upload tasks
+                                {t("upload.noActiveTasks")}
                             </div>
                         )}
                     </CardContent>

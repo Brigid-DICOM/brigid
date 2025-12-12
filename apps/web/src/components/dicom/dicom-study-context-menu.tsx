@@ -9,11 +9,13 @@ import {
     Trash2Icon,
 } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -48,6 +50,8 @@ export function DicomStudyContextMenu({
     studyInstanceUid,
 }: DicomStudyContextMenuProps) {
     const router = useRouter();
+    const { lng } = useParams<{ lng: string }>();
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
         useState(false);
@@ -57,7 +61,6 @@ export function DicomStudyContextMenu({
     const { open } = useBlueLightViewerStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
-    console.log(workspace);
 
     const canRecycle =
         !!workspace &&
@@ -97,12 +100,12 @@ export function DicomStudyContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Recycling DICOM studies...", {
+            toast.loading(t("dicom.messages.recycling", { level: "studies" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM studies recycled successfully");
+            toast.success(t("dicom.messages.recycleSuccess", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-study", workspaceId],
@@ -110,7 +113,7 @@ export function DicomStudyContextMenu({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to recycle DICOM studies");
+            toast.error(t("dicom.messages.recycleError", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -118,7 +121,7 @@ export function DicomStudyContextMenu({
     const handleEnterSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        router.push(`/${workspaceId}/dicom-studies/${studyInstanceUid}`);
+        router.push(`/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}`);
     };
 
     const handleDownloadThis = async (e: React.MouseEvent<HTMLDivElement>) => {
@@ -128,13 +131,13 @@ export function DicomStudyContextMenu({
         try {
             await downloadStudy(workspaceId, studyInstanceUid);
         } catch (error) {
-            console.error("Failed to download this study", error);
+            console.error(t("dicom.messages.downloadError", { level: "studies" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download this study");
+            toast.error(t("dicom.messages.downloadError", { level: "studies" }));
         }
     };
 
@@ -147,7 +150,7 @@ export function DicomStudyContextMenu({
         const currentSelectedIds = getSelectedStudyIds();
 
         if (currentSelectedIds.length === 0) {
-            toast.error("Please select at least one study to download");
+            toast.error(t("dicom.messages.selectToDownload", { level: "study" }));
             return;
         }
 
@@ -158,13 +161,13 @@ export function DicomStudyContextMenu({
                 await downloadMultipleStudies(workspaceId, currentSelectedIds);
             }
         } catch (error) {
-            console.error("Failed to download selected studies", error);
+            console.error(t("dicom.messages.downloadSelectedError", { level: "studies" }), error);
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error("Failed to download selected studies");
+            toast.error(t("dicom.messages.downloadSelectedError", { level: "studies" }));
         }
     };
 
@@ -172,7 +175,7 @@ export function DicomStudyContextMenu({
         e: React.MouseEvent<HTMLDivElement>,
     ) => {
         if (!canRecycle) {
-            toast.error("You do not have permission to recycle DICOM studies");
+            toast.error(t("dicom.messages.noPermissionRecycle", { level: "studies" }));
             return;
         }
 
@@ -183,7 +186,7 @@ export function DicomStudyContextMenu({
 
     const handleConfirmRecycle = () => {
         if (!canRecycle) {
-            toast.error("You do not have permission to recycle DICOM studies");
+            toast.error(t("dicom.messages.noPermissionRecycle", { level: "studies" }));
             return;
         }
 
@@ -204,7 +207,7 @@ export function DicomStudyContextMenu({
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-56">
+                <ContextMenuContent className="w-60">
                     {selectedIds.length === 1 && (
                         <>
                             {canRead && (
@@ -214,21 +217,21 @@ export function DicomStudyContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <CornerDownLeftIcon className="size-4" />
-                                        <span>Enter Series</span>
+                                        <span>{t("dicom.contextMenu.enterSeries")}</span>
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         onClick={handleOpenBlueLightViewer}
                                         className="flex items-center space-x-2"
                                     >
                                         <EyeIcon className="size-4" />
-                                        <span>Open in BlueLight Viewer</span>
+                                        <span>{t("dicom.contextMenu.openInBlueLight")}</span>
                                     </ContextMenuItem>
                                     <ContextMenuItem
                                         onClick={handleDownloadThis}
                                         className="flex items-center space-x-2"
                                     >
                                         <DownloadIcon className="size-4" />
-                                        <span>Download</span>
+                                        <span>{t("dicom.contextMenu.download")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -261,7 +264,7 @@ export function DicomStudyContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>Share</span>
+                                        <span>{t("dicom.contextMenu.share")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -274,7 +277,7 @@ export function DicomStudyContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>Recycle</span>
+                                        <span>{t("dicom.contextMenu.recycle")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -284,7 +287,7 @@ export function DicomStudyContextMenu({
                     {selectedIds.length > 1 && (
                         <>
                             <ContextMenuLabel>
-                                Selected Items ({selectedIds.length})
+                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
                             </ContextMenuLabel>
 
                             <ContextMenuItem
@@ -292,7 +295,7 @@ export function DicomStudyContextMenu({
                                 className="flex items-center space-x-2"
                             >
                                 <DownloadIcon className="size-4" />
-                                <span>Download</span>
+                                <span>{t("dicom.contextMenu.download")}</span>
                             </ContextMenuItem>
 
                             {canShare && (
@@ -308,7 +311,7 @@ export function DicomStudyContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>Share</span>
+                                        <span>{t("dicom.contextMenu.share")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -321,7 +324,7 @@ export function DicomStudyContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>Recycle</span>
+                                        <span>{t("dicom.contextMenu.recycle")}</span>
                                     </ContextMenuItem>
                                 </>
                             )}

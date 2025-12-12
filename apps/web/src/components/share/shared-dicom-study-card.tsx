@@ -15,6 +15,8 @@ import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-stor
 import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomStudyContextMenu } from "./shared-dicom-study-context-menu";
+import { useParams } from "next/navigation";
+import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomStudyCardProps {
     study: DicomStudyData;
@@ -32,7 +34,8 @@ export function SharedDicomStudyCard({
     className,
 }: SharedDicomStudyCardProps) {
     const router = useRouter();
-
+    const { t } = useT("translation");
+    const { lng } = useParams<{ lng: string }>();
     const patientId = study["00100020"]?.Value?.[0] || "N/A";
     const patientName = study["00100010"]?.Value?.[0]?.Alphabetic || "N/A";
     const accessionNumber = study["00080050"]?.Value?.[0] || "N/A";
@@ -68,7 +71,7 @@ export function SharedDicomStudyCard({
 
     const handleDoubleClick = () => {
         const params = password ? `?password=${encodeURIComponent(password)}` : "";
-        router.push(`/share/${token}/studies/${studyInstanceUid}${params}`);
+        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}${params}`);
     };
 
     const { handleCardClick, handleContextMenu, handleDoubleClick: onDoubleClick } = useDicomCardSelection({
@@ -144,7 +147,7 @@ export function SharedDicomStudyCard({
                     <div className="space-y-2">
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Patient ID:
+                                {t("dicom.columns.study.patientId")}:
                             </span>
                             <div className="text-foreground truncate font-medium">
                                 {patientId}
@@ -153,7 +156,7 @@ export function SharedDicomStudyCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Patient Name:
+                                {t("dicom.columns.study.patientName")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {patientName}
@@ -162,7 +165,7 @@ export function SharedDicomStudyCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Study Date:
+                                {t("dicom.columns.study.studyDate")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {studyDate}
@@ -171,7 +174,7 @@ export function SharedDicomStudyCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Description:
+                                {t("dicom.columns.study.description")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {studyDescription}
@@ -180,7 +183,7 @@ export function SharedDicomStudyCard({
 
                         <div className="text-sm">
                             <span className="font-medium text-muted-foreground">
-                                Accession Number:
+                                {t("dicom.columns.study.accessionNumber")}:
                             </span>
                             <div className="text-foreground truncate">
                                 {accessionNumber}

@@ -1,10 +1,12 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import type { TFunction } from "i18next";
 import { XIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import {
     Command,
@@ -30,6 +32,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useUserSearch } from "@/hooks/use-user-search";
+import { getQueryClient } from "@/react-query/get-query-client";
 import { addWorkspaceMembersMutation } from "@/react-query/queries/workspace";
 import { Label } from "../ui/label";
 
@@ -50,36 +53,38 @@ interface SelectedUser {
     role: string;
 }
 
-const ROLES = [
-    {
-        value: "admin",
-        label: "Admin",
-        description:
-            "Full access to the workspace including inviting and managing members",
-    },
-    {
-        value: "maintainer",
-        label: "Maintainer",
-        description: "Can create, edit content and delete content",
-    },
-    {
-        value: "editor",
-        label: "Editor",
-        description: "Can create and edit content",
-    },
-    {
-        value: "viewer",
-        label: "Viewer",
-        description:
-            "Can view the workspace, but cannot create or edit content",
-    },
-];
+const getRoles = (t: TFunction) => {
+    return [
+        {
+            value: "admin",
+            label: t("inviteMember.roles.admin"),
+            description: t("inviteMember.roles.adminDesc"),
+        },
+        {
+            value: "maintainer",
+            label: t("inviteMember.roles.maintainer"),
+            description: t("inviteMember.roles.maintainerDesc"),
+        },
+        {
+            value: "editor",
+            label: t("inviteMember.roles.editor"),
+            description: t("inviteMember.roles.editorDesc"),
+        },
+        {
+            value: "viewer",
+            label: t("inviteMember.roles.viewer"),
+            description: t("inviteMember.roles.viewerDesc"),
+        },
+    ];
+}
 
 export function InviteMemberDialog({
     open,
     onOpenChange,
     workspaceId,
 }: InviteMemberDialogProps) {
+    const { t } = useT("translation");
+    const queryClient = getQueryClient();
     const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
 
     const { searchInput, setSearchInput, users, isSearching, clearSearch } =
@@ -89,7 +94,6 @@ export function InviteMemberDialog({
         });
 
     const addMembers = useMutation(addWorkspaceMembersMutation());
-
     const handleInvite = async () => {
         if (selectedUsers.length === 0) return;
 
@@ -102,19 +106,19 @@ export function InviteMemberDialog({
                 })),
             });
 
-            toast.success("Member invited successfully", {
+            toast.success(t("inviteMember.success"), {
                 position: "bottom-center",
             });
             setSelectedUsers([]);
             setSearchInput("");
             onOpenChange(false);
             clearSearch();
-queryClient.invalidateQueries({
+            queryClient.invalidateQueries({
                 queryKey: ["workspace", workspaceId, "members"],
             });
         } catch (error) {
-            console.error("Failed to invite member", error);
-            toast.error("Failed to invite member", {
+            console.error(t("inviteMember.error"), error);
+            toast.error(t("inviteMember.error"), {
                 position: "bottom-center",
             });
         }
@@ -157,20 +161,20 @@ queryClient.invalidateQueries({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Invite Members</DialogTitle>
+                    <DialogTitle>{t("inviteMember.title")}</DialogTitle>
                     <DialogDescription>
-                        Invite new members to your workspace.
+                        {t("inviteMember.description")}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="add-users">Add Users</Label>
+                        <Label htmlFor="add-users">{t("inviteMember.addUsers")}</Label>
                         <div className="relative">
                             <Command className="bg-background border rounded-md overflow-visible">
                                 <CommandInput
                                     id="add-users"
-                                    placeholder="Search users by name or email..."
+                                    placeholder={t("inviteMember.searchPlaceholder")}
                                     value={searchInput}
                                     onValueChange={setSearchInput}
                                 />
@@ -186,7 +190,7 @@ queryClient.invalidateQueries({
                                         <CommandList>
                                             {users.length === 0 ? (
                                                 <CommandEmpty>
-                                                    No users found.
+                                                    {t("inviteMember.noUsersFound")}
                                                 </CommandEmpty>
                                             ) : (
                                                 <CommandGroup>
@@ -219,7 +223,7 @@ queryClient.invalidateQueries({
                                                                     }
                                                                     alt={
                                                                         user.name ||
-                                                                        "user avatar"
+                                                                        t("inviteMember.userAvatar")
                                                                     }
                                                                     className="w-6 h-6 rounded-full"
                                                                     width={24}
@@ -253,7 +257,7 @@ queryClient.invalidateQueries({
                     {/* Selected Users List */}
                     {selectedUsers.length > 0 && (
                         <div className="space-y-2">
-                            <Label>Selected Members</Label>
+                            <Label>{t("inviteMember.selectedMembers")}</Label>
                             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                                 {selectedUsers.map((user) => (
                                     <div
@@ -266,7 +270,7 @@ queryClient.invalidateQueries({
                                                     src={user.user.image}
                                                     alt={
                                                         user.user.name ||
-                                                        "user avatar"
+                                                        t("inviteMember.userAvatar")
                                                     }
                                                     className="w-8 h-8 rounded-full shrink-0"
                                                     width={32}
@@ -302,7 +306,7 @@ queryClient.invalidateQueries({
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent align="end">
-                                                    {ROLES.map((item) => (
+                                                    {getRoles(t).map((item) => (
                                                         <SelectItem
                                                             key={item.value}
                                                             value={item.value}
@@ -348,7 +352,7 @@ queryClient.invalidateQueries({
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                     >
-                        Cancel
+                        {t("inviteMember.cancel")}
                     </Button>
                     <Button
                         onClick={handleInvite}
@@ -356,7 +360,7 @@ queryClient.invalidateQueries({
                             selectedUsers.length === 0 || addMembers.isPending
                         }
                     >
-                        {addMembers.isPending ? "Inviting..." : "Invite"}
+                        {addMembers.isPending ? t("inviteMember.inviting") : t("inviteMember.invite")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

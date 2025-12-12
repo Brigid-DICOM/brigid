@@ -17,6 +17,7 @@ import { getShareInstancesQuery } from "@/react-query/queries/publicShare";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { SharedDicomInstancesDataTable } from "../data-tables/shared-dicom-instances-data-table";
+import { useT } from "@/app/_i18n/client";
 
 interface SharedInstancesViewProps {
     token: string;
@@ -31,6 +32,7 @@ export default function SharedInstancesView({
     password,
     publicPermissions = 0,
 }: SharedInstancesViewProps) {
+    const { t } = useT("translation");
     const layoutMode = useLayoutStore((state) => state.layoutMode);
     const { 
         currentPage, 
@@ -67,7 +69,7 @@ export default function SharedInstancesView({
     }, [clearSelection]);
 
     const canGoNext = instances && instances.length === ITEM_PER_PAGE;
-    const columns = useMemo(() => createInstanceColumns(), []);
+    const columns = useMemo(() => createInstanceColumns(t), [t]);
 
     const handleSelectAll = () => {
         if (isAllSelected) {
