@@ -4,6 +4,7 @@ import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { FileIcon } from "lucide-react";
 import Image from "next/image";
+import { useT } from "@/app/_i18n/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
@@ -14,7 +15,6 @@ import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selectio
 import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomInstanceContextMenu } from "./shared-dicom-instance-context-menu";
-import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomInstanceCardProps {
     instance: DicomInstanceData;

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ClientShareLinkData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { CopyIcon, EditIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -20,11 +21,10 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { ShareDeleteConfirmDialog } from "./share-delete-confirm-dialog";
 import { ShareLinkEditDialog } from "./share-link-edit-dialog";
-import type { ShareLinkFormData } from "./share-link-edit-form";
 
 interface ShareLinkContextMenuProps {
     children: React.ReactNode;
-    shareLink: ShareLinkFormData;
+    shareLink: ClientShareLinkData;
     workspaceId: string;
     onDeleted?: () => void;
 }

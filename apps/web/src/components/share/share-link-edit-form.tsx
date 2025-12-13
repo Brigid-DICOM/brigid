@@ -1,5 +1,6 @@
 "use client";
 
+import type { ClientShareLinkData } from "@brigid/types";
 import { useMutation } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -17,30 +18,8 @@ import { ShareExpirationDropdown } from "./share-expiration-dropdown";
 import { SharePermissionDropdown } from "./share-permission-dropdown";
 import { UserSelector } from "./user-selector";
 
-export interface ShareLinkFormData {
-    id: string;
-    creatorId: string;
-    name?: string;
-    token: string;
-    publicPermissions: number;
-    requiredPassword: boolean;
-    expiresInSec?: number;
-    expiresAt?: Date;
-    description?: string;
-    recipients: Array<{
-        userId: string;
-        user: {
-            id: string;
-            name: string;
-            email: string;
-            image?: string;
-        };
-        permissions: number;
-    }>;
-}
-
 interface ShareLinkEditFormProps {
-    shareLink: ShareLinkFormData;
+    shareLink: ClientShareLinkData;
     workspaceId: string;
     onSuccess?: () => void;
     onCancel?: () => void;
@@ -50,20 +29,20 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const queryClient = getQueryClient();
-    const [updatedShare, setUpdatedShare] = useState<Partial<ShareLinkFormData>>({});
+    const [updatedShare, setUpdatedShare] = useState<Partial<ClientShareLinkData>>({});
 
     const recipients = useMemo(() => {
-        const share = updatedShare.recipients ?? shareLink.recipients ?? [];
+        const recipients = updatedShare.recipients ?? shareLink.recipients ?? [];
 
-        return share.map((recipient) => ({
-            userId: recipient.userId,
-            permissions: recipient.permissions,
-            user: recipient.user,
+        return recipients.map((r) => ({
+            userId: r.userId,
+            permissions: r.permissions,
+            user: r.user,
         }));
     }, [updatedShare, shareLink]);
 
     const { mutate: updateShareLink, isPending: isUpdating } = useMutation({
-        mutationFn: async ({ shareLinkId, updates }: { shareLinkId: string, updates: Partial<ShareLinkFormData> }) => {
+        mutationFn: async ({ shareLinkId, updates }: { shareLinkId: string, updates: Partial<ClientShareLinkData> }) => {
             const response = await apiClient.api.workspaces[":workspaceId"]["share-links"][":shareLinkId"].$patch({
                 param: { workspaceId, shareLinkId },
                 json: updates,
@@ -108,7 +87,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
         });
     }
 
-    const handleSelectUser = (user: ShareLinkFormData["recipients"][number]) => {
+    const handleSelectUser = (user: ClientShareLinkData["recipients"][number]) => {
         setUpdatedShare((prev) => {
             const existing = prev.recipients?.find((u) => u.userId === user.userId);
             if (existing) {

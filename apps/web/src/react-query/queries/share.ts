@@ -1,3 +1,4 @@
+import type { ApiShareLinkData, ClientShareLinkData } from "@brigid/types";
 import { queryOptions } from "@tanstack/react-query";
 import { apiClient } from "../apiClient";
 
@@ -109,17 +110,20 @@ export const getUserShareLinksQuery = ({
 
             const response = await apiClient.api.workspaces[":workspaceId"][
                 "share-links"
-            ].$get({
-                param: {
-                    workspaceId,
+            ].$get(
+                {
+                    param: {
+                        workspaceId,
+                    },
+                    query: {
+                        page: page.toString(),
+                        limit: limit.toString(),
+                    },
                 },
-                query: {
-                    page: page.toString(),
-                    limit: limit.toString(),
+                {
+                    headers: headers,
                 },
-            }, {
-                headers: headers
-            });
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to fetch user share links");
@@ -149,15 +153,17 @@ export const getUserReceivedShareLinksQuery = ({
                 headers.cookie = cookie;
             }
 
-            const response = await apiClient.api["share-links"].received.$get({
-                query: {
-                    page: page.toString(),
-                    limit: limit.toString(),
-                }
-            }, {
-                headers: headers
-            });
-
+            const response = await apiClient.api["share-links"].received.$get(
+                {
+                    query: {
+                        page: page.toString(),
+                        limit: limit.toString(),
+                    },
+                },
+                {
+                    headers: headers,
+                },
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to fetch user received share links");
@@ -167,4 +173,14 @@ export const getUserReceivedShareLinksQuery = ({
         },
         staleTime: 5 * 60 * 1000,
     });
+};
+
+export const parseShareLinkFromApi = (
+    data: ApiShareLinkData,
+): ClientShareLinkData => {
+    return {
+        ...data,
+        createdAt: new Date(data.createdAt),
+        expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
+    };
 };

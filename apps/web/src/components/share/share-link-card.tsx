@@ -1,12 +1,12 @@
 "use client";
 
+import type { ClientShareLinkData } from "@brigid/types"
 import { format } from "date-fns-tz";
 import { EllipsisVerticalIcon, EyeIcon, FolderIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { ShareLinkFormData } from "./share-link-edit-form";
 
 const ShareLinkContextMenu = dynamic(
     () =>
@@ -38,28 +38,8 @@ const ShareLinkDetailsDialog = dynamic(
     },
 );
 
-interface ShareLinkData {
-    id: string;
-    name?: string;
-    token: string;
-    accessCount: number;
-    description?: string;
-    createdAt: Date;
-    publicPermissions: number;
-    requiredPassword: boolean;
-    expiresInSec?: number;
-    expiresAt?: Date;
-    recipients: ShareLinkFormData["recipients"];
-    targets: Array<{
-        id: string;
-        targetType: "study" | "series" | "instance";
-        targetId: string;
-    }>;
-    creatorId: string;
-}
-
 interface ShareLinkCardProps {
-    shareLink: ShareLinkData;
+    shareLink: ClientShareLinkData;
     workspaceId: string;
     className?: string;
     onDeleted?: () => void;
@@ -74,7 +54,7 @@ export function ShareLinkCard({
     const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
     const formattedDate = format(
-        new Date(shareLink.createdAt),
+        shareLink.createdAt,
         "yyyy/M/d a h:mm:ss",
     );
 
@@ -85,18 +65,7 @@ export function ShareLinkCard({
         <>
             <ShareLinkContextMenu
                 workspaceId={workspaceId}
-                shareLink={{
-                    id: shareLink.id,
-                    name: shareLink.name,
-                    token: shareLink.token,
-                    publicPermissions: shareLink.publicPermissions,
-                    requiredPassword: shareLink.requiredPassword,
-                    expiresInSec: shareLink.expiresInSec,
-                    expiresAt: shareLink.expiresAt,
-                    recipients: shareLink.recipients,
-                    creatorId: shareLink.creatorId,
-                    description: shareLink.description,
-                }}
+                shareLink={shareLink}
                 onDeleted={onDeleted}
             >
                 <div className={cn(
@@ -144,18 +113,7 @@ export function ShareLinkCard({
                     <div className="absolute top-4 right-4">
                         {/* Dropdown Menu Button */}
                         <ShareLinkDropdownMenu
-                                shareLink={{
-                                    id: shareLink.id,
-                                    name: shareLink.name,
-                                    token: shareLink.token,
-                                    publicPermissions: shareLink.publicPermissions,
-                                    requiredPassword: shareLink.requiredPassword,
-                                    expiresInSec: shareLink.expiresInSec,
-                                    expiresAt: shareLink.expiresAt,
-                                    recipients: shareLink.recipients,
-                                    creatorId: shareLink.creatorId,
-                                    description: shareLink.description,
-                                }}
+                                shareLink={shareLink}
                                 workspaceId={workspaceId}
                                 onDeleted={onDeleted}
                             >

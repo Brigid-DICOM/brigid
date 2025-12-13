@@ -5,10 +5,12 @@ import {
     DownloadIcon,
     EyeIcon,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -25,8 +27,6 @@ import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
 import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
-import { useParams } from "next/navigation";
-import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomSeriesContextMenuProps {
     children: React.ReactNode;

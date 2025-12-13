@@ -4,7 +4,9 @@ import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
+import { useT } from "@/app/_i18n/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDicomCardSelection } from "@/hooks/use-dicom-card-selection";
 import { useDicomThumbnail } from "@/hooks/use-dicom-thumbnail";
@@ -15,8 +17,6 @@ import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-st
 import { DicomCardHeaderTagsDisplay } from "../dicom/dicom-card-header-tags-display";
 import { Skeleton } from "../ui/skeleton";
 import { SharedDicomSeriesContextMenu } from "./shared-dicom-series-context-menu";
-import { useParams } from "next/navigation";
-import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomSeriesCardProps {
     series: DicomSeriesData;

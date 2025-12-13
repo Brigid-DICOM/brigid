@@ -1,6 +1,8 @@
 "use client";
 
+import type { ClientShareLinkData } from "@brigid/types";
 import { createPortal } from "react-dom";
+import { useT } from "@/app/_i18n/client";
 import {
     Dialog,
     DialogContent,
@@ -9,13 +11,12 @@ import {
 } from "@/components/ui/dialog";
 import {
     ShareLinkEditForm,
-    type ShareLinkFormData,
 } from "./share-link-edit-form";
 
 interface ShareLinkEditDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    shareLink: ShareLinkFormData;
+    shareLink: ClientShareLinkData;
     workspaceId: string;
 }
 
@@ -25,11 +26,13 @@ export function ShareLinkEditDialog({
     shareLink,
     workspaceId,
 }: ShareLinkEditDialogProps) {
+    const { t } = useT("translation");
+    
     return createPortal(
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Edit Share Link</DialogTitle>
+                    <DialogTitle>{t("shareLink.editDialog.title")}</DialogTitle>
                 </DialogHeader>
                 <ShareLinkEditForm
                     shareLink={shareLink}

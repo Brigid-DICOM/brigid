@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import z from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { toApiShareLinkData } from "@/server/dto/shareLink.dto";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import {
     verifyWorkspaceExists,
@@ -66,7 +67,7 @@ const getShareLinksRoute = new Hono().get(
                 {
                     ok: true,
                     data: {
-                        shareLinks,
+                        shareLinks: shareLinks.map(toApiShareLinkData),
                         hasNextPage,
                         total,
                         page,

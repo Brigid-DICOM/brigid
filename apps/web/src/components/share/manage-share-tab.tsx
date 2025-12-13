@@ -1,5 +1,6 @@
 "use client";
 
+import type { ClientShareLinkData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow, isPast } from "date-fns";
 import {
@@ -16,7 +17,7 @@ import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { usePagination } from "@/hooks/use-pagination";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getTargetShareLinksQuery } from "@/react-query/queries/share";
+import { getTargetShareLinksQuery, parseShareLinkFromApi } from "@/react-query/queries/share";
 import { PaginationControls } from "../common/pagination-controls";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -29,29 +30,6 @@ interface ManageShareTabProps {
     targetIds: string[];
 }
 
-interface ShareLink {
-    id: string;
-    creatorId: string;
-    name?: string;
-    token: string;
-    publicPermissions: number;
-    requiredPassword: boolean;
-    expiresInSec?: number;
-    expiresAt?: Date;
-    accessCount: number;
-    description?: string;
-    recipients: Array<{
-        userId: string;
-        user: {
-            id: string;
-            name: string;
-            email: string;
-            image?: string;
-        };
-        permissions: number;
-    }>;
-}
-
 export function ManageShareTab({
     workspaceId,
     targetType,
@@ -60,7 +38,7 @@ export function ManageShareTab({
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
     const queryClient = getQueryClient();
-    const [editingShare, setEditingShare] = useState<ShareLink | null>(null);
+    const [editingShare, setEditingShare] = useState<ClientShareLinkData | null>(null);
     const [targetIdToDelete, setTargetIdToDelete] = useState<string | null>(
         null,
     );
@@ -224,7 +202,7 @@ export function ManageShareTab({
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setEditingShare(
-                                                        share as ShareLink,
+                                                        parseShareLinkFromApi(share)
                                                     );
                                                 }}
                                                 title="Edit share link"

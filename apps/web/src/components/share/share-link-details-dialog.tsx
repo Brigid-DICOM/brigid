@@ -1,18 +1,13 @@
 "use client";
 
+import type { ShareLinkTarget } from "@brigid/types";
 import { FileIcon, FolderIcon, ImageIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
-import { useParams } from "next/navigation";
-
-interface ShareLinkTarget {
-    id: string;
-    targetType: "study" | "series" | "instance";
-    targetId: string;
-}
 
 interface ShareLinkDetailsDialogProps {
     open: boolean;

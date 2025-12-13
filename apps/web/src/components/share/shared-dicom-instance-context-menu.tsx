@@ -7,6 +7,7 @@ import {
 import type React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -30,7 +31,6 @@ import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
 import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
-import { useT } from "@/app/_i18n/client";
 
 interface SharedDicomInstanceContextMenuProps {
     children: React.ReactNode;

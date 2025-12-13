@@ -1,3 +1,5 @@
+// 此頁面不受 workspace 影響，每個 workspace 內的 share with me 都是共通的
+
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -7,7 +9,7 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { ShareLinkCard } from "@/components/share/share-link-card";
 import { Button } from "@/components/ui/button";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getUserReceivedShareLinksQuery } from "@/react-query/queries/share";
+import { getUserReceivedShareLinksQuery, parseShareLinkFromApi } from "@/react-query/queries/share";
 
 export default function ShareWithMeContent() {
     const queryClient = getQueryClient();
@@ -21,10 +23,9 @@ export default function ShareWithMeContent() {
         })
     );
 
-    const shareLinks = data?.data?.shareLinks ?? [];
+    const shareLinks = (data?.data?.shareLinks ?? []).map(parseShareLinkFromApi);
     const hasNextPage = data?.data?.hasNextPage ?? false;
 
-    console.log("shareLinks", shareLinks);
 
     const handleRefresh = () => {
         refetch();
@@ -69,33 +70,8 @@ export default function ShareWithMeContent() {
                         {shareLinks.map((shareLink) => (
                             <ShareLinkCard
                                 key={shareLink.id}
-                                shareLink={{
-                                    id: shareLink.id,
-                                    name: shareLink.name ?? undefined,
-                                    token: shareLink.token,
-                                    accessCount: shareLink.accessCount,
-                                    publicPermissions: shareLink.publicPermissions,
-                                    requiredPassword: shareLink.requiredPassword,
-                                    expiresInSec: shareLink.expiresInSec ?? undefined,
-                                    expiresAt: shareLink.expiresAt ? new Date(shareLink.expiresAt) : undefined,
-                                    recipients: shareLink.recipients.map((recipient) => ({
-                                        userId: recipient.userId,
-                                        user: {
-                                            id: recipient.user.id ?? "",
-                                            name: recipient.user.name ?? "",
-                                            email: recipient.user.email ?? "",
-                                            image: recipient.user.image ?? undefined,
-                                        },
-                                        permissions: recipient.permissions,
-                                    })),
-                                    createdAt: new Date(shareLink.createdAt),
-                                    targets: shareLink.targets.map((target) => ({
-                                        id: target.id,
-                                        targetType: target.targetType as "study" | "series" | "instance",
-                                        targetId: target.targetId,
-                                    })),
-                                    creatorId: shareLink.creatorId,
-                                }}
+                                shareLink={shareLink}
+                                // 這裡的 workspace id 必須是 share link 的 workspace id，因為每個 share link 都可能來自不同的 workspace
                                 workspaceId={shareLink.workspaceId}
                                 onDeleted={handleShareDeleted}
                             />

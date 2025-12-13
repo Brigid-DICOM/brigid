@@ -8,7 +8,7 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { ShareLinkCard } from "@/components/share/share-link-card";
 import { Button } from "@/components/ui/button";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getUserShareLinksQuery } from "@/react-query/queries/share";
+import { getUserShareLinksQuery, parseShareLinkFromApi } from "@/react-query/queries/share";
 
 interface MySharesContentProps {
     workspaceId: string;
@@ -28,7 +28,7 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
         })
     );
 
-    const shareLinks = data?.data?.shareLinks ?? [];
+    const shareLinks = (data?.data?.shareLinks ?? []).map(parseShareLinkFromApi);
     const hasNextPage = data?.data?.hasNextPage ?? false;
 
     const handleRefresh = () => {
@@ -75,34 +75,7 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
                         {shareLinks.map((shareLink) => (
                             <ShareLinkCard
                                 key={shareLink.id}
-                                shareLink={{
-                                    id: shareLink.id,
-                                    name: shareLink.name ?? undefined,
-                                    token: shareLink.token,
-                                    accessCount: shareLink.accessCount,
-                                    publicPermissions: shareLink.publicPermissions,
-                                    requiredPassword: shareLink.requiredPassword,
-                                    expiresInSec: shareLink.expiresInSec ?? undefined,
-                                    expiresAt: shareLink.expiresAt ? new Date(shareLink.expiresAt) : undefined,
-                                    recipients: shareLink.recipients.map((recipient) => ({
-                                        userId: recipient.userId,
-                                        user: {
-                                            id: recipient.user.id ?? "",
-                                            name: recipient.user.name ?? "",
-                                            email: recipient.user.email ?? "",
-                                            image: recipient.user.image ?? undefined,
-                                        },
-                                        permissions: recipient.permissions,
-                                    })),
-                                    createdAt: new Date(shareLink.createdAt),
-                                    targets: shareLink.targets.map((target) => ({
-                                        id: target.id,
-                                        targetType: target.targetType as "study" | "series" | "instance",
-                                        targetId: target.targetId,
-                                    })),
-                                    creatorId: shareLink.creatorId,
-                                    description: shareLink.description ?? undefined,
-                                }}
+                                shareLink={shareLink}
                                 workspaceId={workspaceId}
                                 onDeleted={handleShareDeleted}
                             />

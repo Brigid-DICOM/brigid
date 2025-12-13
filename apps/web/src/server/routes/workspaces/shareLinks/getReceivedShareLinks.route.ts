@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import z from "zod";
+import { toApiShareLinkData } from "@/server/dto/shareLink.dto";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import { ShareLinkService } from "@/server/services/shareLink.service";
 import { appLogger } from "@/server/utils/logger";
@@ -63,7 +64,7 @@ const getReceivedShareLinksRoute = new Hono().get(
                 {
                     ok: true,
                     data: {
-                        shareLinks,
+                        shareLinks: shareLinks.map(toApiShareLinkData),
                         hasNextPage,
                         total,
                     },

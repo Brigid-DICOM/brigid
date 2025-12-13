@@ -1,5 +1,6 @@
 "use client";
 
+import type { ShareTargetType } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { Share2Icon } from "lucide-react";
 import { useState } from "react";
@@ -22,7 +23,7 @@ interface ShareManagementDialogProps {
     open: boolean;  
     onOpenChange: (open: boolean) => void;
     workspaceId: string;
-    targetType: "study" | "series" | "instance";
+    targetType: ShareTargetType;
     targetIds: string[];
 }
 
