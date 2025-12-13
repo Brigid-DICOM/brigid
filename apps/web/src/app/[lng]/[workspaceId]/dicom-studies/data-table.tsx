@@ -65,20 +65,42 @@ function ActionsCell({
 }) {
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] = useState(false);
-    const [showShareManagementDialog, setShowShareManagementDialog] = useState(false);
+    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
+        useState(false);
+    const [showShareManagementDialog, setShowShareManagementDialog] =
+        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
-    const workspace = useWorkspaceStore(useShallow(state => state.workspace));
+    const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
-    const canRecycle = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
-    const canRead = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
-    const canUpdate = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.UPDATE);
-    const canShare = !!workspace && hasPermission(workspace.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.MANAGE);
+    const canRecycle =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.DELETE,
+        );
+    const canRead =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.READ,
+        );
+    const canUpdate =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.UPDATE,
+        );
+    const canShare =
+        !!workspace &&
+        hasPermission(
+            workspace.membership?.permissions ?? 0,
+            WORKSPACE_PERMISSIONS.MANAGE,
+        );
 
     const { mutate: recycleDicomStudy } = useMutation({
         ...recycleDicomStudyMutation({
@@ -91,7 +113,9 @@ function ActionsCell({
             });
         },
         onSuccess: () => {
-            toast.success(t("dicom.messages.recycleSuccess", { level: "study" }));
+            toast.success(
+                t("dicom.messages.recycleSuccess", { level: "study" }),
+            );
             toast.dismiss(`recycle-${studyInstanceUid}`);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-study", workspaceId],
@@ -124,51 +148,61 @@ function ActionsCell({
 
     const handleRecycleStudy = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "studies" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "studies" }),
+            );
             return;
         }
 
         e.stopPropagation();
         setShowRecycleConfirmDialog(true);
     };
-    
+
     const handleConfirmRecycle = () => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "studies" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "studies" }),
+            );
             return;
         }
 
         recycleDicomStudy();
-    }
+    };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         openBlueLightViewer({
             studyInstanceUid,
         });
-    }
+    };
 
     return (
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant={"ghost"} className="size-8 p-0">
-                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
+                        <span className="sr-only">
+                            {t("dicom.contextMenu.openMenu")}
+                        </span>
                         <MoreHorizontalIcon className="size-4" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-
                     {canRead && (
                         <>
-                            <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
-                                {t("dicom.contextMenu.copy")} {t("dicom.columns.study.studyInstanceUid")}
+                            <DropdownMenuItem
+                                onClick={handleCopyStudyInstanceUid}
+                            >
+                                {t("dicom.contextMenu.copy")}{" "}
+                                {t("dicom.columns.study.studyInstanceUid")}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleEnterSeries}>
                                 {t("dicom.contextMenu.enterSeries")}
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                            <DropdownMenuItem
+                                onClick={handleOpenBlueLightViewer}
+                            >
                                 {t("dicom.contextMenu.openInBlueLight")}
                             </DropdownMenuItem>
 
@@ -178,16 +212,17 @@ function ActionsCell({
                         </>
                     )}
 
-
                     {canUpdate && (
                         <>
                             <DropdownMenuSeparator />
 
-                            <TagDropdownSub 
+                            <TagDropdownSub
                                 workspaceId={workspaceId}
                                 targetId={studyInstanceUid}
                                 targetType="study"
-                                onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                                onOpenCreateTagDialog={() =>
+                                    setOpenCreateTagDialog(true)
+                                }
                             />
                         </>
                     )}
@@ -196,11 +231,13 @@ function ActionsCell({
                         <>
                             <DropdownMenuSeparator />
 
-                            <DropdownMenuItem onClick={(e) => {
-                                e.preventDefault();
-                                closeDropdownMenu();
-                                setShowShareManagementDialog(true);
-                            }} >
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    closeDropdownMenu();
+                                    setShowShareManagementDialog(true);
+                                }}
+                            >
                                 {t("dicom.contextMenu.share")}
                             </DropdownMenuItem>
                         </>
@@ -218,24 +255,28 @@ function ActionsCell({
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {canRecycle && <DicomRecycleConfirmDialog 
-                open={showRecycleConfirmDialog}
-                onOpenChange={setShowRecycleConfirmDialog}
-                dicomLevel={"study"}
-                selectedCount={1}
-                onConfirm={handleConfirmRecycle}
-            />}
+            {canRecycle && (
+                <DicomRecycleConfirmDialog
+                    open={showRecycleConfirmDialog}
+                    onOpenChange={setShowRecycleConfirmDialog}
+                    dicomLevel={"study"}
+                    selectedCount={1}
+                    onConfirm={handleConfirmRecycle}
+                />
+            )}
 
-            {canUpdate && <CreateTagDialog 
-                open={openCreateTagDialog}
-                onOpenChange={setOpenCreateTagDialog}
-                workspaceId={workspaceId}
-                targetType="study"
-                targetId={studyInstanceUid}
-            />}
+            {canUpdate && (
+                <CreateTagDialog
+                    open={openCreateTagDialog}
+                    onOpenChange={setOpenCreateTagDialog}
+                    workspaceId={workspaceId}
+                    targetType="study"
+                    targetId={studyInstanceUid}
+                />
+            )}
 
             {canShare && (
-                <ShareManagementDialog 
+                <ShareManagementDialog
                     open={showShareManagementDialog}
                     onOpenChange={setShowShareManagementDialog}
                     workspaceId={workspaceId}
@@ -283,7 +324,8 @@ export function DicomStudiesDataTable({
                                     selectAll(
                                         rows.map(
                                             (row) =>
-                                                row.original["0020000D"]?.Value?.[0] || "",
+                                                row.original["0020000D"]
+                                                    ?.Value?.[0] || "",
                                         ),
                                     );
                                 } else {
@@ -292,7 +334,7 @@ export function DicomStudiesDataTable({
                             }}
                             aria-label="Select all"
                         />
-                    )
+                    );
                 },
                 cell: ({ row }) => {
                     const studyInstanceUid =
@@ -322,7 +364,9 @@ export function DicomStudiesDataTable({
                                 type: "workspace",
                                 workspaceId,
                             }}
-                            studyInstanceUid={row.original["0020000D"]?.Value?.[0] || ""}
+                            studyInstanceUid={
+                                row.original["0020000D"]?.Value?.[0] || ""
+                            }
                         />
                     );
                 },
@@ -336,7 +380,9 @@ export function DicomStudiesDataTable({
                             mode="workspace"
                             workspaceId={workspaceId}
                             targetType="study"
-                            targetId={row.original["0020000D"]?.Value?.[0] || ""}
+                            targetId={
+                                row.original["0020000D"]?.Value?.[0] || ""
+                            }
                         />
                     );
                 },
@@ -365,7 +411,7 @@ export function DicomStudiesDataTable({
             isStudySelected,
             toggleStudySelection,
             generalColumns,
-            t
+            t,
         ],
     );
 
@@ -478,7 +524,9 @@ export function DicomStudiesDataTable({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    {t("dicom.messages.noData", { level: "studies" })}
+                                    {t("dicom.messages.noData", {
+                                        level: "studies",
+                                    })}
                                 </TableCell>
                             </TableRow>
                         )}
