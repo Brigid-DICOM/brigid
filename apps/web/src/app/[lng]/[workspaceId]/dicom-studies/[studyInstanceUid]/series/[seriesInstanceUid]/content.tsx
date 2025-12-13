@@ -33,6 +33,7 @@ import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selectio
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomInstancesDataTable } from "./data-table";
+import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
 
 interface DicomInstancesContentProps {
     workspaceId: string;
@@ -254,92 +255,96 @@ export default function DicomInstancesContent({
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="mb-8 flex flex-col items-start space-x-4">
-                <div className="flex flex-1 items-center space-x-4">
-                    <Link href={`/${workspaceId}/dicom-studies/${studyInstanceUid}`}>
-                        <Button 
-                            variant="outline" 
-                            className="flex items-center"
-                            onClick={() => {
-                                setSearchConditionsForType("dicom-instance", {});
-                            }}
-                        >
-                            <ArrowLeftIcon className="size-4" />
-                        </Button>
-                    </Link>
+        <>
+            <div className="container mx-auto px-4 py-8">
+                <div className="mb-8 flex flex-col items-start space-x-4">
+                    <div className="flex flex-1 items-center space-x-4">
+                        <Link href={`/${workspaceId}/dicom-studies/${studyInstanceUid}`}>
+                            <Button 
+                                variant="outline" 
+                                className="flex items-center"
+                                onClick={() => {
+                                    setSearchConditionsForType("dicom-instance", {});
+                                }}
+                            >
+                                <ArrowLeftIcon className="size-4" />
+                            </Button>
+                        </Link>
 
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            DICOM Instances
-                        </h1>
-                        <p className="text-gray-600">
-                            Study Instance UID: {studyInstanceUid}
-                        </p>
-                        <p className="text-gray-600">
-                            Series Instance UID: {seriesInstanceUid}
-                        </p>
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">
+                                DICOM Instances
+                            </h1>
+                            <p className="text-gray-600">
+                                Study Instance UID: {studyInstanceUid}
+                            </p>
+                            <p className="text-gray-600">
+                                Series Instance UID: {seriesInstanceUid}
+                            </p>
+                        </div>
                     </div>
                 </div>
+
+                {!isLoading && instances && instances.length > 0 && (
+                    <SelectionControlBar
+                        selectedCount={selectedCount}
+                        isAllSelected={isAllSelected}
+                        onSelectAll={handleSelectAll}
+                        onClearSelection={clearSelection}
+                        onRecycle={() => recycleDicomInstances()}
+                        downloadOptions={downloadOptions}
+                        dicomLevel="instance"
+                    />
+                )}
+
+                {isLoading ? (
+                    layoutMode === "grid" ? (
+                        <LoadingGrid itemCount={ITEM_PER_PAGE} />
+                    ) : (
+                        <LoadingDataTable columns={5} rows={ITEM_PER_PAGE} />
+                    )
+                ) : instances && instances.length > 0 ? (
+                    <>
+                        {layoutMode === "grid" ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+                                {instances.map((instance, index) => (
+                                    <DicomInstanceCard
+                                        // biome-ignore lint/suspicious/noArrayIndexKey: 使用 sop instance uid 會出現 type error，所以直接使用 index
+                                        key={index}
+                                        instance={instance as DicomInstanceData}
+                                        workspaceId={workspaceId}
+                                        studyInstanceUid={studyInstanceUid}
+                                        seriesInstanceUid={seriesInstanceUid}
+                                        type="management"
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="mb-8">
+                                <DicomInstancesDataTable
+                                    instances={instances as DicomInstanceData[]}
+                                    workspaceId={workspaceId}
+                                    className="mb-8"
+                                />
+                            </div>
+                        )}
+
+                        <PaginationControls
+                            canGoPrevious={canGoPrevious}
+                            canGoNext={Boolean(canGoNext)}
+                            onPrevious={handlePreviousPage}
+                            onNext={handleNextPage}
+                        />
+                    </>
+                ) : (
+                    <EmptyState
+                        title="沒有資料"
+                        description="目前沒有可顯示的 Instances"
+                    />
+                )}
             </div>
 
-            {!isLoading && instances && instances.length > 0 && (
-                <SelectionControlBar
-                    selectedCount={selectedCount}
-                    isAllSelected={isAllSelected}
-                    onSelectAll={handleSelectAll}
-                    onClearSelection={clearSelection}
-                    onRecycle={() => recycleDicomInstances()}
-                    downloadOptions={downloadOptions}
-                    dicomLevel="instance"
-                />
-            )}
-
-            {isLoading ? (
-                layoutMode === "grid" ? (
-                    <LoadingGrid itemCount={ITEM_PER_PAGE} />
-                ) : (
-                    <LoadingDataTable columns={5} rows={ITEM_PER_PAGE} />
-                )
-            ) : instances && instances.length > 0 ? (
-                <>
-                    {layoutMode === "grid" ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                            {instances.map((instance, index) => (
-                                <DicomInstanceCard
-                                    // biome-ignore lint/suspicious/noArrayIndexKey: 使用 sop instance uid 會出現 type error，所以直接使用 index
-                                    key={index}
-                                    instance={instance as DicomInstanceData}
-                                    workspaceId={workspaceId}
-                                    studyInstanceUid={studyInstanceUid}
-                                    seriesInstanceUid={seriesInstanceUid}
-                                    type="management"
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="mb-8">
-                            <DicomInstancesDataTable
-                                instances={instances as DicomInstanceData[]}
-                                workspaceId={workspaceId}
-                                className="mb-8"
-                            />
-                        </div>
-                    )}
-
-                    <PaginationControls
-                        canGoPrevious={canGoPrevious}
-                        canGoNext={Boolean(canGoNext)}
-                        onPrevious={handlePreviousPage}
-                        onNext={handleNextPage}
-                    />
-                </>
-            ) : (
-                <EmptyState
-                    title="沒有資料"
-                    description="目前沒有可顯示的 Instances"
-                />
-            )}
-        </div>
+            <ShareManagementDialogProvider />
+        </>
     );
 }

@@ -22,7 +22,6 @@ import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-conf
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
 import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
-import { ShareManagementDialog } from "@/components/share/share-management-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -48,6 +47,7 @@ import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface DicomStudiesTableProps {
@@ -67,13 +67,12 @@ function ActionsCell({
     const { t } = useT("translation");
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
         useState(false);
-    const [showShareManagementDialog, setShowShareManagementDialog] =
-        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
+    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
@@ -235,7 +234,11 @@ function ActionsCell({
                                 onClick={(e) => {
                                     e.preventDefault();
                                     closeDropdownMenu();
-                                    setShowShareManagementDialog(true);
+                                    openShareManagementDialog({
+                                        workspaceId,
+                                        targetType: "study",
+                                        targetIds: [studyInstanceUid],
+                                    });
                                 }}
                             >
                                 {t("dicom.contextMenu.share")}
@@ -272,16 +275,6 @@ function ActionsCell({
                     workspaceId={workspaceId}
                     targetType="study"
                     targetId={studyInstanceUid}
-                />
-            )}
-
-            {canShare && (
-                <ShareManagementDialog
-                    open={showShareManagementDialog}
-                    onOpenChange={setShowShareManagementDialog}
-                    workspaceId={workspaceId}
-                    targetType="study"
-                    targetIds={[studyInstanceUid]}
                 />
             )}
         </>

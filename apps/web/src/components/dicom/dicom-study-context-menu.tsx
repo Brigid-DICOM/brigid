@@ -32,8 +32,8 @@ import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { ShareManagementDialog } from "../share/share-management-dialog";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
@@ -56,8 +56,7 @@ export function DicomStudyContextMenu({
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
         useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
-    const [showShareManagementDialog, setShowShareManagementDialog] =
-        useState(false);
+    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
     const { open } = useBlueLightViewerStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
@@ -260,7 +259,11 @@ export function DicomStudyContextMenu({
                                         onClick={(e) => {
                                             e.preventDefault();
                                             closeContextMenu();
-                                            setShowShareManagementDialog(true);
+                                            openShareManagementDialog({
+                                                workspaceId,
+                                                targetType: "study",
+                                                targetIds: selectedIds,
+                                            });
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
@@ -307,7 +310,11 @@ export function DicomStudyContextMenu({
                                         onClick={(e) => {
                                             e.preventDefault();
                                             closeContextMenu();
-                                            setShowShareManagementDialog(true);
+                                            openShareManagementDialog({
+                                                workspaceId,
+                                                targetType: "study",
+                                                targetIds: selectedIds,
+                                            });
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
@@ -350,16 +357,6 @@ export function DicomStudyContextMenu({
                     workspaceId={workspaceId}
                     targetId={studyInstanceUid}
                     targetType="study"
-                />
-            )}
-
-            {canShare && (
-                <ShareManagementDialog
-                    open={showShareManagementDialog}
-                    onOpenChange={setShowShareManagementDialog}
-                    workspaceId={workspaceId}
-                    targetType="study"
-                    targetIds={selectedIds}
                 />
             )}
         </>

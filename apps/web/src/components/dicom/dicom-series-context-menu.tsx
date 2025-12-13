@@ -32,8 +32,8 @@ import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { ShareManagementDialog } from "../share/share-management-dialog";
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
@@ -56,15 +56,14 @@ export function DicomSeriesContextMenu({
     const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
         useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
-    const [showShareManagementDialog, setShowShareManagementDialog] =
-        useState(false);
+    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
+    const { open } = useBlueLightViewerStore();
     const queryClient = getQueryClient();
     const router = useRouter();
     const { getSelectedSeriesIds, clearSelection } =
         useDicomSeriesSelectionStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
-    const { open } = useBlueLightViewerStore();
     const selectedIds = getSelectedSeriesIds();
 
     const canRecycle =
@@ -275,7 +274,11 @@ export function DicomSeriesContextMenu({
                                         onClick={(e) => {
                                             e.preventDefault();
                                             closeContextMenu();
-                                            setShowShareManagementDialog(true);
+                                            openShareManagementDialog({
+                                                workspaceId,
+                                                targetType: "series",
+                                                targetIds: selectedIds,
+                                            });
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
@@ -324,7 +327,11 @@ export function DicomSeriesContextMenu({
                                         onClick={(e) => {
                                             e.preventDefault();
                                             closeContextMenu();
-                                            setShowShareManagementDialog(true);
+                                            openShareManagementDialog({
+                                                workspaceId,
+                                                targetType: "series",
+                                                targetIds: selectedIds,
+                                            });
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
@@ -368,16 +375,6 @@ export function DicomSeriesContextMenu({
                     workspaceId={workspaceId}
                     targetType="series"
                     targetId={seriesInstanceUid}
-                />
-            )}
-
-            {canShare && (
-                <ShareManagementDialog
-                    open={showShareManagementDialog}
-                    onOpenChange={setShowShareManagementDialog}
-                    workspaceId={workspaceId}
-                    targetType="series"
-                    targetIds={selectedIds}
                 />
             )}
         </>

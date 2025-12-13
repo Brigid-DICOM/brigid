@@ -13,6 +13,7 @@ import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
+import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
@@ -188,75 +189,80 @@ export default function DicomStudiesContent({
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">
-                    DICOM Studies
-                </h1>
-                <p className="text-gray-600">
-                    View and manage DICOM studies in your workspace
-                </p>
+        <>
+
+            <div className="container mx-auto px-4 py-8">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        DICOM Studies
+                    </h1>
+                    <p className="text-gray-600">
+                        View and manage DICOM studies in your workspace
+                    </p>
+                </div>
+
+                {/* 選取控制列 */}
+                {!isLoading && studies && studies.length > 0 && (
+                    <SelectionControlBar 
+                        selectedCount={selectedCount}
+                        isAllSelected={isAllSelected}
+                        onSelectAll={handleSelectAll}
+                        onClearSelection={clearSelection}
+                        onDownload={() => handleDownload(selectedIds)}
+                        onRecycle={handleRecycle}
+                        dicomLevel="study"
+                    />
+                )}
+
+                {isLoading ? (
+                    layoutMode === "grid" ? (
+                        <LoadingGrid 
+                            itemCount={ITEM_PER_PAGE}
+                        />
+                    ) : (
+                        <LoadingDataTable 
+                            columns={8}
+                            rows={ITEM_PER_PAGE}
+                        />
+                    )
+                ) : studies && studies.length > 0 ? (
+                    <>
+                        {layoutMode === "grid" ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+                                {studies.map((study, index) => (
+                                    // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index
+                                    <DicomStudyCard key={index} study={study as DicomStudyData} workspaceId={workspaceId} type="management" />
+                                ))}
+                            </div>
+                        ): (
+                            <div className="mb-8">
+                                <DicomStudiesDataTable 
+                                    studies={studies as DicomStudyData[]}
+                                    workspaceId={workspaceId}
+                                />
+                            </div>
+                        )}
+
+                        <PaginationControls 
+                            canGoPrevious={canGoPrevious}
+                            canGoNext={Boolean(canGoNext)}
+                            onPrevious={handlePreviousPage}
+                            onNext={handleNextPage}
+                        />
+                    </>
+                ) : (
+                    <div className="flex items-center justify-center min-h-[400px]">
+                        <div className="text-center">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                                No data
+                            </h2>
+                            <p className="text-gray-600">No data to display</p>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* 選取控制列 */}
-            {!isLoading && studies && studies.length > 0 && (
-                <SelectionControlBar 
-                    selectedCount={selectedCount}
-                    isAllSelected={isAllSelected}
-                    onSelectAll={handleSelectAll}
-                    onClearSelection={clearSelection}
-                    onDownload={() => handleDownload(selectedIds)}
-                    onRecycle={handleRecycle}
-                    dicomLevel="study"
-                />
-            )}
-
-            {isLoading ? (
-                layoutMode === "grid" ? (
-                    <LoadingGrid 
-                        itemCount={ITEM_PER_PAGE}
-                    />
-                ) : (
-                    <LoadingDataTable 
-                        columns={8}
-                        rows={ITEM_PER_PAGE}
-                    />
-                )
-            ) : studies && studies.length > 0 ? (
-                <>
-                    {layoutMode === "grid" ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-                            {studies.map((study, index) => (
-                                // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index
-                                <DicomStudyCard key={index} study={study as DicomStudyData} workspaceId={workspaceId} type="management" />
-                            ))}
-                        </div>
-                    ): (
-                        <div className="mb-8">
-                            <DicomStudiesDataTable 
-                                studies={studies as DicomStudyData[]}
-                                workspaceId={workspaceId}
-                            />
-                        </div>
-                    )}
-
-                    <PaginationControls 
-                        canGoPrevious={canGoPrevious}
-                        canGoNext={Boolean(canGoNext)}
-                        onPrevious={handlePreviousPage}
-                        onNext={handleNextPage}
-                    />
-                </>
-            ) : (
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="text-center">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                            No data
-                        </h2>
-                        <p className="text-gray-600">No data to display</p>
-                    </div>
-                </div>
-            )}
-        </div>
+            <ShareManagementDialogProvider />
+        </>
     );
 }
