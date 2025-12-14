@@ -71,7 +71,7 @@
     "nextjs-toploader": "^3.9.17",
     "pg": "^8.16.3",
     "raccoon-dcm4che-bridge": "^0.7.1",
-    "react": "19.1.0",
+    "react": "19.1.4",
     "react-day-picker": "^9.11.1",
     "react-dom": "19.1.0",
     "react-i18next": "^16.4.0",
