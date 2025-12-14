@@ -79,3 +79,5 @@ export interface DicomInstanceData {
 }
 
 // #endregion DICOM QIDO Response Data
+
+export type DicomLevel = "study" | "series" | "instance";

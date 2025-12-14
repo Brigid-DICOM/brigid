@@ -31,10 +31,10 @@ import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
 
@@ -53,8 +53,7 @@ export function DicomStudyContextMenu({
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
     const queryClient = getQueryClient();
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
-        useState(false);
+    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
     const { open } = useBlueLightViewerStore();
@@ -170,7 +169,7 @@ export function DicomStudyContextMenu({
         }
     };
 
-    const handleRecycleSelected = async (
+    const handleRecycleSelected = (
         e: React.MouseEvent<HTMLDivElement>,
     ) => {
         if (!canRecycle) {
@@ -180,7 +179,11 @@ export function DicomStudyContextMenu({
 
         e.preventDefault();
         closeContextMenu();
-        setShowRecycleConfirmDialog(true);
+        openDicomRecycleConfirmDialog({
+            dicomLevel: "study",
+            selectedCount: selectedIds.length,
+            onConfirm: handleConfirmRecycle,
+        });
     };
 
     const handleConfirmRecycle = () => {
@@ -339,16 +342,6 @@ export function DicomStudyContextMenu({
                     )}
                 </ContextMenuContent>
             </ContextMenu>
-
-            {canRecycle && (
-                <DicomRecycleConfirmDialog
-                    open={showRecycleConfirmDialog}
-                    onOpenChange={setShowRecycleConfirmDialog}
-                    dicomLevel={"study"}
-                    selectedCount={selectedIds.length}
-                    onConfirm={handleConfirmRecycle}
-                />
-            )}
 
             {canUpdate && (
                 <CreateTagDialog

@@ -18,7 +18,6 @@ import { useT } from "@/app/_i18n/client";
 import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
-import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
 import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
@@ -46,6 +45,7 @@ import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -65,8 +65,7 @@ function ActionsCell({
 }) {
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
-        useState(false);
+    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
@@ -154,7 +153,11 @@ function ActionsCell({
         }
 
         e.stopPropagation();
-        setShowRecycleConfirmDialog(true);
+        openDicomRecycleConfirmDialog({
+            dicomLevel: "study",
+            selectedCount: 1,
+            onConfirm: handleConfirmRecycle,
+        });
     };
 
     const handleConfirmRecycle = () => {
@@ -257,16 +260,6 @@ function ActionsCell({
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-
-            {canRecycle && (
-                <DicomRecycleConfirmDialog
-                    open={showRecycleConfirmDialog}
-                    onOpenChange={setShowRecycleConfirmDialog}
-                    dicomLevel={"study"}
-                    selectedCount={1}
-                    onConfirm={handleConfirmRecycle}
-                />
-            )}
 
             {canUpdate && (
                 <CreateTagDialog

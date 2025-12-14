@@ -31,10 +31,10 @@ import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
 
@@ -53,10 +53,9 @@ export function DicomSeriesContextMenu({
 }: DicomSeriesContextMenuProps) {
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
-        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
     const { open } = useBlueLightViewerStore();
     const queryClient = getQueryClient();
     const router = useRouter();
@@ -195,7 +194,11 @@ export function DicomSeriesContextMenu({
 
         e.preventDefault();
         closeContextMenu();
-        setShowRecycleConfirmDialog(true);
+        openDicomRecycleConfirmDialog({
+            dicomLevel: "series",
+            selectedCount: selectedIds.length,
+            onConfirm: handleConfirmRecycle,
+        });
     };
 
     const handleConfirmRecycle = () => {
@@ -357,16 +360,6 @@ export function DicomSeriesContextMenu({
                     )}
                 </ContextMenuContent>
             </ContextMenu>
-
-            {canRecycle && (
-                <DicomRecycleConfirmDialog
-                    open={showRecycleConfirmDialog}
-                    onOpenChange={setShowRecycleConfirmDialog}
-                    dicomLevel={"series"}
-                    selectedCount={selectedIds.length}
-                    onConfirm={handleConfirmRecycle}
-                />
-            )}
 
             {canUpdate && (
                 <CreateTagDialog

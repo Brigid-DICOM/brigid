@@ -29,6 +29,7 @@ import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-st
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomSeriesDataTable } from "./data-table";
+import { DicomRecycleConfirmDialogProvider } from "@/components/dicom/dicom-recycle-confirm-dialog-provider";
 
 interface DicomSeriesContentProps {
     workspaceId: string;
@@ -297,6 +298,7 @@ export default function DicomSeriesContent({
             </div>
 
             <ShareManagementDialogProvider />
+            <DicomRecycleConfirmDialogProvider />
         </>
     );
 }

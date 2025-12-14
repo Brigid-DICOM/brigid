@@ -35,9 +35,9 @@ import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
 
@@ -93,14 +93,13 @@ export function DicomInstanceContextMenu({
     sopInstanceUid,
 }: DicomInstanceContextMenuProps) {
     const { t } = useT("translation");
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
-        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const { getSelectedInstanceIds, clearSelection } =
         useDicomInstanceSelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
     const canRead =
@@ -234,7 +233,11 @@ export function DicomInstanceContextMenu({
 
         e.preventDefault();
         closeContextMenu();
-        setShowRecycleConfirmDialog(true);
+        openDicomRecycleConfirmDialog({
+            dicomLevel: "instance",
+            selectedCount: selectedIds.length,
+            onConfirm: handleConfirmRecycle,
+        });
     };
 
     const handleConfirmRecycle = () => {
@@ -419,16 +422,6 @@ export function DicomInstanceContextMenu({
                     )}
                 </ContextMenuContent>
             </ContextMenu>
-
-            {canRecycle && (
-                <DicomRecycleConfirmDialog
-                    open={showRecycleConfirmDialog}
-                    onOpenChange={setShowRecycleConfirmDialog}
-                    dicomLevel={"instance"}
-                    selectedCount={selectedIds.length}
-                    onConfirm={handleConfirmRecycle}
-                />
-            )}
 
             {canUpdate && (
                 <CreateTagDialog

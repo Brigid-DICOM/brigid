@@ -17,7 +17,6 @@ import { createInstanceColumns } from "@/components/dicom/data-tables/table-inst
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomInstanceContextMenu } from "@/components/dicom/dicom-instance-context-menu";
-import { DicomRecycleConfirmDialog } from "@/components/dicom/dicom-recycle-confirm-dialog";
 import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
@@ -45,6 +44,7 @@ import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 
@@ -62,12 +62,11 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const { t } = useT("translation");
-    const [showRecycleConfirmDialog, setShowRecycleConfirmDialog] =
-        useState(false);
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
@@ -160,7 +159,11 @@ function ActionsCell({
         }
 
         e.stopPropagation();
-        setShowRecycleConfirmDialog(true);
+        openDicomRecycleConfirmDialog({
+            dicomLevel: "instance",
+            selectedCount: 1,
+            onConfirm: handleConfirmRecycle,
+        });
     };
 
     const handleConfirmRecycle = () => {
@@ -248,16 +251,6 @@ function ActionsCell({
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-
-            {canRecycle && (
-                <DicomRecycleConfirmDialog
-                    open={showRecycleConfirmDialog}
-                    onOpenChange={setShowRecycleConfirmDialog}
-                    dicomLevel={"instance"}
-                    selectedCount={1}
-                    onConfirm={handleConfirmRecycle}
-                />
-            )}
 
             {canUpdate && (
                 <CreateTagDialog

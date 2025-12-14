@@ -13,7 +13,9 @@ import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomInstanceCard } from "@/components/dicom/dicom-instance-card";
+import { DicomRecycleConfirmDialogProvider } from "@/components/dicom/dicom-recycle-confirm-dialog-provider";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
+import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
@@ -33,7 +35,6 @@ import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selectio
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomInstancesDataTable } from "./data-table";
-import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
 
 interface DicomInstancesContentProps {
     workspaceId: string;
@@ -345,6 +346,7 @@ export default function DicomInstancesContent({
             </div>
 
             <ShareManagementDialogProvider />
+            <DicomRecycleConfirmDialogProvider />
         </>
     );
 }

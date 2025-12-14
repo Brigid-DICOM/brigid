@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { DicomRecycleConfirmDialogProvider } from "@/components/dicom/dicom-recycle-confirm-dialog-provider";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
@@ -263,6 +264,7 @@ export default function DicomStudiesContent({
             </div>
 
             <ShareManagementDialogProvider />
+            <DicomRecycleConfirmDialogProvider />
         </>
     );
 }
