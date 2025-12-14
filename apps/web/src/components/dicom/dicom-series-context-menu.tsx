@@ -12,7 +12,6 @@ import { nanoid } from "nanoid";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
@@ -31,11 +30,11 @@ import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useCreateTagDialogStore } from "@/stores/create-tag-dialog-store";
 import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { CreateTagDialog } from "./tag/create-tag-dialog";
 import { TagContextMenuSub } from "./tag/tag-context-menu-sub";
 
 interface DicomSeriesContextMenuProps {
@@ -53,9 +52,11 @@ export function DicomSeriesContextMenu({
 }: DicomSeriesContextMenuProps) {
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
-    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
-    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
+    const { openDialog: openCreateTagDialog } = useCreateTagDialogStore();
+    const { openDialog: openShareManagementDialog } =
+        useShareManagementDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } =
+        useDicomRecycleConfirmDialogStore();
     const { open } = useBlueLightViewerStore();
     const queryClient = getQueryClient();
     const router = useRouter();
@@ -104,7 +105,9 @@ export function DicomSeriesContextMenu({
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.recycleSuccess", { level: "series" }));
+            toast.success(
+                t("dicom.messages.recycleSuccess", { level: "series" }),
+            );
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId, studyInstanceUid],
@@ -138,7 +141,10 @@ export function DicomSeriesContextMenu({
                 seriesInstanceUid,
             );
         } catch (error) {
-            console.error(t("dicom.messages.downloadError", { level: "series" }), error);
+            console.error(
+                t("dicom.messages.downloadError", { level: "series" }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
@@ -157,7 +163,9 @@ export function DicomSeriesContextMenu({
         const currentSelectedIds = getSelectedSeriesIds();
 
         if (currentSelectedIds.length === 0) {
-            toast.error(t("dicom.messages.selectToDownload", { level: "series" }));
+            toast.error(
+                t("dicom.messages.selectToDownload", { level: "series" }),
+            );
             return;
         }
 
@@ -176,19 +184,26 @@ export function DicomSeriesContextMenu({
                 );
             }
         } catch (error) {
-            console.error(t("dicom.messages.downloadSelectedError", { level: "series" }), error);
+            console.error(
+                t("dicom.messages.downloadSelectedError", { level: "series" }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error(t("dicom.messages.downloadSelectedError", { level: "series" }));
+            toast.error(
+                t("dicom.messages.downloadSelectedError", { level: "series" }),
+            );
         }
     };
 
     const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "series" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "series" }),
+            );
             return;
         }
 
@@ -203,7 +218,9 @@ export function DicomSeriesContextMenu({
 
     const handleConfirmRecycle = () => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "series" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "series" }),
+            );
             return;
         }
 
@@ -220,156 +237,160 @@ export function DicomSeriesContextMenu({
     };
 
     return (
-        <>
-            <ContextMenu>
-                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+        <ContextMenu>
+            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-60">
-                    {selectedIds.length === 1 && (
-                        <>
-                            {canRead && (
-                                <>
-                                    <ContextMenuItem
-                                        onClick={handleEnterInstances}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <CornerDownLeftIcon className="size-4" />
-                                        <span>{t("dicom.contextMenu.enterInstances")}</span>
-                                    </ContextMenuItem>
-                                    <ContextMenuItem
-                                        onClick={handleOpenBlueLightViewer}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <EyeIcon className="size-4" />
-                                        <span>{t("dicom.contextMenu.openInBlueLight")}</span>
-                                    </ContextMenuItem>
-                                    <ContextMenuItem
-                                        onClick={handleDownloadThis}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <DownloadIcon className="size-4" />
-                                        <span>{t("dicom.contextMenu.download")}</span>
-                                    </ContextMenuItem>
-                                </>
-                            )}
-
-                            {canUpdate && (
-                                <>
-                                    <ContextMenuSeparator />
-
-                                    <TagContextMenuSub
-                                        workspaceId={workspaceId}
-                                        targetId={seriesInstanceUid}
-                                        targetType="series"
-                                        onOpenCreateTagDialog={() =>
-                                            setOpenCreateTagDialog(true)
-                                        }
-                                    />
-                                </>
-                            )}
-
-                            {canShare && (
-                                <>
-                                    <ContextMenuSeparator />
-
-                                    <ContextMenuItem
-                                        className="flex items-center space-x-2"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            closeContextMenu();
-                                            openShareManagementDialog({
-                                                workspaceId,
-                                                targetType: "series",
-                                                targetIds: selectedIds,
-                                            });
-                                        }}
-                                    >
-                                        <Share2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.share")}</span>
-                                    </ContextMenuItem>
-                                </>
-                            )}
-
-                            {canRecycle && (
-                                <>
-                                    <ContextMenuSeparator />
-
-                                    <ContextMenuItem
-                                        onClick={handleRecycle}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <Trash2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.recycle")}</span>
-                                    </ContextMenuItem>
-                                </>
-                            )}
-                        </>
-                    )}
-
-                    {selectedIds.length > 1 && (
-                        <>
-                            <ContextMenuLabel>
-                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
-                            </ContextMenuLabel>
-
-                            {canRead && (
+            <ContextMenuContent className="w-60">
+                {selectedIds.length === 1 && (
+                    <>
+                        {canRead && (
+                            <>
                                 <ContextMenuItem
-                                    onClick={handleDownloadSelected}
+                                    onClick={handleEnterInstances}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <CornerDownLeftIcon className="size-4" />
+                                    <span>
+                                        {t("dicom.contextMenu.enterInstances")}
+                                    </span>
+                                </ContextMenuItem>
+                                <ContextMenuItem
+                                    onClick={handleOpenBlueLightViewer}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <EyeIcon className="size-4" />
+                                    <span>
+                                        {t("dicom.contextMenu.openInBlueLight")}
+                                    </span>
+                                </ContextMenuItem>
+                                <ContextMenuItem
+                                    onClick={handleDownloadThis}
                                     className="flex items-center space-x-2"
                                 >
                                     <DownloadIcon className="size-4" />
-                                    <span>{t("dicom.contextMenu.download")}</span>
+                                    <span>
+                                        {t("dicom.contextMenu.download")}
+                                    </span>
                                 </ContextMenuItem>
-                            )}
+                            </>
+                        )}
 
-                            {canShare && (
-                                <>
-                                    <ContextMenuSeparator />
-                                    <ContextMenuItem
-                                        className="flex items-center space-x-2"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            closeContextMenu();
-                                            openShareManagementDialog({
-                                                workspaceId,
-                                                targetType: "series",
-                                                targetIds: selectedIds,
-                                            });
-                                        }}
-                                    >
-                                        <Share2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.share")}</span>
-                                    </ContextMenuItem>
-                                </>
-                            )}
+                        {canUpdate && (
+                            <>
+                                <ContextMenuSeparator />
 
-                            {canRecycle && (
-                                <>
-                                    <ContextMenuSeparator />
+                                <TagContextMenuSub
+                                    workspaceId={workspaceId}
+                                    targetId={seriesInstanceUid}
+                                    targetType="series"
+                                    onOpenCreateTagDialog={() =>
+                                        openCreateTagDialog({
+                                            workspaceId,
+                                            targetType: "series",
+                                            targetId: seriesInstanceUid,
+                                        })
+                                    }
+                                />
+                            </>
+                        )}
 
-                                    <ContextMenuItem
-                                        onClick={handleRecycle}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <Trash2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.recycle")}</span>
-                                    </ContextMenuItem>
-                                </>
-                            )}
-                        </>
-                    )}
-                </ContextMenuContent>
-            </ContextMenu>
+                        {canShare && (
+                            <>
+                                <ContextMenuSeparator />
 
-            {canUpdate && (
-                <CreateTagDialog
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    workspaceId={workspaceId}
-                    targetType="series"
-                    targetId={seriesInstanceUid}
-                />
-            )}
-        </>
+                                <ContextMenuItem
+                                    className="flex items-center space-x-2"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        closeContextMenu();
+                                        openShareManagementDialog({
+                                            workspaceId,
+                                            targetType: "series",
+                                            targetIds: selectedIds,
+                                        });
+                                    }}
+                                >
+                                    <Share2Icon className="size-4" />
+                                    <span>{t("dicom.contextMenu.share")}</span>
+                                </ContextMenuItem>
+                            </>
+                        )}
+
+                        {canRecycle && (
+                            <>
+                                <ContextMenuSeparator />
+
+                                <ContextMenuItem
+                                    onClick={handleRecycle}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <Trash2Icon className="size-4" />
+                                    <span>
+                                        {t("dicom.contextMenu.recycle")}
+                                    </span>
+                                </ContextMenuItem>
+                            </>
+                        )}
+                    </>
+                )}
+
+                {selectedIds.length > 1 && (
+                    <>
+                        <ContextMenuLabel>
+                            {t("dicom.contextMenu.selectedItems", {
+                                count: selectedIds.length,
+                            })}
+                        </ContextMenuLabel>
+
+                        {canRead && (
+                            <ContextMenuItem
+                                onClick={handleDownloadSelected}
+                                className="flex items-center space-x-2"
+                            >
+                                <DownloadIcon className="size-4" />
+                                <span>{t("dicom.contextMenu.download")}</span>
+                            </ContextMenuItem>
+                        )}
+
+                        {canShare && (
+                            <>
+                                <ContextMenuSeparator />
+                                <ContextMenuItem
+                                    className="flex items-center space-x-2"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        closeContextMenu();
+                                        openShareManagementDialog({
+                                            workspaceId,
+                                            targetType: "series",
+                                            targetIds: selectedIds,
+                                        });
+                                    }}
+                                >
+                                    <Share2Icon className="size-4" />
+                                    <span>{t("dicom.contextMenu.share")}</span>
+                                </ContextMenuItem>
+                            </>
+                        )}
+
+                        {canRecycle && (
+                            <>
+                                <ContextMenuSeparator />
+
+                                <ContextMenuItem
+                                    onClick={handleRecycle}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <Trash2Icon className="size-4" />
+                                    <span>
+                                        {t("dicom.contextMenu.recycle")}
+                                    </span>
+                                </ContextMenuItem>
+                            </>
+                        )}
+                    </>
+                )}
+            </ContextMenuContent>
+        </ContextMenu>
     );
 }

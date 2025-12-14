@@ -9,7 +9,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
@@ -17,7 +17,6 @@ import { createInstanceColumns } from "@/components/dicom/data-tables/table-inst
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomInstanceContextMenu } from "@/components/dicom/dicom-instance-context-menu";
-import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -43,6 +42,7 @@ import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstanc
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useCreateTagDialogStore } from "@/stores/create-tag-dialog-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
@@ -62,11 +62,13 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const { t } = useT("translation");
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
-    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
-    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
+    const { openDialog: openShareManagementDialog } =
+        useShareManagementDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } =
+        useDicomRecycleConfirmDialogStore();
+    const { openDialog: openCreateTagDialog } = useCreateTagDialogStore();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
@@ -91,11 +93,11 @@ function ActionsCell({
             workspace.membership?.permissions ?? 0,
             WORKSPACE_PERMISSIONS.UPDATE,
         );
-    const canShare = 
+    const canShare =
         !!workspace &&
         hasPermission(
             workspace.membership?.permissions ?? 0,
-            WORKSPACE_PERMISSIONS.MANAGE
+            WORKSPACE_PERMISSIONS.MANAGE,
         );
 
     const { mutate: recycleDicomInstance } = useMutation({
@@ -104,12 +106,17 @@ function ActionsCell({
             instanceIds: [sopInstanceUid],
         }),
         onMutate: () => {
-            toast.loading(t("dicom.messages.recyclingInstance", { level: "instance" }), {
-                id: `recycle-${sopInstanceUid}`,
-            });
+            toast.loading(
+                t("dicom.messages.recyclingInstance", { level: "instance" }),
+                {
+                    id: `recycle-${sopInstanceUid}`,
+                },
+            );
         },
         onSuccess: () => {
-            toast.success(t("dicom.messages.instanceRecycled", { level: "instance" }));
+            toast.success(
+                t("dicom.messages.instanceRecycled", { level: "instance" }),
+            );
             toast.dismiss(`recycle-${sopInstanceUid}`);
             queryClient.invalidateQueries({
                 queryKey: [
@@ -121,7 +128,11 @@ function ActionsCell({
             });
         },
         onError: () => {
-            toast.error(t("dicom.messages.failedToRecycleInstance", { level: "instance" }));
+            toast.error(
+                t("dicom.messages.failedToRecycleInstance", {
+                    level: "instance",
+                }),
+            );
             toast.dismiss(`recycle-${sopInstanceUid}`);
         },
     });
@@ -178,55 +189,58 @@ function ActionsCell({
     };
 
     return (
-        <>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} className="size-8 p-0">
-                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
-                        <MoreHorizontalIcon className="size-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    {canRead && (
-                        <>
-                            <DropdownMenuItem
-                                onClick={handleCopySopInstanceUid}
-                            >
-                                {t("dicom.contextMenu.copy")} {t("dicom.columns.instance.sopInstanceUid")}
-                            </DropdownMenuItem>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"} className="size-8 p-0">
+                    <span className="sr-only">
+                        {t("dicom.contextMenu.openMenu")}
+                    </span>
+                    <MoreHorizontalIcon className="size-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {canRead && (
+                    <>
+                        <DropdownMenuItem onClick={handleCopySopInstanceUid}>
+                            {t("dicom.contextMenu.copy")}{" "}
+                            {t("dicom.columns.instance.sopInstanceUid")}
+                        </DropdownMenuItem>
 
-                            <DropdownMenuItem
-                                onClick={handleOpenBlueLightViewer}
-                            >
-                                {t("dicom.contextMenu.openInBlueLight")}
-                            </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                            {t("dicom.contextMenu.openInBlueLight")}
+                        </DropdownMenuItem>
 
-                            <DropdownMenuItem onClick={handleDownloadInstance}>
-                                {t("dicom.contextMenu.download")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
+                        <DropdownMenuItem onClick={handleDownloadInstance}>
+                            {t("dicom.contextMenu.download")}
+                        </DropdownMenuItem>
+                    </>
+                )}
 
-                    {canUpdate && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canUpdate && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <TagDropdownSub
-                                workspaceId={workspaceId}
-                                targetId={sopInstanceUid}
-                                targetType="instance"
-                                onOpenCreateTagDialog={() =>
-                                    setOpenCreateTagDialog(true)
-                                }
-                            />
-                        </>
-                    )}
+                        <TagDropdownSub
+                            workspaceId={workspaceId}
+                            targetId={sopInstanceUid}
+                            targetType="instance"
+                            onOpenCreateTagDialog={() =>
+                                openCreateTagDialog({
+                                    workspaceId,
+                                    targetType: "instance",
+                                    targetId: sopInstanceUid,
+                                })
+                            }
+                        />
+                    </>
+                )}
 
-                    {canShare && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canShare && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <DropdownMenuItem onClick={(e) => {
+                        <DropdownMenuItem
+                            onClick={(e) => {
                                 e.preventDefault();
                                 closeDropdownMenu();
                                 openShareManagementDialog({
@@ -234,34 +248,24 @@ function ActionsCell({
                                     targetType: "instance",
                                     targetIds: [sopInstanceUid],
                                 });
-                            }} >
-                                {t("dicom.contextMenu.share")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
+                            }}
+                        >
+                            {t("dicom.contextMenu.share")}
+                        </DropdownMenuItem>
+                    </>
+                )}
 
-                    {canRecycle && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canRecycle && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <DropdownMenuItem onClick={handleRecycleInstance}>
-                                {t("dicom.contextMenu.recycle")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
-
-            {canUpdate && (
-                <CreateTagDialog
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    workspaceId={workspaceId}
-                    targetType="instance"
-                    targetId={sopInstanceUid}
-                />
-            )}
-        </>
+                        <DropdownMenuItem onClick={handleRecycleInstance}>
+                            {t("dicom.contextMenu.recycle")}
+                        </DropdownMenuItem>
+                    </>
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 
@@ -286,7 +290,7 @@ export function DicomInstancesDataTable({
         () => [
             {
                 id: "select",
-                header: ({table}) => {
+                header: ({ table }) => {
                     const rows = table.getRowModel().rows;
 
                     return (
@@ -301,8 +305,8 @@ export function DicomInstancesDataTable({
                                     selectAll(
                                         rows.map(
                                             (row) =>
-                                                row.original["00080018"]?.Value?.[0] ||
-                                                "",
+                                                row.original["00080018"]
+                                                    ?.Value?.[0] || "",
                                         ),
                                     );
                                 } else {
@@ -394,7 +398,7 @@ export function DicomInstancesDataTable({
             isInstanceSelected,
             toggleInstanceSelection,
             generalColumns,
-            t
+            t,
         ],
     );
 
@@ -513,7 +517,9 @@ export function DicomInstancesDataTable({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    {t("dicom.messages.noData", { level: "instances" })}
+                                    {t("dicom.messages.noData", {
+                                        level: "instances",
+                                    })}
                                 </TableCell>
                             </TableRow>
                         )}

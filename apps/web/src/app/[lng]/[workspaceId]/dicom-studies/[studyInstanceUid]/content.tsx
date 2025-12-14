@@ -13,8 +13,10 @@ import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { DicomRecycleConfirmDialogProvider } from "@/components/dicom/dicom-recycle-confirm-dialog-provider";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
+import { CreateTagDialogProvider } from "@/components/dicom/tag/create-tag-dialog-provider";
 import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
@@ -29,7 +31,6 @@ import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-st
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomSeriesDataTable } from "./data-table";
-import { DicomRecycleConfirmDialogProvider } from "@/components/dicom/dicom-recycle-confirm-dialog-provider";
 
 interface DicomSeriesContentProps {
     workspaceId: string;
@@ -299,6 +300,7 @@ export default function DicomSeriesContent({
 
             <ShareManagementDialogProvider />
             <DicomRecycleConfirmDialogProvider />
+            <CreateTagDialogProvider />
         </>
     );
 }

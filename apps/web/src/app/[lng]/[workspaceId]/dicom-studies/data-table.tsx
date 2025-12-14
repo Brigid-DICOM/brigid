@@ -11,7 +11,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
@@ -19,7 +19,6 @@ import { createStudyColumns } from "@/components/dicom/data-tables/table-study-c
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomStudyContextMenu } from "@/components/dicom/dicom-study-context-menu";
-import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,6 +44,7 @@ import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useCreateTagDialogStore } from "@/stores/create-tag-dialog-store";
 import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
@@ -65,13 +65,15 @@ function ActionsCell({
 }) {
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
-    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
-    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
+    const { openDialog: openShareManagementDialog } =
+        useShareManagementDialogStore();
+    const { openDialog: openCreateTagDialog } = useCreateTagDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } =
+        useDicomRecycleConfirmDialogStore();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
@@ -179,98 +181,86 @@ function ActionsCell({
     };
 
     return (
-        <>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} className="size-8 p-0">
-                        <span className="sr-only">
-                            {t("dicom.contextMenu.openMenu")}
-                        </span>
-                        <MoreHorizontalIcon className="size-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    {canRead && (
-                        <>
-                            <DropdownMenuItem
-                                onClick={handleCopyStudyInstanceUid}
-                            >
-                                {t("dicom.contextMenu.copy")}{" "}
-                                {t("dicom.columns.study.studyInstanceUid")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleEnterSeries}>
-                                {t("dicom.contextMenu.enterSeries")}
-                            </DropdownMenuItem>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"} className="size-8 p-0">
+                    <span className="sr-only">
+                        {t("dicom.contextMenu.openMenu")}
+                    </span>
+                    <MoreHorizontalIcon className="size-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {canRead && (
+                    <>
+                        <DropdownMenuItem onClick={handleCopyStudyInstanceUid}>
+                            {t("dicom.contextMenu.copy")}{" "}
+                            {t("dicom.columns.study.studyInstanceUid")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEnterSeries}>
+                            {t("dicom.contextMenu.enterSeries")}
+                        </DropdownMenuItem>
 
-                            <DropdownMenuItem
-                                onClick={handleOpenBlueLightViewer}
-                            >
-                                {t("dicom.contextMenu.openInBlueLight")}
-                            </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                            {t("dicom.contextMenu.openInBlueLight")}
+                        </DropdownMenuItem>
 
-                            <DropdownMenuItem onClick={handleDownloadStudy}>
-                                {t("dicom.contextMenu.download")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
+                        <DropdownMenuItem onClick={handleDownloadStudy}>
+                            {t("dicom.contextMenu.download")}
+                        </DropdownMenuItem>
+                    </>
+                )}
 
-                    {canUpdate && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canUpdate && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <TagDropdownSub
-                                workspaceId={workspaceId}
-                                targetId={studyInstanceUid}
-                                targetType="study"
-                                onOpenCreateTagDialog={() =>
-                                    setOpenCreateTagDialog(true)
-                                }
-                            />
-                        </>
-                    )}
+                        <TagDropdownSub
+                            workspaceId={workspaceId}
+                            targetId={studyInstanceUid}
+                            targetType="study"
+                            onOpenCreateTagDialog={() =>
+                                openCreateTagDialog({
+                                    workspaceId,
+                                    targetType: "study",
+                                    targetId: studyInstanceUid,
+                                })
+                            }
+                        />
+                    </>
+                )}
 
-                    {canShare && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canShare && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <DropdownMenuItem
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    closeDropdownMenu();
-                                    openShareManagementDialog({
-                                        workspaceId,
-                                        targetType: "study",
-                                        targetIds: [studyInstanceUid],
-                                    });
-                                }}
-                            >
-                                {t("dicom.contextMenu.share")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                closeDropdownMenu();
+                                openShareManagementDialog({
+                                    workspaceId,
+                                    targetType: "study",
+                                    targetIds: [studyInstanceUid],
+                                });
+                            }}
+                        >
+                            {t("dicom.contextMenu.share")}
+                        </DropdownMenuItem>
+                    </>
+                )}
 
-                    {canRecycle && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canRecycle && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <DropdownMenuItem onClick={handleRecycleStudy}>
-                                {t("dicom.contextMenu.recycle")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
-
-            {canUpdate && (
-                <CreateTagDialog
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    workspaceId={workspaceId}
-                    targetType="study"
-                    targetId={studyInstanceUid}
-                />
-            )}
-        </>
+                        <DropdownMenuItem onClick={handleRecycleStudy}>
+                            {t("dicom.contextMenu.recycle")}
+                        </DropdownMenuItem>
+                    </>
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 

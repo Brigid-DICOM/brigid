@@ -35,6 +35,7 @@ import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selectio
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomInstancesDataTable } from "./data-table";
+import { CreateTagDialogProvider } from "@/components/dicom/tag/create-tag-dialog-provider";
 
 interface DicomInstancesContentProps {
     workspaceId: string;
@@ -347,6 +348,7 @@ export default function DicomInstancesContent({
 
             <ShareManagementDialogProvider />
             <DicomRecycleConfirmDialogProvider />
+            <CreateTagDialogProvider />
         </>
     );
 }

@@ -11,7 +11,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
@@ -19,7 +19,6 @@ import { createSeriesColumns } from "@/components/dicom/data-tables/table-series
 import { TableThumbnailCell } from "@/components/dicom/data-tables/table-thumbnail-cell";
 import { DicomDataTableTagCell } from "@/components/dicom/dicom-data-table-tag-cell";
 import { DicomSeriesContextMenu } from "@/components/dicom/dicom-series-context-menu";
-import { CreateTagDialog } from "@/components/dicom/tag/create-tag-dialog";
 import { TagDropdownSub } from "@/components/dicom/tag/tag-dropdown-sub";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,6 +44,7 @@ import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
+import { useCreateTagDialogStore } from "@/stores/create-tag-dialog-store";
 import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confirm-dialog-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useShareManagementDialogStore } from "@/stores/share-management-dialog-store";
@@ -65,7 +65,6 @@ function ActionsCell({
 }) {
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
@@ -73,6 +72,7 @@ function ActionsCell({
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
     const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
+    const { openDialog: openCreateTagDialog } = useCreateTagDialogStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
     const canRecycle =
@@ -178,7 +178,6 @@ function ActionsCell({
     };
 
     return (
-        <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant={"ghost"} className="size-8 p-0">
@@ -217,7 +216,11 @@ function ActionsCell({
                                 targetId={seriesInstanceUid}
                                 targetType="series"
                                 onOpenCreateTagDialog={() =>
-                                    setOpenCreateTagDialog(true)
+                                    openCreateTagDialog({
+                                        workspaceId,
+                                        targetType: "series",
+                                        targetId: seriesInstanceUid,
+                                    })
                                 }
                             />
                         </>
@@ -252,17 +255,6 @@ function ActionsCell({
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-
-            {canUpdate && (
-                <CreateTagDialog
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    workspaceId={workspaceId}
-                    targetType="series"
-                    targetId={seriesInstanceUid}
-                />
-            )}
-        </>
     );
 }
 

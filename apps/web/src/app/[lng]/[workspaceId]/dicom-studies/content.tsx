@@ -14,6 +14,7 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomRecycleConfirmDialogProvider } from "@/components/dicom/dicom-recycle-confirm-dialog-provider";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
+import { CreateTagDialogProvider } from "@/components/dicom/tag/create-tag-dialog-provider";
 import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
@@ -265,6 +266,7 @@ export default function DicomStudiesContent({
 
             <ShareManagementDialogProvider />
             <DicomRecycleConfirmDialogProvider />
+            <CreateTagDialogProvider />
         </>
     );
 }
