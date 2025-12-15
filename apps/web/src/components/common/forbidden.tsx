@@ -1,7 +1,10 @@
 import { ArrowLeftIcon, FrownIcon } from "lucide-react";
 import Link from "next/link";
+import { getT } from "@/app/_i18n";
 
-export default function Forbidden() {
+export default async function Forbidden() {
+    const { t } = await getT("translation");
+
     return (
         <div className="flex items-center justify-center p-4 sm:p-8 min-h-[calc(100vh-65px)]">
             <div className="max-w-xl w-full text-center p-8 sm:p-12 rounded-xl border border-border shadow-2xl shadow-primary/20 transition-all duration-500 bg-card text-card-foreground">
@@ -13,13 +16,13 @@ export default function Forbidden() {
                     <FrownIcon className="w-12 h-12" />
                 </div>
 
-                <h3 className="text-2xl font-semibold mb-4">Forbidden</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t("common.forbidden")}</h3>
                 <p className="text-muted-foreground mb-8">
-                    You are not authorized to access this page.
+                    {t("common.forbiddenDesc")}
                 </p>
                 <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-300">
                     <ArrowLeftIcon className="size-4" />
-                    Go Back Home
+                    {t("common.goBackHome")}
                 </Link>
             </div>
         </div>

@@ -5,6 +5,8 @@
         "description": "Brigid PACS (醫療影像儲傳系統)",
         "pageNotFound": "頁面不存在",
         "pageNotFoundDesc": "您正在尋找的頁面不存在",
+        "forbidden": "禁止訪問",
+        "forbiddenDesc": "您沒有權限訪問此頁面",
         "goBackHome": "返回首頁",
         "loading": "載入中...",
         "cancel": "取消",
