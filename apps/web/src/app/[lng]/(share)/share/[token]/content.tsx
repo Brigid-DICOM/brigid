@@ -62,8 +62,11 @@ export default function ShareContent({
     );
 
     useEffect(() => {
-        if (error?.message === "Password is required") {
+        if (error?.message === "Password is required" ||
+            error?.message === "Invalid password") {
             setShowPasswordInput(true);
+        } else {
+            setShowPasswordInput(false);
         }
     }, [error]);
 
