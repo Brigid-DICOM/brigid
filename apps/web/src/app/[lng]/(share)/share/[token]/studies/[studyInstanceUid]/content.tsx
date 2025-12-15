@@ -2,8 +2,10 @@
 
 import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -12,6 +14,7 @@ import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { SharedDicomSeriesDataTable } from "@/components/share/data-tables/shared-dicom-series-data-table";
 import { ShareBreadcrumb } from "@/components/share/share-breadcrumb";
 import { SharedDicomSeriesCard } from "@/components/share/shared-dicom-series-card";
+import { ShareCreateTagDialogProvider } from "@/components/share/tag/share-create-tag-dialog-provider";
 import { Card, CardHeader } from "@/components/ui/card";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
@@ -22,8 +25,6 @@ import {
 } from "@/react-query/queries/publicShare";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
-import { useT } from "@/app/_i18n/client";
-import { useParams } from "next/navigation";
 
 interface ShareStudySeriesContentProps {
     token: string;
@@ -163,56 +164,60 @@ export default function ShareStudySeriesContent({
     }
 
     return (
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <ShareBreadcrumb items={breadcrumbItems} />
-                    <div className="text-sm text-muted-foreground mt-2">
-                        {series?.length || 0} series in this study
-                    </div>
-                </CardHeader>
-            </Card>
+        <>
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <ShareBreadcrumb items={breadcrumbItems} />
+                        <div className="text-sm text-muted-foreground mt-2">
+                            {series?.length || 0} series in this study
+                        </div>
+                    </CardHeader>
+                </Card>
 
-            <SelectionControlBar 
-                    selectedCount={selectedCount}
-                    isAllSelected={isAllSelected}
-                    onSelectAll={handleSelectAll}
-                    onClearSelection={clearSelection}
-                    onDownload={handleDownload}
-                    dicomLevel="series"
-            />
-
-            {layoutMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                    {series.map((seriesItem) => (
-                        <SharedDicomSeriesCard
-                            key={seriesItem["0020000E"].Value[0] as string}
-                            series={seriesItem as DicomSeriesData}
-                            token={token}
-                            password={password}
-                            publicPermissions={
-                                publicPermissions
-                            }
-                        />
-                    ))}
-                </div>
-            ) : (
-                <SharedDicomSeriesDataTable
-                    series={series as DicomSeriesData[]}
-                    token={token}
-                    password={password}
-                    publicPermissions={
-                        publicPermissions
-                    }
+                <SelectionControlBar 
+                        selectedCount={selectedCount}
+                        isAllSelected={isAllSelected}
+                        onSelectAll={handleSelectAll}
+                        onClearSelection={clearSelection}
+                        onDownload={handleDownload}
+                        dicomLevel="series"
                 />
-            )}
 
-            <PaginationControls
-                canGoPrevious={canGoPrevious}
-                canGoNext={Boolean(canGoNext)}
-                onPrevious={handlePreviousPage}
-                onNext={handleNextPage}
-            />
-        </div>
+                {layoutMode === "grid" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        {series.map((seriesItem) => (
+                            <SharedDicomSeriesCard
+                                key={seriesItem["0020000E"].Value[0] as string}
+                                series={seriesItem as DicomSeriesData}
+                                token={token}
+                                password={password}
+                                publicPermissions={
+                                    publicPermissions
+                                }
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <SharedDicomSeriesDataTable
+                        series={series as DicomSeriesData[]}
+                        token={token}
+                        password={password}
+                        publicPermissions={
+                            publicPermissions
+                        }
+                    />
+                )}
+
+                <PaginationControls
+                    canGoPrevious={canGoPrevious}
+                    canGoNext={Boolean(canGoNext)}
+                    onPrevious={handlePreviousPage}
+                    onNext={handleNextPage}
+                />
+            </div>
+
+            <ShareCreateTagDialogProvider />
+        </>
     );
 }

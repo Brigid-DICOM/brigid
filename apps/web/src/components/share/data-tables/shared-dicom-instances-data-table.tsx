@@ -10,7 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { createInstanceColumns } from "@/components/dicom/data-tables/table-instance-columns";
@@ -41,8 +41,8 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
+import { useShareCreateTagDialogStore } from "@/stores/share-create-tag-dialog-store";
 import { SharedDicomInstanceContextMenu } from "../shared-dicom-instance-context-menu";
-import { ShareCreateTagDialog } from "../tag/share-create-tag-dialog";
 import { ShareTagDropdownSub } from "../tag/share-tag-dropdown-sub";
 
 interface SharedDicomInstancesDataTableProps {
@@ -114,7 +114,7 @@ function ActionsCell({
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const { openDialog: openCreateTagDialog } = useShareCreateTagDialogStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
 
     const canUpdate = hasPermission(
@@ -138,13 +138,18 @@ function ActionsCell({
                 password,
             });
         } catch (error) {
-            console.error(t("dicom.messages.failedToDownload", { level: "instance" }), error);
+            console.error(
+                t("dicom.messages.failedToDownload", { level: "instance" }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error(t("dicom.messages.failedToDownload", { level: "instance" }));
+            toast.error(
+                t("dicom.messages.failedToDownload", { level: "instance" }),
+            );
         }
     };
 
@@ -157,49 +162,48 @@ function ActionsCell({
             sopInstanceUid,
             password,
         });
-    }
+    };
     return (
-        <>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="size-8 p-0">
-                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
-                        <MoreHorizontalIcon className="size-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleCopySopInstanceUid}>
-                        {t("dicom.contextMenu.copy")} {t("dicom.columns.instance.sopInstanceUid")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        {t("dicom.contextMenu.openInBlueLight")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDownload}>
-                        {t("dicom.contextMenu.download")}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    
-                    {canUpdate && (
-                        <ShareTagDropdownSub 
-                            token={token}
-                            targetType="instance"
-                            targetId={sopInstanceUid}
-                            password={password}
-                            onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
-                        />
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="size-8 p-0">
+                    <span className="sr-only">
+                        {t("dicom.contextMenu.openMenu")}
+                    </span>
+                    <MoreHorizontalIcon className="size-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleCopySopInstanceUid}>
+                    {t("dicom.contextMenu.copy")}{" "}
+                    {t("dicom.columns.instance.sopInstanceUid")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                    {t("dicom.contextMenu.openInBlueLight")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDownload}>
+                    {t("dicom.contextMenu.download")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
 
-            <ShareCreateTagDialog 
-                open={openCreateTagDialog}
-                onOpenChange={setOpenCreateTagDialog}
-                token={token}
-                targetType="instance"
-                targetId={sopInstanceUid}
-                password={password}
-            />
-        </>
+                {canUpdate && (
+                    <ShareTagDropdownSub
+                        token={token}
+                        targetType="instance"
+                        targetId={sopInstanceUid}
+                        password={password}
+                        onOpenCreateTagDialog={() =>
+                            openCreateTagDialog({
+                                token,
+                                targetType: "instance",
+                                targetId: sopInstanceUid,
+                                password,
+                            })
+                        }
+                    />
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 
@@ -321,7 +325,7 @@ export function SharedDicomInstancesDataTable({
             toggleInstanceSelection,
             generalColumns,
             publicPermissions,
-            t
+            t,
         ],
     );
 
@@ -440,7 +444,9 @@ export function SharedDicomInstancesDataTable({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    {t("dicom.messages.noData", { level: "instances" })}
+                                    {t("dicom.messages.noData", {
+                                        level: "instances",
+                                    })}
                                 </TableCell>
                             </TableRow>
                         )}

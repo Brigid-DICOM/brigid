@@ -4,7 +4,6 @@ import { CornerDownLeftIcon, DownloadIcon, EyeIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import {
@@ -21,7 +20,7 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
-import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
+import { useShareCreateTagDialogStore } from "@/stores/share-create-tag-dialog-store";
 import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
 
 interface SharedDicomStudyContextMenuProps {
@@ -39,7 +38,7 @@ export function SharedDicomStudyContextMenu({
     studyInstanceUid,
     publicPermissions,
 }: SharedDicomStudyContextMenuProps) {
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const { openDialog: openCreateTagDialog } = useShareCreateTagDialogStore();
     const router = useRouter();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { lng } = useParams<{ lng: string }>();
@@ -59,7 +58,9 @@ export function SharedDicomStudyContextMenu({
         const params = password
             ? `?password=${encodeURIComponent(password)}`
             : "";
-        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}${params}`);
+        router.push(
+            `/${lng}/share/${token}/studies/${studyInstanceUid}${params}`,
+        );
     };
 
     const handleDownloadSelected = async (
@@ -71,7 +72,9 @@ export function SharedDicomStudyContextMenu({
         const currentSelectedIds = getSelectedStudyIds();
 
         if (currentSelectedIds.length === 0) {
-            toast.error(t("dicom.messages.selectToDownload", { level: "study" }));
+            toast.error(
+                t("dicom.messages.selectToDownload", { level: "study" }),
+            );
             return;
         }
 
@@ -82,13 +85,18 @@ export function SharedDicomStudyContextMenu({
                 password,
             );
         } catch (error) {
-            console.error(t("dicom.messages.downloadSelectedError", { level: "studies" }), error);
+            console.error(
+                t("dicom.messages.downloadSelectedError", { level: "studies" }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error(t("dicom.messages.downloadSelectedError", { level: "studies" }));
+            toast.error(
+                t("dicom.messages.downloadSelectedError", { level: "studies" }),
+            );
         }
     };
 
@@ -104,82 +112,79 @@ export function SharedDicomStudyContextMenu({
     };
 
     return (
-        <>
-            <ContextMenu>
-                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+        <ContextMenu>
+            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
-                <ContextMenuContent className="w-60">
-                    {selectedIds.length === 1 && (
-                        <>
-                            <ContextMenuItem
-                                onClick={handleEnterSeries}
-                                className="flex items-center space-x-2"
-                            >
-                                <CornerDownLeftIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.enterSeries")}</span>
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                                onClick={handleOpenBlueLightViewer}
-                                className="flex items-center space-x-2"
-                            >
-                                <EyeIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.openInBlueLight")}</span>
-                            </ContextMenuItem>
+            <ContextMenuContent className="w-60">
+                {selectedIds.length === 1 && (
+                    <>
+                        <ContextMenuItem
+                            onClick={handleEnterSeries}
+                            className="flex items-center space-x-2"
+                        >
+                            <CornerDownLeftIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.enterSeries")}</span>
+                        </ContextMenuItem>
+                        <ContextMenuItem
+                            onClick={handleOpenBlueLightViewer}
+                            className="flex items-center space-x-2"
+                        >
+                            <EyeIcon className="size-4" />
+                            <span>
+                                {t("dicom.contextMenu.openInBlueLight")}
+                            </span>
+                        </ContextMenuItem>
 
-                            <ContextMenuItem
-                                onClick={handleDownloadSelected}
-                                className="flex items-center space-x-2"
-                            >
-                                <DownloadIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.download")}</span>
-                            </ContextMenuItem>
+                        <ContextMenuItem
+                            onClick={handleDownloadSelected}
+                            className="flex items-center space-x-2"
+                        >
+                            <DownloadIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.download")}</span>
+                        </ContextMenuItem>
 
-                            {canUpdate && (
-                                <>
-                                    <ContextMenuSeparator />
+                        {canUpdate && (
+                            <>
+                                <ContextMenuSeparator />
 
-                                    <ShareTagContextMenuSub
-                                        token={token}
-                                        targetType="study"
-                                        targetId={studyInstanceUid as string}
-                                        password={password}
-                                        onOpenCreateTagDialog={() =>
-                                            setOpenCreateTagDialog(true)
-                                        }
-                                    />
-                                </>
-                            )}
-                        </>
-                    )}
+                                <ShareTagContextMenuSub
+                                    token={token}
+                                    targetType="study"
+                                    targetId={studyInstanceUid as string}
+                                    password={password}
+                                    onOpenCreateTagDialog={() =>
+                                        openCreateTagDialog({
+                                            token,
+                                            targetType: "study",
+                                            targetId:
+                                                studyInstanceUid as string,
+                                            password,
+                                        })
+                                    }
+                                />
+                            </>
+                        )}
+                    </>
+                )}
 
-                    {selectedIds.length > 1 && (
-                        <>
-                            <ContextMenuLabel>
-                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
-                            </ContextMenuLabel>
+                {selectedIds.length > 1 && (
+                    <>
+                        <ContextMenuLabel>
+                            {t("dicom.contextMenu.selectedItems", {
+                                count: selectedIds.length,
+                            })}
+                        </ContextMenuLabel>
 
-                            <ContextMenuItem
-                                onClick={handleDownloadSelected}
-                                className="flex items-center space-x-2"
-                            >
-                                <DownloadIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.download")}</span>
-                            </ContextMenuItem>
-                        </>
-                    )}
-                </ContextMenuContent>
-            </ContextMenu>
-            
-            {canUpdate && (
-                <ShareCreateTagDialog
-                open={openCreateTagDialog}
-                onOpenChange={setOpenCreateTagDialog}
-                token={token}
-                targetType="study"
-                    targetId={studyInstanceUid as string}
-                    password={password}
-                />
-            )}
-        </>
+                        <ContextMenuItem
+                            onClick={handleDownloadSelected}
+                            className="flex items-center space-x-2"
+                        >
+                            <DownloadIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.download")}</span>
+                        </ContextMenuItem>
+                    </>
+                )}
+            </ContextMenuContent>
+        </ContextMenu>
     );
 }

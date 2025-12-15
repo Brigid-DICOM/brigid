@@ -8,7 +8,6 @@ import {
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
-import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import {
@@ -25,7 +24,7 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
-import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
+import { useShareCreateTagDialogStore } from "@/stores/share-create-tag-dialog-store";
 import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
 
 interface SharedDicomSeriesContextMenuProps {
@@ -45,7 +44,7 @@ export function SharedDicomSeriesContextMenu({
     seriesInstanceUid,
     publicPermissions,
 }: SharedDicomSeriesContextMenuProps) {
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const { openDialog: openCreateTagDialog } = useShareCreateTagDialogStore();
     const router = useRouter();
     const { open } = useBlueLightViewerStore();
     const { lng } = useParams<{ lng: string }>();
@@ -111,7 +110,6 @@ export function SharedDicomSeriesContextMenu({
     };
 
     return (
-        <>
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
                 <ContextMenuContent className="w-60">
@@ -150,7 +148,12 @@ export function SharedDicomSeriesContextMenu({
                                         targetType="series"
                                         targetId={seriesInstanceUid}
                                         password={password}
-                                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                                        onOpenCreateTagDialog={() => openCreateTagDialog({
+                                            token,
+                                            targetType: "series",
+                                            targetId: seriesInstanceUid,
+                                            password,
+                                        })}
                                     />
                                 </>
                             )}
@@ -174,17 +177,5 @@ export function SharedDicomSeriesContextMenu({
                     )}
                 </ContextMenuContent>
             </ContextMenu>
-
-            {canUpdate && (
-                <ShareCreateTagDialog 
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    token={token}
-                    targetType="series"
-                    targetId={seriesInstanceUid}
-                    password={password}
-                />
-            )}
-        </>
     );
 }

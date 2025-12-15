@@ -21,7 +21,6 @@ import { Input } from "@/components/ui/input";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { assignShareTagMutation } from "@/react-query/queries/share-tag";
 
-// 暫時先只支援單一目標
 interface ShareCreateTagDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;

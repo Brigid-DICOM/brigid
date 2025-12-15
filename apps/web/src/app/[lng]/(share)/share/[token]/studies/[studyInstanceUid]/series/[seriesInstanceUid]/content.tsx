@@ -2,9 +2,10 @@
 
 import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -13,6 +14,7 @@ import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { SharedDicomInstancesDataTable } from "@/components/share/data-tables/shared-dicom-instances-data-table";
 import { ShareBreadcrumb } from "@/components/share/share-breadcrumb";
 import { SharedDicomInstanceCard } from "@/components/share/shared-dicom-instance-card";
+import { ShareCreateTagDialogProvider } from "@/components/share/tag/share-create-tag-dialog-provider";
 import { Card, CardHeader } from "@/components/ui/card";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
@@ -21,8 +23,6 @@ import { getPublicShareLinkQuery, getShareStudySeriesInstancesQuery } from "@/re
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
-import { useT } from "@/app/_i18n/client";
-import { useParams } from "next/navigation";
 
 interface ShareStudySeriesInstancesContentProps {
     token: string;
@@ -201,52 +201,56 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
     const publicPermissions = publicShareLink?.data?.publicPermissions ?? 0;
 
     return (
-        <div className="space-y-6">
-             <Card>
-                <CardHeader>
-                    <ShareBreadcrumb items={breadcrumbItems} />
-                    <div className="text-sm text-muted-foreground mt-2">
-                        {instances?.length || 0} instances in this series
-                    </div>
-                </CardHeader>
-            </Card>
+        <>
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <ShareBreadcrumb items={breadcrumbItems} />
+                        <div className="text-sm text-muted-foreground mt-2">
+                            {instances?.length || 0} instances in this series
+                        </div>
+                    </CardHeader>
+                </Card>
 
-            <SelectionControlBar 
-                selectedCount={selectedCount}
-                isAllSelected={isAllSelected}
-                onSelectAll={handleSelectAll}
-                onClearSelection={clearSelection}
-                onDownload={handleDownload}
-                dicomLevel="instance"
-            />
-
-            {layoutMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                    {instances.map((instance) => (
-                        <SharedDicomInstanceCard
-                            key={instance["00080018"].Value[0] as string}
-                            instance={instance as DicomInstanceData}
-                            token={token}
-                            password={password}
-                            publicPermissions={publicPermissions}
-                        />
-                    ))}
-                </div>
-            ): (
-                <SharedDicomInstancesDataTable 
-                    token={token}
-                    password={password}
-                    publicPermissions={publicPermissions}
-                    instances={instances as DicomInstanceData[]}
+                <SelectionControlBar 
+                    selectedCount={selectedCount}
+                    isAllSelected={isAllSelected}
+                    onSelectAll={handleSelectAll}
+                    onClearSelection={clearSelection}
+                    onDownload={handleDownload}
+                    dicomLevel="instance"
                 />
-            )}
 
-            <PaginationControls
-                canGoPrevious={canGoPrevious}
-                canGoNext={Boolean(canGoNext)}
-                onPrevious={handlePreviousPage}
-                onNext={handleNextPage}
-            />
-        </div>
+                {layoutMode === "grid" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        {instances.map((instance) => (
+                            <SharedDicomInstanceCard
+                                key={instance["00080018"].Value[0] as string}
+                                instance={instance as DicomInstanceData}
+                                token={token}
+                                password={password}
+                                publicPermissions={publicPermissions}
+                            />
+                        ))}
+                    </div>
+                ): (
+                    <SharedDicomInstancesDataTable 
+                        token={token}
+                        password={password}
+                        publicPermissions={publicPermissions}
+                        instances={instances as DicomInstanceData[]}
+                    />
+                )}
+
+                <PaginationControls
+                    canGoPrevious={canGoPrevious}
+                    canGoNext={Boolean(canGoNext)}
+                    onPrevious={handlePreviousPage}
+                    onNext={handleNextPage}
+                />
+            </div>
+
+            <ShareCreateTagDialogProvider />
+        </>
     )
 }

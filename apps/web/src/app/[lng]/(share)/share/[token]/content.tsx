@@ -9,6 +9,7 @@ import { LoadingGrid } from "@/components/common/loading-grid";
 import SharedInstancesView from "@/components/share/public-views/shared-instances-view";
 import SharedSeriesView from "@/components/share/public-views/shared-series-view";
 import SharedStudiesView from "@/components/share/public-views/shared-studies-view";
+import { ShareCreateTagDialogProvider } from "@/components/share/tag/share-create-tag-dialog-provider";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -184,51 +185,55 @@ export default function ShareContent({
     };
 
     return (
-        <div className="mx-auto space-y-6">
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            {getTargetIcon()}
+        <>
+            <div className="mx-auto space-y-6">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                {getTargetIcon()}
+                            </div>
+                            <div>
+                                <CardTitle className="capitalize">
+                                    Shared {getTargetTitle()}
+                                </CardTitle>
+                                {description && (
+                                    <CardDescription>{description}</CardDescription>
+                                )}
+                            </div>
                         </div>
-                        <div>
-                            <CardTitle className="capitalize">
-                                Shared {getTargetTitle()}
-                            </CardTitle>
-                            {description && (
-                                <CardDescription>{description}</CardDescription>
-                            )}
+                        <div className="text-sm text-muted-foreground mt-2">
+                            {getCountLabel()}
                         </div>
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-2">
-                        {getCountLabel()}
-                    </div>
-                </CardHeader>
-            </Card>
+                    </CardHeader>
+                </Card>
 
-            {targetType === "study" && (
-                <SharedStudiesView
-                    token={token}
-                    password={password}
-                    publicPermissions={shareData.publicPermissions}
-                />
-            )}
+                {targetType === "study" && (
+                    <SharedStudiesView
+                        token={token}
+                        password={password}
+                        publicPermissions={shareData.publicPermissions}
+                    />
+                )}
 
-            {targetType === "series" && (
-                <SharedSeriesView
-                    token={token}
-                    password={password}
-                    publicPermissions={shareData.publicPermissions}
-                />
-            )}
+                {targetType === "series" && (
+                    <SharedSeriesView
+                        token={token}
+                        password={password}
+                        publicPermissions={shareData.publicPermissions}
+                    />
+                )}
 
-            {targetType === "instance" && (
-                <SharedInstancesView
-                    token={token}
-                    password={password}
-                    publicPermissions={shareData.publicPermissions}
-                />
-            )}
-        </div>
+                {targetType === "instance" && (
+                    <SharedInstancesView
+                        token={token}
+                        password={password}
+                        publicPermissions={shareData.publicPermissions}
+                    />
+                )}
+            </div>
+
+            <ShareCreateTagDialogProvider />
+        </>
     );
 }

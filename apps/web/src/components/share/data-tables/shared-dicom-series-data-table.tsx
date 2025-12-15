@@ -10,7 +10,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
@@ -39,8 +39,8 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
+import { useShareCreateTagDialogStore } from "@/stores/share-create-tag-dialog-store";
 import { SharedDicomSeriesContextMenu } from "../shared-dicom-series-context-menu";
-import { ShareCreateTagDialog } from "../tag/share-create-tag-dialog";
 import { ShareTagDropdownSub } from "../tag/share-tag-dropdown-sub";
 
 interface SharedDicomSeriesDataTableProps {
@@ -67,7 +67,7 @@ function ActionsCell({
     const { lng } = useParams<{ lng: string }>();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const { openDialog: openCreateTagDialog } = useShareCreateTagDialogStore();
     const { clearSelection } = useDicomSeriesSelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
 
@@ -97,13 +97,18 @@ function ActionsCell({
                 password,
             });
         } catch (error) {
-            console.error(t("dicom.messages.failedToDownload", { level: "series" }), error);
+            console.error(
+                t("dicom.messages.failedToDownload", { level: "series" }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error(t("dicom.messages.failedToDownload", { level: "series" }));
+            toast.error(
+                t("dicom.messages.failedToDownload", { level: "series" }),
+            );
         }
     };
 
@@ -115,51 +120,47 @@ function ActionsCell({
             seriesInstanceUid,
             password,
         });
-    }
+    };
 
     return (
-        <>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="size-8 p-0">
-                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
-                        <MoreHorizontalIcon className="size-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEnterInstances}>
-                        {t("dicom.contextMenu.enterInstances")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
-                        {t("dicom.contextMenu.openInBlueLight")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDownload}>
-                        {t("dicom.contextMenu.download")}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {canUpdate && (
-                        <ShareTagDropdownSub 
-                            token={token}
-                            targetType="series"
-                            targetId={seriesInstanceUid}
-                            password={password}
-                            onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
-                        />
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
-
-            {canUpdate && (
-                <ShareCreateTagDialog 
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    token={token}
-                    targetType="series"
-                    targetId={seriesInstanceUid}
-                    password={password}
-                />
-            )}
-        </>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="size-8 p-0">
+                    <span className="sr-only">
+                        {t("dicom.contextMenu.openMenu")}
+                    </span>
+                    <MoreHorizontalIcon className="size-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleEnterInstances}>
+                    {t("dicom.contextMenu.enterInstances")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                    {t("dicom.contextMenu.openInBlueLight")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDownload}>
+                    {t("dicom.contextMenu.download")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {canUpdate && (
+                    <ShareTagDropdownSub
+                        token={token}
+                        targetType="series"
+                        targetId={seriesInstanceUid}
+                        password={password}
+                        onOpenCreateTagDialog={() =>
+                            openCreateTagDialog({
+                                token,
+                                targetType: "series",
+                                targetId: seriesInstanceUid,
+                                password,
+                            })
+                        }
+                    />
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 
@@ -281,7 +282,7 @@ export function SharedDicomSeriesDataTable({
             toggleSeriesSelection,
             generalColumns,
             publicPermissions,
-            t
+            t,
         ],
     );
 
@@ -397,7 +398,9 @@ export function SharedDicomSeriesDataTable({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    {t("dicom.messages.noData", { level: "series" })}
+                                    {t("dicom.messages.noData", {
+                                        level: "series",
+                                    })}
                                 </TableCell>
                             </TableRow>
                         )}

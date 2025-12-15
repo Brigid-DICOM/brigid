@@ -10,7 +10,7 @@ import {
 import { MoreHorizontalIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { createStudyColumns } from "@/components/dicom/data-tables/table-study-columns";
@@ -26,8 +26,8 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
+import { useShareCreateTagDialogStore } from "@/stores/share-create-tag-dialog-store";
 import { SharedDicomStudyContextMenu } from "../shared-dicom-study-context-menu";
-import { ShareCreateTagDialog } from "../tag/share-create-tag-dialog";
 import { ShareTagDropdownSub } from "../tag/share-tag-dropdown-sub";
 
 interface SharedDicomStudiesDataTableProps {
@@ -53,7 +53,7 @@ function ActionsCell({
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const { openDialog: openCreateTagDialog } = useShareCreateTagDialogStore();
     const { clearSelection } = useDicomStudySelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
 
@@ -93,7 +93,6 @@ function ActionsCell({
     }
 
     return (
-        <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
@@ -119,27 +118,20 @@ function ActionsCell({
 
                     {canUpdate && (
                         <ShareTagDropdownSub 
-                        token={token}
-                        targetType="study"
-                        targetId={studyInstanceUid}
-                        password={password}
-                        onOpenCreateTagDialog={() => setOpenCreateTagDialog(true)}
+                            token={token}
+                            targetType="study"
+                            targetId={studyInstanceUid}
+                            password={password}
+                            onOpenCreateTagDialog={() => openCreateTagDialog({
+                                token,
+                                targetType: "study",
+                                targetId: studyInstanceUid,
+                                password,
+                            })}
                         />
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-
-            {canUpdate && (
-                <ShareCreateTagDialog 
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    token={token}
-                    targetType="study"
-                    targetId={studyInstanceUid}
-                    password={password}
-                />
-            )}
-        </>
     )
 }
 

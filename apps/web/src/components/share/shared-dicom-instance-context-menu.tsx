@@ -1,11 +1,8 @@
 "use client";
 
-import {
-    DownloadIcon,
-    EyeIcon,
-} from "lucide-react";
+import { DownloadIcon, EyeIcon } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import {
@@ -29,7 +26,7 @@ import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { hasPermission } from "@/server/utils/sharePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
-import { ShareCreateTagDialog } from "./tag/share-create-tag-dialog";
+import { useShareCreateTagDialogStore } from "@/stores/share-create-tag-dialog-store";
 import { ShareTagContextMenuSub } from "./tag/share-tag-context-menu-sub";
 
 interface SharedDicomInstanceContextMenuProps {
@@ -106,7 +103,7 @@ const DownloadSubMenu = ({
             </ContextMenuSubContent>
         </ContextMenuSub>
     );
-}
+};
 
 export function SharedDicomInstanceContextMenu({
     children,
@@ -118,7 +115,7 @@ export function SharedDicomInstanceContextMenu({
     publicPermissions,
 }: SharedDicomInstanceContextMenuProps) {
     const { t } = useT("translation");
-    const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
+    const { openDialog: openCreateTagDialog } = useShareCreateTagDialogStore();
     const { open } = useBlueLightViewerStore();
 
     const { getSelectedInstanceIds, clearSelection } =
@@ -142,13 +139,22 @@ export function SharedDicomInstanceContextMenu({
                 password,
             );
         } catch (error) {
-            console.error(t("dicom.messages.downloadSelectedError", { level: "instances" }), error);
+            console.error(
+                t("dicom.messages.downloadSelectedError", {
+                    level: "instances",
+                }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error(t("dicom.messages.downloadSelectedError", { level: "instances" }));
+            toast.error(
+                t("dicom.messages.downloadSelectedError", {
+                    level: "instances",
+                }),
+            );
         }
     };
 
@@ -163,13 +169,22 @@ export function SharedDicomInstanceContextMenu({
                 selectedIds,
             );
         } catch (error) {
-            console.error(t("dicom.messages.downloadInstanceImageError", { format: "JPG" }), error);
+            console.error(
+                t("dicom.messages.downloadInstanceImageError", {
+                    format: "JPG",
+                }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
-            }   
+            }
 
-            toast.error(t("dicom.messages.downloadInstanceImageError", { format: "JPG" }));
+            toast.error(
+                t("dicom.messages.downloadInstanceImageError", {
+                    format: "JPG",
+                }),
+            );
         }
     };
 
@@ -184,12 +199,21 @@ export function SharedDicomInstanceContextMenu({
                 selectedIds,
             );
         } catch (error) {
-            console.error(t("dicom.messages.downloadInstanceImageError", { format: "PNG" }), error);
+            console.error(
+                t("dicom.messages.downloadInstanceImageError", {
+                    format: "PNG",
+                }),
+                error,
+            );
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error(t("dicom.messages.downloadInstanceImageError", { format: "PNG" }));
+            toast.error(
+                t("dicom.messages.downloadInstanceImageError", {
+                    format: "PNG",
+                }),
+            );
         }
     };
 
@@ -213,71 +237,66 @@ export function SharedDicomInstanceContextMenu({
     }, [clearSelection]);
 
     return (
-        <>
-            <ContextMenu>
-                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-                <ContextMenuContent className="w-60">
-                    {selectedIds.length === 1 && (
-                        <>
-                            <ContextMenuItem
-                                onClick={handleOpenBlueLightViewer}
-                                className="flex items-center space-x-2"
-                            >
-                                <EyeIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.openInBlueLight")}</span>
-                            </ContextMenuItem>
+        <ContextMenu>
+            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+            <ContextMenuContent className="w-60">
+                {selectedIds.length === 1 && (
+                    <>
+                        <ContextMenuItem
+                            onClick={handleOpenBlueLightViewer}
+                            className="flex items-center space-x-2"
+                        >
+                            <EyeIcon className="size-4" />
+                            <span>
+                                {t("dicom.contextMenu.openInBlueLight")}
+                            </span>
+                        </ContextMenuItem>
 
-                            <DownloadSubMenu 
-                                onDicomDownload={handleDicomDownload}
-                                onJpgDownload={handleJpgDownload}
-                                onPngDownload={handlePngDownload}
-                            />
+                        <DownloadSubMenu
+                            onDicomDownload={handleDicomDownload}
+                            onJpgDownload={handleJpgDownload}
+                            onPngDownload={handlePngDownload}
+                        />
 
-                            {canUpdate && (
-                                <>
-                                    <ContextMenuSeparator />
+                        {canUpdate && (
+                            <>
+                                <ContextMenuSeparator />
 
-                                    <ShareTagContextMenuSub
-                                        token={token}
-                                        targetType="instance"
-                                        targetId={sopInstanceUid}
-                                        password={password}
-                                        onOpenCreateTagDialog={() =>
-                                            setOpenCreateTagDialog(true)
-                                        }
-                                    />
-                                </>
-                            )}
-                        </>
-                    )}
+                                <ShareTagContextMenuSub
+                                    token={token}
+                                    targetType="instance"
+                                    targetId={sopInstanceUid}
+                                    password={password}
+                                    onOpenCreateTagDialog={() =>
+                                        openCreateTagDialog({
+                                            token,
+                                            targetType: "instance",
+                                            targetId: sopInstanceUid,
+                                            password,
+                                        })
+                                    }
+                                />
+                            </>
+                        )}
+                    </>
+                )}
 
-                    {selectedIds.length > 1 && (
-                        <>
-                            <ContextMenuLabel>
-                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
-                            </ContextMenuLabel>
-                            
-                            <DownloadSubMenu 
-                                onDicomDownload={handleDicomDownload}
-                                onJpgDownload={handleJpgDownload}
-                                onPngDownload={handlePngDownload}
-                            />
-                        </>
-                    )}
+                {selectedIds.length > 1 && (
+                    <>
+                        <ContextMenuLabel>
+                            {t("dicom.contextMenu.selectedItems", {
+                                count: selectedIds.length,
+                            })}
+                        </ContextMenuLabel>
 
-                </ContextMenuContent>
-            </ContextMenu>
-
-            {canUpdate && (
-                <ShareCreateTagDialog
-                    open={openCreateTagDialog}
-                    onOpenChange={setOpenCreateTagDialog}
-                    token={token}
-                    targetType="instance"
-                    targetId={sopInstanceUid}
-                    password={password}
-                />
-            )}
-        </>
+                        <DownloadSubMenu
+                            onDicomDownload={handleDicomDownload}
+                            onJpgDownload={handleJpgDownload}
+                            onPngDownload={handlePngDownload}
+                        />
+                    </>
+                )}
+            </ContextMenuContent>
+        </ContextMenu>
     );
 }
