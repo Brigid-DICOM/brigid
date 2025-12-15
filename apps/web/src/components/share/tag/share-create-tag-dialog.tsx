@@ -7,6 +7,7 @@ import type React from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import { ColorPicker, PRESET_COLORS } from "@/components/ui/color-picker";
 import {
@@ -38,6 +39,7 @@ export function ShareCreateTagDialog({
     targetId,
     password,
 }: ShareCreateTagDialogProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [tagName, setTagName] = useState("");
     const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
@@ -55,14 +57,14 @@ export function ShareCreateTagDialog({
         e.preventDefault();
 
         if (!tagName.trim()) {
-            toast.error("Tag name is required", {
+            toast.error(t("createTagDialog.messages.tagNameRequired"), {
                 position: "bottom-center",
             });
             return;
         }
 
         const toastId = nanoid();
-        toast.loading("Assigning tag...", {
+        toast.loading(t("createTagDialog.messages.assigning"), {
             id: toastId,
         });
 
@@ -79,14 +81,14 @@ export function ShareCreateTagDialog({
             password: password ?? undefined,
         }, {
             onSuccess: () => {
-                toast.success("Tag assigned successfully");
+                toast.success(t("createTagDialog.messages.assigningSuccess"));
                 queryClient.invalidateQueries({
                     queryKey: ["share-tags", token, targetType, targetId],
                 });
                 toast.dismiss(toastId);
             },
             onError: () => {
-                toast.error("Failed to assign tag");
+                toast.error(t("createTagDialog.messages.assigningError"));
                 toast.dismiss(toastId);
             }
         })
@@ -107,20 +109,20 @@ export function ShareCreateTagDialog({
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Create Tag</DialogTitle>
+                    <DialogTitle>{t("createTagDialog.title")}</DialogTitle>
                     <DialogDescription>
-                        Create a new tag to assign to the item.
+                        {t("createTagDialog.description", { targetType })}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label htmlFor="tag-name" className="text-sm font-medium">
-                            Tag Name
+                            {t("createTagDialog.tagName")}
                         </label>
                         <Input 
                             id="tag-name"
-                            placeholder="Enter tag name"
+                            placeholder={t("createTagDialog.tagNamePlaceholder")}
                             value={tagName}
                             onChange={e => handleTagNameChange(e.target.value)}
                             disabled={isLoading}
@@ -132,6 +134,10 @@ export function ShareCreateTagDialog({
                         value={selectedColor}
                         onChange={setSelectedColor}
                         disabled={isLoading}
+                        labels={{
+                            title: t("createTagDialog.colorPicker.title"),
+                            customColorHint: t("createTagDialog.colorPicker.customColorHint"),
+                        }}
                     />
 
                     <DialogFooter>
@@ -141,10 +147,10 @@ export function ShareCreateTagDialog({
                             onClick={() => handleOpenChange(false)}
                             disabled={isLoading}
                         >
-                            取消
+                            {t("common.cancel")}
                         </Button>
                         <Button type="submit" disabled={isLoading}>
-                            {isLoading ? "Assigning...": "Assign Tag"}
+                            {isLoading ? t("common.loading"): t("createTagDialog.assignTag")}
                         </Button>
                     </DialogFooter>
                 </form>

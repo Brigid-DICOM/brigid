@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import { ColorPicker, PRESET_COLORS } from "@/components/ui/color-picker";
 import {
@@ -41,6 +42,7 @@ export function CreateTagDialog({
     targetType,
     targetId,
 }: CreateTagDialogProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [tagName, setTagName] = useState("");
     const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
@@ -106,14 +108,14 @@ export function CreateTagDialog({
             }
         },
         onError: () => {
-            toast.error("Failed to create tag");
+            toast.error(t("createTagDialog.messages.creatingError"));
         }
     });
 
     const { mutate: assignTag, isPending: isAssigningTag } = useMutation({
         ...assignTagMutation(),
         onSuccess: () => {
-            toast.success("Tag assigned successfully");
+            toast.success(t("createTagDialog.messages.assigningSuccess"));
 
             queryClient.invalidateQueries({
                 queryKey: ["tags", workspaceId],
@@ -127,7 +129,7 @@ export function CreateTagDialog({
             handleOpenChange(false);
         },
         onError: () => {
-            toast.error("Failed to assign tag");
+            toast.error(t("createTagDialog.messages.assigningError"));
         }
     });
 
@@ -145,7 +147,7 @@ export function CreateTagDialog({
             }
         },
         onError: () => {
-            toast.error("Failed to update tag");
+            toast.error(t("createTagDialog.messages.updatingError"));
         }
     });
 
@@ -153,12 +155,12 @@ export function CreateTagDialog({
         e.preventDefault();
 
         if (!tagName.trim()) {
-            toast.error("Tag name is required");
+            toast.error(t("createTagDialog.messages.tagNameRequired"));
             return;
         }
 
         const toastId = nanoid();
-        toast.loading(existingTag ? "Assigning tag..." : "Creating tag...", {
+        toast.loading(existingTag ? t("createTagDialog.messages.assigning") : t("createTagDialog.messages.creating"), {
             id: toastId,
         });
 
@@ -190,26 +192,26 @@ export function CreateTagDialog({
     }
 
     const isLoading = isCreatingTag || isAssigningTag || isUpdatingTag;
-    const submitButtonText = existingTag ? "Assign Tag" : "Create Tag";
+    const submitButtonText = existingTag ? t("createTagDialog.assignTag") : t("createTagDialog.createTag");
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Create Tag</DialogTitle>
+                    <DialogTitle>{t("createTagDialog.title")}</DialogTitle>
                     <DialogDescription>
-                        Crate a new tag to assign to the item.
+                        {t("createTagDialog.description", { targetType })}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label htmlFor="tag-name" className="text-sm font-medium">
-                            Tag Name
+                            {t("createTagDialog.tagName")}
                         </label>
                         <Input 
                             id="tag-name"
-                            placeholder="Enter tag name"
+                            placeholder={t("createTagDialog.tagNamePlaceholder")}
                             value={tagName}
                             onChange={e => handleTagNameChange(e.target.value)}
                             disabled={isLoading}
@@ -220,7 +222,7 @@ export function CreateTagDialog({
                             <div className="text-sm text-yellow-600 flex items-center gap-2">
                                 <AlertCircleIcon className="size-4" />
                                 <span>
-                                    Tag is already exists.
+                                    {t("createTagDialog.tagNameAlreadyExists")}
                                 </span>
                                 <div className="w-5 h-5 rounded-full" style={{ backgroundColor: existingTag.color }} />
                             </div>
@@ -231,6 +233,10 @@ export function CreateTagDialog({
                         value={selectedColor}
                         onChange={setSelectedColor}
                         disabled={isLoading}
+                        labels={{
+                            title: t("createTagDialog.colorPicker.title"),
+                            customColorHint: t("createTagDialog.colorPicker.customColorHint"),
+                        }}
                     />
 
                     <DialogFooter>
@@ -240,14 +246,14 @@ export function CreateTagDialog({
                             onClick={() => handleOpenChange(false)}
                             disabled={isLoading || isChecking}
                         >
-                            取消
+                            {t("common.cancel")}
                         </Button>
 
                         <Button
                             type="submit"
                             disabled={isLoading || !tagName.trim() || isChecking}
                         >
-                            {isLoading ? "Processing...": submitButtonText}
+                            {isLoading ? t("common.loading"): submitButtonText}
                         </Button>
                     </DialogFooter>
                 </form>

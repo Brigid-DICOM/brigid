@@ -406,5 +406,29 @@
         "shareLinkCountLoading": "載入分享連結數量中...",
         "shareLinkCountError": "載入分享連結數量失敗",
         "shareLinkCountEmpty": "尚無分享連結"
+    },
+    "createTagDialog": {
+        "title": "建立標籤",
+        "description": "建立一個新的標籤來分配給 {{targetType}}。",
+        "tagName": "標籤名稱",
+        "tagNamePlaceholder": "輸入標籤名稱",
+        "tagNameAlreadyExists": "標籤名稱已存在",
+        "tagNameAlreadyExistsColor": "標籤名稱已存在於顏色 {{color}}",
+        "tagNameAlreadyExistsColorPlaceholder": "輸入標籤名稱",
+        "assignTag": "建立標籤",
+        "createTag": "建立標籤",
+        "colorPicker": {
+            "title": "自定義標籤顏色",
+            "customColorHint": "或選擇自定義顏色"
+        },
+        "messages": {
+            "tagNameRequired": "標籤名稱是必填的",
+            "assigning": "建立標籤中...",
+            "creating": "建立標籤中...",
+            "assigningSuccess": "標籤建立成功",
+            "creatingSuccess": "標籤建立成功",
+            "assigningError": "建立標籤失敗",
+            "creatingError": "建立標籤失敗"
+        }
     }
 }

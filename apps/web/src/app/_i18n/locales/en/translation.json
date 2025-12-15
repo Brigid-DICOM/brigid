@@ -407,5 +407,29 @@
         "shareLinkCountLoading": "Loading share link count...",
         "shareLinkCountError": "Failed to load share link count",
         "shareLinkCountEmpty": "No share links found"
+    },
+    "createTagDialog": {
+        "title": "Create Tag",
+        "description": "Create a new tag to assign to {{targetType}}.",
+        "tagName": "Tag Name",
+        "tagNamePlaceholder": "Enter tag name",
+        "tagNameAlreadyExists": "Tag name already exists",
+        "tagNameAlreadyExistsColor": "Tag name already exists with color {{color}}",
+        "tagNameAlreadyExistsColorPlaceholder": "Enter tag name",
+        "assignTag": "Assign Tag",
+        "createTag": "Create Tag",
+        "colorPicker": {
+            "title": "Custom Tag Color",
+            "customColorHint": "Or choose custom color"
+        },
+        "messages": {
+            "tagNameRequired": "Tag name is required",
+            "assigning": "Assigning tag...",
+            "creating": "Creating tag...",
+            "assigningSuccess": "Tag assigned successfully",
+            "creatingSuccess": "Tag created successfully",
+            "assigningError": "Failed to assign tag",
+            "creatingError": "Failed to create tag"
+        }
     }
 }
