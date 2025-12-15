@@ -1,4 +1,7 @@
+import env from "@brigid/env";
 import { Hono } from "hono";
+import { getCookie } from "hono/cookie";
+import { verify } from "hono/jwt";
 import { 
     describeRoute, 
     validator as zValidator 
@@ -6,6 +9,8 @@ import {
 import z from "zod";
 import { ShareLinkService } from "@/server/services/shareLink.service";
 import { appLogger } from "@/server/utils/logger";
+
+const JWT_SECRET = env.JWT_SECRET;
 
 const logger = appLogger.child({
     module: "PublicShareLinkRoute",
@@ -66,32 +71,39 @@ const publicShareLinkRoute = new Hono().get(
                 )
             }
 
-            if (shareLink.requiredPassword && !password) {
-                return c.json(
-                    {
-                        ok: false,
-                        data: null,
-                        error: "Password is required"
-                    },
-                    403
-                );
-            }
+            // Password verification
+            if (shareLink.requiredPassword) {
+                let isPasswordVerified = false;
+                
+                const authCookie = getCookie(c, `share-auth-${token}`);
+                if (authCookie) {
+                    try {
+                        const decoded = await verify(authCookie, JWT_SECRET);
+                        if (decoded.token === token && decoded.verified) {
+                            isPasswordVerified = true;
+                        }
+                    } catch {
+                        // Invalid Cookie, continue to check password from query parameter
+                    }
+                }
 
-            if (shareLink.requiredPassword && password && shareLink.passwordHash) {
-                const isValidPassword = await shareLinkService.verifyPassword(
-                    password,
-                    shareLink.passwordHash
-                );
+                if (!isPasswordVerified && password && shareLink.passwordHash) {
+                    const isValidPassword = await shareLinkService.verifyPassword(
+                        password,
+                        shareLink.passwordHash
+                    );
+                    isPasswordVerified = isValidPassword;
+                }
 
-                if (!isValidPassword) {
+                if (!isPasswordVerified) {
                     return c.json(
                         {
                             ok: false,
                             data: null,
-                            error: "Invalid password"
+                            error: password ? "Invalid password" : "Password is required"
                         },
-                        401
-                    );
+                        password ? 401 : 403
+                    )
                 }
             }
 

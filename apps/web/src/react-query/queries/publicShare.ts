@@ -3,7 +3,7 @@ import type {
     DicomSeriesData,
     DicomStudyData,
 } from "@brigid/types";
-import { queryOptions } from "@tanstack/react-query";
+import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { apiClient } from "../apiClient";
 
 export interface PublicShareLinkData {
@@ -41,6 +41,45 @@ interface ShareStudySeriesInstanceQueryParams
     seriesInstanceUid: string;
 }
 
+export const verifyPasswordMutation = ({
+    token,
+    password,
+}: {
+    token: string;
+    password: string;
+}) => {
+    return mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.share[":token"]["verify-password"].$post({
+                param: {
+                    token,
+                },
+                json: {
+                    password,
+                },
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Failed to verify password");
+            }
+
+            return await response.json();
+        }
+    });
+};
+
+function commonRetryHandler(failureCount: number, error: Error) {
+    if (
+        error instanceof Error && 
+        (error.message === "Password is required" || 
+            error.message === "Invalid password")
+    ) {
+        return false;
+    }
+    return failureCount < 3;
+}
+
 export const getPublicShareLinkQuery = ({
     token,
     password,
@@ -67,14 +106,7 @@ export const getPublicShareLinkQuery = ({
             return await response.json();
         },
         retry: (failureCount, error) => {
-            if (
-                error instanceof Error && 
-                (error.message === "Password is required" || 
-                    error.message === "Invalid password")
-            ) {
-                return false;
-            }
-            return failureCount < 3;
+            return commonRetryHandler(failureCount, error);
         },
         staleTime: 30 * 60 * 1000,
         enabled: !!token,
@@ -102,10 +134,14 @@ export const getShareStudiesQuery = ({
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch public share studies");
+                const error = await response.json();
+                throw new Error(error.error || "Failed to fetch public share studies");
             }
 
             return (await response.json()) as DicomStudyData[];
+        },
+        retry: (failureCount, error) => {
+            return commonRetryHandler(failureCount, error);
         },
         staleTime: 30 * 60 * 1000,
         enabled: !!token,
@@ -131,10 +167,14 @@ export const getShareSeriesQuery = ({
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch public share series");
+                const error = await response.json();
+                throw new Error(error.error || "Failed to fetch public share series");
             }
 
             return (await response.json()) as unknown as DicomSeriesData[];
+        },
+        retry: (failureCount, error) => {
+            return commonRetryHandler(failureCount, error);
         },
         staleTime: 30 * 60 * 1000,
         enabled: !!token,
@@ -173,13 +213,19 @@ export const getShareStudySeriesQuery = ({
                     offset: offset.toString(),
                     limit: limit.toString(),
                 },
+            }, {
+                headers
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch public share study series");
+                const error = await response.json();
+                throw new Error(error.error || "Failed to fetch public share study series");
             }
 
             return (await response.json()) as unknown as DicomSeriesData[];
+        },
+        retry: (failureCount, error) => {
+            return commonRetryHandler(failureCount, error);
         },
         staleTime: 30 * 60 * 1000,
         enabled: !!token && !!studyInstanceUid,
@@ -193,6 +239,7 @@ export const getShareStudySeriesInstancesQuery = ({
     seriesInstanceUid,
     offset = 0,
     limit = 10,
+    cookie,
 }: ShareStudySeriesInstanceQueryParams) => {
     return queryOptions({
         queryKey: [
@@ -205,6 +252,11 @@ export const getShareStudySeriesInstancesQuery = ({
             limit,
         ],
         queryFn: async () => {
+            const headers: HeadersInit = {};
+            if (typeof window === "undefined" && typeof cookie === "string") {
+                headers.cookie = cookie;
+            }
+
             const response = await apiClient.api.share[":token"].studies[
                 ":studyInstanceUid"
             ].series[":seriesInstanceUid"].instances.$get({
@@ -214,15 +266,19 @@ export const getShareStudySeriesInstancesQuery = ({
                     offset: offset.toString(),
                     limit: limit.toString(),
                 },
+            }, {
+                headers
             });
 
             if (!response.ok) {
-                throw new Error(
-                    "Failed to fetch public share study series instances",
-                );
+                const error = await response.json();
+                throw new Error(error.error || "Failed to fetch public share study series instances");
             }
 
             return (await response.json()) as DicomInstanceData[];
+        },
+        retry: (failureCount, error) => {
+            return commonRetryHandler(failureCount, error);
         },
         staleTime: 30 * 60 * 1000,
         enabled: !!token && !!studyInstanceUid && !!seriesInstanceUid,
@@ -250,10 +306,14 @@ export const getShareInstancesQuery = ({
             );
 
             if (!response.ok) {
-                throw new Error("Failed to fetch public share instances");
+                const error = await response.json();
+                throw new Error(error.error || "Failed to fetch public share instances");
             }
 
             return (await response.json()) as DicomInstanceData[];
+        },
+        retry: (failureCount, error) => {
+            return commonRetryHandler(failureCount, error);
         },
         staleTime: 30 * 60 * 1000,
         enabled: !!token,
@@ -349,9 +409,7 @@ export const getShareSeriesThumbnailQuery = ({
             });
 
             if (!response.ok) {
-                throw new Error(
-                    "Failed to fetch public share series thumbnail",
-                );
+                throw new Error("Failed to fetch public share series thumbnail");
             }
 
             return await response.blob();
@@ -408,9 +466,7 @@ export const getShareInstanceThumbnailQuery = ({
             });
 
             if (!response.ok) {
-                throw new Error(
-                    "Failed to fetch public share instance thumbnail",
-                );
+                throw new Error("Failed to fetch public share instance thumbnail");
             }
 
             return await response.blob();

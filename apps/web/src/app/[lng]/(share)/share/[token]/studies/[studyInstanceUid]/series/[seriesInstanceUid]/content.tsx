@@ -3,6 +3,7 @@
 import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
@@ -34,6 +35,7 @@ interface ShareStudySeriesInstancesContentProps {
 const ITEM_PER_PAGE = 10;
 
 export default function ShareStudySeriesInstancesContent({ token, studyInstanceUid, seriesInstanceUid, password }: ShareStudySeriesInstancesContentProps) {
+    const router = useRouter();
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const searchParams = useSearchParams();
@@ -58,7 +60,7 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
         })
     );
 
-    const { data: instances, isLoading } = useQuery(
+    const { data: instances, isLoading, error } = useQuery(
         getShareStudySeriesInstancesQuery({
             token,
             password,
@@ -69,6 +71,12 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
         })
     );
     const isAllSelected = selectedCount === instances?.length;
+
+    useEffect(() => {
+        if (error instanceof Error && error.message === "Password is required") {
+            router.push(`/${lng}/share/${token}`);
+        }
+    }, [error, token, lng, router]);
 
     useClearSelectionOnBlankClick({
         clearSelection,
@@ -102,22 +110,20 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
 
     const canGoNext = instances && instances.length === ITEM_PER_PAGE;
 
-    const passwordParam = password ? `?password=${encodeURIComponent(password)}` : "";
-
     const truncateUid = (uid: string) => 
         uid.length > 20 ? `${uid.slice(0, 10)}...${uid.slice(-10)}` : uid;
 
     const breadcrumbItems = publicShareLink?.data?.targetType === "study" ? [
         { 
             label: "Studies", 
-            href: `/${lng}/share/${token}${passwordParam}` 
+            href: `/${lng}/share/${token}` 
         },
         { 
             label: truncateUid(studyInstanceUid),
         },
         { 
             label: "Series",
-            href: `/${lng}/share/${token}/studies/${studyInstanceUid}${passwordParam}`
+            href: `/${lng}/share/${token}/studies/${studyInstanceUid}`
         },
         { 
             label: truncateUid(seriesInstanceUid)
@@ -128,7 +134,7 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
     ] : [
         {
             label: "Series",
-            href: `/${lng}/share/${token}${passwordParam}`
+            href: `/${lng}/share/${token}`
         },
         {
             label: truncateUid(seriesInstanceUid),

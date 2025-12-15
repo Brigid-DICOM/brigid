@@ -1,4 +1,7 @@
+import env from "@brigid/env";
 import { Hono } from "hono";
+import { setCookie } from "hono/cookie";
+import { sign } from "hono/jwt";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import z from "zod";
 import { verifyPasswordSchema } from "@/server/schemas/shareLinkSchema";
@@ -8,6 +11,8 @@ import { appLogger } from "@/server/utils/logger";
 const logger = appLogger.child({
     module: "VerifyPasswordRoute",
 });
+
+const JWT_SECRET = env.JWT_SECRET;
 
 const verifyPasswordRoute = new Hono().post(
     "/share/:token/verify-password",
@@ -67,6 +72,21 @@ const verifyPasswordRoute = new Hono().post(
                     401,
                 );
             }
+
+            const payload = {
+                token,
+                verified: true,
+                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 12, // 12 hours
+            };
+            const jwt = await sign(payload, JWT_SECRET);  
+
+            setCookie(c, `share-auth-${token}`, jwt, {
+                httpOnly: true,
+                secure: env.IS_LOCAL_APP ? false : process.env.NODE_ENV === "production",
+                sameSite: "Lax",
+                path: "/",
+                maxAge: 60 * 60 * 12, // 12 hours
+            });
 
             return c.json(
                 {

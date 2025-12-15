@@ -57,7 +57,7 @@ export class ShareLinkService {
         });
     }
 
-    async verifyPassword(password: string, hash: string) {
+    async verifyPassword(password: string, hash: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             const [iterations, salt, originalHash] = hash.split(":");
 

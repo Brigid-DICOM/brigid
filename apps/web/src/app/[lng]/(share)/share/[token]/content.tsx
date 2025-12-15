@@ -1,8 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, FileIcon, FolderIcon, LockIcon } from "lucide-react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -20,45 +19,47 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getPublicShareLinkQuery } from "@/react-query/queries/publicShare";
+import { getQueryClient } from "@/react-query/get-query-client";
+import { getPublicShareLinkQuery, verifyPasswordMutation } from "@/react-query/queries/publicShare";
 
 interface ShareContentProps {
     token: string;
-    initialPassword?: string;
 }
 
 export default function ShareContent({
     token,
-    initialPassword,
 }: ShareContentProps) {
-    const { lng } = useParams<{ lng: string }>();
-    const router = useRouter();
-    const searchParams = useSearchParams();
+    const queryClient = getQueryClient();
 
-    const [password, setPassword] = useState(initialPassword || "");
-    const [submittedPassword, setSubmittedPassword] = useState(
-        initialPassword || "",
-    );
+    const [password, setPassword] = useState("");
     const [showPasswordInput, setShowPasswordInput] = useState(false);
 
     const { data, isLoading, error } = useQuery({
         ...getPublicShareLinkQuery({
-            token,
-            password: submittedPassword,
+            token
         }),
         refetchOnWindowFocus: false,
+    });
+
+    const { mutate: verifyPassword, isPending: isVerifyingPassword, error: verifyPasswordError } = useMutation({
+        ...verifyPasswordMutation({
+            token,
+            password
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["public-share-link", token],
+            })
+            setShowPasswordInput(false);
+        }
     });
 
     const handlePasswordSubmit = useCallback(
         (e: React.FormEvent) => {
             e.preventDefault();
-            setSubmittedPassword(password);
-
-            const params = new URLSearchParams(searchParams);
-            params.set("password", password);
-            router.replace(`/${lng}/share/${token}?${params.toString()}`);
+            verifyPassword()
         },
-        [password, router, token, searchParams, lng],
+        [verifyPassword],
     );
 
     useEffect(() => {
@@ -106,16 +107,21 @@ export default function ShareContent({
                                 placeholder="Enter password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                disabled={isVerifyingPassword}
                                 autoFocus
                             />
-                            {error?.message === "Invalid password" && (
-                                <p className="text-sm text-destructive flex items-center gap-1">
+                            {verifyPasswordError?.message === "Invalid password" && (
+                                <p className="text-sm text-destructive flex items-center gap-1 mt-2">
                                     <AlertCircleIcon className="size-4" />
                                     Invalid password. Please try again.
                                 </p>
                             )}
-                            <Button type="submit" className="w-full mt-4">
-                                Unlock Content
+                            <Button 
+                                type="submit" 
+                                className="w-full mt-4"
+                                disabled={isVerifyingPassword}
+                            >
+                                {isVerifyingPassword ? "Verifying..." : "Unlock Content"}
                             </Button>
                         </form>
                     </CardContent>

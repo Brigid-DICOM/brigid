@@ -65,8 +65,7 @@ function ActionsCell({
     const handleEnterSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         clearSelection();
-        const params = password ? `?password=${encodeURIComponent(password)}` : "";
-        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}${params}`);
+        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}`);
     }
 
     const handleDownloadStudy = async (e: React.MouseEvent<HTMLDivElement>) => {

@@ -55,11 +55,8 @@ export function SharedDicomStudyContextMenu({
         e.preventDefault();
         closeContextMenu();
 
-        const params = password
-            ? `?password=${encodeURIComponent(password)}`
-            : "";
         router.push(
-            `/${lng}/share/${token}/studies/${studyInstanceUid}${params}`,
+            `/${lng}/share/${token}/studies/${studyInstanceUid}`,
         );
     };
 

@@ -3,6 +3,7 @@
 import type { DicomSeriesData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
@@ -39,6 +40,7 @@ export default function ShareStudySeriesContent({
     studyInstanceUid,
     password,
 }: ShareStudySeriesContentProps) {
+    const router = useRouter();
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const layoutMode = useLayoutStore((state) => state.layoutMode);
@@ -56,14 +58,17 @@ export default function ShareStudySeriesContent({
         }),
     );
 
-    const { data: series, isLoading } = useQuery(
-        getShareStudySeriesQuery({
-            token,
-            password,
-            studyInstanceUid,
-            offset: currentPage * ITEM_PER_PAGE,
-            limit: ITEM_PER_PAGE,
-        }),
+    const { data: series, isLoading, error } = useQuery(
+        {
+            ...getShareStudySeriesQuery({
+                token,
+                password,
+                studyInstanceUid,
+                offset: currentPage * ITEM_PER_PAGE,
+                limit: ITEM_PER_PAGE,
+            }),
+            refetchOnWindowFocus: false
+        }
     );
     const isAllSelected = selectedCount === series?.length;
 
@@ -78,14 +83,16 @@ export default function ShareStudySeriesContent({
         };
     }, [clearSelection]);
 
-    const passwordParam = password
-        ? `?password=${encodeURIComponent(password)}`
-        : "";
+    useEffect(() => {
+        if (error instanceof Error && error.message === "Password is required") {
+            router.push(`/${lng}/share/${token}`);
+        }
+    }, [error, token, lng, router]);
 
     const breadcrumbItems = [
         {
             label: "Studies",
-            href: `/${lng}/share/${token}${passwordParam}`,
+            href: `/${lng}/share/${token}`,
         },
         {
             label:

@@ -5,19 +5,16 @@ import ShareContent from "./content";
 
 interface ShareViewerPageProps {
     params: Promise<{ token: string }>;
-    searchParams: Promise<{ password?: string }>;
 }
 
-export default async function ShareViewerPage({ params, searchParams }: ShareViewerPageProps) {
+export default async function ShareViewerPage({ params }: ShareViewerPageProps) {
     const queryClient = getQueryClient();
     const { token } = await params;
-    const { password } = await searchParams;
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
             <ShareContent
                 token={token}
-                initialPassword={password}
             />
             <BlueLightViewerDialog />
         </HydrationBoundary>
