@@ -66,6 +66,16 @@ export const getPublicShareLinkQuery = ({
 
             return await response.json();
         },
+        retry: (failureCount, error) => {
+            if (
+                error instanceof Error && 
+                (error.message === "Password is required" || 
+                    error.message === "Invalid password")
+            ) {
+                return false;
+            }
+            return failureCount < 3;
+        },
         staleTime: 30 * 60 * 1000,
         enabled: !!token,
     });

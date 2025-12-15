@@ -41,12 +41,13 @@ export default function ShareContent({
     );
     const [showPasswordInput, setShowPasswordInput] = useState(false);
 
-    const { data, isLoading, error } = useQuery(
-        getPublicShareLinkQuery({
+    const { data, isLoading, error } = useQuery({
+        ...getPublicShareLinkQuery({
             token,
             password: submittedPassword,
         }),
-    );
+        refetchOnWindowFocus: false,
+    });
 
     const handlePasswordSubmit = useCallback(
         (e: React.FormEvent) => {
@@ -110,7 +111,7 @@ export default function ShareContent({
                                     Invalid password. Please try again.
                                 </p>
                             )}
-                            <Button type="submit" className="w-full">
+                            <Button type="submit" className="w-full mt-4">
                                 Unlock Content
                             </Button>
                         </form>
@@ -198,7 +199,9 @@ export default function ShareContent({
                                     Shared {getTargetTitle()}
                                 </CardTitle>
                                 {description && (
-                                    <CardDescription>{description}</CardDescription>
+                                    <CardDescription>
+                                        {description}
+                                    </CardDescription>
                                 )}
                             </div>
                         </div>
