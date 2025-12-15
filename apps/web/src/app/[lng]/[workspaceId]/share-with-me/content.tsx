@@ -5,6 +5,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon, RefreshCcwIcon } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { ShareLinkCard } from "@/components/share/share-link-card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { getQueryClient } from "@/react-query/get-query-client";
 import { getUserReceivedShareLinksQuery, parseShareLinkFromApi } from "@/react-query/queries/share";
 
 export default function ShareWithMeContent() {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
     const [page, setPage] = useState(1);
     const LIMIT = 10;
@@ -42,7 +44,7 @@ export default function ShareWithMeContent() {
             {/* Header */}
             <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold">
-                    Share With Me
+                    {t("shareWithMe.title")}
                 </h2>
                 <Button
                     variant="ghost"
@@ -61,7 +63,7 @@ export default function ShareWithMeContent() {
                  </div>
             ): shareLinks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                    No shared content yet.
+                    {t("shareWithMe.noData")}
                 </div>
             ): (
                 <>

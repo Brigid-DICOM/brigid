@@ -332,6 +332,11 @@
         "noData": "尚無分享內容。",
         "refresh": "重新整理"
     },
+    "shareWithMe": {
+        "title": "與我分享",
+        "noData": "尚無被分享的內容。",
+        "refresh": "重新整理"
+    },
     "shareLink": {
         "title": "分享連結",
         "menu": {

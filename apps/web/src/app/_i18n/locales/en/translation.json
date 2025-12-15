@@ -332,6 +332,11 @@
         "noData": "No shared content yet.",
         "refresh": "Refresh"
     },
+    "shareWithMe": {
+        "title": "Share With Me",
+        "noData": "No shared content yet.",
+        "refresh": "Refresh"
+    },
     "shareLink": {
         "title": "Share Link",
         "menu": {
