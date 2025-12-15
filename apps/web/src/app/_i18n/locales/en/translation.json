@@ -23,6 +23,10 @@
             "day": "Day",
             "days": "Days",
             "hour": "Hour"
+        },
+        "pagination": {
+            "previous": "Previous",
+            "next": "Next"
         }
     },
     "auth": {

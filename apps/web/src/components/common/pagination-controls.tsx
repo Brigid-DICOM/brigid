@@ -1,4 +1,7 @@
+"use client";
+
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useT } from "@/app/_i18n/client";
 import { Button } from "../ui/button";
 
 interface PaginationControlsProps {
@@ -14,6 +17,8 @@ export function PaginationControls({
     onPrevious,
     onNext,
 }: PaginationControlsProps) {
+    const { t } = useT("translation");
+
     return (
         <div className="flex items-between items-center justify-center space-x-4">
             <Button
@@ -23,7 +28,7 @@ export function PaginationControls({
                 className="flex items-center space-x-2"
             >
                 <ChevronLeftIcon className="size-4" />
-                <span>Previous</span>
+                <span>{t("common.pagination.previous")}</span>
             </Button>
 
             <Button
@@ -32,7 +37,7 @@ export function PaginationControls({
                 disabled={!canGoNext}
                 className="flex items-center space-x-2"
             >
-                <span>Next</span>
+                <span>{t("common.pagination.next")}</span>
                 <ChevronRightIcon className="size-4" />
             </Button>
         </div>
