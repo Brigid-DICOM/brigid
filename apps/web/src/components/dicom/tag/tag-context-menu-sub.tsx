@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckIcon, Loader2Icon, TagIcon, TagsIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenuItem,
     ContextMenuSeparator,
@@ -16,7 +17,6 @@ import {
     getWorkspaceTagsQuery,
     removeTagAssignmentMutation,
 } from "@/react-query/queries/tag";
-import { useT } from "@/app/_i18n/client";
 
 interface TagContextMenuSubProps {
     workspaceId: string;
@@ -61,10 +61,10 @@ export function TagContextMenuSub({
         return currentAssigned;
     }
 
-    const combinedTags = workspaceTags?.data?.map((tag) => ({
+    const combinedTags = (workspaceTags?.data?.map((tag) => ({
         ...tag,
         isAssigned: getIsAssigned(tag.id),
-    }));
+    })) ?? []).sort((a, b) => a.name.localeCompare(b.name));
 
     const { mutate: assignTag } = useMutation({
         ...assignTagMutation(),

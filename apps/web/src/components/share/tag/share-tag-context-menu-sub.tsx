@@ -4,6 +4,7 @@ import { CheckIcon, Loader2Icon, TagIcon, TagsIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import {
     ContextMenuItem,
     ContextMenuSeparator,
@@ -18,7 +19,6 @@ import {
     removeShareTagAssignmentMutation,
 } from "@/react-query/queries/share-tag";
 import { useShareTagStore } from "@/stores/share-tag-store";
-import { useT } from "@/app/_i18n/client";
 
 interface ShareTagContextMenuSubProps {
     token: string;
@@ -84,7 +84,7 @@ export function ShareTagContextMenuSub({
             }
         }
 
-        return result;
+        return result.sort((a, b) => a.name.localeCompare(b.name));
     }, [tags?.data, cachedTags, optimisticUpdates]);
 
     const { mutate: assignShareTag } = useMutation({
