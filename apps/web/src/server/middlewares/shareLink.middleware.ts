@@ -61,7 +61,7 @@ export const verifyShareLinkToken = createMiddleware<ShareLinkEnv>(
             if (authCookie) {
                 try {
                     const decoded = await verify(authCookie, JWT_SECRET);
-                    if ( decoded.token === token && decoded.verified) {
+                    if (decoded.token === token && decoded.verified) {
                         isPasswordVerified = true;
                     }
                 } catch {
@@ -80,7 +80,11 @@ export const verifyShareLinkToken = createMiddleware<ShareLinkEnv>(
             if (!isPasswordVerified) {
                 if (!password) {
                     return c.json(
-                        { ok: false, data: null, error: "Password is required" },
+                        {
+                            ok: false,
+                            data: null,
+                            error: "Password is required",
+                        },
                         403,
                     );
                 }

@@ -62,15 +62,22 @@ function ActionsCell({
 }) {
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
-    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
+        useState(false);
     const queryClient = getQueryClient();
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
-    const workspace = useWorkspaceStore(useShallow(state => state.workspace));
+    const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
-    const canRead = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
-    const canDelete = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
+    const canRead = hasPermission(
+        workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.READ,
+    );
+    const canDelete = hasPermission(
+        workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.DELETE,
+    );
 
     const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
 
@@ -85,7 +92,9 @@ function ActionsCell({
             });
         },
         onSuccess: () => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "series" }));
+            toast.success(
+                t("dicom.messages.restoreSuccess", { level: "series" }),
+            );
             toast.dismiss(`restore-${seriesInstanceUid}`);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId],
@@ -109,7 +118,9 @@ function ActionsCell({
             });
         },
         onSuccess: () => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "series" }));
+            toast.success(
+                t("dicom.messages.deleteSuccess", { level: "series" }),
+            );
             toast.dismiss(`delete-${seriesInstanceUid}`);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId],
@@ -149,7 +160,7 @@ function ActionsCell({
 
     const handleConfirmDelete = () => {
         deleteDicomSeries();
-    }
+    };
 
     return (
         <>
@@ -163,8 +174,11 @@ function ActionsCell({
                 <DropdownMenuContent align="end">
                     {canRead && (
                         <>
-                            <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
-                                {t("dicom.contextMenu.copy")} {t("dicom.columns.series.seriesInstanceUid")}
+                            <DropdownMenuItem
+                                onClick={handleCopySeriesInstanceUid}
+                            >
+                                {t("dicom.contextMenu.copy")}{" "}
+                                {t("dicom.columns.series.seriesInstanceUid")}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleEnterInstances}>
                                 {t("dicom.contextMenu.enterInstances")}
@@ -185,11 +199,10 @@ function ActionsCell({
                             </DropdownMenuItem>
                         </>
                     )}
-
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <DicomDeleteConfirmDialog 
+            <DicomDeleteConfirmDialog
                 open={showDeleteConfirmDialog}
                 onOpenChange={setShowDeleteConfirmDialog}
                 dicomLevel="series"
@@ -237,8 +250,8 @@ export function DicomRecycleSeriesDataTable({
                                     selectAll(
                                         rows.map(
                                             (row) =>
-                                                row.original["0020000E"]?.Value?.[0] ||
-                                                "",
+                                                row.original["0020000E"]
+                                                    ?.Value?.[0] || "",
                                         ),
                                     );
                                 } else {
@@ -277,8 +290,12 @@ export function DicomRecycleSeriesDataTable({
                                 type: "workspace",
                                 workspaceId,
                             }}
-                            studyInstanceUid={row.original["0020000D"]?.Value?.[0] || "N/A"}
-                            seriesInstanceUid={row.original["0020000E"]?.Value?.[0] || "N/A"}
+                            studyInstanceUid={
+                                row.original["0020000D"]?.Value?.[0] || "N/A"
+                            }
+                            seriesInstanceUid={
+                                row.original["0020000E"]?.Value?.[0] || "N/A"
+                            }
                             size={64}
                         />
                     );

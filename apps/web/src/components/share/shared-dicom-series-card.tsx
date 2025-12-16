@@ -44,8 +44,10 @@ export function SharedDicomSeriesCard({
     const seriesDate = series["00080021"]?.Value?.[0] || "N/A";
     const seriesNumber = series["00200011"]?.Value?.[0] || "N/A";
     const numberOfInstances = series["00201209"]?.Value?.[0] || 0;
-    
-    const studyUidFromSeries = series["0020000D"]?.Value?.[0] as string | undefined;
+
+    const studyUidFromSeries = series["0020000D"]?.Value?.[0] as
+        | string
+        | undefined;
     const effectiveStudyUid = studyInstanceUid || studyUidFromSeries;
 
     const {
@@ -64,23 +66,36 @@ export function SharedDicomSeriesCard({
             studyInstanceUid: effectiveStudyUid || "N/A",
             seriesInstanceUid,
             viewport: "224,224",
-        })
+        }),
     );
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
     const { data: tags, isLoading: isLoadingTags } = useQuery(
-        getTargetShareTagsQuery(token, "series", seriesInstanceUid, password ?? undefined)
+        getTargetShareTagsQuery(
+            token,
+            "series",
+            seriesInstanceUid,
+            password ?? undefined,
+        ),
     );
 
     const handleDoubleClick = () => {
         if (effectiveStudyUid) {
-            const params = password ? `?password=${encodeURIComponent(password)}` : "";
-            router.push(`/${lng}/share/${token}/studies/${effectiveStudyUid}/series/${seriesInstanceUid}${params}`);
+            const params = password
+                ? `?password=${encodeURIComponent(password)}`
+                : "";
+            router.push(
+                `/${lng}/share/${token}/studies/${effectiveStudyUid}/series/${seriesInstanceUid}${params}`,
+            );
         }
-    }
+    };
 
-    const { handleCardClick, handleContextMenu, handleDoubleClick: onDoubleClick } = useDicomCardSelection({
+    const {
+        handleCardClick,
+        handleContextMenu,
+        handleDoubleClick: onDoubleClick,
+    } = useDicomCardSelection({
         itemId: seriesInstanceUid,
         isSelected,
         toggleSelection: toggleSeriesSelection,
@@ -91,11 +106,11 @@ export function SharedDicomSeriesCard({
 
     return (
         <SharedDicomSeriesContextMenu
-          token={token}
-          password={password}
-          studyInstanceUid={effectiveStudyUid || "N/A"}
-          seriesInstanceUid={seriesInstanceUid}
-          publicPermissions={publicPermissions}
+            token={token}
+            password={password}
+            studyInstanceUid={effectiveStudyUid || "N/A"}
+            seriesInstanceUid={seriesInstanceUid}
+            publicPermissions={publicPermissions}
         >
             <Card
                 className={cn(
@@ -108,16 +123,16 @@ export function SharedDicomSeriesCard({
                     isSelected
                         ? ["ring-2 ring-primary", "shadow-lg", "bg-accent"]
                         : [
-                            "hover:shadow-lg",
-                            "hover:ring-2 hover:ring-accent hover:bg-accent/10",
-                        ],
+                              "hover:shadow-lg",
+                              "hover:ring-2 hover:ring-accent hover:bg-accent/10",
+                          ],
                     className,
                 )}
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
                 onDoubleClick={onDoubleClick}
             >
-                <DicomCardHeaderTagsDisplay 
+                <DicomCardHeaderTagsDisplay
                     tags={tags?.data ?? []}
                     isLoadingTags={isLoadingTags}
                     isSelected={isSelected}
@@ -129,7 +144,7 @@ export function SharedDicomSeriesCard({
                     {isLoadingThumbnail ? (
                         <Skeleton className="w-full h-full" />
                     ) : thumbnailUrl ? (
-                        <Image 
+                        <Image
                             src={thumbnailUrl}
                             alt={t("dicom.columns.thumbnail")}
                             width={224}
@@ -137,7 +152,7 @@ export function SharedDicomSeriesCard({
                             className="w-full h-full object-cover"
                             unoptimized
                         />
-                    ): (
+                    ) : (
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
                             <ImageIcon className="h-12 w-12 opacity-50" />
                             <div className="text-xs">
@@ -155,7 +170,8 @@ export function SharedDicomSeriesCard({
                                 {modality}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                                {t("dicom.columns.series.number")}{seriesNumber}
+                                {t("dicom.columns.series.number")}
+                                {seriesNumber}
                             </span>
                         </div>
 
@@ -189,6 +205,5 @@ export function SharedDicomSeriesCard({
                 </CardContent>
             </Card>
         </SharedDicomSeriesContextMenu>
-        
     );
 }

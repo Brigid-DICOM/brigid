@@ -4,7 +4,6 @@ import { ChevronRightIcon, HomeIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-
 interface BreadcrumbItem {
     label: string;
     href?: string;
@@ -16,17 +15,16 @@ interface ShareBreadcrumbProps {
     className?: string;
 }
 
-export function ShareBreadcrumb({ items, children, className }: ShareBreadcrumbProps) {
+export function ShareBreadcrumb({
+    items,
+    children,
+    className,
+}: ShareBreadcrumbProps) {
     return (
-        <nav
-            className={cn(
-                "flex items-center gap-1 text-sm",
-                className
-            )}
-        >
+        <nav className={cn("flex items-center gap-1 text-sm", className)}>
             {items.map((item, index) => {
                 const isLast = index === items.length - 1;
-                
+
                 return (
                     // biome-ignore lint/suspicious/noArrayIndexKey: index is used as key
                     <div key={index} className="flex items-center gap-1">
@@ -37,14 +35,19 @@ export function ShareBreadcrumb({ items, children, className }: ShareBreadcrumbP
                             <HomeIcon className="size-4 text-muted-foreground" />
                         )}
                         {item.href && !isLast ? (
-                            <Link href={item.href} className="text-primary hover:underline font-medium truncate max-w-[200px]">
+                            <Link
+                                href={item.href}
+                                className="text-primary hover:underline font-medium truncate max-w-[200px]"
+                            >
                                 {item.label}
                             </Link>
-                        ): (
+                        ) : (
                             <span
                                 className={cn(
                                     "truncate max-w-[200px]",
-                                    isLast ? "text-foreground font-medium" : "text-muted-foreground"
+                                    isLast
+                                        ? "text-foreground font-medium"
+                                        : "text-muted-foreground",
                                 )}
                                 title={item.label}
                             >
@@ -52,10 +55,10 @@ export function ShareBreadcrumb({ items, children, className }: ShareBreadcrumbP
                             </span>
                         )}
                     </div>
-                )
+                );
             })}
 
             {children}
         </nav>
-    )
+    );
 }

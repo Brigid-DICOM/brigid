@@ -18,7 +18,7 @@ export const getSearchUsersQuery = ({
                     query,
                     limit: limit.toString(),
                     page: page.toString(),
-                }
+                },
             });
 
             if (!response.ok) {
@@ -30,4 +30,4 @@ export const getSearchUsersQuery = ({
         enabled: !!query,
         staleTime: 5 * 60 * 1000,
     });
-}
+};

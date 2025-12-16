@@ -13,10 +13,7 @@ type UploadFileResult = {
 };
 
 export interface StorageProvider {
-    uploadFile(
-        file: MultipartFile,
-        key: string
-    ): Promise<UploadFileResult>;
+    uploadFile(file: MultipartFile, key: string): Promise<UploadFileResult>;
 
     abortUpload(key: string): Promise<void>;
 

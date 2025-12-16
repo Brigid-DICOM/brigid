@@ -46,8 +46,6 @@ export async function middleware(request: NextRequest) {
 
     // # region NextAuth
 
-
-
     const url = request.nextUrl;
     const nextAuthCookie = request.cookies.get("authjs.session-token");
 
@@ -60,9 +58,11 @@ export async function middleware(request: NextRequest) {
 
     if (!url.pathname.includes(`/share`)) {
         if (!nextAuthCookie) {
-            return NextResponse.redirect(new URL(`/${lng}/auth/signin`, request.url));
+            return NextResponse.redirect(
+                new URL(`/${lng}/auth/signin`, request.url),
+            );
         }
-    
+
         const session = await fetch(
             `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`,
             {
@@ -71,15 +71,16 @@ export async function middleware(request: NextRequest) {
                 },
             },
         );
-    
+
         const sessionData = await session.json();
-    
+
         if (!sessionData || !sessionData.user) {
-            return NextResponse.redirect(new URL(`/${lng}/auth/signin`, request.url));
+            return NextResponse.redirect(
+                new URL(`/${lng}/auth/signin`, request.url),
+            );
         }
     }
     // # endregion NextAuth
-
 
     const response = NextResponse.next({ headers });
     // Sync cookie if path language differs from cookie

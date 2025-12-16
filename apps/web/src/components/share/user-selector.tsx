@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useT } from "@/app/_i18n/client";
-import { 
+import {
     Command,
     CommandEmpty,
     CommandGroup,
@@ -47,11 +47,11 @@ export function UserSelector({
         users,
         isSearching,
         isLoading,
-        clearSearch
+        clearSearch,
     } = useUserSearch({
         debouncedMs: 300,
-        limit: 10
-    })
+        limit: 10,
+    });
 
     const handleSelectUser = (user: UserOption) => {
         onSelect({
@@ -65,7 +65,10 @@ export function UserSelector({
     const handlePermissionChange = (userId: string, permissions: number) => {
         const selectedUser = selected.find((s) => s.userId === userId);
         if (selectedUser) {
-            const newPermissions = toggleSharePermission(selectedUser.permissions, permissions);
+            const newPermissions = toggleSharePermission(
+                selectedUser.permissions,
+                permissions,
+            );
             if (newPermissions !== selectedUser.permissions) {
                 onSelect({
                     ...selectedUser,
@@ -78,44 +81,57 @@ export function UserSelector({
     return (
         <div className="space-y-4">
             <div>
-                <label className="text-sm font-medium" htmlFor="add-users">{t("shareLink.userSelector.addUsers")}</label>
+                <label className="text-sm font-medium" htmlFor="add-users">
+                    {t("shareLink.userSelector.addUsers")}
+                </label>
                 <div className="relative mt-2">
                     <Command className="bg-background border">
                         <CommandInput
                             id="add-users"
-                            placeholder={t("shareLink.userSelector.searchPlaceholder")}
+                            placeholder={t(
+                                "shareLink.userSelector.searchPlaceholder",
+                            )}
                             value={searchInput}
                             onValueChange={setSearchInput}
                         />
-                      
+
                         {isSearching && (
                             <div className="absolute right-2 top-2.5">
                                 <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
                             </div>
                         )}
-                        
+
                         {searchInput && (
                             <CommandList className="absolute top-full left-0 right-0 z-10 mt-1 border rounded-md bg-background shadow-lg max-h-[200px]">
                                 {users.length === 0 ? (
-                                    <CommandEmpty>{t("shareLink.userSelector.noUsersFound")}</CommandEmpty>
-                                ): (
+                                    <CommandEmpty>
+                                        {t(
+                                            "shareLink.userSelector.noUsersFound",
+                                        )}
+                                    </CommandEmpty>
+                                ) : (
                                     <CommandGroup>
                                         {users.map((user) => (
                                             <CommandItem
                                                 key={user.id}
                                                 value={`${user.name} <${user.email}>`}
-                                                onSelect={() => handleSelectUser({
-                                                    id: user.id,
-                                                    name: user.name || "",
-                                                    email: user.email || "",
-                                                    image: user.image || ""
-                                                })}
+                                                onSelect={() =>
+                                                    handleSelectUser({
+                                                        id: user.id,
+                                                        name: user.name || "",
+                                                        email: user.email || "",
+                                                        image: user.image || "",
+                                                    })
+                                                }
                                                 className="flex items-center gap-2"
                                             >
                                                 {user.image && (
-                                                    <Image 
+                                                    <Image
                                                         src={user.image}
-                                                        alt={user.name || "user avatar"}
+                                                        alt={
+                                                            user.name ||
+                                                            "user avatar"
+                                                        }
                                                         className="w-6 h-6 rounded-full"
                                                         width={24}
                                                         height={24}
@@ -141,7 +157,9 @@ export function UserSelector({
 
             {selected.length > 0 && (
                 <div className="space-y-2">
-                    <p className="text-sm font-medium">{t("shareLink.userSelector.recipients")}</p>
+                    <p className="text-sm font-medium">
+                        {t("shareLink.userSelector.recipients")}
+                    </p>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                         {selected.map((user) => (
                             <div
@@ -173,8 +191,14 @@ export function UserSelector({
                                             permissions: user.permissions,
                                         }}
                                         mode="user"
-                                        onTogglePermission={(userId, permission) =>
-                                            handlePermissionChange(userId, permission)
+                                        onTogglePermission={(
+                                            userId,
+                                            permission,
+                                        ) =>
+                                            handlePermissionChange(
+                                                userId,
+                                                permission,
+                                            )
                                         }
                                         id={`user-permissions-${user.userId}`}
                                     />

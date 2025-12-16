@@ -13,7 +13,7 @@ import { getStorageProvider } from "@/server/utils/storage/storageFactory";
 import type { WadoResponseHandler } from "./wadoResponseHandler.interface";
 
 const logger = appLogger.child({
-    module: "ZipHandler"
+    module: "ZipHandler",
 });
 
 export class ZipHandler implements WadoResponseHandler {
@@ -21,23 +21,25 @@ export class ZipHandler implements WadoResponseHandler {
         return accept.includes("application/zip");
     }
 
-    async handle(c: Context, args: { instances: InstanceEntity[]; accept: string }) {
+    async handle(
+        c: Context,
+        args: { instances: InstanceEntity[]; accept: string },
+    ) {
         const { instances } = args;
 
-        const keys = instances.map(instance => instance.instancePath);
-        if (!keys.every(key => key) || keys.length === 0) {
+        const keys = instances.map((instance) => instance.instancePath);
+        if (!keys.every((key) => key) || keys.length === 0) {
             return c.json(
                 {
-                    message: "Instance paths not found"
+                    message: "Instance paths not found",
                 },
-                404
+                404,
             );
         }
 
         const id = randomUUID();
         const workDir = join(tmp.dirSync().name, id);
-        const zipTempFile = join(tmp.dirSync().name
-        , `${id}.zip`);
+        const zipTempFile = join(tmp.dirSync().name, `${id}.zip`);
 
         const storage = getStorageProvider();
 
@@ -48,7 +50,7 @@ export class ZipHandler implements WadoResponseHandler {
             const rel = join(
                 createHash(instance.studyInstanceUid),
                 createHash(instance.seriesInstanceUid),
-                createHash(instance.sopInstanceUid)
+                createHash(instance.sopInstanceUid),
             );
 
             const destFile = join(workDir, rel);
@@ -68,12 +70,17 @@ export class ZipHandler implements WadoResponseHandler {
         const headers = new Headers();
         headers.set("Content-Type", "application/zip");
 
-        const zipFile = instances.length === 1 ? `${instances[0].sopInstanceUid}.zip` : `${instances[0].studyInstanceUid}.zip`;
+        const zipFile =
+            instances.length === 1
+                ? `${instances[0].sopInstanceUid}.zip`
+                : `${instances[0].studyInstanceUid}.zip`;
         headers.set("Content-Disposition", `attachment; filename="${zipFile}"`);
 
         zipStream.once("close", async () => {
             await fsE.remove(workDir);
-            logger.info(`Deleted zip temp work directory successfully: ${workDir}`);
+            logger.info(
+                `Deleted zip temp work directory successfully: ${workDir}`,
+            );
         });
 
         // @ts-expect-error

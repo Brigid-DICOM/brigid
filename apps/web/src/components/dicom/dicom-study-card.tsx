@@ -39,7 +39,12 @@ export function DicomStudyCard({
     const accessionNumber = study["00080050"]?.Value?.[0] || "N/A";
     const studyInstanceUid = study["0020000D"]?.Value?.[0] || "N/A";
 
-    const { toggleStudySelection, isStudySelected, selectStudy, clearSelection } = useDicomStudySelectionStore();
+    const {
+        toggleStudySelection,
+        isStudySelected,
+        selectStudy,
+        clearSelection,
+    } = useDicomStudySelectionStore();
 
     const isSelected = isStudySelected(studyInstanceUid);
 
@@ -53,20 +58,23 @@ export function DicomStudyCard({
         getTargetTagsQuery(workspaceId, "study", studyInstanceUid),
     );
 
-    const { handleCardClick, handleContextMenu, handleDoubleClick } = useDicomCardSelection({
-        itemId: studyInstanceUid,
-        isSelected,
-        toggleSelection: toggleStudySelection,
-        selectItem: selectStudy,
-        clearSelection,
-        onDoubleClick: () => router.push(`/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}`),
-    });
+    const { handleCardClick, handleContextMenu, handleDoubleClick } =
+        useDicomCardSelection({
+            itemId: studyInstanceUid,
+            isSelected,
+            toggleSelection: toggleStudySelection,
+            selectItem: selectStudy,
+            clearSelection,
+            onDoubleClick: () =>
+                router.push(
+                    `/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}`,
+                ),
+        });
 
-    const ContextMenu = type === "management" ? (
-        DicomStudyContextMenu
-    ) : (
-        DicomRecycleStudyContextMenu
-    );
+    const ContextMenu =
+        type === "management"
+            ? DicomStudyContextMenu
+            : DicomRecycleStudyContextMenu;
 
     return (
         <ContextMenu
@@ -82,21 +90,19 @@ export function DicomStudyCard({
                     "pt-0 gap-0",
                     "select-none",
                     "relative",
-                    isSelected ? [
-                        "ring-2 ring-primary",
-                        "shadow-lg",
-                        "bg-accent"
-                    ] : [
-                        "hover:shadow-lg",
-                        "hover:ring-2 hover:ring-accent hover:bg-accent/10",
-                    ],
+                    isSelected
+                        ? ["ring-2 ring-primary", "shadow-lg", "bg-accent"]
+                        : [
+                              "hover:shadow-lg",
+                              "hover:ring-2 hover:ring-accent hover:bg-accent/10",
+                          ],
                     className,
                 )}
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
                 onDoubleClick={handleDoubleClick}
             >
-                <DicomCardHeaderTagsDisplay 
+                <DicomCardHeaderTagsDisplay
                     tags={tags?.data ?? []}
                     isLoadingTags={isLoadingTags}
                     isSelected={isSelected}
@@ -114,7 +120,7 @@ export function DicomStudyCard({
                             height={224}
                             className={cn(
                                 "w-full h-full object-cover transition-opacity duration-200",
-                                isSelected ? "opacity-90" : "opacity-100"
+                                isSelected ? "opacity-90" : "opacity-100",
                             )}
                             unoptimized
                         />

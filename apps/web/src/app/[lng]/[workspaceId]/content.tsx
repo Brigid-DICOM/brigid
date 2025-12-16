@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import { useT } from "@/app/_i18n/client";
 import {
     Carousel,
     CarouselContent,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { getDicomStatsQuery } from "@/react-query/queries/stats";
-import { useT } from "@/app/_i18n/client";
 
 export default function HomeContent() {
     const { t } = useT("translation");

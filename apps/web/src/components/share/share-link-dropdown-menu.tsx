@@ -47,7 +47,12 @@ export function ShareLinkDropdownMenu({
     }, [userSession, shareLink.creatorId]);
 
     const canEdit = useMemo(() => {
-        return hasPermission(shareLink.publicPermissions, SHARE_PERMISSIONS.UPDATE) || isCreator;
+        return (
+            hasPermission(
+                shareLink.publicPermissions,
+                SHARE_PERMISSIONS.UPDATE,
+            ) || isCreator
+        );
     }, [shareLink.publicPermissions, isCreator]);
 
     const shareUrl = `${window.location.origin}/${lng}/share/${shareLink.token}`;

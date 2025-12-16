@@ -6,11 +6,7 @@ export const createShareLinkSchema = z.object({
         .enum(["study", "series", "instance"])
         .describe("The type of the target"),
     targetIds: z.array(z.string()).describe("The IDs of the targets"),
-    name: z
-        .string()
-        .max(255)
-        .optional()
-        .describe("The name of the share link"),
+    name: z.string().max(255).optional().describe("The name of the share link"),
     publicPermissions: z
         .number()
         .min(0)
@@ -50,11 +46,7 @@ export const createShareLinkSchema = z.object({
 });
 
 export const updateShareLinkSchema = z.object({
-    name: z
-        .string()
-        .max(255)
-        .optional()
-        .describe("The name of the share link"),
+    name: z.string().max(255).optional().describe("The name of the share link"),
     expiresInSec: z
         .number()
         .optional()
@@ -92,7 +84,6 @@ export const updateShareLinkSchema = z.object({
         .optional()
         .describe("The recipients of the share link"),
 });
-
 
 export const verifyPasswordSchema = z.object({
     password: z.string().max(255).describe("The password for the share link"),

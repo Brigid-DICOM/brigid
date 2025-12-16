@@ -1,20 +1,27 @@
-import { createReadStream } from "node:fs";
 import path from "node:path";
-import type { DataSource } from "typeorm";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { app } from "@/app/api/[...route]/route";
-import multipartMessage from "@/server/utils/multipartMessage";
-import { TestDatabaseManager } from "../../utils/testDatabaseManager";
-import { WORKSPACE_ID } from "../workspace.const";
-import testData from "../../fixtures/dicomFiles/data.json";
 import { join } from "desm";
+import type { DataSource } from "typeorm";
+import {
+    afterAll,
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from "vitest";
+import { app } from "@/app/api/[...route]/route";
+import testData from "../../fixtures/dicomFiles/data.json";
+import { TestDatabaseManager } from "../../utils/testDatabaseManager";
 import { TestFileManager } from "../../utils/testFileManager";
+import { WORKSPACE_ID } from "../workspace.const";
 
 declare global {
     function setTestDataSource(dataSource: DataSource): void;
 }
 
-const TEST_STUDY_KEY = "1.3.6.1.4.1.14519.5.2.1.3023.4017.246199836259881483055596634768"
+const TEST_STUDY_KEY =
+    "1.3.6.1.4.1.14519.5.2.1.3023.4017.246199836259881483055596634768";
 const TEST_STUDY = testData[TEST_STUDY_KEY];
 const TEST_SERIES = TEST_STUDY.series[0];
 const TEST_INSTANCE = TEST_SERIES.instances[0];
@@ -23,7 +30,9 @@ const TEST_DICOM_DATA = {
     studyInstanceUid: TEST_STUDY_KEY,
     seriesInstanceUid: TEST_SERIES.seriesInstanceUid,
     sopInstanceUid: TEST_INSTANCE.sopInstanceUid,
-    instanceFile: path.resolve(join(import.meta.url, "../../fixtures/dicomFiles", TEST_INSTANCE.file))
+    instanceFile: path.resolve(
+        join(import.meta.url, "../../fixtures/dicomFiles", TEST_INSTANCE.file),
+    ),
 };
 
 describe("WADO-URI Route", () => {
@@ -47,7 +56,9 @@ describe("WADO-URI Route", () => {
 
         const testFileManager = new TestFileManager();
 
-        const res = await testFileManager.uploadTestFile(TEST_DICOM_DATA.instanceFile);
+        const res = await testFileManager.uploadTestFile(
+            TEST_DICOM_DATA.instanceFile,
+        );
         expect(res.status).toBe(200);
     });
 
@@ -67,17 +78,21 @@ describe("WADO-URI Route", () => {
                 );
 
                 expect(response.status).toBe(200);
-                expect(response.headers.get("Content-Type")).toBe("application/dicom");
+                expect(response.headers.get("Content-Type")).toBe(
+                    "application/dicom",
+                );
             });
 
             it("should retrieve DICOM instance with image/jpeg content type", async () => {
                 // Act
                 const response = await app.request(
-                    `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams({
-                        ...baseParams,
-                        contentType: "image/jpeg"
-                    })}`,
-                )
+                    `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(
+                        {
+                            ...baseParams,
+                            contentType: "image/jpeg",
+                        },
+                    )}`,
+                );
 
                 // Assert
                 expect(response.status).toBe(200);
@@ -97,25 +112,31 @@ describe("WADO-URI Route", () => {
                 it(`should retrieve DICOM instance with ${contentType} content type`, async () => {
                     // Act
                     const response = await app.request(
-                        `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams({
-                            ...baseParams,
-                            contentType: contentType
-                        })}`,
+                        `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(
+                            {
+                                ...baseParams,
+                                contentType: contentType,
+                            },
+                        )}`,
                     );
 
                     // Assert
                     expect(response.status).toBe(200);
-                    expect(response.headers.get("Content-Type")).toBe(contentType);
+                    expect(response.headers.get("Content-Type")).toBe(
+                        contentType,
+                    );
                 });
             }
 
             it("should return 400 if the content type is not supported", async () => {
                 // Act
                 const response = await app.request(
-                    `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams({
-                        ...baseParams,
-                        contentType: "application/pdf"
-                    })}`,
+                    `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(
+                        {
+                            ...baseParams,
+                            contentType: "application/pdf",
+                        },
+                    )}`,
                 );
 
                 // Assert
@@ -129,7 +150,7 @@ describe("WADO-URI Route", () => {
                     ...baseParams,
                     contentType: "image/jpeg",
                     row: "512",
-                    column: "512"
+                    column: "512",
                 };
 
                 // Act
@@ -137,9 +158,9 @@ describe("WADO-URI Route", () => {
                     `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(params)}`,
                     {
                         headers: {
-                            "Accept": "image/jpeg"
-                        }
-                    }
+                            Accept: "image/jpeg",
+                        },
+                    },
                 );
 
                 // Assert
@@ -149,9 +170,9 @@ describe("WADO-URI Route", () => {
 
             it("should reject invalid row and column parameters", async () => {
                 const invalidParams = [
-                    {...baseParams, row: "0"},
+                    { ...baseParams, row: "0" },
                     { ...baseParams, column: "-1" },
-                    { ...baseParams, row: "abc" }
+                    { ...baseParams, row: "abc" },
                 ];
 
                 for (const params of invalidParams) {
@@ -160,9 +181,9 @@ describe("WADO-URI Route", () => {
                         `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(params)}`,
                         {
                             headers: {
-                                "Accept": "image/jpeg"
-                            }
-                        }
+                                Accept: "image/jpeg",
+                            },
+                        },
                     );
                     // Assert
                     expect(response.status).toBe(400);
@@ -173,7 +194,7 @@ describe("WADO-URI Route", () => {
                 const params = {
                     ...baseParams,
                     contentType: "image/jpeg",
-                    region: "0,0,0.5,0.5"
+                    region: "0,0,0.5,0.5",
                 };
 
                 // Act
@@ -181,9 +202,9 @@ describe("WADO-URI Route", () => {
                     `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(params)}`,
                     {
                         headers: {
-                            "Accept": "image/jpeg"
-                        }
-                    }
+                            Accept: "image/jpeg",
+                        },
+                    },
                 );
 
                 // Assert
@@ -192,20 +213,22 @@ describe("WADO-URI Route", () => {
 
             it("should reject invalid region parameter", async () => {
                 const invalidRegions = [
-                    "0.1,0.2,0.3",       // 缺少參數
-                    "0.5,0.5,0.3,0.3",   // xmin >= xmax
-                    "0.5,0.5,0.3,0.6",   // ymin >= ymax
-                    "-0.1,0.2,0.3,0.4",  // 負值
-                    "abc,def,ghi,jkl"    // 非數字
+                    "0.1,0.2,0.3", // 缺少參數
+                    "0.5,0.5,0.3,0.3", // xmin >= xmax
+                    "0.5,0.5,0.3,0.6", // ymin >= ymax
+                    "-0.1,0.2,0.3,0.4", // 負值
+                    "abc,def,ghi,jkl", // 非數字
                 ];
 
                 for (const region of invalidRegions) {
                     // Act
                     const response = await app.request(
-                        `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams({
-                            ...baseParams,
-                            region: region
-                        })}`,
+                        `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(
+                            {
+                                ...baseParams,
+                                region: region,
+                            },
+                        )}`,
                     );
                     // Assert
                     expect(response.status).toBe(400);
@@ -217,17 +240,17 @@ describe("WADO-URI Route", () => {
                     ...baseParams,
                     contentType: "image/jpeg",
                     windowCenter: "1024",
-                    windowWidth: "2048"
+                    windowWidth: "2048",
                 };
-                
+
                 // Act
                 const response = await app.request(
                     `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(params)}`,
                     {
                         headers: {
-                            "Accept": "image/jpeg"
-                        }
-                    }
+                            Accept: "image/jpeg",
+                        },
+                    },
                 );
                 // Assert
                 expect(response.status).toBe(200);
@@ -237,7 +260,7 @@ describe("WADO-URI Route", () => {
                 const params = {
                     ...baseParams,
                     contentType: "image/jpeg",
-                    windowCenter: "1024"
+                    windowCenter: "1024",
                 };
 
                 // Act
@@ -252,7 +275,7 @@ describe("WADO-URI Route", () => {
                 const params = {
                     ...baseParams,
                     contentType: "image/jpeg",
-                    windowWidth: "2048"
+                    windowWidth: "2048",
                 };
 
                 // Act
@@ -267,27 +290,27 @@ describe("WADO-URI Route", () => {
                 const params = {
                     ...baseParams,
                     contentType: "image/jpeg",
-                    imageQuality: "100"
+                    imageQuality: "100",
                 };
-                
+
                 // Act
                 const response = await app.request(
                     `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(params)}`,
                     {
                         headers: {
-                            "Accept": "image/jpeg"
-                        }
-                    }
+                            Accept: "image/jpeg",
+                        },
+                    },
                 );
                 // Assert
                 expect(response.status).toBe(200);
             });
 
-            it ("should reject invalid imageQuality parameter", async () => {
+            it("should reject invalid imageQuality parameter", async () => {
                 const invalidParams = [
                     { ...baseParams, imageQuality: "0" },
                     { ...baseParams, imageQuality: "101" },
-                    { ...baseParams, imageQuality: "abc" }
+                    { ...baseParams, imageQuality: "abc" },
                 ];
 
                 for (const params of invalidParams) {
@@ -298,13 +321,13 @@ describe("WADO-URI Route", () => {
                     // Assert
                     expect(response.status).toBe(400);
                 }
-            })
+            });
 
             it("should handle frameNumber parameter", async () => {
                 const params = {
                     ...baseParams,
                     contentType: "image/jpeg",
-                    frameNumber: "1"
+                    frameNumber: "1",
                 };
 
                 // Act
@@ -312,9 +335,9 @@ describe("WADO-URI Route", () => {
                     `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(params)}`,
                     {
                         headers: {
-                            "Accept": "image/jpeg"
-                        }
-                    }
+                            Accept: "image/jpeg",
+                        },
+                    },
                 );
                 // Assert
                 expect(response.status).toBe(200);
@@ -325,9 +348,13 @@ describe("WADO-URI Route", () => {
                     { ...baseParams, frameNumber: "-1" },
                     { ...baseParams, frameNumber: "0" },
                     { ...baseParams, frameNumber: "abc" },
-                    { ...baseParams, frameNumber: "100", contentType: "image/jpeg" }
+                    {
+                        ...baseParams,
+                        frameNumber: "100",
+                        contentType: "image/jpeg",
+                    },
                 ];
-                
+
                 for (const params of invalidParams) {
                     // Act
                     const response = await app.request(
@@ -344,13 +371,15 @@ describe("WADO-URI Route", () => {
                 "requestType",
                 "studyUID",
                 "seriesUID",
-                "objectUID"
+                "objectUID",
             ];
 
             for (const param of requiredParams) {
                 it(`should return 400 when missing ${param} parameter`, async () => {
                     const incompleteParams = { ...baseParams };
-                    delete incompleteParams[param as keyof typeof incompleteParams];
+                    delete incompleteParams[
+                        param as keyof typeof incompleteParams
+                    ];
 
                     // Act
                     const response = await app.request(
@@ -360,11 +389,11 @@ describe("WADO-URI Route", () => {
                     expect(response.status).toBe(400);
                 });
             }
-            
+
             it("should return 400 when requestType is not WADO", async () => {
                 const params = {
                     ...baseParams,
-                    requestType: "WADO-RS"
+                    requestType: "WADO-RS",
                 };
 
                 // Act
@@ -392,10 +421,12 @@ describe("WADO-URI Route", () => {
                 const nonExistentInstance = "non-existent-instance";
                 // Act
                 const response = await app.request(
-                    `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams({
-                        ...baseParams,
-                        objectUID: nonExistentInstance
-                    })}`,
+                    `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(
+                        {
+                            ...baseParams,
+                            objectUID: nonExistentInstance,
+                        },
+                    )}`,
                 );
                 // Assert
                 expect(response.status).toBe(404);
@@ -410,7 +441,7 @@ describe("WADO-URI Route", () => {
                     row: "256",
                     column: "256",
                     imageQuality: "85",
-                    frameNumber: "1"
+                    frameNumber: "1",
                 };
 
                 // Act
@@ -418,15 +449,13 @@ describe("WADO-URI Route", () => {
                     `/api/workspaces/${WORKSPACE_ID}/wado-uri?${new URLSearchParams(complexParams)}`,
                     {
                         headers: {
-                            "Accept": "image/jpeg"
-                        }
-                    }
+                            Accept: "image/jpeg",
+                        },
+                    },
                 );
                 // Assert
                 expect(response.status).toBe(200);
-            })
+            });
         });
     });
 });
-
-

@@ -40,7 +40,6 @@ export const PATIENT_TAGS_TO_STORE = [
     DICOM_TAG_KEYWORD_REGISTRY.StorageMediaFileSetUID.tag,
 ] as const;
 
-
 /**
  * tag from: {@link https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.7.2.html|Common Study IE Modules}
  * and {@link https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.7.2.2.html|Patient Study Module}
@@ -99,7 +98,7 @@ export const STUDY_TAGS_TO_STORE = [
     DICOM_TAG_KEYWORD_REGISTRY.GenderIdentitySequence.tag,
     DICOM_TAG_KEYWORD_REGISTRY.SexParametersForClinicalUseCategorySequence.tag,
     DICOM_TAG_KEYWORD_REGISTRY.PersonNamesToUseSequence.tag,
-    DICOM_TAG_KEYWORD_REGISTRY.ThirdPersonPronounsSequence.tag
+    DICOM_TAG_KEYWORD_REGISTRY.ThirdPersonPronounsSequence.tag,
 ] as const;
 
 /**
@@ -127,7 +126,7 @@ export const SERIES_TAGS_TO_STORE = [
     DICOM_TAG_KEYWORD_REGISTRY.LargestPixelValueInSeries.tag,
     DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag,
     DICOM_TAG_KEYWORD_REGISTRY.AnatomicalOrientationType.tag,
-    DICOM_TAG_KEYWORD_REGISTRY.TreatmentSessionUID.tag
+    DICOM_TAG_KEYWORD_REGISTRY.TreatmentSessionUID.tag,
 ];
 
 /**

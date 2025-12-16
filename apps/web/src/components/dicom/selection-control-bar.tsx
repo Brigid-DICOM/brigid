@@ -70,7 +70,9 @@ export function SelectionControlBar({
                                 variant={"outline"}
                                 size="sm"
                                 onClick={onClearSelection}
-                                title={t("dicom.selectionControl.clearSelection")}
+                                title={t(
+                                    "dicom.selectionControl.clearSelection",
+                                )}
                             >
                                 <XIcon className="size-4" />
                             </Button>
@@ -87,7 +89,9 @@ export function SelectionControlBar({
                         )}
                         {selectedCount > 0 && (
                             <ButtonGroupText className="bg-background">
-                                {t("dicom.selectionControl.selectedCount", { count: selectedCount })}
+                                {t("dicom.selectionControl.selectedCount", {
+                                    count: selectedCount,
+                                })}
                             </ButtonGroupText>
                         )}
                     </ButtonGroup>
@@ -101,7 +105,9 @@ export function SelectionControlBar({
                                             <Button
                                                 size={"sm"}
                                                 variant={"outline"}
-                                                title={t("dicom.selectionControl.download")}
+                                                title={t(
+                                                    "dicom.selectionControl.download",
+                                                )}
                                             >
                                                 <DownloadIcon className="size-4" />
                                             </Button>
@@ -122,7 +128,9 @@ export function SelectionControlBar({
                                         onClick={onDownload}
                                         size="sm"
                                         variant={"outline"}
-                                        title={t("dicom.selectionControl.download")}
+                                        title={t(
+                                            "dicom.selectionControl.download",
+                                        )}
                                     >
                                         <DownloadIcon className="size-4" />
                                     </Button>
@@ -133,7 +141,9 @@ export function SelectionControlBar({
                                         onClick={handleRecycle}
                                         size="sm"
                                         variant={"outline"}
-                                        title={t("dicom.selectionControl.recycle")}
+                                        title={t(
+                                            "dicom.selectionControl.recycle",
+                                        )}
                                     >
                                         <Trash2Icon className="size-4 text-destructive" />
                                     </Button>

@@ -34,24 +34,28 @@ const baseStudyFields: SearchFieldConfig[] = [
     { key: "StudyInstanceUID", label: "Study Instance UID", type: "text" },
     { key: "StudyDate", label: "Study Date", type: "dateRange" },
     { key: "AccessionNumber", label: "Accession Number", type: "text" },
-    { 
-        key: "ModalitiesInStudy", 
-        label: "Modalities In Study", 
+    {
+        key: "ModalitiesInStudy",
+        label: "Modalities In Study",
         type: "select",
         options: [
-          { value: "CT", label: "CT" },
-          { value: "MR", label: "MR" },
-          { value: "US", label: "US" },
-          { value: "XA", label: "XA" },
-          { value: "RF", label: "RF" },
-          { value: "DX", label: "DX" },
-          { value: "CR", label: "CR" },
-          { value: "MG", label: "MG" },
-          { value: "PT", label: "PT" },
-          { value: "NM", label: "NM" },
-        ]
+            { value: "CT", label: "CT" },
+            { value: "MR", label: "MR" },
+            { value: "US", label: "US" },
+            { value: "XA", label: "XA" },
+            { value: "RF", label: "RF" },
+            { value: "DX", label: "DX" },
+            { value: "CR", label: "CR" },
+            { value: "MG", label: "MG" },
+            { value: "PT", label: "PT" },
+            { value: "NM", label: "NM" },
+        ],
     },
-    { key: "ReferringPhysicianName", label: "Referring Physician Name", type: "text" },
+    {
+        key: "ReferringPhysicianName",
+        label: "Referring Physician Name",
+        type: "text",
+    },
 ];
 
 const baseSeriesFields: SearchFieldConfig[] = [
@@ -61,27 +65,31 @@ const baseSeriesFields: SearchFieldConfig[] = [
         type: "select",
         placeholder: "Select Tags",
     },
-    { 
-        key: "Modality", 
-        label: "Modality", 
+    {
+        key: "Modality",
+        label: "Modality",
         type: "select",
         options: [
-          { value: "CT", label: "CT" },
-          { value: "MR", label: "MR" },
-          { value: "US", label: "US" },
-          { value: "XA", label: "XA" },
-          { value: "RF", label: "RF" },
-          { value: "DX", label: "DX" },
-          { value: "CR", label: "CR" },
-          { value: "MG", label: "MG" },
-          { value: "PT", label: "PT" },
-          { value: "NM", label: "NM" },
-        ]
+            { value: "CT", label: "CT" },
+            { value: "MR", label: "MR" },
+            { value: "US", label: "US" },
+            { value: "XA", label: "XA" },
+            { value: "RF", label: "RF" },
+            { value: "DX", label: "DX" },
+            { value: "CR", label: "CR" },
+            { value: "MG", label: "MG" },
+            { value: "PT", label: "PT" },
+            { value: "NM", label: "NM" },
+        ],
     },
     { key: "SeriesInstanceUID", label: "Series Instance UID", type: "text" },
     { key: "SeriesNumber", label: "Series Number", type: "text" },
     { key: "SeriesDate", label: "Series Date", type: "dateRange" },
-    { key: "PerformedProcedureStepStartDate", label: "Performed Procedure Step Start Date", type: "dateRange" },
+    {
+        key: "PerformedProcedureStepStartDate",
+        label: "Performed Procedure Step Start Date",
+        type: "dateRange",
+    },
 ];
 
 const baseInstanceFields: SearchFieldConfig[] = [
@@ -114,5 +122,4 @@ export const DEFAULT_FIELDS: Record<SearchLevel, string[]> = {
     "recycle-study": ["PatientID", "AccessionNumber"],
     "recycle-series": ["Modality"],
     "recycle-instance": ["ContentDate"],
-}
-
+};

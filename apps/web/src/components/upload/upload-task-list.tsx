@@ -4,11 +4,11 @@ import {
     CheckCircleIcon,
     ChevronDownIcon,
     ChevronUpIcon,
-    Loader2Icon, 
+    Loader2Icon,
     Trash2Icon,
     UploadIcon,
     XCircleIcon,
-    XIcon
+    XIcon,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ import { formatFileSize } from "@/lib/utils";
 import {
     type UploadStatus,
     type UploadTask,
-    useUploadManagerStore
+    useUploadManagerStore,
 } from "@/stores/upload-manager-store";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -39,7 +39,7 @@ export function UploadTaskList() {
         getPendingTasksCount,
         getUploadingTasksCount,
         getAllTasksCount,
-        hasOnlyCompletedOrFailedTasks
+        hasOnlyCompletedOrFailedTasks,
     } = useUploadManagerStore();
 
     const [isExpanded, setIsExpanded] = useState(false);
@@ -53,14 +53,14 @@ export function UploadTaskList() {
         } else {
             setShowCloseDialog(true);
         }
-    }
+    };
 
     const handleConfirmClose = () => {
         abortAllActiveTasks();
         clearAllTasks();
         setIsVisible(false);
         setShowCloseDialog(false);
-    }
+    };
 
     useEffect(() => {
         if (tasks.length > 0) {
@@ -76,10 +76,11 @@ export function UploadTaskList() {
 
     const activeTasksCount = getActiveTasksCount();
     const hasActiveTasks = activeTasksCount > 0;
-    const hasCompletedTasks = tasks.some(task => task.status === "completed" || task.status === "failed");
+    const hasCompletedTasks = tasks.some(
+        (task) => task.status === "completed" || task.status === "failed",
+    );
 
     if (!isVisible || isUploadPage) return null;
-    
 
     const formatDuration = (startTime: number, endTime?: number) => {
         const duration = (endTime || Date.now()) - startTime;
@@ -101,7 +102,9 @@ export function UploadTaskList() {
             case "pending":
                 return <UploadIcon className="size-4 text-blue-500" />;
             case "validating":
-                return <Loader2Icon className="size-4 text-yellow-500 animate-spin" />;
+                return (
+                    <Loader2Icon className="size-4 text-yellow-500 animate-spin" />
+                );
             default:
                 return null;
         }
@@ -124,13 +127,13 @@ export function UploadTaskList() {
             default:
                 return t("upload.status.unknown");
         }
-    }
+    };
 
     const cancelUpload = (task: UploadTask) => {
         if (task.abortController && !task.abortController.signal.aborted) {
             task.abortController.abort();
         }
-    }
+    };
 
     return (
         <div className="fixed bottom-4 right-4 z-50 max-w-md">
@@ -139,7 +142,9 @@ export function UploadTaskList() {
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex text-sm font-medium items-center space-x-2">
                             <UploadIcon className="size-4" />
-                            <span>{t("upload.uploadingTasks")} ({tasks.length})</span>
+                            <span>
+                                {t("upload.uploadingTasks")} ({tasks.length})
+                            </span>
                         </CardTitle>
 
                         <div className="flex items-center space-x-1">
@@ -168,11 +173,11 @@ export function UploadTaskList() {
 
                             {hasCompletedTasks && (
                                 <Button
-                                   variant={"ghost"}
-                                   size="sm"
-                                   onClick={clearCompletedTasks}
-                                   className="size-6 p-0"
-                                   title={t("upload.clearCompletedTasks")}
+                                    variant={"ghost"}
+                                    size="sm"
+                                    onClick={clearCompletedTasks}
+                                    className="size-6 p-0"
+                                    title={t("upload.clearCompletedTasks")}
                                 >
                                     <Trash2Icon className="size-3" />
                                 </Button>
@@ -182,7 +187,8 @@ export function UploadTaskList() {
 
                     {hasActiveTasks && (
                         <div className="text-xs text-muted-foreground">
-                            {t("upload.uploading")} {activeTasksCount} {t("upload.files")}
+                            {t("upload.uploading")} {activeTasksCount}{" "}
+                            {t("upload.files")}
                         </div>
                     )}
                 </CardHeader>
@@ -191,10 +197,7 @@ export function UploadTaskList() {
                     <CardContent className="pt-0 max-h-64 overflow-y-auto">
                         <div className="space-y-3">
                             {tasks.map((task) => (
-                                <div
-                                    key={task.id}
-                                    className="space-y-2"
-                                >
+                                <div key={task.id} className="space-y-2">
                                     <div className="flex items-center justify-between text-sm">
                                         <div className="flex items-center space-x-2 flex-1 min-w-0">
                                             {getStatusIcon(task.status)}
@@ -207,7 +210,9 @@ export function UploadTaskList() {
                                             variant={"ghost"}
                                             size="sm"
                                             onClick={() => {
-                                                if (task.status === "uploading") {
+                                                if (
+                                                    task.status === "uploading"
+                                                ) {
                                                     cancelUpload(task);
                                                 } else {
                                                     removeTask(task.id);
@@ -218,18 +223,28 @@ export function UploadTaskList() {
                                         </Button>
                                     </div>
 
-                                    {(task.status === "uploading") ||
-                                      task.status === "pending" ||
-                                      task.status === "validating" && (
-                                        <Progress value={task.progress} className="h-1" />
-                                    )}
+                                    {task.status === "uploading" ||
+                                        task.status === "pending" ||
+                                        (task.status === "validating" && (
+                                            <Progress
+                                                value={task.progress}
+                                                className="h-1"
+                                            />
+                                        ))}
 
                                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                        <span>{getStatusText(task.status)}</span>
+                                        <span>
+                                            {getStatusText(task.status)}
+                                        </span>
                                         <div className="fex items-center space-x-2">
-                                            <span>{formatFileSize(task.size)}</span>
                                             <span>
-                                                {formatDuration(task.startTime, task.endTime)}
+                                                {formatFileSize(task.size)}
+                                            </span>
+                                            <span>
+                                                {formatDuration(
+                                                    task.startTime,
+                                                    task.endTime,
+                                                )}
                                             </span>
                                         </div>
                                     </div>
@@ -257,7 +272,7 @@ export function UploadTaskList() {
                     </CardContent>
                 )}
 
-                <UploadCloseDialog 
+                <UploadCloseDialog
                     open={showCloseDialog}
                     onOpenChange={setShowCloseDialog}
                     onConfirm={handleConfirmClose}
@@ -266,5 +281,5 @@ export function UploadTaskList() {
                 />
             </Card>
         </div>
-    )
+    );
 }

@@ -16,7 +16,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { apiClient } from "@/react-query/apiClient";
@@ -46,7 +46,11 @@ export function CreateTagDialog({
     const queryClient = getQueryClient();
     const [tagName, setTagName] = useState("");
     const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
-    const [existingTag, setExistingTag] = useState<{ id: string, name: string, color: string } | null>(null);
+    const [existingTag, setExistingTag] = useState<{
+        id: string;
+        name: string;
+        color: string;
+    } | null>(null);
     const [isChecking, setIsChecking] = useState(false);
 
     const checkTagExists = async (name: string) => {
@@ -58,31 +62,33 @@ export function CreateTagDialog({
         setIsChecking(true);
 
         try {
-            const response = await apiClient.api.workspaces[":workspaceId"].tags.$get({
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].tags.$get({
                 param: {
                     workspaceId,
                 },
                 query: {
-                    name: name.trim()
-                }
+                    name: name.trim(),
+                },
             });
 
             if (response.ok) {
                 const tags = await response.json();
 
-                const found = tags.data?.find(t => t.name === name.trim());
+                const found = tags.data?.find((t) => t.name === name.trim());
                 setExistingTag(found || null);
 
                 if (found) {
                     setSelectedColor(found.color);
                 }
             }
-        } catch(error) {
+        } catch (error) {
             console.error("Error checking tag exists", error);
         } finally {
             setIsChecking(false);
         }
-    }
+    };
 
     const handleTagNameChange = (value: string) => {
         setTagName(value);
@@ -92,7 +98,7 @@ export function CreateTagDialog({
         }, 350);
 
         return () => clearTimeout(timer);
-    }
+    };
 
     const { mutate: createTag, isPending: isCreatingTag } = useMutation({
         ...createTagMutation(),
@@ -109,7 +115,7 @@ export function CreateTagDialog({
         },
         onError: () => {
             toast.error(t("createTagDialog.messages.creatingError"));
-        }
+        },
     });
 
     const { mutate: assignTag, isPending: isAssigningTag } = useMutation({
@@ -130,7 +136,7 @@ export function CreateTagDialog({
         },
         onError: () => {
             toast.error(t("createTagDialog.messages.assigningError"));
-        }
+        },
     });
 
     const { mutate: updateTag, isPending: isUpdatingTag } = useMutation({
@@ -148,7 +154,7 @@ export function CreateTagDialog({
         },
         onError: () => {
             toast.error(t("createTagDialog.messages.updatingError"));
-        }
+        },
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -160,9 +166,14 @@ export function CreateTagDialog({
         }
 
         const toastId = nanoid();
-        toast.loading(existingTag ? t("createTagDialog.messages.assigning") : t("createTagDialog.messages.creating"), {
-            id: toastId,
-        });
+        toast.loading(
+            existingTag
+                ? t("createTagDialog.messages.assigning")
+                : t("createTagDialog.messages.creating"),
+            {
+                id: toastId,
+            },
+        );
 
         if (existingTag) {
             updateTag({
@@ -179,7 +190,7 @@ export function CreateTagDialog({
         }
 
         toast.dismiss(toastId);
-    }
+    };
 
     const handleOpenChange = (open: boolean) => {
         if (!open) {
@@ -187,12 +198,14 @@ export function CreateTagDialog({
             setSelectedColor(PRESET_COLORS[0]);
             setExistingTag(null);
         }
-        
+
         onOpenChange(open);
-    }
+    };
 
     const isLoading = isCreatingTag || isAssigningTag || isUpdatingTag;
-    const submitButtonText = existingTag ? t("createTagDialog.assignTag") : t("createTagDialog.createTag");
+    const submitButtonText = existingTag
+        ? t("createTagDialog.assignTag")
+        : t("createTagDialog.createTag");
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -206,14 +219,21 @@ export function CreateTagDialog({
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor="tag-name" className="text-sm font-medium">
+                        <label
+                            htmlFor="tag-name"
+                            className="text-sm font-medium"
+                        >
                             {t("createTagDialog.tagName")}
                         </label>
-                        <Input 
+                        <Input
                             id="tag-name"
-                            placeholder={t("createTagDialog.tagNamePlaceholder")}
+                            placeholder={t(
+                                "createTagDialog.tagNamePlaceholder",
+                            )}
                             value={tagName}
-                            onChange={e => handleTagNameChange(e.target.value)}
+                            onChange={(e) =>
+                                handleTagNameChange(e.target.value)
+                            }
                             disabled={isLoading}
                             maxLength={255}
                         />
@@ -224,18 +244,25 @@ export function CreateTagDialog({
                                 <span>
                                     {t("createTagDialog.tagNameAlreadyExists")}
                                 </span>
-                                <div className="w-5 h-5 rounded-full" style={{ backgroundColor: existingTag.color }} />
+                                <div
+                                    className="w-5 h-5 rounded-full"
+                                    style={{
+                                        backgroundColor: existingTag.color,
+                                    }}
+                                />
                             </div>
                         )}
                     </div>
 
-                    <ColorPicker 
+                    <ColorPicker
                         value={selectedColor}
                         onChange={setSelectedColor}
                         disabled={isLoading}
                         labels={{
                             title: t("createTagDialog.colorPicker.title"),
-                            customColorHint: t("createTagDialog.colorPicker.customColorHint"),
+                            customColorHint: t(
+                                "createTagDialog.colorPicker.customColorHint",
+                            ),
                         }}
                     />
 
@@ -251,13 +278,15 @@ export function CreateTagDialog({
 
                         <Button
                             type="submit"
-                            disabled={isLoading || !tagName.trim() || isChecking}
+                            disabled={
+                                isLoading || !tagName.trim() || isChecking
+                            }
                         >
-                            {isLoading ? t("common.loading"): submitButtonText}
+                            {isLoading ? t("common.loading") : submitButtonText}
                         </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
-    )
+    );
 }

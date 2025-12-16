@@ -46,7 +46,10 @@ export const STUDY_SEARCH_FIELDS: FieldConfig[] = [
         table: "study",
         field: "studyInstanceUid",
         type: QueryType.STRING,
-        paramKeys: ["StudyInstanceUID", DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag],
+        paramKeys: [
+            "StudyInstanceUID",
+            DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag,
+        ],
     },
     {
         table: "study",
@@ -64,42 +67,52 @@ export const STUDY_SEARCH_FIELDS: FieldConfig[] = [
         table: "study",
         field: "accessionNumber",
         type: QueryType.STRING,
-        paramKeys: ["AccessionNumber", DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag],
+        paramKeys: [
+            "AccessionNumber",
+            DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag,
+        ],
     },
     {
         table: "series",
         field: "modality",
         type: QueryType.STRING,
-        paramKeys: ["ModalitiesInStudy", DICOM_TAG_KEYWORD_REGISTRY.ModalitiesInStudy.tag],
+        paramKeys: [
+            "ModalitiesInStudy",
+            DICOM_TAG_KEYWORD_REGISTRY.ModalitiesInStudy.tag,
+        ],
         joinConfig: {
             type: "innerJoin",
             tableName: "series",
             alias: "series",
             condition: "series.localStudyId = study.id",
-        }
+        },
     },
     {
         table: "referringPhysicianName",
         field: "alphabetic",
         type: QueryType.STRING,
-        paramKeys: ["ReferringPhysicianName", DICOM_TAG_KEYWORD_REGISTRY.ReferringPhysicianName.tag],
+        paramKeys: [
+            "ReferringPhysicianName",
+            DICOM_TAG_KEYWORD_REGISTRY.ReferringPhysicianName.tag,
+        ],
         joinConfig: {
             type: "leftJoin",
             tableName: "person_name",
             alias: "referringPhysicianName",
-            condition: "referringPhysicianName.id = study.referringPhysicianNameId",
-        }
+            condition:
+                "referringPhysicianName.id = study.referringPhysicianNameId",
+        },
     },
     {
         table: "patientName",
         field: "alphabetic",
         type: QueryType.STRING,
-        paramKeys: ["PatientName", DICOM_TAG_KEYWORD_REGISTRY.PatientName.tag]
+        paramKeys: ["PatientName", DICOM_TAG_KEYWORD_REGISTRY.PatientName.tag],
     },
     {
         table: "study",
         field: "studyId",
         type: QueryType.STRING,
         paramKeys: ["StudyID", DICOM_TAG_KEYWORD_REGISTRY.StudyID.tag],
-    }
-]
+    },
+];

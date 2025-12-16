@@ -20,7 +20,7 @@ export class MultipleFramesHandler implements WadoResponseHandler {
             'multipart/related; type="image/jpeg"',
             'multipart/related; type="image/jp2"',
             'multipart/related; type="image/png"',
-            "*/*"
+            "*/*",
         ]);
 
         return acceptSchema.safeParse(accept).success;
@@ -28,27 +28,27 @@ export class MultipleFramesHandler implements WadoResponseHandler {
 
     async handle(
         c: Context,
-        args: { instances: InstanceEntity[]; accept: string }
+        args: { instances: InstanceEntity[]; accept: string },
     ): Promise<Response> {
         const { instances, accept } = args;
         const storage = getStorageProvider();
-        const acceptType = parseAcceptHeader(accept)?.type || "image/jpeg"
+        const acceptType = parseAcceptHeader(accept)?.type || "image/jpeg";
         const outputFormat = resolveOutputFormat(acceptType) || "jpeg";
 
-        const keys = instances.map(instance => instance.instancePath);
-        if (!keys.every(key => key)) {
+        const keys = instances.map((instance) => instance.instancePath);
+        if (!keys.every((key) => key)) {
             return c.json(
                 {
-                    message: "Instance paths not found"
+                    message: "Instance paths not found",
                 },
-                404
+                404,
             );
         }
 
-        const datasets: { 
-            stream: ReadStream | Readable; 
-            size?: number; 
-            contentLocation?: string 
+        const datasets: {
+            stream: ReadStream | Readable;
+            size?: number;
+            contentLocation?: string;
         }[] = [];
 
         const converter = getDicomToImageConverter(outputFormat);
@@ -57,7 +57,10 @@ export class MultipleFramesHandler implements WadoResponseHandler {
             const key = instance.instancePath;
             const convertOptions = toConvertOptions({
                 ...c.req.query(),
-                frameNumber: c.req.param("frameNumber") || c.req.query("frameNumber") || "1"
+                frameNumber:
+                    c.req.param("frameNumber") ||
+                    c.req.query("frameNumber") ||
+                    "1",
             });
             const { body } = await storage.downloadFile(key);
 
@@ -69,12 +72,12 @@ export class MultipleFramesHandler implements WadoResponseHandler {
                 datasets.push({
                     stream: frame.stream,
                     size: frame.size,
-                    contentLocation: 
-                    `${env.NEXT_PUBLIC_APP_URL}/api/workspaces/${instance.workspaceId}` + 
-                    `/studies/${instance.studyInstanceUid}` +
-                    `/series/${instance.seriesInstanceUid}` +
-                    `/instances/${instance.sopInstanceUid}` +
-                    `/frames/${frame.index}/rendered`
+                    contentLocation:
+                        `${env.NEXT_PUBLIC_APP_URL}/api/workspaces/${instance.workspaceId}` +
+                        `/studies/${instance.studyInstanceUid}` +
+                        `/series/${instance.seriesInstanceUid}` +
+                        `/instances/${instance.sopInstanceUid}` +
+                        `/frames/${frame.index}/rendered`,
                 });
             }
         }
@@ -82,14 +85,14 @@ export class MultipleFramesHandler implements WadoResponseHandler {
         const multipart = multipartMessage.multipartEncodeByStream(
             datasets,
             undefined, // default to use guid boundary
-            acceptType
+            acceptType,
         );
 
         // @ts-expect-error
         return new Response(multipart.data, {
             headers: {
-                "Content-Type": `multipart/related; type="${acceptType}"; boundary=${multipart.boundary}`
-            }
+                "Content-Type": `multipart/related; type="${acceptType}"; boundary=${multipart.boundary}`,
+            },
         });
     }
 }

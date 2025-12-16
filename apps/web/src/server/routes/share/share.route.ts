@@ -15,23 +15,20 @@ import retrieveShareStudyInstancesRoute from "./wado-rs/retrieveShareStudyInstan
 import uriRetrieveShareInstanceRoute from "./wado-uri/uriRetrieveShareInstance.route";
 
 const shareRoute = new Hono()
-.basePath(
-    "/share"
-)
-.route("/", getShareLinksRoute)
-.route("/", getShareStudiesRoute)
-.route("/", getShareStudySeriesRoute)
-.route("/", getShareStudySeriesInstancesRoute)
-.route("/", getShareSeriesRoute)
-.route("/", getShareInstancesRoute)
-.route("/", retrieveShareStudyThumbnailRoute)
-.route("/", retrieveShareSeriesThumbnailRoute)
-.route("/", retrieveShareInstanceThumbnailRoute)
-.route("/", retrieveShareStudyInstancesRoute)
-.route("/", retrieveShareSeriesInstancesRoute)
-.route("/", retrieveShareInstanceRoute)
-.route("/", uriRetrieveShareInstanceRoute)
-.route("/", shareTagRoutes);
-
+    .basePath("/share")
+    .route("/", getShareLinksRoute)
+    .route("/", getShareStudiesRoute)
+    .route("/", getShareStudySeriesRoute)
+    .route("/", getShareStudySeriesInstancesRoute)
+    .route("/", getShareSeriesRoute)
+    .route("/", getShareInstancesRoute)
+    .route("/", retrieveShareStudyThumbnailRoute)
+    .route("/", retrieveShareSeriesThumbnailRoute)
+    .route("/", retrieveShareInstanceThumbnailRoute)
+    .route("/", retrieveShareStudyInstancesRoute)
+    .route("/", retrieveShareSeriesInstancesRoute)
+    .route("/", retrieveShareInstanceRoute)
+    .route("/", uriRetrieveShareInstanceRoute)
+    .route("/", shareTagRoutes);
 
 export default shareRoute;

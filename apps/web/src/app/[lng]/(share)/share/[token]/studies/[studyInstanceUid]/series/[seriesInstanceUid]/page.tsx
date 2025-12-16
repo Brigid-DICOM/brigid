@@ -1,7 +1,4 @@
-import {
-    dehydrate,
-    HydrationBoundary,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { cookies } from "next/headers";
 import { BlueLightViewerDialog } from "@/components/dicom/bluelight-viewer-dialog";
 import { getQueryClient } from "@/react-query/get-query-client";
@@ -13,14 +10,17 @@ interface ShareStudySeriesInstancesPageProps {
         token: string;
         studyInstanceUid: string;
         seriesInstanceUid: string;
-    }>
+    }>;
 
     searchParams: Promise<{
         password?: string;
-    }>
+    }>;
 }
 
-export default async function ShareStudySeriesInstancesPage({ params, searchParams }: ShareStudySeriesInstancesPageProps) {
+export default async function ShareStudySeriesInstancesPage({
+    params,
+    searchParams,
+}: ShareStudySeriesInstancesPageProps) {
     const cookieStore = await cookies();
     const queryClient = getQueryClient();
     const { token, studyInstanceUid, seriesInstanceUid } = await params;
@@ -34,13 +34,13 @@ export default async function ShareStudySeriesInstancesPage({ params, searchPara
             seriesInstanceUid,
             offset: 0,
             limit: 10,
-            cookie: cookieStore.toString()
-        })
+            cookie: cookieStore.toString(),
+        }),
     );
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ShareStudySeriesInstancesContent 
+            <ShareStudySeriesInstancesContent
                 token={token}
                 studyInstanceUid={studyInstanceUid}
                 seriesInstanceUid={seriesInstanceUid}
@@ -49,5 +49,5 @@ export default async function ShareStudySeriesInstancesPage({ params, searchPara
 
             <BlueLightViewerDialog />
         </HydrationBoundary>
-    )
+    );
 }

@@ -7,17 +7,16 @@ import { useGlobalSearchStore } from "@/stores/global-search-store";
 import type { SearchCondition } from "../dicom/search/dicom-search-condition-item";
 import { DicomSearchModal } from "../dicom/search/dicom-search-modal";
 import { Button } from "../ui/button";
-import { getSearchTypeConfig, getSearchTypeFromRoute } from "./search-type-config";
+import {
+    getSearchTypeConfig,
+    getSearchTypeFromRoute,
+} from "./search-type-config";
 
 export function GlobalSearch() {
     const pathname = usePathname();
     const [searchModalOpen, setSearchModalOpen] = useState(false);
-    
-    const {
-        searchType,
-        setSearchType,
-        executeSearch,
-    } = useGlobalSearchStore();
+
+    const { searchType, setSearchType, executeSearch } = useGlobalSearchStore();
 
     useEffect(() => {
         const autoDetectedType = getSearchTypeFromRoute(pathname);
@@ -37,19 +36,21 @@ export function GlobalSearch() {
         }
     }, [pathname, setSearchType]);
 
-    const currentSearchTypeConfig = searchType ? getSearchTypeConfig(searchType) : null;
+    const currentSearchTypeConfig = searchType
+        ? getSearchTypeConfig(searchType)
+        : null;
 
     const handleSearch = (conditions: SearchCondition[]) => {
         if (searchType) {
             executeSearch(searchType, conditions);
         }
-    }
+    };
 
     const handleOpenSearch = () => {
         if (searchType) {
             setSearchModalOpen(true);
         }
-    }
+    };
 
     if (!currentSearchTypeConfig) {
         return null;
@@ -65,12 +66,14 @@ export function GlobalSearch() {
                     className="flex items-center gap-2"
                 >
                     <SearchIcon className="size-4" />
-                    <span className="hidden sm:inline">Search {currentSearchTypeConfig.label}</span>
+                    <span className="hidden sm:inline">
+                        Search {currentSearchTypeConfig.label}
+                    </span>
                 </Button>
             </div>
 
             {currentSearchTypeConfig?.dicomLevel && (
-                <DicomSearchModal 
+                <DicomSearchModal
                     key={`${currentSearchTypeConfig.dicomLevel}-${pathname}`}
                     open={searchModalOpen}
                     onOpenChange={setSearchModalOpen}
@@ -79,5 +82,5 @@ export function GlobalSearch() {
                 />
             )}
         </>
-    )
+    );
 }

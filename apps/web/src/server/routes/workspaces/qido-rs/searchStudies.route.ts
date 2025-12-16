@@ -4,7 +4,10 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
-import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
+import {
+    verifyWorkspaceExists,
+    verifyWorkspacePermission,
+} from "@/server/middlewares/workspace.middleware";
 import { searchStudiesQueryParamSchema } from "@/server/schemas/searchStudies";
 import { DicomSearchStudyQueryBuilder } from "@/server/services/qido-rs/dicomSearchStudyQueryBuilder";
 
@@ -38,21 +41,21 @@ const searchStudiesRoute = new Hono().get(
             return c.body(null, 204);
         }
 
-        return c.json(studies.map(
-            (study) => {
+        return c.json(
+            studies.map((study) => {
                 const studyData = JSON.parse(study.json) as DicomTag;
                 return {
                     ...studyData,
                     "00201206": {
-                        "vr": "IS",
-                        "Value": [study.numberOfStudyRelatedSeries || 0]
+                        vr: "IS",
+                        Value: [study.numberOfStudyRelatedSeries || 0],
                     },
                     "00201208": {
-                        "vr": "IS",
-                        "Value": [study.numberOfStudyRelatedInstances || 0]
-                    }
+                        vr: "IS",
+                        Value: [study.numberOfStudyRelatedInstances || 0],
+                    },
                 } as DicomTag;
-            })
+            }),
         );
     },
 );

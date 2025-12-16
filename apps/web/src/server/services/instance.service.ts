@@ -14,36 +14,51 @@ export class InstanceService {
     }
 
     async insertOrUpdateInstance(instanceEntity: InstanceEntity) {
-        const existingInstance = await this.entityManager.findOne(InstanceEntity, {
-            where: {
-                studyInstanceUid: instanceEntity.studyInstanceUid,
-                seriesInstanceUid: instanceEntity.seriesInstanceUid,
-                sopInstanceUid: instanceEntity.sopInstanceUid,
-                workspaceId: instanceEntity.workspaceId
+        const existingInstance = await this.entityManager.findOne(
+            InstanceEntity,
+            {
+                where: {
+                    studyInstanceUid: instanceEntity.studyInstanceUid,
+                    seriesInstanceUid: instanceEntity.seriesInstanceUid,
+                    sopInstanceUid: instanceEntity.sopInstanceUid,
+                    workspaceId: instanceEntity.workspaceId,
+                },
+                select: {
+                    id: true,
+                    json: true,
+                },
             },
-            select: {
-                id: true,
-                json: true
-            }
-        });
-        
+        );
+
         if (existingInstance) {
             instanceEntity.id = existingInstance.id;
 
-            const existingInstanceJson = JSON.parse(existingInstance.json ?? "{}") as DicomTag;
-            const incomingInstanceJson = JSON.parse(instanceEntity.json ?? "{}") as DicomTag;
+            const existingInstanceJson = JSON.parse(
+                existingInstance.json ?? "{}",
+            ) as DicomTag;
+            const incomingInstanceJson = JSON.parse(
+                instanceEntity.json ?? "{}",
+            ) as DicomTag;
 
-            instanceEntity.json  = JSON.stringify({
+            instanceEntity.json = JSON.stringify({
                 ...existingInstanceJson,
                 ...incomingInstanceJson,
             });
         }
 
-        const savedInstance = await this.entityManager.save(InstanceEntity, instanceEntity);
+        const savedInstance = await this.entityManager.save(
+            InstanceEntity,
+            instanceEntity,
+        );
 
         if (existingInstance) {
-            const dicomDeleteService = new DicomDeleteService(this.entityManager);
-            await dicomDeleteService.reactivateInstancesOnUpload(savedInstance.workspaceId, [savedInstance.id]);
+            const dicomDeleteService = new DicomDeleteService(
+                this.entityManager,
+            );
+            await dicomDeleteService.reactivateInstancesOnUpload(
+                savedInstance.workspaceId,
+                [savedInstance.id],
+            );
         }
 
         return savedInstance;
@@ -60,16 +75,19 @@ export class InstanceService {
                 workspaceId: options.workspaceId,
                 studyInstanceUid: options.studyInstanceUid,
                 seriesInstanceUid: options.seriesInstanceUid,
-                sopInstanceUid: options.sopInstanceUid
-            }
+                sopInstanceUid: options.sopInstanceUid,
+            },
         });
     }
 
-    async getInstancesBySopInstanceUid(workspaceId: string, sopInstanceUids: string[]) {
+    async getInstancesBySopInstanceUid(
+        workspaceId: string,
+        sopInstanceUids: string[],
+    ) {
         return await this.entityManager.find(InstanceEntity, {
             where: {
                 workspaceId: workspaceId,
-                sopInstanceUid: In(sopInstanceUids)
+                sopInstanceUid: In(sopInstanceUids),
             },
             select: {
                 id: true,
@@ -78,24 +96,30 @@ export class InstanceService {
                 localSeriesId: true,
                 sopInstanceUid: true,
                 deleteStatus: true,
-                deletedAt: true
-            }
+                deletedAt: true,
+            },
         });
     }
 
     async getInstanceCount(
-        workspaceId: string, 
+        workspaceId: string,
         range?: string,
-        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
     ) {
         const countQuery = this.entityManager
-        .createQueryBuilder(InstanceEntity, "instance")
-        .where("instance.workspaceId = :workspaceId", { workspaceId })
-        .andWhere("instance.deleteStatus = :deleteStatus", { deleteStatus });
-        
+            .createQueryBuilder(InstanceEntity, "instance")
+            .where("instance.workspaceId = :workspaceId", { workspaceId })
+            .andWhere("instance.deleteStatus = :deleteStatus", {
+                deleteStatus,
+            });
+
         if (range) {
             const dateQueryStrategy = new DateQueryStrategy();
-            const dateQuery = dateQueryStrategy.buildQuery("instance", "createdAt", range);
+            const dateQuery = dateQueryStrategy.buildQuery(
+                "instance",
+                "createdAt",
+                range,
+            );
             countQuery.andWhere(dateQuery.sql, dateQuery.parameters);
         }
 

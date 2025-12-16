@@ -1,6 +1,11 @@
 "use client";
 
-import { CopyIcon, CornerDownLeftIcon, DownloadIcon, EyeIcon } from "lucide-react";
+import {
+    CopyIcon,
+    CornerDownLeftIcon,
+    DownloadIcon,
+    EyeIcon,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
@@ -55,9 +60,7 @@ export function SharedDicomStudyContextMenu({
         e.preventDefault();
         closeContextMenu();
 
-        router.push(
-            `/${lng}/share/${token}/studies/${studyInstanceUid}`,
-        );
+        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}`);
     };
 
     const handleDownloadSelected = async (
@@ -108,12 +111,18 @@ export function SharedDicomStudyContextMenu({
         });
     };
 
-    const handleCopyStudyInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleCopyStudyInstanceUid = (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
         navigator.clipboard.writeText(studyInstanceUid);
-        toast.success(t("dicom.messages.copiedToClipboard", { level: "studyInstanceUid" }));
-    }
+        toast.success(
+            t("dicom.messages.copiedToClipboard", {
+                level: "studyInstanceUid",
+            }),
+        );
+    };
 
     return (
         <ContextMenu>
@@ -127,7 +136,10 @@ export function SharedDicomStudyContextMenu({
                             className="flex items-center space-x-2"
                         >
                             <CopyIcon className="size-4" />
-                            <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.study.studyInstanceUid")}</span>
+                            <span>
+                                {t("dicom.contextMenu.copy")}{" "}
+                                {t("dicom.columns.study.studyInstanceUid")}
+                            </span>
                         </ContextMenuItem>
                         <ContextMenuItem
                             onClick={handleEnterSeries}

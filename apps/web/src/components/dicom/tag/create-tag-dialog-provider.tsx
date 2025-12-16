@@ -3,21 +3,16 @@ import { useCreateTagDialogStore } from "@/stores/create-tag-dialog-store";
 import { CreateTagDialog } from "./create-tag-dialog";
 
 export function CreateTagDialogProvider() {
-    const {
-        isOpen,
-        workspaceId,
-        targetType,
-        targetId,
-        closeDialog,
-    } = useCreateTagDialogStore(
-        useShallow((state) => ({
-            isOpen: state.isOpen,
-            workspaceId: state.workspaceId,
-            targetType: state.targetType,
-            targetId: state.targetId,
-            closeDialog: state.closeDialog,
-        }))
-    );
+    const { isOpen, workspaceId, targetType, targetId, closeDialog } =
+        useCreateTagDialogStore(
+            useShallow((state) => ({
+                isOpen: state.isOpen,
+                workspaceId: state.workspaceId,
+                targetType: state.targetType,
+                targetId: state.targetId,
+                closeDialog: state.closeDialog,
+            })),
+        );
 
     if (!workspaceId || !targetType || !targetId) return null;
 
@@ -29,5 +24,5 @@ export function CreateTagDialogProvider() {
             targetType={targetType}
             targetId={targetId}
         />
-    )
+    );
 }

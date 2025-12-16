@@ -52,16 +52,24 @@ export function DicomDeleteConfirmDialog({
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{t("dicom.deleteConfirmDialog.title")}</AlertDialogTitle>
+                    <AlertDialogTitle>
+                        {t("dicom.deleteConfirmDialog.title")}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                         {isSingle
-                            ? t("dicom.deleteConfirmDialog.single", { level: itemLabel })
-                            : t("dicom.deleteConfirmDialog.multiple", { count: selectedCount, level: itemLabel })
-                        }
+                            ? t("dicom.deleteConfirmDialog.single", {
+                                  level: itemLabel,
+                              })
+                            : t("dicom.deleteConfirmDialog.multiple", {
+                                  count: selectedCount,
+                                  level: itemLabel,
+                              })}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>{t("dicom.deleteConfirmDialog.cancel")}</AlertDialogCancel>
+                    <AlertDialogCancel>
+                        {t("dicom.deleteConfirmDialog.cancel")}
+                    </AlertDialogCancel>
                     <AlertDialogAction onClick={handleConfirm}>
                         {t("dicom.deleteConfirmDialog.confirm")}
                     </AlertDialogAction>

@@ -6,39 +6,39 @@ import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem, 
+    DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getSharePermissionNames } from "@/lib/share/sharePermissionUtils";
-import {
-    SHARE_PERMISSIONS
-} from "@/server/const/share.const";
-import {
-    hasPermission
-} from "@/server/utils/sharePermissions";
+import { SHARE_PERMISSIONS } from "@/server/const/share.const";
+import { hasPermission } from "@/server/utils/sharePermissions";
 
-type SharePermissionDropdownProps = 
-| {
-    mode: "public",
-    publicPermissions: number;
-    onTogglePermission: (permission: number) => void;
-    id: string;
-} | {
-    mode: "user",
-    user: {
-        id: string;
-        name: string;
-        permissions: number;
-    },
-    onTogglePermission: (userId: string, permission: number) => void;
-    id: string;
-}
+type SharePermissionDropdownProps =
+    | {
+          mode: "public";
+          publicPermissions: number;
+          onTogglePermission: (permission: number) => void;
+          id: string;
+      }
+    | {
+          mode: "user";
+          user: {
+              id: string;
+              name: string;
+              permissions: number;
+          };
+          onTogglePermission: (userId: string, permission: number) => void;
+          id: string;
+      };
 
 export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
     const { t } = useT("translation");
     const id = props.id || nanoid();
-    const permissions = props.mode === "public" ? props.publicPermissions : props.user.permissions;
+    const permissions =
+        props.mode === "public"
+            ? props.publicPermissions
+            : props.user.permissions;
 
     const handleTogglePermission = (permission: number) => {
         if (props.mode === "public") {
@@ -46,7 +46,7 @@ export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
         } else {
             props.onTogglePermission(props.user.id, permission);
         }
-    }
+    };
 
     return (
         <DropdownMenu>
@@ -63,15 +63,16 @@ export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
             <DropdownMenuContent className="p-2" align="start">
                 <DropdownMenuCheckboxItem
                     className="flex flex-col items-start justify-center hover:bg-accent"
-                    checked={hasPermission(
-                        permissions,
-                        SHARE_PERMISSIONS.READ
-                    )}
-                    onCheckedChange={() => handleTogglePermission(SHARE_PERMISSIONS.READ)}
+                    checked={hasPermission(permissions, SHARE_PERMISSIONS.READ)}
+                    onCheckedChange={() =>
+                        handleTogglePermission(SHARE_PERMISSIONS.READ)
+                    }
                     onSelect={(e) => e.preventDefault()}
                 >
                     <div className="flex items-center gap-2">
-                        <span className="whitespace-nowrap">{t("shareLink.permissions.read")}</span>
+                        <span className="whitespace-nowrap">
+                            {t("shareLink.permissions.read")}
+                        </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
                         {t("shareLink.permissions.readDesc")}
@@ -81,13 +82,17 @@ export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
                     className="flex flex-col items-start justify-center hover:bg-accent"
                     checked={hasPermission(
                         permissions,
-                        SHARE_PERMISSIONS.UPDATE
+                        SHARE_PERMISSIONS.UPDATE,
                     )}
-                    onCheckedChange={() => handleTogglePermission(SHARE_PERMISSIONS.UPDATE)}
+                    onCheckedChange={() =>
+                        handleTogglePermission(SHARE_PERMISSIONS.UPDATE)
+                    }
                     onSelect={(e) => e.preventDefault()}
                 >
                     <div className="flex items-center gap-2">
-                        <span className="whitespace-nowrap">{t("shareLink.permissions.update")}</span>
+                        <span className="whitespace-nowrap">
+                            {t("shareLink.permissions.update")}
+                        </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
                         {t("shareLink.permissions.updateDesc")}
@@ -95,5 +100,5 @@ export function SharePermissionDropdown(props: SharePermissionDropdownProps) {
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>
-    )
+    );
 }

@@ -34,11 +34,12 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
                 "person_name",
                 "patientName",
                 "patientName.id = patient.patientNameId",
-            )
+            );
 
         this.applyTagJoin(query, "series", tagName);
-        query.where("series.workspaceId = :workspaceId", { workspaceId })
-        .andWhere("series.deleteStatus = :deleteStatus", { deleteStatus });
+        query
+            .where("series.workspaceId = :workspaceId", { workspaceId })
+            .andWhere("series.deleteStatus = :deleteStatus", { deleteStatus });
 
         this.applyTagFilter(query, tagName);
 
@@ -65,7 +66,7 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
             offset,
             deleteStatus,
             instanceDeleteStatus,
-            ...queryParams
+            ...queryParams,
         } as {
             workspaceId: string;
             limit: number;
@@ -74,61 +75,70 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
             instanceDeleteStatus?: number;
         } & SearchStudySeriesQueryParam);
 
-        const seriesInstances = series.map(
-            s => s.seriesInstanceUid
-        );
+        const seriesInstances = series.map((s) => s.seriesInstanceUid);
 
         if (seriesInstances.length === 0) {
             return [];
         }
 
-        const counts = await this.entityManager
+        const counts = (await this.entityManager
             .createQueryBuilder(SeriesEntity, "series")
             .select("series.seriesInstanceUid", "seriesInstanceUid")
-            .addSelect("COUNT(DISTINCT i.sopInstanceUid)", "numberOfSeriesRelatedInstances")
+            .addSelect(
+                "COUNT(DISTINCT i.sopInstanceUid)",
+                "numberOfSeriesRelatedInstances",
+            )
             .leftJoin(
                 InstanceEntity,
                 "i",
                 "i.seriesInstanceUid = series.seriesInstanceUid AND i.deleteStatus = :deleteStatus AND i.workspaceId = series.workspaceId",
-                { deleteStatus, workspaceId }
+                { deleteStatus, workspaceId },
             )
-            .where("series.seriesInstanceUid IN (:...seriesInstances)", { seriesInstances })
+            .where("series.seriesInstanceUid IN (:...seriesInstances)", {
+                seriesInstances,
+            })
             .groupBy("series.seriesInstanceUid")
-            .getRawMany() as Array<{
-                seriesInstanceUid: string;
-                numberOfSeriesRelatedInstances: string;
-            }>;
+            .getRawMany()) as Array<{
+            seriesInstanceUid: string;
+            numberOfSeriesRelatedInstances: string;
+        }>;
 
         const countMap = new Map(
-            counts.map(c => [
+            counts.map((c) => [
                 c.seriesInstanceUid,
                 {
-                    numberOfSeriesRelatedInstances: parseInt(c.numberOfSeriesRelatedInstances || "0", 10),
-                }
-            ])
+                    numberOfSeriesRelatedInstances: parseInt(
+                        c.numberOfSeriesRelatedInstances || "0",
+                        10,
+                    ),
+                },
+            ]),
         );
 
-        return series.map(s => ({
+        return series.map((s) => ({
             ...s,
-            numberOfSeriesRelatedInstances: countMap.get(s.seriesInstanceUid)?.numberOfSeriesRelatedInstances ?? 0,
+            numberOfSeriesRelatedInstances:
+                countMap.get(s.seriesInstanceUid)
+                    ?.numberOfSeriesRelatedInstances ?? 0,
         }));
     }
 
     protected applyInstanceDeleteStatusFilter(
         query: SelectQueryBuilder<SeriesEntity>,
-        instanceDeleteStatus: number
+        instanceDeleteStatus: number,
     ): void {
         const subQuery = this.entityManager
             .createQueryBuilder(InstanceEntity, "instance")
             .select("instance.seriesInstanceUid")
             .where("instance.workspaceId = series.workspaceId")
             .andWhere("instance.seriesInstanceUid = series.seriesInstanceUid")
-            .andWhere("instance.deleteStatus = :instanceDeleteStatus", { instanceDeleteStatus })
+            .andWhere("instance.deleteStatus = :instanceDeleteStatus", {
+                instanceDeleteStatus,
+            })
             .getQuery();
-            
+
         query.andWhere(`EXISTS (${subQuery})`, { instanceDeleteStatus });
     }
-
 
     protected getSearchFields(): readonly (SeriesFieldConfig | FieldConfig)[] {
         return SERIES_SEARCH_FIELDS;

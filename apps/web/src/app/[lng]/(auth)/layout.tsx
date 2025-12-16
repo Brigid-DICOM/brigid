@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Providers from "@/app/providers";
 import { getT } from "@/app/_i18n";
+import Providers from "@/app/providers";
 
-export async function generateMetadata({ params }: { params: Promise<{ lng: string }> }): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
     const { t } = await getT("translation");
     return {
         title: t("auth.title"),
@@ -17,9 +17,7 @@ export default function SignInLayout({
 }) {
     return (
         <div className="min-h-screen">
-            <Providers>
-                {children}
-            </Providers>
+            <Providers>{children}</Providers>
         </div>
     );
 }

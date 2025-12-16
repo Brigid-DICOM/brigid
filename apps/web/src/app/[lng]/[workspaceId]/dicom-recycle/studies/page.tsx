@@ -11,7 +11,9 @@ interface DicomRecycleStudiesPageProps {
     }>;
 }
 
-export default async function DicomRecycleStudiesPage({ params }: DicomRecycleStudiesPageProps) {
+export default async function DicomRecycleStudiesPage({
+    params,
+}: DicomRecycleStudiesPageProps) {
     const { workspaceId } = await params;
     const cookieStore = await cookies();
     const queryClient = getQueryClient();
@@ -21,8 +23,8 @@ export default async function DicomRecycleStudiesPage({ params }: DicomRecycleSt
             offset: 0,
             limit: 10,
             deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
-            cookie: cookieStore.toString()
-        })
+            cookie: cookieStore.toString(),
+        }),
     );
 
     return (

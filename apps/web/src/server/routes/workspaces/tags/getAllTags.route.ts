@@ -25,16 +25,30 @@ const getAllTagsRoute = new Hono().get(
             workspaceId: z.string().describe("The ID of the workspace"),
         }),
     ),
-    zValidator("query", z.object({
-        name: z.string().optional().describe("The name of the tag"),
-        targetType: z.enum([TAG_TARGET_TYPE.STUDY, TAG_TARGET_TYPE.SERIES, TAG_TARGET_TYPE.INSTANCE]).optional().describe("The type of target"),
-    })),
+    zValidator(
+        "query",
+        z.object({
+            name: z.string().optional().describe("The name of the tag"),
+            targetType: z
+                .enum([
+                    TAG_TARGET_TYPE.STUDY,
+                    TAG_TARGET_TYPE.SERIES,
+                    TAG_TARGET_TYPE.INSTANCE,
+                ])
+                .optional()
+                .describe("The type of target"),
+        }),
+    ),
     async (c) => {
         const { workspaceId } = c.req.valid("param");
         const { name, targetType } = c.req.valid("query");
 
         const tagService = new TagService();
-        const tags = await tagService.getWorkspaceTags(workspaceId, name, targetType);
+        const tags = await tagService.getWorkspaceTags(
+            workspaceId,
+            name,
+            targetType,
+        );
 
         return c.json(
             {

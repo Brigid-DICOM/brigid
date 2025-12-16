@@ -4,6 +4,7 @@ import type { DicomInstanceData } from "@brigid/types";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -17,7 +18,6 @@ import { getShareInstancesQuery } from "@/react-query/queries/publicShare";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { SharedDicomInstancesDataTable } from "../data-tables/shared-dicom-instances-data-table";
-import { useT } from "@/app/_i18n/client";
 
 interface SharedInstancesViewProps {
     token: string;
@@ -27,21 +27,22 @@ interface SharedInstancesViewProps {
 
 const ITEM_PER_PAGE = 10;
 
-export default function SharedInstancesView({ 
-    token, 
+export default function SharedInstancesView({
+    token,
     password,
     publicPermissions = 0,
 }: SharedInstancesViewProps) {
     const { t } = useT("translation");
     const layoutMode = useLayoutStore((state) => state.layoutMode);
-    const { 
-        currentPage, 
-        handlePreviousPage, 
-        handleNextPage, 
-        canGoPrevious 
-    } = usePagination();
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
+        usePagination();
 
-    const { clearSelection, getSelectedCount, selectAll, getSelectedInstanceIds } = useDicomInstanceSelectionStore();
+    const {
+        clearSelection,
+        getSelectedCount,
+        selectAll,
+        getSelectedInstanceIds,
+    } = useDicomInstanceSelectionStore();
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedInstanceIds();
 
@@ -51,7 +52,7 @@ export default function SharedInstancesView({
             password,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
-        })
+        }),
     );
     const isAllSelected = selectedCount === instances?.length;
     const studyInstanceUid = instances?.[0]["0020000D"]?.Value?.[0] as string;
@@ -75,9 +76,13 @@ export default function SharedInstancesView({
         if (isAllSelected) {
             clearSelection();
         } else {
-            selectAll(instances?.map((instance) => instance["00080018"]?.Value?.[0] as string) || []);
+            selectAll(
+                instances?.map(
+                    (instance) => instance["00080018"]?.Value?.[0] as string,
+                ) || [],
+            );
         }
-    }
+    };
 
     const handleDownload = async () => {
         if (selectedIds.length === 0) {
@@ -102,7 +107,7 @@ export default function SharedInstancesView({
 
             toast.error("Failed to download selected instances");
         }
-    }
+    };
 
     if (isLoading) {
         return layoutMode === "grid" ? (
@@ -122,7 +127,7 @@ export default function SharedInstancesView({
 
     return (
         <div className="space-y-6">
-            <SelectionControlBar 
+            <SelectionControlBar
                 selectedCount={selectedCount}
                 isAllSelected={isAllSelected}
                 onSelectAll={handleSelectAll}
@@ -144,7 +149,7 @@ export default function SharedInstancesView({
                     ))}
                 </div>
             ) : (
-                <SharedDicomInstancesDataTable 
+                <SharedDicomInstancesDataTable
                     instances={instances as DicomInstanceData[]}
                     token={token}
                     password={password}

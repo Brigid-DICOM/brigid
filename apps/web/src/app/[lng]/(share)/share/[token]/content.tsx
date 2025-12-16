@@ -22,15 +22,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getPublicShareLinkQuery, verifyPasswordMutation } from "@/react-query/queries/publicShare";
+import {
+    getPublicShareLinkQuery,
+    verifyPasswordMutation,
+} from "@/react-query/queries/publicShare";
 
 interface ShareContentProps {
     token: string;
 }
 
-export default function ShareContent({
-    token,
-}: ShareContentProps) {
+export default function ShareContent({ token }: ShareContentProps) {
     const { t } = useT("translation");
     const queryClient = getQueryClient();
 
@@ -39,35 +40,41 @@ export default function ShareContent({
 
     const { data, isLoading, error } = useQuery({
         ...getPublicShareLinkQuery({
-            token
+            token,
         }),
         refetchOnWindowFocus: false,
     });
 
-    const { mutate: verifyPassword, isPending: isVerifyingPassword, error: verifyPasswordError } = useMutation({
+    const {
+        mutate: verifyPassword,
+        isPending: isVerifyingPassword,
+        error: verifyPasswordError,
+    } = useMutation({
         ...verifyPasswordMutation({
             token,
-            password
+            password,
         }),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["public-share-link", token],
-            })
+            });
             setShowPasswordInput(false);
-        }
+        },
     });
 
     const handlePasswordSubmit = useCallback(
         (e: React.FormEvent) => {
             e.preventDefault();
-            verifyPassword()
+            verifyPassword();
         },
         [verifyPassword],
     );
 
     useEffect(() => {
-        if (error?.message === "Password is required" ||
-            error?.message === "Invalid password") {
+        if (
+            error?.message === "Password is required" ||
+            error?.message === "Invalid password"
+        ) {
             setShowPasswordInput(true);
         } else {
             setShowPasswordInput(false);
@@ -98,7 +105,9 @@ export default function ShareContent({
                         <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                             <LockIcon className="size-6 text-primary" />
                         </div>
-                        <CardTitle>{t("sharePublicView.passwordProtected.title")}</CardTitle>
+                        <CardTitle>
+                            {t("sharePublicView.passwordProtected.title")}
+                        </CardTitle>
                         <CardDescription>
                             {t("sharePublicView.passwordProtected.description")}
                         </CardDescription>
@@ -107,24 +116,35 @@ export default function ShareContent({
                         <form onSubmit={handlePasswordSubmit}>
                             <Input
                                 type="password"
-                                placeholder={t("sharePublicView.passwordProtected.placeholder")}
+                                placeholder={t(
+                                    "sharePublicView.passwordProtected.placeholder",
+                                )}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 disabled={isVerifyingPassword}
                                 autoFocus
                             />
-                            {verifyPasswordError?.message === "Invalid password" && (
+                            {verifyPasswordError?.message ===
+                                "Invalid password" && (
                                 <p className="text-sm text-destructive flex items-center gap-1 mt-2">
                                     <AlertCircleIcon className="size-4" />
-                                    {t("sharePublicView.passwordProtected.invalidPassword")}
+                                    {t(
+                                        "sharePublicView.passwordProtected.invalidPassword",
+                                    )}
                                 </p>
                             )}
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 className="w-full mt-4"
                                 disabled={isVerifyingPassword}
                             >
-                                {isVerifyingPassword ? t("sharePublicView.passwordProtected.verifying") : t("sharePublicView.passwordProtected.unlock")}
+                                {isVerifyingPassword
+                                    ? t(
+                                          "sharePublicView.passwordProtected.verifying",
+                                      )
+                                    : t(
+                                          "sharePublicView.passwordProtected.unlock",
+                                      )}
                             </Button>
                         </form>
                     </CardContent>
@@ -142,7 +162,9 @@ export default function ShareContent({
                         <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
                             <AlertCircleIcon className="size-6 text-destructive" />
                         </div>
-                        <CardTitle>{t("sharePublicView.error.title")}</CardTitle>
+                        <CardTitle>
+                            {t("sharePublicView.error.title")}
+                        </CardTitle>
                         <CardDescription>
                             {error?.message ||
                                 t("sharePublicView.error.defaultMessage")}
@@ -187,11 +209,15 @@ export default function ShareContent({
         const count = targets.length;
         switch (targetType) {
             case "study":
-                return count === 1 ? t("sharePublicView.countLabel.study", { count }) : t("sharePublicView.countLabel.studies", { count });
+                return count === 1
+                    ? t("sharePublicView.countLabel.study", { count })
+                    : t("sharePublicView.countLabel.studies", { count });
             case "series":
                 return t("sharePublicView.countLabel.series", { count });
             case "instance":
-                return count === 1 ? t("sharePublicView.countLabel.instance", { count }) : t("sharePublicView.countLabel.instances", { count });
+                return count === 1
+                    ? t("sharePublicView.countLabel.instance", { count })
+                    : t("sharePublicView.countLabel.instances", { count });
             default:
                 return t("sharePublicView.countLabel.items", { count });
         }
@@ -208,7 +234,9 @@ export default function ShareContent({
                             </div>
                             <div>
                                 <CardTitle className="capitalize">
-                                    {t("sharePublicView.sharedTitle", { targetType: getTargetTitle() })}
+                                    {t("sharePublicView.sharedTitle", {
+                                        targetType: getTargetTitle(),
+                                    })}
                                 </CardTitle>
                                 {description && (
                                     <CardDescription>

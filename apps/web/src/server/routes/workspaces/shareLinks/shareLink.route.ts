@@ -10,14 +10,14 @@ import updateShareLinkRoute from "./updateShareLink.route";
 import verifyPasswordRoute from "./verifyPassword.route";
 
 const shareLinkRoute = new Hono()
-.route("/", createShareLinkRoute)
-.route("/", getShareLinksRoute)
-.route("/", updateShareLinkRoute)
-.route("/", verifyPasswordRoute)
-.route("/", deleteShareLinkRoute)
-.route("/", publicShareLinkRoute)
-.route("/", getTargetShareLinksRoute)
-.route("/", getTargetShareLinkCountRoute)
-.route("/", getReceivedShareLinksRoute)
+    .route("/", createShareLinkRoute)
+    .route("/", getShareLinksRoute)
+    .route("/", updateShareLinkRoute)
+    .route("/", verifyPasswordRoute)
+    .route("/", deleteShareLinkRoute)
+    .route("/", publicShareLinkRoute)
+    .route("/", getTargetShareLinksRoute)
+    .route("/", getTargetShareLinkCountRoute)
+    .route("/", getReceivedShareLinksRoute);
 
 export default shareLinkRoute;

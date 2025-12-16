@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import {
-    describeRoute,
-    validator as zValidator
-} from "hono-openapi";
+import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
-import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
+import {
+    verifyWorkspaceExists,
+    verifyWorkspacePermission,
+} from "@/server/middlewares/workspace.middleware";
 import {
     wadoRsMultipleFramesHeaderSchema,
     wadoRsQueryParamSchema,
@@ -25,15 +25,23 @@ const retrieveRenderedInstancesRoute = new Hono().get(
     verifyWorkspaceExists,
     verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
     zValidator("header", wadoRsMultipleFramesHeaderSchema),
-    zValidator("param", z.object({
-        workspaceId: z.string().describe("The ID of the workspace"),
-        studyInstanceUid: z.string().describe("The study instance UID"),
-        seriesInstanceUid: z.string().describe("The series instance UID"),
-        sopInstanceUid: z.string().describe("The sop instance UID"),
-    })),
+    zValidator(
+        "param",
+        z.object({
+            workspaceId: z.string().describe("The ID of the workspace"),
+            studyInstanceUid: z.string().describe("The study instance UID"),
+            seriesInstanceUid: z.string().describe("The series instance UID"),
+            sopInstanceUid: z.string().describe("The sop instance UID"),
+        }),
+    ),
     zValidator("query", wadoRsQueryParamSchema),
     async (c) => {
-        const { workspaceId, studyInstanceUid, seriesInstanceUid, sopInstanceUid } = c.req.valid("param");
+        const {
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+        } = c.req.valid("param");
         const accept = c.req.valid("header").accept;
 
         const instanceService = new InstanceService();
@@ -63,7 +71,7 @@ const retrieveRenderedInstancesRoute = new Hono().get(
         }
 
         return handler.handle(c, { instances: [instance], accept: accept });
-    }
-)
+    },
+);
 
 export default retrieveRenderedInstancesRoute;

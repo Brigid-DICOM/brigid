@@ -2,14 +2,7 @@ import type { InstanceEntity } from "@brigid/database/src/entities/instance.enti
 import type { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import type { DataSource } from "typeorm";
-import {
-    afterAll,
-    beforeAll,
-    beforeEach,
-    describe,
-    expect,
-    it
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { app } from "@/app/api/[...route]/route";
 import { TagTestUtils } from "../../utils/tagTestUtils";
 import { TestDatabaseManager } from "../../utils/testDatabaseManager";
@@ -56,12 +49,7 @@ describe("Tag Query for DICOM", () => {
             );
             const studyId = testStudies[0].studyInstanceUid;
 
-            await tagUtils.assignTag(
-                WORKSPACE_ID,
-                tag.id,
-                "study",
-                studyId,
-            );
+            await tagUtils.assignTag(WORKSPACE_ID, tag.id, "study", studyId);
 
             // Act
             const response = await app.request(
@@ -105,18 +93,8 @@ describe("Tag Query for DICOM", () => {
 
             const studyId1 = testStudies[0].studyInstanceUid;
             const studyId2 = testStudies[1].studyInstanceUid;
-            await tagUtils.assignTag(
-                WORKSPACE_ID,
-                tag1.id,
-                "study",
-                studyId1,
-            );
-            await tagUtils.assignTag(
-                WORKSPACE_ID,
-                tag2.id,
-                "study",
-                studyId2,
-            );
+            await tagUtils.assignTag(WORKSPACE_ID, tag1.id, "study", studyId1);
+            await tagUtils.assignTag(WORKSPACE_ID, tag2.id, "study", studyId2);
 
             // Act
             const response = await app.request(
@@ -142,12 +120,7 @@ describe("Tag Query for DICOM", () => {
                 "#FF5735",
             );
             const seriesId = testSeries[0].seriesInstanceUid;
-            await tagUtils.assignTag(
-                WORKSPACE_ID,
-                tag.id,
-                "series",
-                seriesId,
-            );
+            await tagUtils.assignTag(WORKSPACE_ID, tag.id, "series", seriesId);
 
             // Act
             const response = await app.request(

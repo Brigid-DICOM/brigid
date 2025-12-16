@@ -11,45 +11,65 @@ interface TableThumbnailCellProps {
     studyInstanceUid: string;
     seriesInstanceUid?: string;
     sopInstanceUid?: string;
-    size?: number
+    size?: number;
 }
 
-export function TableThumbnailCell({ source, studyInstanceUid, seriesInstanceUid, sopInstanceUid, size = 64 }: TableThumbnailCellProps) {
-    const { data: thumbnail, isLoading: isLoadingThumbnail } = useThumbnailQuery({
-        source,
-        studyInstanceUid,
-        seriesInstanceUid,
-        sopInstanceUid,
-        viewport: `${size},${size}`,
-    });
-    
+export function TableThumbnailCell({
+    source,
+    studyInstanceUid,
+    seriesInstanceUid,
+    sopInstanceUid,
+    size = 64,
+}: TableThumbnailCellProps) {
+    const { data: thumbnail, isLoading: isLoadingThumbnail } =
+        useThumbnailQuery({
+            source,
+            studyInstanceUid,
+            seriesInstanceUid,
+            sopInstanceUid,
+            viewport: `${size},${size}`,
+        });
+
     const url = useDicomThumbnail(thumbnail as Blob | undefined);
 
     if (isLoadingThumbnail) {
-        return <Skeleton className="rounded" style={{ width: size, height: size }} />;
+        return (
+            <Skeleton
+                className="rounded"
+                style={{ width: size, height: size }}
+            />
+        );
     }
 
-    if (!url || studyInstanceUid === "N/A" || seriesInstanceUid === "N/A" || sopInstanceUid === "N/A") {
+    if (
+        !url ||
+        studyInstanceUid === "N/A" ||
+        seriesInstanceUid === "N/A" ||
+        sopInstanceUid === "N/A"
+    ) {
         return (
-          <div
-            className="bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500"
-            style={{ width: size, height: size }}
-          >
-            No image
-          </div>
+            <div
+                className="bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500"
+                style={{ width: size, height: size }}
+            >
+                No image
+            </div>
         );
     }
 
     return (
-      <div className="flex justify-center items-center" style={{ width: size, height: size }}>
-        <Image
-          src={url}
-          alt="DICOM Thumbnail"
-          width={size}
-          height={size}
-          className="object-cover rounded"
-          unoptimized
-        />
-      </div>
+        <div
+            className="flex justify-center items-center"
+            style={{ width: size, height: size }}
+        >
+            <Image
+                src={url}
+                alt="DICOM Thumbnail"
+                width={size}
+                height={size}
+                className="object-cover rounded"
+                unoptimized
+            />
+        </div>
     );
 }

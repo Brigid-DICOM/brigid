@@ -11,9 +11,11 @@ import { StringQueryStrategy } from "./stringQueryStrategy";
 export abstract class BaseDicomSearchQueryBuilder<
     TEntity extends ObjectLiteral,
     TQueryParam extends Record<string, unknown>,
-    TFieldConfig extends FieldConfig | SeriesFieldConfig | InstanceFieldConfig = FieldConfig
+    TFieldConfig extends
+        | FieldConfig
+        | SeriesFieldConfig
+        | InstanceFieldConfig = FieldConfig,
 > {
-
     protected readonly entityManager: EntityManager;
 
     constructor(entityManager?: EntityManager) {
@@ -29,12 +31,12 @@ export abstract class BaseDicomSearchQueryBuilder<
         tagName,
         ...queryParams
     }: { workspaceId: string } & TQueryParam & {
-        limit?: number;
-        offset?: number;
-        deleteStatus?: number;
-        instanceDeleteStatus?: number;
-        tagName?: string;
-    }) {
+            limit?: number;
+            offset?: number;
+            deleteStatus?: number;
+            instanceDeleteStatus?: number;
+            tagName?: string;
+        }) {
         const query = this.buildBaseQuery(workspaceId, deleteStatus, tagName);
 
         if (instanceDeleteStatus !== undefined) {
@@ -48,19 +50,19 @@ export abstract class BaseDicomSearchQueryBuilder<
     protected abstract buildBaseQuery(
         workspaceId: string,
         deleteStatus?: number,
-        tagName?: string
+        tagName?: string,
     ): SelectQueryBuilder<TEntity>;
-    
+
     protected abstract getSearchFields(): readonly TFieldConfig[];
 
     protected abstract applyInstanceDeleteStatusFilter(
         query: SelectQueryBuilder<TEntity>,
-        instanceDeleteStatus: number
+        instanceDeleteStatus: number,
     ): void;
 
     protected applySearchFilters(
         query: SelectQueryBuilder<TEntity>,
-        queryParams: TQueryParam
+        queryParams: TQueryParam,
     ): void {
         const appliedJoins = new Set<string>();
         const searchFields = this.getSearchFields();
@@ -92,10 +94,10 @@ export abstract class BaseDicomSearchQueryBuilder<
             query.andWhere(condition.sql, condition.parameters);
         }
     }
-    
+
     protected extractParamValue(
         queryParams: TQueryParam,
-        fieldConfig: TFieldConfig
+        fieldConfig: TFieldConfig,
     ): string | undefined {
         for (const key of fieldConfig.paramKeys) {
             const value = queryParams[key] as string | undefined;
@@ -103,55 +105,61 @@ export abstract class BaseDicomSearchQueryBuilder<
                 return value;
             }
         }
-        
+
         return undefined;
     }
 
     protected applyJoin(
         query: SelectQueryBuilder<TEntity>,
-        joinConfig: NonNullable<TFieldConfig["joinConfig"]>
+        joinConfig: NonNullable<TFieldConfig["joinConfig"]>,
     ): void {
         if (joinConfig.type === "leftJoin") {
             query.leftJoin(
                 joinConfig.tableName,
                 joinConfig.alias,
-                joinConfig.condition
+                joinConfig.condition,
             );
         } else {
             query.innerJoin(
                 joinConfig.tableName,
                 joinConfig.alias,
-                joinConfig.condition
+                joinConfig.condition,
             );
         }
     }
 
-    protected buildQueryCondition(table: string, field: string, value: string, type: string, uniquePrefix: string): QueryDicomResult {
+    protected buildQueryCondition(
+        table: string,
+        field: string,
+        value: string,
+        type: string,
+        uniquePrefix: string,
+    ): QueryDicomResult {
         const strategy = getQueryStrategy(type);
         const result = strategy.buildQuery(table, field, value);
-    
+
         const remappedParameters: Record<string, unknown> = {};
         const paramMapping = new Map<string, string>();
-    
+
         for (const [originalKey, value] of Object.entries(result.parameters)) {
             const newKey = `${uniquePrefix}_${originalKey}`;
             paramMapping.set(originalKey, newKey);
             remappedParameters[newKey] = value;
         }
-    
+
         let remappedSql = result.sql;
-    
+
         for (const [originalKey, newKey] of paramMapping.entries()) {
             remappedSql = remappedSql.replace(
                 new RegExp(`:${originalKey}(?![\\w])`, "g"),
-                `:${newKey}`
+                `:${newKey}`,
             );
             remappedSql = remappedSql.replace(
                 new RegExp(`:...${originalKey}(?![\\w])`, "g"),
-                `:...${newKey}`
+                `:...${newKey}`,
             );
         }
-    
+
         return {
             sql: remappedSql,
             parameters: remappedParameters,
@@ -161,7 +169,7 @@ export abstract class BaseDicomSearchQueryBuilder<
     protected applyTagJoin(
         query: SelectQueryBuilder<TEntity>,
         targetType: "study" | "series" | "instance",
-        tagName?: string
+        tagName?: string,
     ): void {
         if (!tagName) return;
 
@@ -181,18 +189,19 @@ export abstract class BaseDicomSearchQueryBuilder<
                 throw new Error(`Invalid target type: ${targetType}`);
         }
 
-        query.innerJoin(
-            "tag_assignment",
-            "tag_assignment",
-            `tag_assignment.targetType = :targetType AND tag_assignment.targetId = ${targetIdField}`,
-            { targetType }
-        )
-        .innerJoin("tag", "tag", "tag.id = tag_assignment.tagId")
+        query
+            .innerJoin(
+                "tag_assignment",
+                "tag_assignment",
+                `tag_assignment.targetType = :targetType AND tag_assignment.targetId = ${targetIdField}`,
+                { targetType },
+            )
+            .innerJoin("tag", "tag", "tag.id = tag_assignment.tagId");
     }
 
     protected applyTagFilter(
         query: SelectQueryBuilder<TEntity>,
-        tagName?: string
+        tagName?: string,
     ): void {
         if (!tagName) return;
 

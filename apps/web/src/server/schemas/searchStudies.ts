@@ -8,7 +8,12 @@ export const searchStudiesQueryParamSchema = z.object({
     limit: z.coerce.number().int().min(1).max(1000).optional(),
     offset: z.coerce.number().int().min(0).optional(),
     fuzzymatching: z.boolean().optional(),
-    deleteStatus: z.coerce.number().min(0).max(2).optional().default(DICOM_DELETE_STATUS.ACTIVE),
+    deleteStatus: z.coerce
+        .number()
+        .min(0)
+        .max(2)
+        .optional()
+        .default(DICOM_DELETE_STATUS.ACTIVE),
     instanceDeleteStatus: z.coerce.number().min(0).max(2).optional(),
     tagName: z.string().optional(),
     StudyInstanceUID: z.string().optional(),
@@ -22,7 +27,9 @@ export const searchStudiesQueryParamSchema = z.object({
     ModalitiesInStudy: z.string().optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.ModalitiesInStudy.tag]: z.string().optional(),
     ReferringPhysicianName: z.string().optional(),
-    [DICOM_TAG_KEYWORD_REGISTRY.ReferringPhysicianName.tag]: z.string().optional(),
+    [DICOM_TAG_KEYWORD_REGISTRY.ReferringPhysicianName.tag]: z
+        .string()
+        .optional(),
     PatientName: z.string().optional(),
     [DICOM_TAG_KEYWORD_REGISTRY.PatientName.tag]: z.string().optional(),
     PatientID: z.string().optional(),
@@ -31,5 +38,6 @@ export const searchStudiesQueryParamSchema = z.object({
     [DICOM_TAG_KEYWORD_REGISTRY.StudyID.tag]: z.string().optional(),
 });
 
-
-export type SearchStudiesQueryParam = z.infer<typeof searchStudiesQueryParamSchema>;
+export type SearchStudiesQueryParam = z.infer<
+    typeof searchStudiesQueryParamSchema
+>;

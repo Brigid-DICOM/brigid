@@ -1,11 +1,11 @@
 import { Skeleton } from "../ui/skeleton";
-import { 
+import {
     Table,
     TableBody,
     TableCell,
     TableHead,
     TableHeader,
-    TableRow
+    TableRow,
 } from "../ui/table";
 
 interface LoadingDataTableProps {
@@ -13,8 +13,14 @@ interface LoadingDataTableProps {
     rows?: number;
 }
 
-export function LoadingDataTable({ columns = 5, rows = 10 }: LoadingDataTableProps) {
-    const columnKeys = Array.from({ length: columns }, (_, index) => `column-${index}`);
+export function LoadingDataTable({
+    columns = 5,
+    rows = 10,
+}: LoadingDataTableProps) {
+    const columnKeys = Array.from(
+        { length: columns },
+        (_, index) => `column-${index}`,
+    );
     const rowKeys = Array.from({ length: rows }, (_, index) => `row-${index}`);
 
     return (
@@ -42,5 +48,5 @@ export function LoadingDataTable({ columns = 5, rows = 10 }: LoadingDataTablePro
                 </TableBody>
             </Table>
         </div>
-    )
+    );
 }

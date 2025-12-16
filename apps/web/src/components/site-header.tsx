@@ -19,7 +19,7 @@ export function SiteHeader() {
                 <div className="ml-4">
                     <GlobalSearch />
                 </div>
-                
+
                 <div className="ml-auto flex items-center gap-2">
                     <Button
                         variant="ghost"

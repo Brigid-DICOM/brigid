@@ -3,7 +3,12 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-export type DownloadStatus = "pending" | "downloading" | "completed" | "failed" | "cancelled";
+export type DownloadStatus =
+    | "pending"
+    | "downloading"
+    | "completed"
+    | "failed"
+    | "cancelled";
 
 export interface DownloadTask {
     id: string;
@@ -19,15 +24,24 @@ export interface DownloadTask {
     endTime?: number;
     size?: number;
     abortController?: AbortController;
-};
+}
 
 interface DownloadManagerState {
     tasks: DownloadTask[];
 
-    addDownloadTask: (task: Omit<DownloadTask, "id" | "progress" | "startTime">) => string;
+    addDownloadTask: (
+        task: Omit<DownloadTask, "id" | "progress" | "startTime">,
+    ) => string;
     updateTaskProgress: (id: string, progress: number) => void;
-    updateTaskStatus: (id: string, status: DownloadStatus, error?: string) => void;
-    setTaskAbortController: (id: string, abortController: AbortController) => void;
+    updateTaskStatus: (
+        id: string,
+        status: DownloadStatus,
+        error?: string,
+    ) => void;
+    setTaskAbortController: (
+        id: string,
+        abortController: AbortController,
+    ) => void;
     removeTask: (id: string) => void;
     clearCompletedTasks: () => void;
     clearAllTasks: () => void;
@@ -52,7 +66,7 @@ export const useDownloadManagerStore = create<DownloadManagerState>()(
                     id: taskId,
                     progress: 0,
                     startTime: Date.now(),
-                }
+                };
 
                 set((state) => ({
                     tasks: [...state.tasks, task],
@@ -64,31 +78,35 @@ export const useDownloadManagerStore = create<DownloadManagerState>()(
             updateTaskProgress: (id, progress) => {
                 set((state) => ({
                     tasks: state.tasks.map((task) =>
-                        task.id === id ? { ...task, progress } : task
-                    )
+                        task.id === id ? { ...task, progress } : task,
+                    ),
                 }));
             },
 
             updateTaskStatus: (id, status, error) => {
                 set((state) => ({
-                    tasks: state.tasks.map((task) => 
-                        task.id === id ? {
-                            ...task,
-                            status,
-                            error,
-                            endTime: status === "completed" || status === "failed" ? Date.now() : task.endTime,
-                        }
-                        : task
-                    )
+                    tasks: state.tasks.map((task) =>
+                        task.id === id
+                            ? {
+                                  ...task,
+                                  status,
+                                  error,
+                                  endTime:
+                                      status === "completed" ||
+                                      status === "failed"
+                                          ? Date.now()
+                                          : task.endTime,
+                              }
+                            : task,
+                    ),
                 }));
-
             },
 
             setTaskAbortController: (id, abortController) => {
                 set((state) => ({
                     tasks: state.tasks.map((task) =>
-                        task.id === id ? { ...task, abortController } : task
-                    )
+                        task.id === id ? { ...task, abortController } : task,
+                    ),
                 }));
             },
 
@@ -100,10 +118,14 @@ export const useDownloadManagerStore = create<DownloadManagerState>()(
 
             clearCompletedTasks: () => {
                 set((state) => ({
-                    tasks: state.tasks.filter((task) => task.status !== "completed" && task.status !== "failed"),
+                    tasks: state.tasks.filter(
+                        (task) =>
+                            task.status !== "completed" &&
+                            task.status !== "failed",
+                    ),
                 }));
             },
-            
+
             clearAllTasks: () => {
                 set({
                     tasks: [],
@@ -113,7 +135,7 @@ export const useDownloadManagerStore = create<DownloadManagerState>()(
             abortAllActiveTasks: () => {
                 const { tasks } = get();
 
-                tasks.forEach(task => {
+                tasks.forEach((task) => {
                     if (task.status === "downloading" && task.abortController) {
                         if (!task.abortController.signal.aborted) {
                             task.abortController.abort();
@@ -122,37 +144,39 @@ export const useDownloadManagerStore = create<DownloadManagerState>()(
                 });
 
                 set((state) => ({
-                    tasks: state.tasks.map(task =>
-                        task.status === "downloading" ? {
-                            ...task,
-                            status: "cancelled",
-                        } : task
-                    )
-                }))
+                    tasks: state.tasks.map((task) =>
+                        task.status === "downloading"
+                            ? {
+                                  ...task,
+                                  status: "cancelled",
+                              }
+                            : task,
+                    ),
+                }));
             },
 
             getActiveTasksCount: () => {
                 return get().tasks.filter(
-                    (task) => task.status !== "pending" && task.status !== "downloading"
+                    (task) =>
+                        task.status !== "pending" &&
+                        task.status !== "downloading",
                 ).length;
             },
 
             getPendingTasksCount: () => {
-                return get().tasks.filter(
-                    (task) => task.status === "pending"
-                ).length;
+                return get().tasks.filter((task) => task.status === "pending")
+                    .length;
             },
 
             getDownloadingTasksCount: () => {
                 return get().tasks.filter(
-                    (task) => task.status === "downloading"
+                    (task) => task.status === "downloading",
                 ).length;
             },
 
             getCompletedTasksCount: () => {
-                return get().tasks.filter(
-                    (task) => task.status === "completed"
-                ).length;
+                return get().tasks.filter((task) => task.status === "completed")
+                    .length;
             },
 
             getAllTasksCount: () => {
@@ -161,13 +185,18 @@ export const useDownloadManagerStore = create<DownloadManagerState>()(
 
             hasOnlyCompletedOrFailedTasks: () => {
                 const { tasks } = get();
-                return tasks.length > 0 && tasks.every(task =>
-                    task.status === "completed" || task.status === "failed"
+                return (
+                    tasks.length > 0 &&
+                    tasks.every(
+                        (task) =>
+                            task.status === "completed" ||
+                            task.status === "failed",
+                    )
                 );
-            }
+            },
         }),
         {
             name: "download-manager-store",
-        }
-    )
+        },
+    ),
 );

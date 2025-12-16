@@ -1,4 +1,10 @@
-import { createReadStream, createWriteStream, type ReadStream, statSync, writeFileSync } from "node:fs";
+import {
+    createReadStream,
+    createWriteStream,
+    type ReadStream,
+    statSync,
+    writeFileSync,
+} from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
@@ -12,32 +18,32 @@ import {
 import { join } from "desm";
 import fsE from "fs-extra";
 import { HTTPException } from "hono/http-exception";
-import type { AttributesClass} from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Attributes";
+import type { AttributesClass } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Attributes";
 import type { ImageTranscodeParamClass } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/ImageTranscodeParam";
 import type { Transcoder$Format } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/img/Transcoder$Format";
 import tmp from "tmp";
 import type {
     ConvertOptions,
     ConvertResult,
-    DicomSource,OutputFormat 
+    DicomSource,
+    OutputFormat,
 } from "@/server/types/dicom/convert";
 import { appLogger } from "@/server/utils/logger";
 import type { DicomToImageConverter } from "./covert.interface";
 
 const logger = appLogger.child({
-    module: "BaseConverter"
+    module: "BaseConverter",
 });
 
 export abstract class BaseConverter implements DicomToImageConverter {
-
     private dicomDataset: AttributesClass | null = null;
 
     private static magickWasmPath: string | null = null;
-    
+
     public abstract getMimeType(): string;
-    
+
     protected abstract getTranscodeFormat(): Promise<Transcoder$Format>;
-    
+
     protected abstract getMagickFormat(): MagickFormat;
 
     protected abstract getFileExtension(): string;
@@ -70,7 +76,10 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 await DicomFileInputStream.newInstanceAsync(
                     path.resolve(tmpFile.name),
                 );
-            this.dicomDataset = await dicomFileInputStream.readDataset(-1, Tag.PixelData);
+            this.dicomDataset = await dicomFileInputStream.readDataset(
+                -1,
+                Tag.PixelData,
+            );
             const numberOfFramesStr = await this.dicomDataset?.getString(
                 Tag.NumberOfFrames,
             );
@@ -84,8 +93,12 @@ export abstract class BaseConverter implements DicomToImageConverter {
 
             const frameNumbers = (() => {
                 if (!options.frameNumber) {
-                    return numberOfFrames > 1 ? 
-                    Array.from({ length: numberOfFrames }, (_, i) => i + 1) : [1];
+                    return numberOfFrames > 1
+                        ? Array.from(
+                              { length: numberOfFrames },
+                              (_, i) => i + 1,
+                          )
+                        : [1];
                 }
 
                 if (Array.isArray(options.frameNumber)) {
@@ -98,7 +111,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
             for (const frameNumber of frameNumbers) {
                 if (frameNumber > numberOfFrames || frameNumber < 1) {
                     throw new HTTPException(400, {
-                        message: `Invalid frame number: ${frameNumber}. Valid range: 1-${numberOfFrames}`
+                        message: `Invalid frame number: ${frameNumber}. Valid range: 1-${numberOfFrames}`,
                     });
                 }
             }
@@ -110,20 +123,26 @@ export abstract class BaseConverter implements DicomToImageConverter {
                     tmpFile.name,
                     destFile,
                     imageTranscodeParam,
-                    frameNumber
+                    frameNumber,
                 );
 
                 await this.handleConvertOptions(destFile, options);
                 const fileStream = createReadStream(destFile);
                 fileStream.once("close", async () => {
                     await fsE.remove(destFile);
-                    logger.info(`Deleted converted file successfully: ${destFile}`);
-                    
+                    logger.info(
+                        `Deleted converted file successfully: ${destFile}`,
+                    );
+
                     if (frameNumber === frameNumbers[frameNumbers.length - 1]) {
                         // Clean up temp file on last frame
-                        fsE.remove(tmpFile.name).then(() => {
-                            logger.info(`Deleted temp file successfully: ${tmpFile.name}`);
-                        }).catch();
+                        fsE.remove(tmpFile.name)
+                            .then(() => {
+                                logger.info(
+                                    `Deleted temp file successfully: ${tmpFile.name}`,
+                                );
+                            })
+                            .catch();
                     }
                 });
 
@@ -137,7 +156,7 @@ export abstract class BaseConverter implements DicomToImageConverter {
             return {
                 frames,
                 contentType: this.getMimeType() as OutputFormat,
-            }
+            };
         }
     }
 
@@ -198,7 +217,12 @@ export abstract class BaseConverter implements DicomToImageConverter {
                 await this.handleQuality(image, options);
                 await this.handleViewport(image, options);
                 await this.handleImageICCProfile(image, options);
-                await this.handleRegion(image, options, image.width, image.height);
+                await this.handleRegion(
+                    image,
+                    options,
+                    image.width,
+                    image.height,
+                );
 
                 await image.write(this.getMagickFormat(), async (data) => {
                     return writeFileSync(path.resolve(filename), data);
@@ -273,11 +297,18 @@ export abstract class BaseConverter implements DicomToImageConverter {
                     );
                     let iccProfileBytes: Buffer | null = null;
                     if (this.dicomDataset) {
-                        iccProfileBytes = await this.dicomDataset.getBytes(Tag.ICCProfile);
+                        iccProfileBytes = await this.dicomDataset.getBytes(
+                            Tag.ICCProfile,
+                        );
                         if (!iccProfileBytes) {
-                            const opticalPath = await this.dicomDataset.getNestedDataset(Tag.OpticalPathSequence);
+                            const opticalPath =
+                                await this.dicomDataset.getNestedDataset(
+                                    Tag.OpticalPathSequence,
+                                );
                             if (opticalPath) {
-                                iccProfileBytes = await opticalPath.getBytes(Tag.ICCProfile);
+                                iccProfileBytes = await opticalPath.getBytes(
+                                    Tag.ICCProfile,
+                                );
                             }
                         }
                     }
@@ -339,8 +370,10 @@ export abstract class BaseConverter implements DicomToImageConverter {
         if (options.region) {
             const cropX = options.region.xmin * imageWidth;
             const cropY = options.region.ymin * imageHeight;
-            const cropWidth = (options.region.xmax - options.region.xmin) * imageWidth;
-            const cropHeight = (options.region.ymax - options.region.ymin) * imageHeight;
+            const cropWidth =
+                (options.region.xmax - options.region.xmin) * imageWidth;
+            const cropHeight =
+                (options.region.ymax - options.region.ymin) * imageHeight;
             image.crop(new MagickGeometry(cropX, cropY, cropWidth, cropHeight));
         }
     }
@@ -352,14 +385,14 @@ export abstract class BaseConverter implements DicomToImageConverter {
 
         const possiblePaths = [
             path.resolve(
-                "node_modules/@imagemagick/magick-wasm/dist/magick.wasm"
+                "node_modules/@imagemagick/magick-wasm/dist/magick.wasm",
             ),
             path.resolve(
-                "../../node_modules/@imagemagick/magick-wasm/dist/magick.wasm"
+                "../../node_modules/@imagemagick/magick-wasm/dist/magick.wasm",
             ),
             path.resolve(
-                "apps/web/node_modules/@imagemagick/magick-wasm/dist/magick.wasm"
-            )
+                "apps/web/node_modules/@imagemagick/magick-wasm/dist/magick.wasm",
+            ),
         ];
 
         for (const wasmPath of possiblePaths) {

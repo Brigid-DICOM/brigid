@@ -4,7 +4,7 @@ import {
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
-    ValueTransformer,
+    type ValueTransformer,
 } from "typeorm";
 
 const transformer: Record<"date" | "bigint", ValueTransformer> = {

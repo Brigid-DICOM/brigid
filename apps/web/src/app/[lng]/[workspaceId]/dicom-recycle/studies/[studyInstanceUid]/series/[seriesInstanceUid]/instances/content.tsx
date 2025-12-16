@@ -45,7 +45,7 @@ export default function DicomRecycleInstancesContent({
     useEffect(() => {
         setMounted(true);
     }, []);
-    
+
     const queryClient = getQueryClient();
     const ITEM_PER_PAGE = 10;
     const layoutMode = useLayoutStore((state) => state.layoutMode);
@@ -55,7 +55,9 @@ export default function DicomRecycleInstancesContent({
         setSearchType,
         getSearchConditionsForType,
     } = useGlobalSearchStore();
-    const searchConditions  = mounted ? getSearchConditionsForType("dicom-recycle-instance") : {};
+    const searchConditions = mounted
+        ? getSearchConditionsForType("dicom-recycle-instance")
+        : {};
 
     const {
         selectedInstanceIds,
@@ -125,14 +127,14 @@ export default function DicomRecycleInstancesContent({
     }, [instances]);
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedInstanceIds();
-    const isAllSelected = useMemo(() => 
-        currentPageInstanceUids.length > 0 &&
-        currentPageInstanceUids.every((instanceId) =>
-            selectedInstanceIds.has(instanceId as string),
-        ), 
-        [currentPageInstanceUids, selectedInstanceIds]
+    const isAllSelected = useMemo(
+        () =>
+            currentPageInstanceUids.length > 0 &&
+            currentPageInstanceUids.every((instanceId) =>
+                selectedInstanceIds.has(instanceId as string),
+            ),
+        [currentPageInstanceUids, selectedInstanceIds],
     );
-        
 
     const { mutate: restoreDicomInstances } = useMutation({
         ...restoreDicomInstanceMutation({
@@ -189,7 +191,14 @@ export default function DicomRecycleInstancesContent({
     useEffect(() => {
         handleResetToFirstPage();
         queryClient.invalidateQueries({
-            queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid, 0, ITEM_PER_PAGE],
+            queryKey: [
+                "dicom-instance",
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                0,
+                ITEM_PER_PAGE,
+            ],
         });
     }, [searchConditions]);
 
@@ -205,15 +214,14 @@ export default function DicomRecycleInstancesContent({
         if (selectedCount === 0) return;
 
         restoreDicomInstances();
-    }
+    };
 
     const handleDelete = () => {
         if (selectedCount === 0) return;
 
         deleteDicomInstances();
-    }
+    };
 
-    
     if (error) {
         return (
             <EmptyState
@@ -227,12 +235,17 @@ export default function DicomRecycleInstancesContent({
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8 flex flex-col items-start space-x-4">
                 <div className="flex flex-1 items-center space-x-4">
-                    <Link href={`/${workspaceId}/dicom-recycle/studies/${studyInstanceUid}/series`}>
-                        <Button 
-                            variant="outline" 
+                    <Link
+                        href={`/${workspaceId}/dicom-recycle/studies/${studyInstanceUid}/series`}
+                    >
+                        <Button
+                            variant="outline"
                             className="flex items-center"
                             onClick={() => {
-                                setSearchConditionsForType("dicom-recycle-instance", {});
+                                setSearchConditionsForType(
+                                    "dicom-recycle-instance",
+                                    {},
+                                );
                             }}
                         >
                             <ArrowLeftIcon className="size-4" />

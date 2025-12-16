@@ -6,7 +6,10 @@ interface DicomSeriesSelectionState {
 
     lastSelectedId: string | null;
 
-    toggleSeriesSelection: (seriesInstanceUid: string, ctrlKey?: boolean) => void;
+    toggleSeriesSelection: (
+        seriesInstanceUid: string,
+        ctrlKey?: boolean,
+    ) => void;
     selectSeries: (seriesInstanceUid: string) => void;
     deselectSeries: (seriesInstanceUid: string) => void;
     clearSelection: () => void;
@@ -33,7 +36,7 @@ export const useDicomSeriesSelectionStore = create<DicomSeriesSelectionState>()(
                     // 如果沒按 Ctrl 鍵，則清空其他選取
                     newSelectedIds.clear();
                 }
-                
+
                 if (
                     selectedSeriesIds.has(seriesInstanceUid) &&
                     newSelectedIds.size > 0
@@ -42,7 +45,7 @@ export const useDicomSeriesSelectionStore = create<DicomSeriesSelectionState>()(
                 } else {
                     newSelectedIds.add(seriesInstanceUid);
                 }
-                
+
                 set({
                     selectedSeriesIds: newSelectedIds,
                     lastSelectedId: newSelectedIds.has(seriesInstanceUid)
@@ -86,7 +89,8 @@ export const useDicomSeriesSelectionStore = create<DicomSeriesSelectionState>()(
                 set({
                     selectedSeriesIds: new Set(seriesInstanceUids),
                     lastSelectedId:
-                        seriesInstanceUids[seriesInstanceUids.length - 1] || null,
+                        seriesInstanceUids[seriesInstanceUids.length - 1] ||
+                        null,
                 });
             },
 
@@ -100,10 +104,10 @@ export const useDicomSeriesSelectionStore = create<DicomSeriesSelectionState>()(
 
             getSelectedSeriesIds: () => {
                 return Array.from(get().selectedSeriesIds);
-            }
+            },
         }),
         {
             name: "dicom-series-selection-store",
-        }
-    )
+        },
+    ),
 );

@@ -139,7 +139,9 @@ export function DicomRecycleInstanceContextMenu({
                 <ContextMenuContent className="w-60">
                     {selectedIds.length > 1 && (
                         <ContextMenuLabel>
-                            {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
+                            {t("dicom.contextMenu.selectedItems", {
+                                count: selectedIds.length,
+                            })}
                         </ContextMenuLabel>
                     )}
 

@@ -19,39 +19,40 @@ interface ShareManagementDialogState {
     closeDialog: () => void;
 }
 
-export const useShareManagementDialogStore = create<ShareManagementDialogState>()(
-    devtools(
-        (set) => ({
-            isOpen: false,
-            workspaceId: null,
-            targetType: null,
-            targetIds: [],
+export const useShareManagementDialogStore =
+    create<ShareManagementDialogState>()(
+        devtools(
+            (set) => ({
+                isOpen: false,
+                workspaceId: null,
+                targetType: null,
+                targetIds: [],
 
-            openDialog: ({ workspaceId, targetType, targetIds }) => {
-                set({
-                    isOpen: true,
-                    workspaceId,
-                    targetType,
-                    targetIds
-                });
-            },
-
-            closeDialog: () => {
-                set({
-                    isOpen: false,
-                });
-
-                setTimeout(() => {
+                openDialog: ({ workspaceId, targetType, targetIds }) => {
                     set({
-                        workspaceId: null,
-                        targetType: null,
-                        targetIds: []
+                        isOpen: true,
+                        workspaceId,
+                        targetType,
+                        targetIds,
                     });
-                }, 200);
-            }
-        }),
-        {
-            name: "share-management-dialog-store"
-        }
-    )
-)
+                },
+
+                closeDialog: () => {
+                    set({
+                        isOpen: false,
+                    });
+
+                    setTimeout(() => {
+                        set({
+                            workspaceId: null,
+                            targetType: null,
+                            targetIds: [],
+                        });
+                    }, 200);
+                },
+            }),
+            {
+                name: "share-management-dialog-store",
+            },
+        ),
+    );

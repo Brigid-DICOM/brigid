@@ -18,17 +18,21 @@ const retrieveShareInstanceRoute = new Hono().get(
     }),
     zValidator("header", wadoRsHeaderSchema),
     zValidator("query", wadoRsQueryParamSchema),
-    zValidator("param", z.object({
-        studyInstanceUid: z.string().describe("The study instance UID"),
-        seriesInstanceUid: z.string().describe("The series instance UID"),
-        sopInstanceUid: z.string().describe("The sop instance UID"),
-    })),
+    zValidator(
+        "param",
+        z.object({
+            studyInstanceUid: z.string().describe("The study instance UID"),
+            seriesInstanceUid: z.string().describe("The series instance UID"),
+            sopInstanceUid: z.string().describe("The sop instance UID"),
+        }),
+    ),
     setUserMiddleware,
     verifyShareLinkToken,
     verifyInstanceAccess,
     async (c) => {
         const workspaceId = c.get("workspaceId");
-        const { studyInstanceUid, seriesInstanceUid, sopInstanceUid } = c.req.valid("param");
+        const { studyInstanceUid, seriesInstanceUid, sopInstanceUid } =
+            c.req.valid("param");
         const { accept } = c.req.valid("header");
 
         return await retrieveInstanceHandler(c, {
@@ -36,9 +40,9 @@ const retrieveShareInstanceRoute = new Hono().get(
             studyInstanceUid,
             seriesInstanceUid,
             sopInstanceUid,
-            accept
+            accept,
         });
-    }
-)
+    },
+);
 
 export default retrieveShareInstanceRoute;

@@ -10,7 +10,9 @@ interface DicomUploadContentProps {
     workspaceId: string;
 }
 
-export default function DicomUploadContent({ workspaceId }: DicomUploadContentProps) {
+export default function DicomUploadContent({
+    workspaceId,
+}: DicomUploadContentProps) {
     const { t } = useT("translation");
     const { addFiles } = useUploadHandler({ workspaceId });
 
@@ -18,15 +20,13 @@ export default function DicomUploadContent({ workspaceId }: DicomUploadContentPr
         async (files: File[]) => {
             await addFiles(files);
         },
-        [addFiles]
-    )
+        [addFiles],
+    );
 
     return (
         <div className="container p-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">
-                    {t("upload.title")}
-                </h1>
+                <h1 className="text-3xl font-bold mb-2">{t("upload.title")}</h1>
             </div>
 
             <div className="space-y-6">
@@ -35,5 +35,5 @@ export default function DicomUploadContent({ workspaceId }: DicomUploadContentPr
                 <UploadTaskListInLine />
             </div>
         </div>
-    )
+    );
 }

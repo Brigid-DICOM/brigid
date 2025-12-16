@@ -19,18 +19,20 @@ export const useLayoutStore = create<LayoutState>()(
                 setLayoutMode: (layoutMode: LayoutMode) => {
                     set({ layoutMode });
                 },
-                
+
                 toggleLayoutMode: () => {
                     const { layoutMode } = get();
-                    set({ layoutMode: layoutMode === "grid" ? "list" : "grid" });
+                    set({
+                        layoutMode: layoutMode === "grid" ? "list" : "grid",
+                    });
                 },
             }),
             {
                 name: "dicom-layout-store",
-            }
+            },
         ),
         {
             name: "dicom-layout-store",
-        }
-    )
-)
+        },
+    ),
+);

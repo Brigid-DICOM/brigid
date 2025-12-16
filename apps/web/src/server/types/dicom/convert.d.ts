@@ -3,8 +3,8 @@ import type { ReadStream } from "node:fs";
 export type OutputFormat = "jpeg" | "jp2" | "png" | "raw";
 
 export type DicomSource =
-    | { kind: "filePath", path: string }
-    | { kind: "stream", stream: Readable };
+    | { kind: "filePath"; path: string }
+    | { kind: "stream"; stream: Readable };
 
 export type ConvertResult = {
     contentType: OutputFormat;
@@ -13,7 +13,7 @@ export type ConvertResult = {
         index: number;
         size?: number;
     }[];
-}
+};
 
 export type ConvertOptions = {
     quality?: number;
@@ -24,13 +24,13 @@ export type ConvertOptions = {
     resize?: {
         width?: number;
         height?: number;
-    },
+    };
     crop?: {
         x?: number;
         y?: number;
         width?: number;
         height?: number;
-    },
+    };
     profile?: "no" | "yes" | "srgb" | "adobergb" | "rommrgb" | "displayp3";
     region?: {
         xmin: number;
@@ -38,4 +38,4 @@ export type ConvertOptions = {
         xmax: number;
         ymax: number;
     };
-}
+};

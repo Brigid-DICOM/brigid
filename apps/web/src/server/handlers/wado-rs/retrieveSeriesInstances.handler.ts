@@ -28,11 +28,11 @@ export const retrieveSeriesInstancesHandler = async (
 
         const instances: InstanceEntity[] = [];
         let batch: InstanceEntity[] = [];
-        
+
         let lastUpdatedAt: Date | undefined;
         let lastId: string | undefined;
         let keepPaging = true;
-        
+
         const seriesService = new SeriesService();
         batch = await seriesService.getSeriesInstancesByCursor({
             workspaceId,
@@ -42,7 +42,7 @@ export const retrieveSeriesInstancesHandler = async (
             lastUpdatedAt,
             lastId,
         });
-        
+
         if (batch.length === 0) {
             return c.json(
                 {

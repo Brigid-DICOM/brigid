@@ -16,7 +16,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { getQueryClient } from "@/react-query/get-query-client";
@@ -43,15 +43,15 @@ export function ShareCreateTagDialog({
     const queryClient = getQueryClient();
     const [tagName, setTagName] = useState("");
     const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
-    
 
     const handleTagNameChange = (value: string) => {
         setTagName(value);
-    }
+    };
 
-    const { mutate: assignShareTag, isPending: isAssigningShareTag } = useMutation({
-        ...assignShareTagMutation(),
-    });
+    const { mutate: assignShareTag, isPending: isAssigningShareTag } =
+        useMutation({
+            ...assignShareTagMutation(),
+        });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,31 +68,40 @@ export function ShareCreateTagDialog({
             id: toastId,
         });
 
-        assignShareTag({
-            token,
-            tags: [{
-                name: tagName.trim(),
-                color: selectedColor,
-            }],
-            targets: [{
-                targetType,
-                targetId,
-            }],
-            password: password ?? undefined,
-        }, {
-            onSuccess: () => {
-                toast.success(t("createTagDialog.messages.assigningSuccess"));
-                queryClient.invalidateQueries({
-                    queryKey: ["share-tags", token, targetType, targetId],
-                });
-                toast.dismiss(toastId);
+        assignShareTag(
+            {
+                token,
+                tags: [
+                    {
+                        name: tagName.trim(),
+                        color: selectedColor,
+                    },
+                ],
+                targets: [
+                    {
+                        targetType,
+                        targetId,
+                    },
+                ],
+                password: password ?? undefined,
             },
-            onError: () => {
-                toast.error(t("createTagDialog.messages.assigningError"));
-                toast.dismiss(toastId);
-            }
-        })
-    }
+            {
+                onSuccess: () => {
+                    toast.success(
+                        t("createTagDialog.messages.assigningSuccess"),
+                    );
+                    queryClient.invalidateQueries({
+                        queryKey: ["share-tags", token, targetType, targetId],
+                    });
+                    toast.dismiss(toastId);
+                },
+                onError: () => {
+                    toast.error(t("createTagDialog.messages.assigningError"));
+                    toast.dismiss(toastId);
+                },
+            },
+        );
+    };
 
     const handleOpenChange = (open: boolean) => {
         if (!open) {
@@ -101,7 +110,7 @@ export function ShareCreateTagDialog({
         }
 
         onOpenChange(open);
-    }
+    };
 
     const isLoading = isAssigningShareTag;
 
@@ -117,14 +126,21 @@ export function ShareCreateTagDialog({
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor="tag-name" className="text-sm font-medium">
+                        <label
+                            htmlFor="tag-name"
+                            className="text-sm font-medium"
+                        >
                             {t("createTagDialog.tagName")}
                         </label>
-                        <Input 
+                        <Input
                             id="tag-name"
-                            placeholder={t("createTagDialog.tagNamePlaceholder")}
+                            placeholder={t(
+                                "createTagDialog.tagNamePlaceholder",
+                            )}
                             value={tagName}
-                            onChange={e => handleTagNameChange(e.target.value)}
+                            onChange={(e) =>
+                                handleTagNameChange(e.target.value)
+                            }
                             disabled={isLoading}
                             maxLength={255}
                         />
@@ -136,7 +152,9 @@ export function ShareCreateTagDialog({
                         disabled={isLoading}
                         labels={{
                             title: t("createTagDialog.colorPicker.title"),
-                            customColorHint: t("createTagDialog.colorPicker.customColorHint"),
+                            customColorHint: t(
+                                "createTagDialog.colorPicker.customColorHint",
+                            ),
                         }}
                     />
 
@@ -150,13 +168,14 @@ export function ShareCreateTagDialog({
                             {t("common.cancel")}
                         </Button>
                         <Button type="submit" disabled={isLoading}>
-                            {isLoading ? t("common.loading"): t("createTagDialog.assignTag")}
+                            {isLoading
+                                ? t("common.loading")
+                                : t("createTagDialog.assignTag")}
                         </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>,
         document.body,
-    )
+    );
 }
-

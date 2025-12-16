@@ -51,7 +51,8 @@ export class WorkspaceService {
 
     constructor() {
         this.workspaceRepository = AppDataSource.getRepository(WorkspaceEntity);
-        this.userWorkspaceRepository = AppDataSource.getRepository(UserWorkspaceEntity);
+        this.userWorkspaceRepository =
+            AppDataSource.getRepository(UserWorkspaceEntity);
     }
 
     async createWorkspace({ name, ownerId }: CreateWorkspaceParams) {
@@ -59,51 +60,62 @@ export class WorkspaceService {
         return await this.workspaceRepository.save(workspace);
     }
 
-    async createUserWorkspace({ 
-        userId, 
-        workspaceId, 
-        role, 
+    async createUserWorkspace({
+        userId,
+        workspaceId,
+        role,
         permissions,
-        isDefault 
+        isDefault,
     }: CreateUserWorkspaceParams) {
         const userWorkspace = this.userWorkspaceRepository.create({
             userId,
             workspaceId,
             role,
             permissions,
-            isDefault
+            isDefault,
         });
 
         return await this.userWorkspaceRepository.save(userWorkspace);
     }
 
-    async createDefaultWorkspace({ userId, userName }: CreateDefaultWorkspaceParams) {
+    async createDefaultWorkspace({
+        userId,
+        userName,
+    }: CreateDefaultWorkspaceParams) {
         const existingWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
                 userId,
-                isDefault: true
-            }
+                isDefault: true,
+            },
         });
 
         if (existingWorkspace) {
             throw new Error("Default workspace already exists");
         }
 
-        const workspaceName = userName ? `${userName}'s Workspace` : "My Default Workspace";
-        const workspace = await this.createWorkspace({ name: workspaceName, ownerId: userId });
+        const workspaceName = userName
+            ? `${userName}'s Workspace`
+            : "My Default Workspace";
+        const workspace = await this.createWorkspace({
+            name: workspaceName,
+            ownerId: userId,
+        });
 
         const userWorkspace = await this.createUserWorkspace({
             userId,
             workspaceId: workspace.id,
             role: "owner",
             permissions: ROLE_PERMISSION_TEMPLATES.owner,
-            isDefault: true
+            isDefault: true,
         });
 
         return { workspace, userWorkspace };
     }
 
-    async createWorkspaceForUser({ userId, name }: CreateWorkspaceForUserParams) {
+    async createWorkspaceForUser({
+        userId,
+        name,
+    }: CreateWorkspaceForUserParams) {
         const workspace = await this.createWorkspace({ name, ownerId: userId });
 
         const userWorkspace = await this.createUserWorkspace({
@@ -111,7 +123,7 @@ export class WorkspaceService {
             workspaceId: workspace.id,
             role: "owner",
             permissions: ROLE_PERMISSION_TEMPLATES.owner,
-            isDefault: false
+            isDefault: false,
         });
 
         return {
@@ -123,8 +135,8 @@ export class WorkspaceService {
             membership: {
                 role: userWorkspace.role,
                 permissions: userWorkspace.permissions,
-                isDefault: false
-            }
+                isDefault: false,
+            },
         };
     }
 
@@ -134,27 +146,32 @@ export class WorkspaceService {
 
         return await this.workspaceRepository.findOne({
             where: {
-                id: workspaceId
-            }
+                id: workspaceId,
+            },
         });
     }
 
     async getOrCreateSystemWorkspace() {
-        const SYSTEM_WORKSPACE_ID = uuidV5("brigid-system-workspace",NAMESPACE_FOR_UUID);
+        const SYSTEM_WORKSPACE_ID = uuidV5(
+            "brigid-system-workspace",
+            NAMESPACE_FOR_UUID,
+        );
         const userService = new UserService();
         const systemUser = await userService.getGuestUser();
 
-        let workspace = await AppDataSource.getRepository(WorkspaceEntity).findOne({
+        let workspace = await AppDataSource.getRepository(
+            WorkspaceEntity,
+        ).findOne({
             where: {
-                id: SYSTEM_WORKSPACE_ID
-            }
+                id: SYSTEM_WORKSPACE_ID,
+            },
         });
 
         if (!workspace) {
             workspace = await this.workspaceRepository.save({
                 id: SYSTEM_WORKSPACE_ID,
                 name: "System Default Workspace",
-                ownerId: systemUser.id
+                ownerId: systemUser.id,
             });
 
             await this.userWorkspaceRepository.save({
@@ -162,7 +179,7 @@ export class WorkspaceService {
                 workspaceId: workspace.id,
                 role: "owner",
                 permissions: ROLE_PERMISSION_TEMPLATES.owner,
-                isDefault: true
+                isDefault: true,
             });
         }
 
@@ -190,8 +207,8 @@ export class WorkspaceService {
             membership: {
                 role: userWorkspace.role,
                 permissions: userWorkspace.permissions,
-                isDefault: userWorkspace.isDefault
-            }
+                isDefault: userWorkspace.isDefault,
+            },
         }));
     }
 
@@ -207,10 +224,10 @@ export class WorkspaceService {
                 userId,
                 workspaceId,
                 workspace: {
-                    deletedAt: IsNull()
-                }
+                    deletedAt: IsNull(),
+                },
             },
-            relations: ["workspace"]
+            relations: ["workspace"],
         });
 
         return userWorkspace;
@@ -224,12 +241,12 @@ export class WorkspaceService {
 
         await this.userWorkspaceRepository.update(
             { userId },
-            { isDefault: false }
+            { isDefault: false },
         );
 
         await this.userWorkspaceRepository.update(
             { userId, workspaceId },
-            { isDefault: true }
+            { isDefault: true },
         );
     }
 
@@ -239,8 +256,8 @@ export class WorkspaceService {
 
         const workspace = await this.workspaceRepository.findOne({
             where: {
-                id: workspaceId
-            }
+                id: workspaceId,
+            },
         });
 
         if (!workspace) return null;
@@ -261,8 +278,8 @@ export class WorkspaceService {
         const userWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
                 userId,
-                workspaceId
-            }
+                workspaceId,
+            },
         });
 
         return userWorkspace?.permissions ?? 0;
@@ -275,25 +292,26 @@ export class WorkspaceService {
         const userWorkspace = await this.userWorkspaceRepository.findOne({
             where: {
                 userId,
-                isDefault: true
+                isDefault: true,
             },
-            relations: ["workspace"]
+            relations: ["workspace"],
         });
 
         if (!userWorkspace || userWorkspace?.workspace === null) {
-            const nextDefaultWorkspace = await this.userWorkspaceRepository.findOne({
-                where: {
-                    userId,
-                    isDefault: false,
-                    workspace: {
-                        deletedAt: IsNull()
-                    }
-                },
-                order: {
-                    createdAt: "DESC"
-                },
-                relations: ["workspace"]
-            });
+            const nextDefaultWorkspace =
+                await this.userWorkspaceRepository.findOne({
+                    where: {
+                        userId,
+                        isDefault: false,
+                        workspace: {
+                            deletedAt: IsNull(),
+                        },
+                    },
+                    order: {
+                        createdAt: "DESC",
+                    },
+                    relations: ["workspace"],
+                });
 
             if (!nextDefaultWorkspace) {
                 return null;
@@ -301,7 +319,7 @@ export class WorkspaceService {
 
             await this.userWorkspaceRepository.update(
                 { id: nextDefaultWorkspace.id },
-                { isDefault: true }
+                { isDefault: true },
             );
 
             return nextDefaultWorkspace;
@@ -316,13 +334,13 @@ export class WorkspaceService {
 
         const members = await this.userWorkspaceRepository.find({
             where: {
-                workspaceId
+                workspaceId,
             },
             relations: ["user"],
-            order: { createdAt: "DESC" }
+            order: { createdAt: "DESC" },
         });
 
-        return members.map(member => ({
+        return members.map((member) => ({
             userId: member.user.id,
             name: member.user.name,
             email: member.user.email,
@@ -342,22 +360,23 @@ export class WorkspaceService {
         const existing = await this.userWorkspaceRepository.findOne({
             where: {
                 workspaceId,
-                userId
-            }
+                userId,
+            },
         });
 
         if (existing) {
             throw new Error("User already a member of this workspace");
         }
 
-        const permissions = ROLE_PERMISSION_TEMPLATES[role] || ROLE_PERMISSION_TEMPLATES.viewer;
-        
+        const permissions =
+            ROLE_PERMISSION_TEMPLATES[role] || ROLE_PERMISSION_TEMPLATES.viewer;
+
         return await this.createUserWorkspace({
             userId,
             workspaceId,
             role,
             permissions,
-            isDefault: false
+            isDefault: false,
         });
     }
 
@@ -369,26 +388,30 @@ export class WorkspaceService {
         const existingUsers = await this.userWorkspaceRepository.find({
             where: {
                 workspaceId,
-                userId: In(users.map(user => user.userId))
-            }
+                userId: In(users.map((user) => user.userId)),
+            },
         });
 
-        const existingUserIds = existingUsers.map(user => user.userId);
+        const existingUserIds = existingUsers.map((user) => user.userId);
 
-        const newUsers = users.filter(user => !existingUserIds.includes(user.userId));
+        const newUsers = users.filter(
+            (user) => !existingUserIds.includes(user.userId),
+        );
 
         if (newUsers.length === 0) {
             return [];
         }
 
-        const newUserWorkspaces = newUsers.map(user => {
-            const permissions = ROLE_PERMISSION_TEMPLATES[user.role] || ROLE_PERMISSION_TEMPLATES.viewer;
+        const newUserWorkspaces = newUsers.map((user) => {
+            const permissions =
+                ROLE_PERMISSION_TEMPLATES[user.role] ||
+                ROLE_PERMISSION_TEMPLATES.viewer;
             return this.userWorkspaceRepository.create({
                 userId: user.userId,
                 workspaceId,
                 role: user.role,
                 permissions,
-                isDefault: false
+                isDefault: false,
             });
         });
 
@@ -406,9 +429,10 @@ export class WorkspaceService {
 
             return this.userWorkspaceRepository.update(
                 {
-                    workspaceId, userId: user.userId
+                    workspaceId,
+                    userId: user.userId,
                 },
-                { role: user.role, permissions }
+                { role: user.role, permissions },
             );
         });
 
@@ -434,7 +458,9 @@ export class WorkspaceService {
     async removeMembers(workspaceId: string, userIds: string[]) {
         const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
         if (!workspaceIdSuccess) return;
-        const { success: userIdsSuccess } = z.array(z.uuid()).safeParse(userIds);
+        const { success: userIdsSuccess } = z
+            .array(z.uuid())
+            .safeParse(userIds);
         if (!userIdsSuccess) return;
 
         const workspace = await this.getWorkspaceById(workspaceId);
@@ -445,11 +471,15 @@ export class WorkspaceService {
 
         await this.userWorkspaceRepository.delete({
             workspaceId,
-            userId: In(userIds)
+            userId: In(userIds),
         });
     }
 
-    async updateMemberRole(workspaceId: string, userId: string, role: keyof typeof ROLE_PERMISSION_TEMPLATES) {
+    async updateMemberRole(
+        workspaceId: string,
+        userId: string,
+        role: keyof typeof ROLE_PERMISSION_TEMPLATES,
+    ) {
         const { success: workspaceIdSuccess } = z.uuid().safeParse(workspaceId);
         if (!workspaceIdSuccess) return;
         const { success: userIdSuccess } = z.uuid().safeParse(userId);
@@ -463,7 +493,7 @@ export class WorkspaceService {
 
         await this.userWorkspaceRepository.update(
             { workspaceId, userId },
-            { role, permissions }
+            { role, permissions },
         );
 
         return { userId, role, permissions };

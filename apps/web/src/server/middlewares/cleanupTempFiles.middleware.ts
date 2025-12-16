@@ -4,7 +4,7 @@ import { setTimeout as delay } from "timers/promises";
 import { appLogger } from "../utils/logger";
 
 const logger = appLogger.child({
-    module: "CleanupTempFilesMiddleware"
+    module: "CleanupTempFilesMiddleware",
 });
 
 async function deleteWithRetry(filePath: string, maxRetries: number = 10) {

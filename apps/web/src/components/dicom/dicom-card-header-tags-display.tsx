@@ -2,7 +2,7 @@
 
 import type { InferResponseType } from "hono";
 import { CheckIcon } from "lucide-react";
-import type  { apiClient } from "@/react-query/apiClient";
+import type { apiClient } from "@/react-query/apiClient";
 import { Skeleton } from "../ui/skeleton";
 import { DicomCardTagBadge } from "./dicom-card-tag-badge";
 
@@ -12,7 +12,9 @@ type TagResponse = InferResponseType<
     ApiClient["api"]["workspaces"][":workspaceId"]["tags"][":targetType"][":targetId"]["$get"]
 >;
 
-type ResponseTagData = Extract<TagResponse, { ok: true}>["data"][number] | undefined;
+type ResponseTagData =
+    | Extract<TagResponse, { ok: true }>["data"][number]
+    | undefined;
 
 interface DicomCardHeaderTagsDisplayProps {
     tags?: ResponseTagData[];
@@ -21,7 +23,9 @@ interface DicomCardHeaderTagsDisplayProps {
     maxTagDisplay?: number;
 }
 
-export function DicomCardHeaderTagsDisplay(props: DicomCardHeaderTagsDisplayProps) {
+export function DicomCardHeaderTagsDisplay(
+    props: DicomCardHeaderTagsDisplayProps,
+) {
     const { tags, isLoadingTags, isSelected, maxTagDisplay = 2 } = props;
 
     if (!tags) return null;
@@ -37,16 +41,11 @@ export function DicomCardHeaderTagsDisplay(props: DicomCardHeaderTagsDisplayProp
             <div className="flex-1 flex min-w-0 items-center">
                 <DicomCardTagBadge tags={tagData} maxDisplay={maxTagDisplay} />
 
-                {isLoadingTags && (
-                    <Skeleton className="h-5 w-7 rounded-full" />
-                )}
+                {isLoadingTags && <Skeleton className="h-5 w-7 rounded-full" />}
 
-                {!isLoadingTags && !tagData.length && (
-                    <div className="h-5" />
-                )}
+                {!isLoadingTags && !tagData.length && <div className="h-5" />}
             </div>
 
-            
             {isSelected && (
                 <div className="ml-2 flex-shrink-0">
                     <div className="bg-primary text-white rounded-full p-1.5 shadow-md">
@@ -55,5 +54,5 @@ export function DicomCardHeaderTagsDisplay(props: DicomCardHeaderTagsDisplayProp
                 </div>
             )}
         </div>
-    )
+    );
 }

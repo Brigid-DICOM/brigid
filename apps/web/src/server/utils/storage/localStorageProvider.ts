@@ -1,4 +1,8 @@
-import { createReadStream, createWriteStream, promises as fsPromise } from "node:fs";
+import {
+    createReadStream,
+    createWriteStream,
+    promises as fsPromise,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import type { Readable } from "node:stream";
 import env from "@brigid/env";
@@ -7,7 +11,7 @@ import { appLogger } from "../logger";
 import type { StorageProvider } from "./storage.interface";
 
 const logger = appLogger.child({
-    module: "LocalStorageProvider"
+    module: "LocalStorageProvider",
 });
 
 export class LocalStorageProvider implements StorageProvider {
@@ -26,7 +30,7 @@ export class LocalStorageProvider implements StorageProvider {
     private async ensureStorageDir() {
         try {
             await fsPromise.mkdir(this.storageDir, { recursive: true });
-        } catch(error) {
+        } catch (error) {
             console.error("Failed to ensure storage directory", error);
             throw error;
         }
@@ -46,7 +50,6 @@ export class LocalStorageProvider implements StorageProvider {
         this.uploadingFiles.set(key, readableStream);
 
         try {
-
             const writeStream = createWriteStream(filePath);
             readableStream.pipe(writeStream);
             logger.info(`upload ${file.filename} to ${filePath} successfully`);
@@ -54,7 +57,7 @@ export class LocalStorageProvider implements StorageProvider {
             this.uploadingFiles.delete(key);
 
             return { key, filePath };
-        } catch(error) {
+        } catch (error) {
             console.error("Failed to upload file", error);
             throw error;
         }
@@ -70,7 +73,7 @@ export class LocalStorageProvider implements StorageProvider {
             try {
                 await fsPromise.unlink(filePath);
                 logger.info(`Aborted upload and deleted file: ${filePath}`);
-            } catch(error) {
+            } catch (error) {
                 logger.error("Failed to delete file", error);
                 throw error;
             }
@@ -86,9 +89,9 @@ export class LocalStorageProvider implements StorageProvider {
 
             return {
                 body: readStream,
-                size: stats.size
+                size: stats.size,
             };
-        } catch(error) {
+        } catch (error) {
             logger.error("Failed to download file", error);
             throw error;
         }
@@ -100,7 +103,7 @@ export class LocalStorageProvider implements StorageProvider {
         try {
             await fsPromise.unlink(filePath);
             logger.info(`Delete file successfully: ${filePath}`);
-        } catch(error) {
+        } catch (error) {
             logger.error("Failed to delete file", error);
             throw error;
         }
@@ -110,7 +113,7 @@ export class LocalStorageProvider implements StorageProvider {
         const deletePromises = keys.map(async (key) => {
             try {
                 await this.deleteFile(key);
-            } catch(error) {
+            } catch (error) {
                 logger.error("Failed to delete file in batch", error);
             }
         });

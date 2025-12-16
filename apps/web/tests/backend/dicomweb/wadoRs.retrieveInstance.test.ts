@@ -8,7 +8,7 @@ import {
     describe,
     expect,
     it,
-    vi
+    vi,
 } from "vitest";
 import { app } from "@/app/api/[...route]/route";
 import { multipartDecode } from "@/lib/dicomMultipartDecode";
@@ -33,8 +33,8 @@ const TEST_DICOM_DATA = {
     seriesInstanceUid: TEST_SERIES.seriesInstanceUid,
     sopInstanceUid: TEST_INSTANCE.sopInstanceUid,
     instanceFile: path.resolve(
-        join(import.meta.url, "../../fixtures/dicomFiles", TEST_INSTANCE.file)
-    )
+        join(import.meta.url, "../../fixtures/dicomFiles", TEST_INSTANCE.file),
+    ),
 };
 
 describe("WADO-RS Route", () => {
@@ -58,21 +58,21 @@ describe("WADO-RS Route", () => {
 
         const testFileManager = new TestFileManager();
         const res = await testFileManager.uploadTestFile(
-            TEST_DICOM_DATA.instanceFile
+            TEST_DICOM_DATA.instanceFile,
         );
         expect(res.status).toBe(200);
     });
 
     describe("GET /workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid", () => {
-        it("should retrieve instance with multipart/related; type=\"application/dicom\"", async () => {
+        it('should retrieve instance with multipart/related; type="application/dicom"', async () => {
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}`,
                 {
                     headers: {
-                        accept: 'multipart/related; type="application/dicom"'
-                    }
-                }
+                        accept: 'multipart/related; type="application/dicom"',
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(200);
@@ -87,59 +87,67 @@ describe("WADO-RS Route", () => {
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}`,
                 {
                     headers: {
-                        accept: 'application/zip'
-                    }
-                }
+                        accept: "application/zip",
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toBe('application/zip');
+            expect(response.headers.get("Content-Type")).toBe(
+                "application/zip",
+            );
         });
 
-        it("should retrieve instance as multipart/related; type=\"image/jpeg\"", async () => {
+        it('should retrieve instance as multipart/related; type="image/jpeg"', async () => {
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}`,
                 {
                     headers: {
-                        accept: 'multipart/related; type="image/jpeg"'
-                    }
-                }
+                        accept: 'multipart/related; type="image/jpeg"',
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="image/jpeg"');
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="image/jpeg"',
+            );
         });
 
-        it("should retrieve instance as multipart/related; type=\"image/jp2\"", async () => {
+        it('should retrieve instance as multipart/related; type="image/jp2"', async () => {
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}`,
                 {
                     headers: {
-                        accept: 'multipart/related; type="image/jp2"'
-                    }
-                }
+                        accept: 'multipart/related; type="image/jp2"',
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="image/jp2"');
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="image/jp2"',
+            );
         });
 
-        it("should retrieve instance as multipart/related; type=\"image/png\"", async () => {
+        it('should retrieve instance as multipart/related; type="image/png"', async () => {
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}`,
                 {
                     headers: {
-                        accept: 'multipart/related; type="image/png"'
-                    }
-                }
+                        accept: 'multipart/related; type="image/png"',
+                    },
+                },
             );
 
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="image/png"');
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="image/png"',
+            );
         });
 
         it("should handle window parameter", async () => {
@@ -148,13 +156,15 @@ describe("WADO-RS Route", () => {
                 {
                     headers: {
                         accept: 'multipart/related; type="image/jpeg"',
-                        'window': '1024,2048,linear'
-                    }
-                }
+                        window: "1024,2048,linear",
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="image/jpeg"');
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="image/jpeg"',
+            );
         });
 
         it("should handle quality parameter", async () => {
@@ -164,26 +174,28 @@ describe("WADO-RS Route", () => {
                 {
                     headers: {
                         accept: 'multipart/related; type="image/jpeg"',
-                    }
-                }
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="image/jpeg"');
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="image/jpeg"',
+            );
         });
 
         it("should reject invalid quality parameter", async () => {
             const invalidParams = [
                 {
-                    quality: '0'
+                    quality: "0",
                 },
                 {
-                    quality: '101'
+                    quality: "101",
                 },
                 {
-                    quality: 'abc'
-                }
-            ]
+                    quality: "abc",
+                },
+            ];
 
             for (const params of invalidParams) {
                 // Act
@@ -201,22 +213,24 @@ describe("WADO-RS Route", () => {
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}?iccprofile=srgb`,
                 {
                     headers: {
-                        accept: 'multipart/related; type="image/jpeg"'
-                    }
-                }
+                        accept: 'multipart/related; type="image/jpeg"',
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="image/jpeg"');
-        }); 
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="image/jpeg"',
+            );
+        });
 
         it("should reject invalid iccprofile parameter", async () => {
             const invalidParams = [
                 {
-                    iccprofile: 'invalid'
-                }
-            ]
-            
+                    iccprofile: "invalid",
+                },
+            ];
+
             for (const params of invalidParams) {
                 // Act
                 const response = await app.request(
@@ -230,17 +244,17 @@ describe("WADO-RS Route", () => {
         it("should handle viewport parameter", async () => {
             const validParams = [
                 {
-                    viewport: '1024,1024'
+                    viewport: "1024,1024",
                 },
                 {
-                    viewport: '1024,1024,0,0,1024,1024'
+                    viewport: "1024,1024,0,0,1024,1024",
                 },
                 {
-                    viewport: '1024,1024,0,0,-1024,-1024'
+                    viewport: "1024,1024,0,0,-1024,-1024",
                 },
                 {
-                    viewport: '1024,1024,,,-1024,-1024'
-                }
+                    viewport: "1024,1024,,,-1024,-1024",
+                },
             ];
 
             for (const params of validParams) {
@@ -249,35 +263,37 @@ describe("WADO-RS Route", () => {
                     `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}?${new URLSearchParams(params)}`,
                     {
                         headers: {
-                            accept: 'multipart/related; type="image/jpeg"'
-                        }
-                    }
+                            accept: 'multipart/related; type="image/jpeg"',
+                        },
+                    },
                 );
                 // Assert
                 expect(response.status).toBe(200);
-                expect(response.headers.get('Content-Type')).toContain('multipart/related; type="image/jpeg"');
+                expect(response.headers.get("Content-Type")).toContain(
+                    'multipart/related; type="image/jpeg"',
+                );
             }
         });
 
         it("should reject invalid viewport parameter", async () => {
             const invalidParams = [
                 {
-                    viewport: 'invalid'
+                    viewport: "invalid",
                 },
                 {
-                    viewport: '1024,1024,0,0'
-                }
+                    viewport: "1024,1024,0,0",
+                },
             ];
-            
+
             for (const params of invalidParams) {
                 // Act
                 const response = await app.request(
                     `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}?${new URLSearchParams(params)}`,
                     {
                         headers: {
-                            accept: 'multipart/related; type="image/jpeg"'
-                        }
-                    }
+                            accept: 'multipart/related; type="image/jpeg"',
+                        },
+                    },
                 );
                 // Assert
                 expect(response.status).toBe(400);
@@ -285,7 +301,7 @@ describe("WADO-RS Route", () => {
         });
 
         it("should return 404 for non-existent instance", async () => {
-            const nonExistentInstance = 'non-existent-instance';
+            const nonExistentInstance = "non-existent-instance";
 
             // Act
             const response = await app.request(
@@ -296,16 +312,16 @@ describe("WADO-RS Route", () => {
         });
 
         it("should return 400 for unsupported accept header", async () => {
-            const unsupportedAccept = 'application/pdf';
+            const unsupportedAccept = "application/pdf";
 
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}`,
                 {
                     headers: {
-                        accept: unsupportedAccept
-                    }
-                }
+                        accept: unsupportedAccept,
+                    },
+                },
             );
             // Assert
             expect(response.status).toBe(400);
@@ -314,19 +330,24 @@ describe("WADO-RS Route", () => {
 
     describe("Service Error Handling", () => {
         it("should handle InstanceService errors", async () => {
-            const { InstanceService } = await import("@/server/services/instance.service");
-            vi.spyOn(InstanceService.prototype, "getInstanceByUid").mockRejectedValue(new Error("Database error"));
+            const { InstanceService } = await import(
+                "@/server/services/instance.service"
+            );
+            vi.spyOn(
+                InstanceService.prototype,
+                "getInstanceByUid",
+            ).mockRejectedValue(new Error("Database error"));
 
             const instancePath = `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}`;
 
             // Act
             const response = await app.request(instancePath, {
                 headers: {
-                    accept: 'multipart/related; type="application/dicom"'
-                }
+                    accept: 'multipart/related; type="application/dicom"',
+                },
             });
             // Assert
             expect(response.status).toBe(500);
         });
-    })
+    });
 });

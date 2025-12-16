@@ -67,7 +67,7 @@ export const retrieveStudyInstancesHandler = async (
                 lastUpdatedAt,
                 lastId,
             });
-            
+
             if (nextBatch.length < limit) {
                 keepPaging = false;
             }

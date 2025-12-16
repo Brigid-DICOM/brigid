@@ -20,4 +20,4 @@ export const getQueryStrategy = (type: string): QueryStrategy => {
     }
 
     return strategy;
-}
+};

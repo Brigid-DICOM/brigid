@@ -37,7 +37,10 @@ export function UploadCloseDialog({
                         {t("upload.closeDialog.title")}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                        {t("upload.closeDialog.description", { uploadingCount, pendingCount })}
+                        {t("upload.closeDialog.description", {
+                            uploadingCount,
+                            pendingCount,
+                        })}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -50,5 +53,5 @@ export function UploadCloseDialog({
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
-    )
+    );
 }

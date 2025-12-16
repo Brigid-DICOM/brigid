@@ -126,9 +126,12 @@ export const verifySeriesInstancesAccess = createMiddleware<ShareLinkEnv>(
 export const verifyInstanceAccess = createMiddleware<ShareLinkEnv>(
     async (c, next) => {
         const shareLink = c.get("shareLink") as ShareLinkEntity;
-        const studyInstanceUid = c.req.param("studyInstanceUid") || c.req.query("studyUID");
-        const seriesInstanceUid = c.req.param("seriesInstanceUid") || c.req.query("seriesUID");
-        const sopInstanceUid = c.req.param("sopInstanceUid") || c.req.query("objectUID");
+        const studyInstanceUid =
+            c.req.param("studyInstanceUid") || c.req.query("studyUID");
+        const seriesInstanceUid =
+            c.req.param("seriesInstanceUid") || c.req.query("seriesUID");
+        const sopInstanceUid =
+            c.req.param("sopInstanceUid") || c.req.query("objectUID");
 
         const targetType = shareLink.targets[0]?.targetType;
         let isAllowed = false;

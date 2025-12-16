@@ -86,10 +86,20 @@ export function CreateShareTab({
                 position: "bottom-center",
             });
             queryClient.invalidateQueries({
-                queryKey: ["share-links", targetType, targetIds.join(","), workspaceId],
+                queryKey: [
+                    "share-links",
+                    targetType,
+                    targetIds.join(","),
+                    workspaceId,
+                ],
             });
             queryClient.invalidateQueries({
-                queryKey: ["share-link-count", targetType, targetIds.join(","), workspaceId],
+                queryKey: [
+                    "share-link-count",
+                    targetType,
+                    targetIds.join(","),
+                    workspaceId,
+                ],
             });
 
             const shareUrl = `${window.location.origin}/share/${data?.data?.token ?? ""}`;
@@ -147,7 +157,7 @@ export function CreateShareTab({
         }
 
         createShareLink();
-    }
+    };
 
     const resetForm = () => {
         setPublicPermissions(SHARE_PERMISSIONS.READ);
@@ -157,7 +167,7 @@ export function CreateShareTab({
         setDescription("");
         setSelectedUsers([]);
         setName("");
-    }
+    };
 
     return (
         <div className="space-y-6 py-4">
@@ -174,7 +184,9 @@ export function CreateShareTab({
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="public-permissions">{t("shareLink.form.publicPermissionsLabel")}</Label>
+                <Label htmlFor="public-permissions">
+                    {t("shareLink.form.publicPermissionsLabel")}
+                </Label>
                 <SharePermissionDropdown
                     mode="public"
                     publicPermissions={publicPermissions}
@@ -198,7 +210,9 @@ export function CreateShareTab({
                             setRequiredPassword(checked as boolean)
                         }
                     />
-                    <Label htmlFor="required-password">{t("shareLink.form.requiredPasswordLabel")}</Label>
+                    <Label htmlFor="required-password">
+                        {t("shareLink.form.requiredPasswordLabel")}
+                    </Label>
                 </div>
 
                 {requiredPassword && (
@@ -213,7 +227,9 @@ export function CreateShareTab({
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="expires-in">{t("shareLink.form.expiresInLabel")}</Label>
+                <Label htmlFor="expires-in">
+                    {t("shareLink.form.expiresInLabel")}
+                </Label>
                 <ShareExpirationDropdown
                     expiresInSec={expiresInSec}
                     onSelect={setExpiresInSec}
@@ -222,7 +238,9 @@ export function CreateShareTab({
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="description">{t("shareLink.form.descriptionLabel")}</Label>
+                <Label htmlFor="description">
+                    {t("shareLink.form.descriptionLabel")}
+                </Label>
                 <Textarea
                     id="description"
                     placeholder={t("shareLink.form.descriptionPlaceholder")}
@@ -231,7 +249,7 @@ export function CreateShareTab({
                 />
             </div>
 
-            <Button 
+            <Button
                 className="w-full"
                 onClick={handleSubmit}
                 disabled={
@@ -240,7 +258,9 @@ export function CreateShareTab({
                     (requiredPassword && !password.trim())
                 }
             >
-                {isPending ? t("shareLink.form.creating") : t("shareLink.form.create")}
+                {isPending
+                    ? t("shareLink.form.creating")
+                    : t("shareLink.form.create")}
             </Button>
         </div>
     );

@@ -90,7 +90,10 @@ export class SeriesService {
         });
     }
 
-    async getSeriesBySeriesInstanceUids(workspaceId: string, seriesInstanceUids: string[]) {
+    async getSeriesBySeriesInstanceUids(
+        workspaceId: string,
+        seriesInstanceUids: string[],
+    ) {
         return await this.entityManager.find(SeriesEntity, {
             where: {
                 workspaceId: workspaceId,
@@ -102,8 +105,8 @@ export class SeriesService {
                 studyInstanceUid: true,
                 seriesInstanceUid: true,
                 deleteStatus: true,
-                deletedAt: true
-            }
+                deletedAt: true,
+            },
         });
     }
     async getSeriesInstances(options: {
@@ -174,9 +177,10 @@ export class SeriesService {
     async getUniqueModalities(
         workspaceId: string,
         range?: string,
-        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
     ) {
-        const modalitiesQuery = this.entityManager.createQueryBuilder(SeriesEntity, "series")
+        const modalitiesQuery = this.entityManager
+            .createQueryBuilder(SeriesEntity, "series")
             .select("series.modality", "modality")
             .addSelect("COUNT(series.modality)", "count")
             .distinct(true)
@@ -187,13 +191,17 @@ export class SeriesService {
 
         if (range) {
             const dateQueryStrategy = new DateQueryStrategy();
-            const dateQuery = dateQueryStrategy.buildQuery("series", "createdAt", range);
+            const dateQuery = dateQueryStrategy.buildQuery(
+                "series",
+                "createdAt",
+                range,
+            );
             modalitiesQuery.andWhere(dateQuery.sql, dateQuery.parameters);
         }
 
         const modalities = await modalitiesQuery.getRawMany();
 
-        return modalities.map(modality => ({
+        return modalities.map((modality) => ({
             modality: modality.modality,
             count: modality.count,
         }));
@@ -205,23 +213,34 @@ export class SeriesService {
         seriesInstanceUid: string;
         limit: number;
         lastUpdatedAt?: Date;
-        lastId?: string
+        lastId?: string;
     }) {
-        const { workspaceId, studyInstanceUid, seriesInstanceUid, limit, lastUpdatedAt, lastId } = options;
+        const {
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+            limit,
+            lastUpdatedAt,
+            lastId,
+        } = options;
         const queryBuilder = this.entityManager
             .createQueryBuilder(InstanceEntity, "instance")
             .where("instance.workspaceId = :workspaceId", { workspaceId })
-            .andWhere("instance.studyInstanceUid = :studyInstanceUid", { studyInstanceUid })
-            .andWhere("instance.seriesInstanceUid = :seriesInstanceUid", { seriesInstanceUid })
+            .andWhere("instance.studyInstanceUid = :studyInstanceUid", {
+                studyInstanceUid,
+            })
+            .andWhere("instance.seriesInstanceUid = :seriesInstanceUid", {
+                seriesInstanceUid,
+            })
             .orderBy("instance.updatedAt", "ASC")
             .addOrderBy("instance.id", "ASC")
             .take(limit);
-            
+
         if (lastUpdatedAt && lastId) {
             queryBuilder.andWhere(
                 `(instance.updatedAt > :lastUpdatedAt OR (instance.updatedAt = :lastUpdatedAt AND instance.id > :lastId))`,
-                { lastUpdatedAt, lastId }
-            )
+                { lastUpdatedAt, lastId },
+            );
         }
 
         // !這裡只返回資料，不計算總數 (count)

@@ -11,11 +11,14 @@ export const authSessionQuery = (cookie?: string) => {
     return queryOptions({
         queryKey: ["auth", "session"],
         queryFn: async () => {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`, {
-                headers
-            });
-    
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`,
+                {
+                    headers,
+                },
+            );
+
             return response.json() as Promise<Session | null>;
-        }
+        },
     });
-}
+};

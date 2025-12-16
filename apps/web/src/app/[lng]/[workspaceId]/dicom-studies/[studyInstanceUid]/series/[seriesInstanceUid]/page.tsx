@@ -13,7 +13,9 @@ interface DicomInstancesPageProps {
     }>;
 }
 
-export default async function DicomInstancesSeriesPage({ params }: DicomInstancesPageProps) {
+export default async function DicomInstancesSeriesPage({
+    params,
+}: DicomInstancesPageProps) {
     const cookieStore = await cookies();
     const { studyInstanceUid, seriesInstanceUid, workspaceId } = await params;
 
@@ -26,14 +28,14 @@ export default async function DicomInstancesSeriesPage({ params }: DicomInstance
             seriesInstanceUid: seriesInstanceUid,
             offset: 0,
             limit: 10,
-            cookie: cookieStore.toString()
-        })
+            cookie: cookieStore.toString(),
+        }),
     );
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <DicomInstancesContent 
-                workspaceId={workspaceId} 
+            <DicomInstancesContent
+                workspaceId={workspaceId}
                 studyInstanceUid={studyInstanceUid}
                 seriesInstanceUid={seriesInstanceUid}
             />

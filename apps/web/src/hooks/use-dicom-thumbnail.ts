@@ -2,9 +2,7 @@
 
 import { useMemo } from "react";
 
-export function useDicomThumbnail(
-    thumbnail: Blob | undefined
-) {
+export function useDicomThumbnail(thumbnail: Blob | undefined) {
     const thumbnailUrl = useMemo(() => {
         if (!thumbnail) return null;
 

@@ -21,7 +21,11 @@ import type {
     AdapterSession,
     AdapterUser,
 } from "@auth/core/adapters";
-import { DataSource, type DataSourceOptions, type EntityManager } from "typeorm";
+import {
+    DataSource,
+    type DataSourceOptions,
+    type EntityManager,
+} from "typeorm";
 import * as defaultEntities from "./entities";
 import { parseDataSourceConfig, updateConnectionEntities } from "./utils";
 

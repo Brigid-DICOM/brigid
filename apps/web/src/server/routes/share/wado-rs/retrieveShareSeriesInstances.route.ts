@@ -32,8 +32,7 @@ const retrieveShareSeriesInstancesRoute = new Hono().get(
     verifySeriesInstancesAccess,
     async (c) => {
         const workspaceId = c.get("workspaceId");
-        const { studyInstanceUid, seriesInstanceUid } =
-            c.req.valid("param");
+        const { studyInstanceUid, seriesInstanceUid } = c.req.valid("param");
         const { accept } = c.req.valid("header");
 
         return await retrieveSeriesInstancesHandler(c, {

@@ -2,13 +2,19 @@ import type { TagTargetType } from "@brigid/database/src/entities/tagAssignment.
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { apiClient } from "../apiClient";
 
-
-export const getTargetShareTagsQuery = (token: string, targetType: TagTargetType, targetId: string, password?: string) =>
+export const getTargetShareTagsQuery = (
+    token: string,
+    targetType: TagTargetType,
+    targetId: string,
+    password?: string,
+) =>
     queryOptions({
         queryKey: ["share-tags", token, targetType, targetId],
         queryFn: async () => {
-            const response = await apiClient.api.share[":token"].tags[":targetType"][":targetId"].$get({
-                param: { 
+            const response = await apiClient.api.share[":token"].tags[
+                ":targetType"
+            ][":targetId"].$get({
+                param: {
                     token,
                     targetType,
                     targetId,

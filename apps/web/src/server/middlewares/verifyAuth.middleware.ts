@@ -11,9 +11,12 @@ export const verifyAuthMiddleware = createMiddleware(async (c, next) => {
     const userService = new UserService();
     const guestUser = await userService.getGuestUser();
     if (!guestUser) {
-        return c.json({
-            message: "Guest user not found"
-        }, 404);
+        return c.json(
+            {
+                message: "Guest user not found",
+            },
+            404,
+        );
     }
     c.set("authUser", {
         session: {
@@ -22,13 +25,17 @@ export const verifyAuthMiddleware = createMiddleware(async (c, next) => {
                 name: guestUser.name ?? "",
                 email: guestUser.email ?? "",
             },
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString()
+            expires: new Date(
+                Date.now() + 1000 * 60 * 60 * 24 * 30,
+            ).toISOString(),
         },
         user: {
             id: guestUser.id,
             email: guestUser.email ?? "",
-            emailVerified: guestUser.emailVerified ? new Date(guestUser.emailVerified) : null
-        }
+            emailVerified: guestUser.emailVerified
+                ? new Date(guestUser.emailVerified)
+                : null,
+        },
     });
 
     await next();

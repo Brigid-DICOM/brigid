@@ -1,29 +1,33 @@
 import type { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import { DICOM_TAG_KEYWORD_REGISTRY } from "@/server/const/dicomTagKeywordRegistry";
 import type { SearchStudySeriesQueryParam } from "@/server/schemas/searchStudySeriesSchema";
-import { type FieldConfig, QueryType, STUDY_SEARCH_FIELDS } from "./dicomSearchStudyQueryConfig";
-
+import {
+    type FieldConfig,
+    QueryType,
+    STUDY_SEARCH_FIELDS,
+} from "./dicomSearchStudyQueryConfig";
 
 export interface SeriesFieldConfig {
     table: string;
-    field: keyof Pick<
-        SeriesEntity,
-        | "seriesInstanceUid"
-        | "modality"
-        | "seriesNumber"
-        | "seriesDescription"
-        | "seriesDate"
-        | "seriesTime"
-        | "performedProcedureStepStartDate"
-        | "performedProcedureStepStartTime"
-    > 
-    | "accessionNumber" 
-    | "studyInstanceUid" 
-    | "scheduledProcedureStepId"
-    | "requestedProcedureId"
-    | "accLocalNamespaceEntityId"
-    | "accUniversalEntityId"
-    | "accUniversalEntityIdType";
+    field:
+        | keyof Pick<
+              SeriesEntity,
+              | "seriesInstanceUid"
+              | "modality"
+              | "seriesNumber"
+              | "seriesDescription"
+              | "seriesDate"
+              | "seriesTime"
+              | "performedProcedureStepStartDate"
+              | "performedProcedureStepStartTime"
+          >
+        | "accessionNumber"
+        | "studyInstanceUid"
+        | "scheduledProcedureStepId"
+        | "requestedProcedureId"
+        | "accLocalNamespaceEntityId"
+        | "accUniversalEntityId"
+        | "accUniversalEntityIdType";
     type: QueryType;
     paramKeys: (keyof SearchStudySeriesQueryParam)[];
     joinConfig?: {
@@ -31,7 +35,7 @@ export interface SeriesFieldConfig {
         tableName: string;
         alias: string;
         condition: string;
-    }
+    };
 }
 
 export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
@@ -40,7 +44,10 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
         table: "series",
         field: "seriesInstanceUid",
         type: QueryType.STRING,
-        paramKeys: ["SeriesInstanceUID", DICOM_TAG_KEYWORD_REGISTRY.SeriesInstanceUID.tag],
+        paramKeys: [
+            "SeriesInstanceUID",
+            DICOM_TAG_KEYWORD_REGISTRY.SeriesInstanceUID.tag,
+        ],
     },
     {
         table: "series",
@@ -52,13 +59,19 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
         table: "series",
         field: "seriesDescription",
         type: QueryType.STRING,
-        paramKeys: ["SeriesDescription", DICOM_TAG_KEYWORD_REGISTRY.SeriesDescription.tag],
+        paramKeys: [
+            "SeriesDescription",
+            DICOM_TAG_KEYWORD_REGISTRY.SeriesDescription.tag,
+        ],
     },
     {
         table: "series",
         field: "seriesNumber",
         type: QueryType.NUMBER,
-        paramKeys: ["SeriesNumber", DICOM_TAG_KEYWORD_REGISTRY.SeriesNumber.tag],
+        paramKeys: [
+            "SeriesNumber",
+            DICOM_TAG_KEYWORD_REGISTRY.SeriesNumber.tag,
+        ],
     },
     {
         table: "series",
@@ -76,13 +89,19 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
         table: "series",
         field: "performedProcedureStepStartDate",
         type: QueryType.DATE,
-        paramKeys: ["PerformedProcedureStepStartDate", DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartDate.tag],
+        paramKeys: [
+            "PerformedProcedureStepStartDate",
+            DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartDate.tag,
+        ],
     },
     {
         table: "series",
         field: "performedProcedureStepStartTime",
         type: QueryType.TIME,
-        paramKeys: ["PerformedProcedureStepStartTime", DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartTime.tag],
+        paramKeys: [
+            "PerformedProcedureStepStartTime",
+            DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartTime.tag,
+        ],
     },
     {
         table: "seriesRequestAttributes",
@@ -97,7 +116,7 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
             tableName: "series_request_attributes",
             alias: "seriesRequestAttributes",
             condition: `"seriesRequestAttributes"."id" = series."seriesRequestAttributesId"`,
-        }
+        },
     },
     {
         table: "seriesRequestAttributes",
@@ -112,7 +131,7 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
             tableName: "series_request_attributes",
             alias: "seriesRequestAttributes",
             condition: `"seriesRequestAttributes"."id" = series."seriesRequestAttributesId"`,
-        }
+        },
     },
     {
         table: "seriesRequestAttributes",
@@ -127,7 +146,7 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
             tableName: "series_request_attributes",
             alias: "seriesRequestAttributes",
             condition: `"seriesRequestAttributes"."id" = series."seriesRequestAttributesId"`,
-        }
+        },
     },
     {
         table: "seriesRequestAttributes",
@@ -142,7 +161,7 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
             tableName: "series_request_attributes",
             alias: "seriesRequestAttributes",
             condition: `"seriesRequestAttributes"."id" = series."seriesRequestAttributesId"`,
-        }
+        },
     },
     {
         table: "seriesRequestAttributes",
@@ -157,7 +176,7 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
             tableName: "series_request_attributes",
             alias: "seriesRequestAttributes",
             condition: `"seriesRequestAttributes"."id" = series."seriesRequestAttributesId"`,
-        }
+        },
     },
     {
         table: "seriesRequestAttributes",
@@ -172,7 +191,7 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
             tableName: "series_request_attributes",
             alias: "seriesRequestAttributes",
             condition: `"seriesRequestAttributes"."id" = series."seriesRequestAttributesId"`,
-        }
+        },
     },
     {
         table: "seriesRequestAttributes",
@@ -187,6 +206,6 @@ export const SERIES_SEARCH_FIELDS: (SeriesFieldConfig | FieldConfig)[] = [
             tableName: "series_request_attributes",
             alias: "seriesRequestAttributes",
             condition: `"seriesRequestAttributes"."id" = series."seriesRequestAttributesId"`,
-        }
+        },
     },
 ];

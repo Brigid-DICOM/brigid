@@ -2,30 +2,33 @@ import { queryOptions } from "@tanstack/react-query";
 import { apiClient } from "../apiClient";
 
 export const getDicomStudyThumbnailQuery = (
-    workspaceId: string, 
+    workspaceId: string,
     studyInstanceUid: string,
-    viewport: string = "64,64"
-) => queryOptions({
-    queryKey: ["dicom-thumbnail", workspaceId, studyInstanceUid, viewport],
-    queryFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].studies[":studyInstanceUid"].thumbnail.$get({
-            header: {
-                accept: "image/jpeg"
-            },
-            param: {
-                workspaceId,
-                studyInstanceUid
-            },
-            query: {
-                viewport
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error("Failed to fetch DICOM thumbnail");
-        }
+    viewport: string = "64,64",
+) =>
+    queryOptions({
+        queryKey: ["dicom-thumbnail", workspaceId, studyInstanceUid, viewport],
+        queryFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].studies[":studyInstanceUid"].thumbnail.$get({
+                header: {
+                    accept: "image/jpeg",
+                },
+                param: {
+                    workspaceId,
+                    studyInstanceUid,
+                },
+                query: {
+                    viewport,
+                },
+            });
 
-        return response.blob();
-    },
-    staleTime: 30 * 60 * 1000,
-})
+            if (!response.ok) {
+                throw new Error("Failed to fetch DICOM thumbnail");
+            }
+
+            return response.blob();
+        },
+        staleTime: 30 * 60 * 1000,
+    });

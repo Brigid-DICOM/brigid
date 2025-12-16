@@ -46,7 +46,7 @@ const getExpiration = (t: TFunction) => {
             label: `90 ${t("common.expiration.days")}`,
             value: 90 * 24 * 60 * 60,
         },
-    ]
+    ];
 };
 
 interface ShareExpirationDropdownProps {
@@ -66,15 +66,13 @@ export function ShareExpirationDropdown({
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild className="w-full" id={expirationId}>
-            <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start">
                     <CalendarIcon className="size-4" />
                     <span>
                         {expiresInSec
                             ? `${
                                   getExpiration(t).find(
-                                      (option) =>
-                                          option.value ===
-                                          expiresInSec
+                                      (option) => option.value === expiresInSec,
                                   )?.label
                               }`
                             : "Never"}

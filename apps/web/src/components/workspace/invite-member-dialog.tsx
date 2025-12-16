@@ -76,7 +76,7 @@ const getRoles = (t: TFunction) => {
             description: t("inviteMember.roles.viewerDesc"),
         },
     ];
-}
+};
 
 export function InviteMemberDialog({
     open,
@@ -169,12 +169,16 @@ export function InviteMemberDialog({
 
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="add-users">{t("inviteMember.addUsers")}</Label>
+                        <Label htmlFor="add-users">
+                            {t("inviteMember.addUsers")}
+                        </Label>
                         <div className="relative">
                             <Command className="bg-background border rounded-md overflow-visible">
                                 <CommandInput
                                     id="add-users"
-                                    placeholder={t("inviteMember.searchPlaceholder")}
+                                    placeholder={t(
+                                        "inviteMember.searchPlaceholder",
+                                    )}
                                     value={searchInput}
                                     onValueChange={setSearchInput}
                                 />
@@ -190,7 +194,9 @@ export function InviteMemberDialog({
                                         <CommandList>
                                             {users.length === 0 ? (
                                                 <CommandEmpty>
-                                                    {t("inviteMember.noUsersFound")}
+                                                    {t(
+                                                        "inviteMember.noUsersFound",
+                                                    )}
                                                 </CommandEmpty>
                                             ) : (
                                                 <CommandGroup>
@@ -223,7 +229,9 @@ export function InviteMemberDialog({
                                                                     }
                                                                     alt={
                                                                         user.name ||
-                                                                        t("inviteMember.userAvatar")
+                                                                        t(
+                                                                            "inviteMember.userAvatar",
+                                                                        )
                                                                     }
                                                                     className="w-6 h-6 rounded-full"
                                                                     width={24}
@@ -270,7 +278,9 @@ export function InviteMemberDialog({
                                                     src={user.user.image}
                                                     alt={
                                                         user.user.name ||
-                                                        t("inviteMember.userAvatar")
+                                                        t(
+                                                            "inviteMember.userAvatar",
+                                                        )
                                                     }
                                                     className="w-8 h-8 rounded-full shrink-0"
                                                     width={32}
@@ -360,7 +370,9 @@ export function InviteMemberDialog({
                             selectedUsers.length === 0 || addMembers.isPending
                         }
                     >
-                        {addMembers.isPending ? t("inviteMember.inviting") : t("inviteMember.invite")}
+                        {addMembers.isPending
+                            ? t("inviteMember.inviting")
+                            : t("inviteMember.invite")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

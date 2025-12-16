@@ -43,28 +43,31 @@ export const getDicomInstanceQuery = ({
                 ":workspaceId"
             ].studies[":studyInstanceUid"].series[
                 ":seriesInstanceUid"
-            ].instances.$get({
-                param: {
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                },
-                query: {
-                    offset: offset.toString(),
-                    limit: limit.toString(),
-                    deleteStatus: deleteStatus.toString(),
-                    ...Object.fromEntries(
-                        Object.entries(searchConditions).filter(
-                            ([_, value]) =>
-                                value !== undefined &&
-                                value !== null &&
-                                value !== "",
+            ].instances.$get(
+                {
+                    param: {
+                        workspaceId,
+                        studyInstanceUid,
+                        seriesInstanceUid,
+                    },
+                    query: {
+                        offset: offset.toString(),
+                        limit: limit.toString(),
+                        deleteStatus: deleteStatus.toString(),
+                        ...Object.fromEntries(
+                            Object.entries(searchConditions).filter(
+                                ([_, value]) =>
+                                    value !== undefined &&
+                                    value !== null &&
+                                    value !== "",
+                            ),
                         ),
-                    ),
+                    },
                 },
-            }, {
-                headers: headers
-            });
+                {
+                    headers: headers,
+                },
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to fetch DICOM instance");
@@ -156,24 +159,27 @@ export const restoreDicomInstanceMutation = ({
 }: {
     workspaceId: string;
     instanceIds: string[];
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.instances.restore.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                instanceIds,
-            },
-        });
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.instances.restore.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    instanceIds,
+                },
+            });
 
-        if (!response.ok) {
-            throw new Error("Failed to restore DICOM instance");
-        }
+            if (!response.ok) {
+                throw new Error("Failed to restore DICOM instance");
+            }
 
-        return await response.json();
-    }
-});
+            return await response.json();
+        },
+    });
 
 export const deleteDicomInstanceMutation = ({
     workspaceId,
@@ -181,21 +187,24 @@ export const deleteDicomInstanceMutation = ({
 }: {
     workspaceId: string;
     instanceIds: string[];
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.instances.delete.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                instanceIds,
-            },
-        });
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.instances.delete.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    instanceIds,
+                },
+            });
 
-        if (!response.ok) {
-            throw Error("Failed to delete DICOM instance");
-        }
+            if (!response.ok) {
+                throw Error("Failed to delete DICOM instance");
+            }
 
-        return await response.json();
-    }
-});
+            return await response.json();
+        },
+    });

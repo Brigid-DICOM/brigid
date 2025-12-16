@@ -16,38 +16,41 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
     const { t } = useT("translation");
     const [isDragging, setIsDragging] = useState(false);
 
-    const handleDrop = useCallback(async (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
+    const handleDrop = useCallback(
+        async (e: React.DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDragging(false);
 
-        const items = Array.from(e.dataTransfer.items);
-        const files: File[] = [];
-        let hasDirectory = false;
+            const items = Array.from(e.dataTransfer.items);
+            const files: File[] = [];
+            let hasDirectory = false;
 
-        for (const item of items) {
-            const entry = item.webkitGetAsEntry?.();
-            if (entry?.isDirectory) {
-                hasDirectory = true;
-                break;
-            }
-        }
-
-        if (hasDirectory) {
             for (const item of items) {
                 const entry = item.webkitGetAsEntry?.();
-                if (entry) {
-                    await traverseFileTree(entry, files);
+                if (entry?.isDirectory) {
+                    hasDirectory = true;
+                    break;
                 }
             }
-        } else {
-            const droppedFiles = Array.from(e.dataTransfer.files);
-            files.push(...droppedFiles);
-        }
 
-        const validatedFiles = await validateDicomFiles(files);
-        onFilesSelected(validatedFiles.map((result) => result.file));
-    }, [onFilesSelected]);
+            if (hasDirectory) {
+                for (const item of items) {
+                    const entry = item.webkitGetAsEntry?.();
+                    if (entry) {
+                        await traverseFileTree(entry, files);
+                    }
+                }
+            } else {
+                const droppedFiles = Array.from(e.dataTransfer.files);
+                files.push(...droppedFiles);
+            }
+
+            const validatedFiles = await validateDicomFiles(files);
+            onFilesSelected(validatedFiles.map((result) => result.file));
+        },
+        [onFilesSelected],
+    );
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -69,7 +72,9 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
         e.target.value = "";
     };
 
-    const handleFolderSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFolderSelect = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
         const selectedFolder = Array.from(e.target.files || []);
         const validatedFiles = await validateDicomFiles(selectedFolder);
         onFilesSelected(validatedFiles.map((result) => result.file));
@@ -84,11 +89,11 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             className={cn(
-                'border-2 border-dashed rounded-lg p-12 text-center transition-colors',
+                "border-2 border-dashed rounded-lg p-12 text-center transition-colors",
                 "w-full",
                 isDragging
-                ? 'border-primary bg-primary/5'
-                : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                    ? "border-primary bg-primary/5"
+                    : "border-muted-foreground/25 hover:border-muted-foreground/50",
             )}
         >
             <UploadIcon className="mx-auto size-12 text-muted-foreground mb-4" />
@@ -102,10 +107,7 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
             </p>
 
             <div className="flex gap-2 justify-center">
-                <Button
-                    variant={"outline"}
-                    asChild
-                >
+                <Button variant={"outline"} asChild>
                     <label htmlFor="file-input">
                         {t("upload.selectFiles")}
                         <input
@@ -118,10 +120,7 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
                     </label>
                 </Button>
 
-                <Button
-                    asChild
-                    variant={"outline"}
-                >
+                <Button asChild variant={"outline"}>
                     <label htmlFor="folder-input">
                         {t("upload.selectFolder")}
                         <input
@@ -141,7 +140,7 @@ export function UploadArea({ onFilesSelected }: UploadAreaProps) {
 
 async function traverseFileTree(
     entry: FileSystemEntry,
-    files: File[]
+    files: File[],
 ): Promise<void> {
     if (entry.isFile) {
         const fileEntry = entry as FileSystemFileEntry;
@@ -153,9 +152,11 @@ async function traverseFileTree(
         const dirEntry = entry as FileSystemDirectoryEntry;
         const reader = dirEntry.createReader();
 
-        const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-            reader.readEntries(resolve, reject);
-        });
+        const entries = await new Promise<FileSystemEntry[]>(
+            (resolve, reject) => {
+                reader.readEntries(resolve, reject);
+            },
+        );
 
         for (const childEntry of entries) {
             await traverseFileTree(childEntry, files);

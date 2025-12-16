@@ -48,7 +48,7 @@ export const useShareTagStore = create<ShareTagState>()(
             },
 
             getCachedTags: (token) => {
-                console.log()
+                console.log();
                 const tokenTags = get().cachedTagsByToken.get(token);
                 return tokenTags ? Array.from(tokenTags.values()) : [];
             },
@@ -71,8 +71,10 @@ export const useShareTagStore = create<ShareTagState>()(
                     const parsedValue = JSON.parse(value);
                     return {
                         ...parsedValue.state,
-                        cachedTagsByToken: new Map(parsedValue.state.cachedTagsByToken),
-                    }
+                        cachedTagsByToken: new Map(
+                            parsedValue.state.cachedTagsByToken,
+                        ),
+                    };
                 },
                 setItem: (name, value) => {
                     const stringifiedValue = JSON.stringify(value);

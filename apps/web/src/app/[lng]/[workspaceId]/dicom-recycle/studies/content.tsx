@@ -39,12 +39,17 @@ export default function DicomRecycleStudiesContent({
     useEffect(() => {
         setMounted(true);
     }, []);
-    
+
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
-    const { setSearchConditionsForType, setSearchType, getSearchConditionsForType } =
-        useGlobalSearchStore();
-    const searchConditions = mounted ? getSearchConditionsForType("dicom-recycle-study") : {};
+    const {
+        setSearchConditionsForType,
+        setSearchType,
+        getSearchConditionsForType,
+    } = useGlobalSearchStore();
+    const searchConditions = mounted
+        ? getSearchConditionsForType("dicom-recycle-study")
+        : {};
 
     const { layoutMode } = useLayoutStore(
         useShallow((state) => ({
@@ -120,12 +125,13 @@ export default function DicomRecycleStudiesContent({
                 .filter(Boolean) || []
         );
     }, [studies]);
-    const isAllSelected = useMemo(() =>
-        currentPageStudyIds.length > 0 &&
+    const isAllSelected = useMemo(
+        () =>
+            currentPageStudyIds.length > 0 &&
             currentPageStudyIds.every((studyId) =>
                 selectedStudyIds.has(studyId as string),
             ),
-        [currentPageStudyIds, selectedStudyIds]
+        [currentPageStudyIds, selectedStudyIds],
     );
 
     const { mutate: restoreStudies } = useMutation({
@@ -192,7 +198,14 @@ export default function DicomRecycleStudiesContent({
     useEffect(() => {
         handleResetToFirstPage();
         queryClient.invalidateQueries({
-            queryKey: ["dicom-study", workspaceId, 0, ITEM_PER_PAGE, DICOM_DELETE_STATUS.RECYCLED, ...Object.keys(searchConditions)],
+            queryKey: [
+                "dicom-study",
+                workspaceId,
+                0,
+                ITEM_PER_PAGE,
+                DICOM_DELETE_STATUS.RECYCLED,
+                ...Object.keys(searchConditions),
+            ],
         });
     }, [searchConditions]);
 

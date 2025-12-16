@@ -221,7 +221,7 @@ export class ShareLinkService {
                                     workspaceId: shareLink.workspaceId,
                                     SeriesInstanceUID: target.targetId,
                                     deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
-                                }
+                                },
                             );
                         if (series.length > 0) {
                             resourceInfo = series[0];
@@ -327,7 +327,6 @@ export class ShareLinkService {
         );
 
         if (options.recipientPermissions) {
-
             for (const recipient of options.recipientPermissions) {
                 await this.entityManager.upsert(
                     ShareLinkRecipientEntity,
@@ -339,21 +338,30 @@ export class ShareLinkService {
                     {
                         conflictPaths: ["shareLinkId", "userId"],
                         skipUpdateIfNoValuesChanged: true,
-                    }
+                    },
                 );
             }
 
-            const recipients = await this.entityManager.find(ShareLinkRecipientEntity, {
-                where: {
-                    shareLinkId: shareLink.id,
+            const recipients = await this.entityManager.find(
+                ShareLinkRecipientEntity,
+                {
+                    where: {
+                        shareLinkId: shareLink.id,
+                    },
                 },
-            });
-
-            const recipientsToDelete = recipients.filter((recipient) => 
-                !options.recipientPermissions?.some((r) => r.userId === recipient.userId)
             );
 
-            await this.entityManager.remove(ShareLinkRecipientEntity, recipientsToDelete);
+            const recipientsToDelete = recipients.filter(
+                (recipient) =>
+                    !options.recipientPermissions?.some(
+                        (r) => r.userId === recipient.userId,
+                    ),
+            );
+
+            await this.entityManager.remove(
+                ShareLinkRecipientEntity,
+                recipientsToDelete,
+            );
         }
 
         return updatedShareLink;
@@ -438,12 +446,16 @@ export class ShareLinkService {
         limit: number;
     }) {
         const queryBuilder = this.entityManager
-           .createQueryBuilder(ShareLinkEntity, "shareLink")
-           .leftJoinAndSelect("shareLink.targets", "targets")
-           .leftJoinAndSelect("shareLink.recipients", "recipients")
-           .leftJoinAndSelect("recipients.user", "user")
-           .where("shareLink.workspaceId = :workspaceId", { workspaceId: options.workspaceId })
-           .andWhere("shareLink.creatorId = :userId", { userId: options.userId })
+            .createQueryBuilder(ShareLinkEntity, "shareLink")
+            .leftJoinAndSelect("shareLink.targets", "targets")
+            .leftJoinAndSelect("shareLink.recipients", "recipients")
+            .leftJoinAndSelect("recipients.user", "user")
+            .where("shareLink.workspaceId = :workspaceId", {
+                workspaceId: options.workspaceId,
+            })
+            .andWhere("shareLink.creatorId = :userId", {
+                userId: options.userId,
+            })
             .orderBy("shareLink.createdAt", "DESC")
             .skip((options.page - 1) * options.limit)
             .take(options.limit);
@@ -471,7 +483,7 @@ export class ShareLinkService {
             .orderBy("shareLink.createdAt", "DESC")
             .skip((options.page - 1) * options.limit)
             .take(options.limit);
-        
+
         const [shareLinks, total] = await queryBuilder.getManyAndCount();
 
         return {
@@ -487,7 +499,10 @@ export class ShareLinkService {
         creatorId: string;
     }) {
         const shareLink = await this.entityManager.findOne(ShareLinkEntity, {
-            where: { id: options.shareLinkId, workspaceId: options.workspaceId },
+            where: {
+                id: options.shareLinkId,
+                workspaceId: options.workspaceId,
+            },
         });
 
         if (!shareLink) return false;
@@ -497,7 +512,6 @@ export class ShareLinkService {
             workspaceId: shareLink.workspaceId,
             userId: options.creatorId,
         });
-
 
         await this.entityManager.remove(ShareLinkEntity, shareLink);
         return true;
@@ -509,16 +523,26 @@ export class ShareLinkService {
         userId: string;
     }) {
         if (options.shareLink.creatorId !== options.userId) {
-            const workspaceMember = await this.entityManager.findOne(UserWorkspaceEntity, {
-                where: {
-                    workspaceId: options.workspaceId,
-                    userId: options.userId,
-                }
-            });
+            const workspaceMember = await this.entityManager.findOne(
+                UserWorkspaceEntity,
+                {
+                    where: {
+                        workspaceId: options.workspaceId,
+                        userId: options.userId,
+                    },
+                },
+            );
 
-            if (!workspaceMember || !hasPermission(workspaceMember.permissions, WORKSPACE_PERMISSIONS.MANAGE)) {
+            if (
+                !workspaceMember ||
+                !hasPermission(
+                    workspaceMember.permissions,
+                    WORKSPACE_PERMISSIONS.MANAGE,
+                )
+            ) {
                 throw new HTTPException(403, {
-                    message: "You do not have permission to update/delete this share link",
+                    message:
+                        "You do not have permission to update/delete this share link",
                 });
             }
         }
@@ -530,35 +554,53 @@ export class ShareLinkService {
         workspaceId: string;
         userId: string;
         page: number;
-        limit: number
+        limit: number;
     }) {
-        const workspaceMember = await this.entityManager.findOne(UserWorkspaceEntity, {
-            where: {
-                workspaceId: options.workspaceId,
-                userId: options.userId,
-            }
-        });
+        const workspaceMember = await this.entityManager.findOne(
+            UserWorkspaceEntity,
+            {
+                where: {
+                    workspaceId: options.workspaceId,
+                    userId: options.userId,
+                },
+            },
+        );
 
-        if (!workspaceMember || !hasPermission(workspaceMember.permissions, WORKSPACE_PERMISSIONS.MANAGE)) {
+        if (
+            !workspaceMember ||
+            !hasPermission(
+                workspaceMember.permissions,
+                WORKSPACE_PERMISSIONS.MANAGE,
+            )
+        ) {
             throw new HTTPException(403, {
-                message: "You do not have permission to access this target share links",
+                message:
+                    "You do not have permission to access this target share links",
             });
         }
 
-        const [shareLinks, total] = await this.entityManager.findAndCount(ShareLinkEntity, {
-            where: {
-                targets: {
-                    targetType: options.targetType,
-                    targetId: In(options.targetIds),
+        const [shareLinks, total] = await this.entityManager.findAndCount(
+            ShareLinkEntity,
+            {
+                where: {
+                    targets: {
+                        targetType: options.targetType,
+                        targetId: In(options.targetIds),
+                    },
+                },
+                skip: (options.page - 1) * options.limit,
+                take: options.limit,
+                relations: [
+                    "targets",
+                    "recipients",
+                    "creator",
+                    "recipients.user",
+                ],
+                order: {
+                    updatedAt: "DESC",
                 },
             },
-            skip: (options.page - 1) * options.limit,
-            take: options.limit,
-            relations: ["targets", "recipients", "creator", "recipients.user"],
-            order: {
-                updatedAt: "DESC",
-            },
-        });
+        );
 
         return {
             shareLinks,
@@ -573,16 +615,26 @@ export class ShareLinkService {
         workspaceId: string;
         userId: string;
     }) {
-        const workspaceMember = await this.entityManager.findOne(UserWorkspaceEntity, {
-            where: {
-                workspaceId: options.workspaceId,
-                userId: options.userId,
-            }
-        });
+        const workspaceMember = await this.entityManager.findOne(
+            UserWorkspaceEntity,
+            {
+                where: {
+                    workspaceId: options.workspaceId,
+                    userId: options.userId,
+                },
+            },
+        );
 
-        if (!workspaceMember || !hasPermission(workspaceMember.permissions, WORKSPACE_PERMISSIONS.MANAGE)) {
+        if (
+            !workspaceMember ||
+            !hasPermission(
+                workspaceMember.permissions,
+                WORKSPACE_PERMISSIONS.MANAGE,
+            )
+        ) {
             throw new HTTPException(403, {
-                message: "You do not have permission to access this target share links",
+                message:
+                    "You do not have permission to access this target share links",
             });
         }
 

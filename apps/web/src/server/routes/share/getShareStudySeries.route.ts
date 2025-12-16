@@ -5,7 +5,10 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
 import { verifyShareLinkToken } from "@/server/middlewares/shareLink.middleware";
-import { requireShareLinkTargetType, verifyStudyInShareLink } from "@/server/middlewares/shareLinkAccess.middleware";
+import {
+    requireShareLinkTargetType,
+    verifyStudyInShareLink,
+} from "@/server/middlewares/shareLinkAccess.middleware";
 import { DicomSearchSeriesQueryBuilder } from "@/server/services/qido-rs/dicomSearchSeriesQueryBuilder";
 import { appLogger } from "@/server/utils/logger";
 

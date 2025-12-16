@@ -1,15 +1,11 @@
 import { z } from "zod";
 import { positiveNumberQuerySchema } from "./positiveNumberQuerySchema";
 
-export const wadoRsViewportSchema = z
-.string()
-.refine((v) => {
+export const wadoRsViewportSchema = z.string().refine((v) => {
     const parts = v.split(",");
     if (parts.length === 2) {
         const [vw, vh] = parts.map(Number);
-        return (
-            !Number.isNaN(vw) && !Number.isNaN(vh) && vw > 0 && vh > 0
-        );
+        return !Number.isNaN(vw) && !Number.isNaN(vh) && vw > 0 && vh > 0;
     }
 
     if (parts.length === 6) {
@@ -56,10 +52,17 @@ export const wadoRsQueryParamSchema = z.object({
     iccprofile: z
         .string()
         .default("no")
-        .pipe(z.enum(["no", "yes", "srgb", "adobergb", "rommrgb", "displayp3"])),
+        .pipe(
+            z.enum(["no", "yes", "srgb", "adobergb", "rommrgb", "displayp3"]),
+        ),
     viewport: wadoRsViewportSchema.optional(),
     frameNumber: positiveNumberQuerySchema.optional(),
-    password: z.string().optional().describe("The password of the share link if the share link is protected"),
+    password: z
+        .string()
+        .optional()
+        .describe(
+            "The password of the share link if the share link is protected",
+        ),
 });
 
 const wadoRsBaseAcceptEnum = z.enum([
@@ -70,11 +73,12 @@ const wadoRsBaseAcceptEnum = z.enum([
     'multipart/related; type="image/jp2"',
     'multipart/related; type="image/png"',
     "*/*",
-])
+]);
 
 export const wadoRsHeaderSchema = z.object({
-    accept: wadoRsBaseAcceptEnum
-            .default('multipart/related; type="application/dicom"'),
+    accept: wadoRsBaseAcceptEnum.default(
+        'multipart/related; type="application/dicom"',
+    ),
 });
 
 const wadoRsSingleFrameAcceptEnum = z.enum([
@@ -82,7 +86,7 @@ const wadoRsSingleFrameAcceptEnum = z.enum([
     "image/jp2",
     "image/png",
     "image/*",
-    "*/*"
+    "*/*",
 ]);
 
 const wadoRsMultipleFramesAcceptEnum = z.enum([
@@ -90,7 +94,7 @@ const wadoRsMultipleFramesAcceptEnum = z.enum([
     'multipart/related; type="image/jpeg"',
     'multipart/related; type="image/jp2"',
     'multipart/related; type="image/png"',
-    "*/*"
+    "*/*",
 ]);
 
 const wadoRsRenderedFramesAcceptEnum = z.enum([
@@ -99,13 +103,13 @@ const wadoRsRenderedFramesAcceptEnum = z.enum([
 ]);
 
 export const wadoRsRenderedFramesHeaderSchema = z.object({
-    accept: wadoRsRenderedFramesAcceptEnum
+    accept: wadoRsRenderedFramesAcceptEnum,
 });
 
 export const wadoRsSingleFrameHeaderSchema = z.object({
-    accept: wadoRsSingleFrameAcceptEnum
+    accept: wadoRsSingleFrameAcceptEnum,
 });
 
 export const wadoRsMultipleFramesHeaderSchema = z.object({
-    accept: wadoRsMultipleFramesAcceptEnum
+    accept: wadoRsMultipleFramesAcceptEnum,
 });

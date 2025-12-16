@@ -3,23 +3,17 @@ import { useShareCreateTagDialogStore } from "@/stores/share-create-tag-dialog-s
 import { ShareCreateTagDialog } from "./share-create-tag-dialog";
 
 export function ShareCreateTagDialogProvider() {
-    const {
-        isOpen,
-        token,
-        targetType,
-        targetId,
-        password,
-        closeDialog,
-    } = useShareCreateTagDialogStore(
-        useShallow((state) => ({
-            isOpen: state.isOpen,
-            token: state.token,
-            targetType: state.targetType,
-            targetId: state.targetId,
-            password: state.password,
-            closeDialog: state.closeDialog,
-        }))
-    );
+    const { isOpen, token, targetType, targetId, password, closeDialog } =
+        useShareCreateTagDialogStore(
+            useShallow((state) => ({
+                isOpen: state.isOpen,
+                token: state.token,
+                targetType: state.targetType,
+                targetId: state.targetId,
+                password: state.password,
+                closeDialog: state.closeDialog,
+            })),
+        );
 
     if (!token || !targetType || !targetId) return null;
 
@@ -36,5 +30,5 @@ export function ShareCreateTagDialogProvider() {
             targetId={targetId}
             password={password}
         />
-    )
+    );
 }

@@ -183,8 +183,10 @@ const workspacesRoute = new Hono()
             }
 
             const workspaceService = new WorkspaceService();
-            const userWorkspace =
-                await workspaceService.getUserWorkspaceById(userId, workspaceId);
+            const userWorkspace = await workspaceService.getUserWorkspaceById(
+                userId,
+                workspaceId,
+            );
 
             if (!userWorkspace) {
                 return c.json(
@@ -217,14 +219,18 @@ const workspacesRoute = new Hono()
         "/workspaces",
         describeRoute({
             description: "Create a new workspace",
-            tags: ["Workspaces"]
+            tags: ["Workspaces"],
         }),
         verifyAuthMiddleware,
         zValidator(
             "json",
             z.object({
-                name: z.string().min(1).max(255).describe("The name of the workspace"),
-            })
+                name: z
+                    .string()
+                    .min(1)
+                    .max(255)
+                    .describe("The name of the workspace"),
+            }),
         ),
         async (c) => {
             const { name } = c.req.valid("json");
@@ -236,25 +242,28 @@ const workspacesRoute = new Hono()
                         message: "Unauthorized",
                     },
                     401,
-                )
+                );
             }
 
             const workspaceService = new WorkspaceService();
             const newWorkspace = await workspaceService.createWorkspaceForUser({
                 userId: authUser.user.id,
-                name
+                name,
             });
 
-            return c.json({
-                workspace: newWorkspace,
-            }, 201);
-        }
+            return c.json(
+                {
+                    workspace: newWorkspace,
+                },
+                201,
+            );
+        },
     )
     .put(
         "/workspaces/:workspaceId/default",
         describeRoute({
             description: "Set a default workspace",
-            tags: ["Workspaces"]
+            tags: ["Workspaces"],
         }),
         verifyAuthMiddleware,
         verifyWorkspaceExists,
@@ -263,31 +272,37 @@ const workspacesRoute = new Hono()
             "param",
             z.object({
                 workspaceId: z.string().describe("The ID of the workspace"),
-            })
+            }),
         ),
         async (c) => {
             const { workspaceId } = c.req.valid("param");
             const authUser = c.get("authUser");
             const userId = authUser?.user?.id;
             if (!userId) {
-                return c.json({
-                    message: "Unauthorized",
-                }, 401);
+                return c.json(
+                    {
+                        message: "Unauthorized",
+                    },
+                    401,
+                );
             }
 
             const workspaceService = new WorkspaceService();
             await workspaceService.setUserDefaultWorkspace(userId, workspaceId);
 
-            return c.json({
-                ok: true
-            }, 200);
-        }
+            return c.json(
+                {
+                    ok: true,
+                },
+                200,
+            );
+        },
     )
     .patch(
         "/workspaces/:workspaceId",
         describeRoute({
             description: "Update a workspace",
-            tags: ["Workspaces"]
+            tags: ["Workspaces"],
         }),
         verifyAuthMiddleware,
         verifyWorkspaceExists,
@@ -296,32 +311,37 @@ const workspacesRoute = new Hono()
             "param",
             z.object({
                 workspaceId: z.string().describe("The ID of the workspace"),
-            })
+            }),
         ),
         zValidator(
             "json",
             z.object({
                 name: z.string().min(1).max(255).optional(),
-            })
+            }),
         ),
         async (c) => {
             const { workspaceId } = c.req.valid("param");
             const { name } = c.req.valid("json");
-            
 
             const workspaceService = new WorkspaceService();
-            const updatedWorkspace = await workspaceService.updateWorkspace(workspaceId, { name });
+            const updatedWorkspace = await workspaceService.updateWorkspace(
+                workspaceId,
+                { name },
+            );
 
-            return c.json({
-                workspace: updatedWorkspace,
-            }, 200);
-        }
+            return c.json(
+                {
+                    workspace: updatedWorkspace,
+                },
+                200,
+            );
+        },
     )
     .delete(
         "/workspaces/:workspaceId",
         describeRoute({
             description: "Delete a workspace",
-            tags: ["Workspaces"]
+            tags: ["Workspaces"],
         }),
         verifyAuthMiddleware,
         verifyWorkspaceExists,
@@ -330,20 +350,23 @@ const workspacesRoute = new Hono()
             "param",
             z.object({
                 workspaceId: z.string().describe("The ID of the workspace"),
-            })
+            }),
         ),
         async (c) => {
             const authUser = c.get("authUser");
             const userId = authUser?.user?.id;
 
             if (!userId) {
-                return c.json({
-                    message: "Unauthorized",
-                }, 401);
+                return c.json(
+                    {
+                        message: "Unauthorized",
+                    },
+                    401,
+                );
             }
 
             const { workspaceId } = c.req.valid("param");
-            
+
             const workspaceService = new WorkspaceService();
             await workspaceService.deleteWorkspace(workspaceId);
 
@@ -355,10 +378,13 @@ const workspacesRoute = new Hono()
                 });
             }
 
-            return c.json({
-                ok: true
-            }, 200);
-        }
+            return c.json(
+                {
+                    ok: true,
+                },
+                200,
+            );
+        },
     )
     .route("/", workspaceMemberRoute);
 

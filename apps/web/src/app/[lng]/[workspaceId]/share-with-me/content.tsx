@@ -10,7 +10,10 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { ShareLinkCard } from "@/components/share/share-link-card";
 import { Button } from "@/components/ui/button";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getUserReceivedShareLinksQuery, parseShareLinkFromApi } from "@/react-query/queries/share";
+import {
+    getUserReceivedShareLinksQuery,
+    parseShareLinkFromApi,
+} from "@/react-query/queries/share";
 
 export default function ShareWithMeContent() {
     const { t } = useT("translation");
@@ -21,31 +24,30 @@ export default function ShareWithMeContent() {
     const { data, isLoading, isFetching, refetch } = useQuery(
         getUserReceivedShareLinksQuery({
             page,
-            limit: LIMIT
-        })
+            limit: LIMIT,
+        }),
     );
 
-    const shareLinks = (data?.data?.shareLinks ?? []).map(parseShareLinkFromApi);
+    const shareLinks = (data?.data?.shareLinks ?? []).map(
+        parseShareLinkFromApi,
+    );
     const hasNextPage = data?.data?.hasNextPage ?? false;
-
 
     const handleRefresh = () => {
         refetch();
-    }
+    };
 
     const handleShareDeleted = () => {
         queryClient.invalidateQueries({
             queryKey: ["user-received-share-links", page, LIMIT],
         });
-    }
+    };
 
     return (
         <div className="container mx-auto space-y-4 py-8 px-4">
             {/* Header */}
             <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold">
-                    {t("shareWithMe.title")}
-                </h2>
+                <h2 className="text-xl font-bold">{t("shareWithMe.title")}</h2>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -58,14 +60,14 @@ export default function ShareWithMeContent() {
 
             {/* Content */}
             {isLoading ? (
-                 <div className="flex items-center justify-center py-8">
+                <div className="flex items-center justify-center py-8">
                     <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-                 </div>
-            ): shareLinks.length === 0 ? (
+                </div>
+            ) : shareLinks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                     {t("shareWithMe.noData")}
                 </div>
-            ): (
+            ) : (
                 <>
                     {/* Grid Layout for Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -89,5 +91,5 @@ export default function ShareWithMeContent() {
                 </>
             )}
         </div>
-    )
+    );
 }

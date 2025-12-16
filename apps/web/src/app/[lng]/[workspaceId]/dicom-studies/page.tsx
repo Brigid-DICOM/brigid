@@ -9,7 +9,9 @@ interface DicomStudiesPageProps {
     }>;
 }
 
-export default async function DicomStudiesPage({ params }: DicomStudiesPageProps) {
+export default async function DicomStudiesPage({
+    params,
+}: DicomStudiesPageProps) {
     const queryClient = getQueryClient();
     const { workspaceId } = await params;
 

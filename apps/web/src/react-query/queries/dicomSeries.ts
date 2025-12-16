@@ -19,75 +19,103 @@ export const getDicomSeriesQuery = ({
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
     cookie,
     ...searchConditions
-}: DicomSeriesQueryParams) => queryOptions({
-    queryKey: ["dicom-series", workspaceId, studyInstanceUid, offset, limit, deleteStatus, ...Object.keys(searchConditions)],
-    queryFn: async () => {
-        const headers: HeadersInit = {};
-        if (typeof window === "undefined" && typeof cookie === "string") {
-            headers.cookie = cookie;
-        }
-
-        const response = await apiClient.api.workspaces[":workspaceId"].studies[":studyInstanceUid"].series.$get({
-            param: {
-                workspaceId,
-                studyInstanceUid
-            },
-            query: {
-                offset: offset.toString(),
-                limit: limit.toString(),
-                deleteStatus: deleteStatus.toString(),
-                ...Object.fromEntries(
-                    Object.entries(searchConditions).filter(([_, value]) =>
-                        value !== undefined && value !== null && value !== ""
-                    )
-                )
+}: DicomSeriesQueryParams) =>
+    queryOptions({
+        queryKey: [
+            "dicom-series",
+            workspaceId,
+            studyInstanceUid,
+            offset,
+            limit,
+            deleteStatus,
+            ...Object.keys(searchConditions),
+        ],
+        queryFn: async () => {
+            const headers: HeadersInit = {};
+            if (typeof window === "undefined" && typeof cookie === "string") {
+                headers.cookie = cookie;
             }
-        }, {
-            headers: headers
-        });
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch DICOM series");
-        }
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].studies[":studyInstanceUid"].series.$get(
+                {
+                    param: {
+                        workspaceId,
+                        studyInstanceUid,
+                    },
+                    query: {
+                        offset: offset.toString(),
+                        limit: limit.toString(),
+                        deleteStatus: deleteStatus.toString(),
+                        ...Object.fromEntries(
+                            Object.entries(searchConditions).filter(
+                                ([_, value]) =>
+                                    value !== undefined &&
+                                    value !== null &&
+                                    value !== "",
+                            ),
+                        ),
+                    },
+                },
+                {
+                    headers: headers,
+                },
+            );
 
-        if (response.status === 204) {
-            return [];
-        }
+            if (!response.ok) {
+                throw new Error("Failed to fetch DICOM series");
+            }
 
-        return await response.json();
-    }
-});
+            if (response.status === 204) {
+                return [];
+            }
+
+            return await response.json();
+        },
+    });
 
 export const getDicomSeriesThumbnailQuery = (
     workspaceId: string,
     studyInstanceUid: string,
     seriesInstanceUid: string,
-    viewport: string = "64,64"
-) => queryOptions({
-    queryKey: ["dicom-series-thumbnail", workspaceId, studyInstanceUid, seriesInstanceUid, viewport],
-    queryFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].studies[":studyInstanceUid"].series[":seriesInstanceUid"].thumbnail.$get({
-            header: {
-                accept: "image/jpeg"
-            },
-            param: {
-                workspaceId,
-                studyInstanceUid,
-                seriesInstanceUid
-            },
-            query: {
-                viewport
+    viewport: string = "64,64",
+) =>
+    queryOptions({
+        queryKey: [
+            "dicom-series-thumbnail",
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+            viewport,
+        ],
+        queryFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].studies[":studyInstanceUid"].series[
+                ":seriesInstanceUid"
+            ].thumbnail.$get({
+                header: {
+                    accept: "image/jpeg",
+                },
+                param: {
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                },
+                query: {
+                    viewport,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch DICOM series thumbnail");
             }
-        });
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch DICOM series thumbnail");
-        }
-
-        return await response.blob();
-    },
-    enabled: !!workspaceId && !!studyInstanceUid && !!seriesInstanceUid
-});
+            return await response.blob();
+        },
+        enabled: !!workspaceId && !!studyInstanceUid && !!seriesInstanceUid,
+    });
 
 export const recycleDicomSeriesMutation = ({
     workspaceId,
@@ -95,49 +123,55 @@ export const recycleDicomSeriesMutation = ({
 }: {
     workspaceId: string;
     seriesIds: string[];
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.series.recycle.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                seriesIds,
-            },
-        });
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.series.recycle.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    seriesIds,
+                },
+            });
 
-        if (!response.ok) {
-            throw new Error("Failed to recycle DICOM series");
-        }
+            if (!response.ok) {
+                throw new Error("Failed to recycle DICOM series");
+            }
 
-        return await response.json();
-    }
-});
+            return await response.json();
+        },
+    });
 
 export const restoreDicomSeriesMutation = ({
     workspaceId,
     seriesIds,
 }: {
     workspaceId: string;
-    seriesIds: string[]
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.series.restore.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                seriesIds,
-            },
-        });
-        
-        if (!response.ok) {
-            throw new Error("Failed to restore DICOM series");
-        }
+    seriesIds: string[];
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.series.restore.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    seriesIds,
+                },
+            });
 
-        return await response.json();
-    }
-});
+            if (!response.ok) {
+                throw new Error("Failed to restore DICOM series");
+            }
+
+            return await response.json();
+        },
+    });
 
 export const deleteDicomSeriesMutation = ({
     workspaceId,
@@ -145,21 +179,24 @@ export const deleteDicomSeriesMutation = ({
 }: {
     workspaceId: string;
     seriesIds: string[];
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.series.delete.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                seriesIds,
-            },
-        });
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.series.delete.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    seriesIds,
+                },
+            });
 
-        if (!response.ok) {
-            throw new Error("Failed to delete DICOM series");
-        }
+            if (!response.ok) {
+                throw new Error("Failed to delete DICOM series");
+            }
 
-        return await response.json();
-    }
-})
+            return await response.json();
+        },
+    });

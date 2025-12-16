@@ -24,24 +24,24 @@ export default async function MySharesPage({ params }: MySharesPageProps) {
             page: 1,
             limit: 10,
             cookie: cookieStore.toString(),
-        })
+        }),
     );
     const workspaceData = await queryClient.fetchQuery(
-        getWorkspaceByIdQuery(workspaceId, cookieStore.toString())
+        getWorkspaceByIdQuery(workspaceId, cookieStore.toString()),
     );
 
     const canShare = hasPermission(
         workspaceData?.workspace?.membership?.permissions ?? 0,
-        WORKSPACE_PERMISSIONS.MANAGE
+        WORKSPACE_PERMISSIONS.MANAGE,
     );
 
     if (!canShare) {
-        return <Forbidden />
+        return <Forbidden />;
     }
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
             <MySharesContent workspaceId={workspaceId} />
         </HydrationBoundary>
-    )
+    );
 }

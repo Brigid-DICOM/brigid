@@ -8,7 +8,10 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { ShareLinkCard } from "@/components/share/share-link-card";
 import { Button } from "@/components/ui/button";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getUserShareLinksQuery, parseShareLinkFromApi } from "@/react-query/queries/share";
+import {
+    getUserShareLinksQuery,
+    parseShareLinkFromApi,
+} from "@/react-query/queries/share";
 
 interface MySharesContentProps {
     workspaceId: string;
@@ -24,30 +27,30 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
         getUserShareLinksQuery({
             workspaceId,
             page,
-            limit: LIMIT
-        })
+            limit: LIMIT,
+        }),
     );
 
-    const shareLinks = (data?.data?.shareLinks ?? []).map(parseShareLinkFromApi);
+    const shareLinks = (data?.data?.shareLinks ?? []).map(
+        parseShareLinkFromApi,
+    );
     const hasNextPage = data?.data?.hasNextPage ?? false;
 
     const handleRefresh = () => {
         refetch();
-    }
+    };
 
     const handleShareDeleted = () => {
         queryClient.invalidateQueries({
             queryKey: ["user-share-links", workspaceId],
         });
-    }
+    };
 
     return (
         <div className="container mx-auto space-y-4 py-8 px-4">
             {/* Header */}
             <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold">
-                    {t("myShares.title")}
-                </h2>
+                <h2 className="text-xl font-bold">{t("myShares.title")}</h2>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -61,16 +64,16 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
 
             {/* Content */}
             {isLoading ? (
-                 <div className="flex items-center justify-center py-8">
+                <div className="flex items-center justify-center py-8">
                     <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-                 </div>
-            ): shareLinks.length === 0 ? (
+                </div>
+            ) : shareLinks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                     {t("myShares.noData")}
                 </div>
-            ): (
+            ) : (
                 <>
-                {/* Grid Layout for Cards */}
+                    {/* Grid Layout for Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {shareLinks.map((shareLink) => (
                             <ShareLinkCard
@@ -92,5 +95,5 @@ export default function MySharesContent({ workspaceId }: MySharesContentProps) {
                 </>
             )}
         </div>
-    )
+    );
 }

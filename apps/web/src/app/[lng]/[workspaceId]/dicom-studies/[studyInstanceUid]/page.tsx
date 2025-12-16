@@ -12,7 +12,9 @@ interface DicomSeriesPageProps {
     }>;
 }
 
-export default async function DicomSeriesPage({ params }: DicomSeriesPageProps) {
+export default async function DicomSeriesPage({
+    params,
+}: DicomSeriesPageProps) {
     const cookieStore = await cookies();
     const { studyInstanceUid, workspaceId } = await params;
 
@@ -24,15 +26,15 @@ export default async function DicomSeriesPage({ params }: DicomSeriesPageProps) 
             studyInstanceUid: studyInstanceUid,
             offset: 0,
             limit: 10,
-            cookie: cookieStore.toString()
-        })
+            cookie: cookieStore.toString(),
+        }),
     );
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <DicomSeriesContent 
-                workspaceId={workspaceId} 
-                studyInstanceUid={studyInstanceUid} 
+            <DicomSeriesContent
+                workspaceId={workspaceId}
+                studyInstanceUid={studyInstanceUid}
             />
             <BlueLightViewerDialog />
         </HydrationBoundary>

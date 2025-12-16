@@ -8,7 +8,7 @@ import {
     describe,
     expect,
     it,
-    vi
+    vi,
 } from "vitest";
 import { app } from "@/app/api/[...route]/route";
 import { multipartDecode } from "@/lib/dicomMultipartDecode";
@@ -39,7 +39,11 @@ const TEST_DICOM_DATA = {
     seriesInstanceUid: TEST_SERIES.seriesInstanceUid,
     sopInstanceUid: TEST_INSTANCE.sopInstanceUid,
     instanceFile: path.resolve(
-        join(import.meta.url, "../../../fixtures/dicomFiles", TEST_INSTANCE.file)
+        join(
+            import.meta.url,
+            "../../../fixtures/dicomFiles",
+            TEST_INSTANCE.file,
+        ),
     ),
 };
 
@@ -49,7 +53,11 @@ const TEST_DICOM_DATA_2 = {
     seriesInstanceUid: TEST_SERIES_2.seriesInstanceUid,
     sopInstanceUid: TEST_INSTANCE_2.sopInstanceUid,
     instanceFile: path.resolve(
-        join(import.meta.url, "../../../fixtures/dicomFiles", TEST_INSTANCE_2.file)
+        join(
+            import.meta.url,
+            "../../../fixtures/dicomFiles",
+            TEST_INSTANCE_2.file,
+        ),
     ),
 };
 
@@ -74,48 +82,52 @@ describe("WADO-RS Retrieve Frame Pixel Data Route", () => {
 
         const testFileManager = new TestFileManager();
         const res = await testFileManager.uploadTestFile(
-            TEST_DICOM_DATA.instanceFile
+            TEST_DICOM_DATA.instanceFile,
         );
         const res2 = await testFileManager.uploadTestFile(
-            TEST_DICOM_DATA_2.instanceFile
+            TEST_DICOM_DATA_2.instanceFile,
         );
         expect(res.status).toBe(200);
         expect(res2.status).toBe(200);
     });
 
     describe("GET /workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/frames/:frameNumbers", () => {
-        it("should retrieve compressed frame pixel data with multipart/related; type=\"application/octet-stream\"", async () => {
+        it('should retrieve compressed frame pixel data with multipart/related; type="application/octet-stream"', async () => {
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}/instances/${TEST_DICOM_DATA.sopInstanceUid}/frames/1`,
                 {
                     headers: {
-                        accept: 'multipart/related; type="application/octet-stream"'
-                    }
-                }
+                        accept: 'multipart/related; type="application/octet-stream"',
+                    },
+                },
             );
 
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="application/octet-stream"');
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="application/octet-stream"',
+            );
             const parts = multipartDecode(await response.arrayBuffer());
             expect(parts.length).toBe(1);
         });
 
-        it("should retrieve uncompressed frame pixel data with multipart/related; type=\"application/octet-stream\"", async () => {
+        it('should retrieve uncompressed frame pixel data with multipart/related; type="application/octet-stream"', async () => {
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA_2.studyInstanceUid}/series/${TEST_DICOM_DATA_2.seriesInstanceUid}/instances/${TEST_DICOM_DATA_2.sopInstanceUid}/frames/1`,
                 {
                     headers: {
-                        accept: 'multipart/related; type="application/octet-stream"'
-                    }
-                }
+                        accept: 'multipart/related; type="application/octet-stream"',
+                    },
+                },
             );
 
             // Assert
             expect(response.status).toBe(200);
-            expect(response.headers.get('Content-Type')).toContain('multipart/related; type="application/octet-stream"');
+            expect(response.headers.get("Content-Type")).toContain(
+                'multipart/related; type="application/octet-stream"',
+            );
             const parts = multipartDecode(await response.arrayBuffer());
             expect(parts.length).toBe(1);
         });

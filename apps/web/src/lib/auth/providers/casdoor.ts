@@ -15,7 +15,9 @@ export interface CasdoorProfile extends Record<string, any> {
     permanentAvatar: string;
 }
 
-export default function Casdoor(config: OIDCUserConfig<CasdoorProfile>): OIDCConfig<CasdoorProfile> {
+export default function Casdoor(
+    config: OIDCUserConfig<CasdoorProfile>,
+): OIDCConfig<CasdoorProfile> {
     return {
         ...config,
         id: "casdoor",
@@ -26,10 +28,13 @@ export default function Casdoor(config: OIDCUserConfig<CasdoorProfile>): OIDCCon
                 emailVerified: profile.emailVerified,
                 id: profile.id,
                 image: profile.avatar,
-                name: profile.displayName ?? profile.firstName ?? profile.lastName,
-                providerAccountId: profile.id
+                name:
+                    profile.displayName ??
+                    profile.firstName ??
+                    profile.lastName,
+                providerAccountId: profile.id,
             };
         },
-        type: "oidc"
-    }
+        type: "oidc",
+    };
 }

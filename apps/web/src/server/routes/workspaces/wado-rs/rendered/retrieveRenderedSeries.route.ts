@@ -5,7 +5,10 @@ import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
-import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
+import {
+    verifyWorkspaceExists,
+    verifyWorkspacePermission,
+} from "@/server/middlewares/workspace.middleware";
 import {
     wadoRsMultipleFramesHeaderSchema,
     wadoRsQueryParamSchema,
@@ -51,7 +54,7 @@ const retrieveRenderedSeriesRoute = new Hono().get(
                 offset: 0,
             });
         seriesInstances.push(...instances);
-    
+
         while (hasNextPage) {
             offset += env.QUERY_MAX_LIMIT;
             const result = await seriesService.getSeriesInstances({

@@ -22,7 +22,10 @@ import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getDicomStudyQuery, recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
+import {
+    getDicomStudyQuery,
+    recycleDicomStudyMutation,
+} from "@/react-query/queries/dicomStudy";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
@@ -45,11 +48,18 @@ export default function DicomStudiesContent({
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
     const searchParams = useSearchParams();
-    const { getSearchConditionsForType, setSearchConditionsForType, setSearchType } = useGlobalSearchStore();
-    const searchConditions = mounted ? getSearchConditionsForType("dicom-study") : {};
+    const {
+        getSearchConditionsForType,
+        setSearchConditionsForType,
+        setSearchType,
+    } = useGlobalSearchStore();
+    const searchConditions = mounted
+        ? getSearchConditionsForType("dicom-study")
+        : {};
 
     const { layoutMode } = useLayoutStore();
-    const { close: closeBlueLightViewer, open: openBlueLightViewer } = useBlueLightViewerStore();
+    const { close: closeBlueLightViewer, open: openBlueLightViewer } =
+        useBlueLightViewerStore();
 
     const {
         selectedStudyIds,
@@ -67,20 +77,29 @@ export default function DicomStudiesContent({
             });
         }
     }, [searchParams, openBlueLightViewer]);
-    
-    const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } = usePagination();
-    
+
+    const {
+        currentPage,
+        handlePreviousPage,
+        handleNextPage,
+        handleResetToFirstPage,
+        canGoPrevious,
+    } = usePagination();
+
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedStudyIds();
-    
-    const handleSearchParamsChange = useCallback((urlParams: Record<string, string>) => {
-        setSearchConditionsForType("dicom-study", urlParams);
-        setSearchType("dicom-study");
-    }, [setSearchConditionsForType, setSearchType]);
+
+    const handleSearchParamsChange = useCallback(
+        (urlParams: Record<string, string>) => {
+            setSearchConditionsForType("dicom-study", urlParams);
+            setSearchType("dicom-study");
+        },
+        [setSearchConditionsForType, setSearchType],
+    );
 
     const { syncSearchParamsToUrl } = useUrlSearchParams({
         searchLevel: "study",
-        onSearchParamsChange: handleSearchParamsChange
+        onSearchParamsChange: handleSearchParamsChange,
     });
 
     useEffect(() => {
@@ -98,7 +117,7 @@ export default function DicomStudiesContent({
             closeBlueLightViewer();
         };
     }, [clearSelection, closeBlueLightViewer]);
-    
+
     const {
         data: studies,
         isLoading,
@@ -113,20 +132,27 @@ export default function DicomStudiesContent({
         }),
     );
     const canGoNext = studies && studies.length === ITEM_PER_PAGE;
-    
+
     const currentPageStudyIds = useMemo(() => {
-        return studies?.map((study) => study["0020000D"]?.Value?.[0] as string).filter(Boolean) || [];
+        return (
+            studies
+                ?.map((study) => study["0020000D"]?.Value?.[0] as string)
+                .filter(Boolean) || []
+        );
     }, [studies]);
-    const isAllSelected = currentPageStudyIds.length > 0 &&
-    currentPageStudyIds.every((studyId) => selectedStudyIds.has(studyId as string));
-    
+    const isAllSelected =
+        currentPageStudyIds.length > 0 &&
+        currentPageStudyIds.every((studyId) =>
+            selectedStudyIds.has(studyId as string),
+        );
+
     const { mutate: recycleStudies } = useMutation({
         ...recycleDicomStudyMutation({
             workspaceId,
-            studyIds: selectedIds
+            studyIds: selectedIds,
         }),
         meta: {
-            toastId: nanoid()
+            toastId: nanoid(),
         },
         onMutate: (_, context) => {
             toast.loading("Recycling DICOM studies...", {
@@ -145,7 +171,7 @@ export default function DicomStudiesContent({
             toast.error("Failed to recycle DICOM studies");
             toast.dismiss(context.meta?.toastId as string);
             clearSelection();
-        }
+        },
     });
 
     useClearSelectionOnBlankClick({
@@ -167,11 +193,12 @@ export default function DicomStudiesContent({
         } else {
             selectAll(currentPageStudyIds);
         }
-    }
+    };
 
     const { handleDownload } = useDownloadHandler({
         downloadSingle: (id: string) => downloadStudy(workspaceId, id),
-        downloadMultiple: (ids: string[]) => downloadMultipleStudies(workspaceId, ids),
+        downloadMultiple: (ids: string[]) =>
+            downloadMultipleStudies(workspaceId, ids),
         errorMessage: "Failed to download selected studies",
     });
 
@@ -183,7 +210,7 @@ export default function DicomStudiesContent({
 
     if (error) {
         return (
-            <EmptyState 
+            <EmptyState
                 title="載入失敗"
                 description="無法載入 DICOM Studies 資料"
             />
@@ -192,7 +219,6 @@ export default function DicomStudiesContent({
 
     return (
         <>
-
             <div className="container mx-auto px-4 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">
@@ -205,7 +231,7 @@ export default function DicomStudiesContent({
 
                 {/* 選取控制列 */}
                 {!isLoading && studies && studies.length > 0 && (
-                    <SelectionControlBar 
+                    <SelectionControlBar
                         selectedCount={selectedCount}
                         isAllSelected={isAllSelected}
                         onSelectAll={handleSelectAll}
@@ -218,34 +244,34 @@ export default function DicomStudiesContent({
 
                 {isLoading ? (
                     layoutMode === "grid" ? (
-                        <LoadingGrid 
-                            itemCount={ITEM_PER_PAGE}
-                        />
+                        <LoadingGrid itemCount={ITEM_PER_PAGE} />
                     ) : (
-                        <LoadingDataTable 
-                            columns={8}
-                            rows={ITEM_PER_PAGE}
-                        />
+                        <LoadingDataTable columns={8} rows={ITEM_PER_PAGE} />
                     )
                 ) : studies && studies.length > 0 ? (
                     <>
                         {layoutMode === "grid" ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
                                 {studies.map((study, index) => (
-                                    // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index
-                                    <DicomStudyCard key={index} study={study as DicomStudyData} workspaceId={workspaceId} type="management" />
+                                    <DicomStudyCard
+                                        // biome-ignore lint/suspicious/noArrayIndexKey: 使用 study instance uid 會出現 type error，所以直接使用 index
+                                        key={index}
+                                        study={study as DicomStudyData}
+                                        workspaceId={workspaceId}
+                                        type="management"
+                                    />
                                 ))}
                             </div>
-                        ): (
+                        ) : (
                             <div className="mb-8">
-                                <DicomStudiesDataTable 
+                                <DicomStudiesDataTable
                                     studies={studies as DicomStudyData[]}
                                     workspaceId={workspaceId}
                                 />
                             </div>
                         )}
 
-                        <PaginationControls 
+                        <PaginationControls
                             canGoPrevious={canGoPrevious}
                             canGoNext={Boolean(canGoNext)}
                             onPrevious={handlePreviousPage}

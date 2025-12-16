@@ -47,7 +47,12 @@ export default function ShareStudySeriesContent({
     const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
         usePagination();
 
-    const { clearSelection, getSelectedCount, selectAll, getSelectedSeriesIds } = useDicomSeriesSelectionStore();
+    const {
+        clearSelection,
+        getSelectedCount,
+        selectAll,
+        getSelectedSeriesIds,
+    } = useDicomSeriesSelectionStore();
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedSeriesIds();
 
@@ -58,18 +63,20 @@ export default function ShareStudySeriesContent({
         }),
     );
 
-    const { data: series, isLoading, error } = useQuery(
-        {
-            ...getShareStudySeriesQuery({
-                token,
-                password,
-                studyInstanceUid,
-                offset: currentPage * ITEM_PER_PAGE,
-                limit: ITEM_PER_PAGE,
-            }),
-            refetchOnWindowFocus: false
-        }
-    );
+    const {
+        data: series,
+        isLoading,
+        error,
+    } = useQuery({
+        ...getShareStudySeriesQuery({
+            token,
+            password,
+            studyInstanceUid,
+            offset: currentPage * ITEM_PER_PAGE,
+            limit: ITEM_PER_PAGE,
+        }),
+        refetchOnWindowFocus: false,
+    });
     const isAllSelected = selectedCount === series?.length;
 
     useClearSelectionOnBlankClick({
@@ -84,7 +91,10 @@ export default function ShareStudySeriesContent({
     }, [clearSelection]);
 
     useEffect(() => {
-        if (error instanceof Error && error.message === "Password is required") {
+        if (
+            error instanceof Error &&
+            error.message === "Password is required"
+        ) {
             router.push(`/${lng}/share/${token}`);
         }
     }, [error, token, lng, router]);
@@ -113,9 +123,13 @@ export default function ShareStudySeriesContent({
         if (isAllSelected) {
             clearSelection();
         } else {
-            selectAll(series?.map((aSeries) => aSeries["0020000E"]?.Value?.[0] as string) || []);
+            selectAll(
+                series?.map(
+                    (aSeries) => aSeries["0020000E"]?.Value?.[0] as string,
+                ) || [],
+            );
         }
-    }
+    };
 
     const handleDownload = async () => {
         if (selectedIds.length === 0) {
@@ -139,7 +153,7 @@ export default function ShareStudySeriesContent({
 
             toast.error("Failed to download selected series");
         }
-    }
+    };
 
     if (isLoading) {
         return (
@@ -182,13 +196,13 @@ export default function ShareStudySeriesContent({
                     </CardHeader>
                 </Card>
 
-                <SelectionControlBar 
-                        selectedCount={selectedCount}
-                        isAllSelected={isAllSelected}
-                        onSelectAll={handleSelectAll}
-                        onClearSelection={clearSelection}
-                        onDownload={handleDownload}
-                        dicomLevel="series"
+                <SelectionControlBar
+                    selectedCount={selectedCount}
+                    isAllSelected={isAllSelected}
+                    onSelectAll={handleSelectAll}
+                    onClearSelection={clearSelection}
+                    onDownload={handleDownload}
+                    dicomLevel="series"
                 />
 
                 {layoutMode === "grid" ? (
@@ -199,9 +213,7 @@ export default function ShareStudySeriesContent({
                                 series={seriesItem as DicomSeriesData}
                                 token={token}
                                 password={password}
-                                publicPermissions={
-                                    publicPermissions
-                                }
+                                publicPermissions={publicPermissions}
                             />
                         ))}
                     </div>
@@ -210,9 +222,7 @@ export default function ShareStudySeriesContent({
                         series={series as DicomSeriesData[]}
                         token={token}
                         password={password}
-                        publicPermissions={
-                            publicPermissions
-                        }
+                        publicPermissions={publicPermissions}
                     />
                 )}
 

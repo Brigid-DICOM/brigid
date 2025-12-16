@@ -1,6 +1,6 @@
 "use client";
 
-import type { ClientShareLinkData } from "@brigid/types"
+import type { ClientShareLinkData } from "@brigid/types";
 import { format } from "date-fns-tz";
 import { EllipsisVerticalIcon, EyeIcon, FolderIcon } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -53,10 +53,7 @@ export function ShareLinkCard({
 }: ShareLinkCardProps) {
     const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
-    const formattedDate = format(
-        shareLink.createdAt,
-        "yyyy/M/d a h:mm:ss",
-    );
+    const formattedDate = format(shareLink.createdAt, "yyyy/M/d a h:mm:ss");
 
     const displayName =
         shareLink.name || `Shared ${shareLink.targets[0].targetType}`;
@@ -68,10 +65,7 @@ export function ShareLinkCard({
                 shareLink={shareLink}
                 onDeleted={onDeleted}
             >
-                <div className={cn(
-                    "relative",
-                    className
-                )}>
+                <div className={cn("relative", className)}>
                     <button
                         type="button"
                         onClick={() => setShowDetailsDialog(true)}
@@ -113,19 +107,19 @@ export function ShareLinkCard({
                     <div className="absolute top-4 right-4">
                         {/* Dropdown Menu Button */}
                         <ShareLinkDropdownMenu
-                                shareLink={shareLink}
-                                workspaceId={workspaceId}
-                                onDeleted={onDeleted}
+                            shareLink={shareLink}
+                            workspaceId={workspaceId}
+                            onDeleted={onDeleted}
+                        >
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={(e) => e.stopPropagation()}
                             >
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <EllipsisVerticalIcon className="h-4 w-4" />
-                                </Button>
-                            </ShareLinkDropdownMenu>
+                                <EllipsisVerticalIcon className="h-4 w-4" />
+                            </Button>
+                        </ShareLinkDropdownMenu>
                     </div>
                 </div>
             </ShareLinkContextMenu>

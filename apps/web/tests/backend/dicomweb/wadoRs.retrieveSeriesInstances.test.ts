@@ -98,9 +98,7 @@ describe("WADO-RS Series Route", () => {
             // Assert
             expect(response.status).toBe(200);
 
-            const parts = multipartDecode(
-                await response.arrayBuffer(),
-            );
+            const parts = multipartDecode(await response.arrayBuffer());
             expect(parts.length).toBe(TEST_DICOM_DATA.instances.length);
         });
 

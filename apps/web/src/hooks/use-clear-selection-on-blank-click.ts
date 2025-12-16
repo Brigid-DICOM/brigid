@@ -14,16 +14,16 @@ export function useClearSelectionOnBlankClick({
     enabled = true,
     dataAttribute = "data-dicom-card",
     excludeSelectors = [
-        'button',
-        'a',
-        'input',
-        'textarea',
-        'select',
+        "button",
+        "a",
+        "input",
+        "textarea",
+        "select",
         '[role="menu"]',
         '[role="menuitem"]',
-        '[data-radix-menu-content]', // Radix UI menu
-        '[data-radix-context-menu-content]', // Radix UI context menu
-        '[data-radix-dialog-content]', // Radix UI dialog
+        "[data-radix-menu-content]", // Radix UI menu
+        "[data-radix-context-menu-content]", // Radix UI context menu
+        "[data-radix-dialog-content]", // Radix UI dialog
     ],
 }: UseClearSelectionOnBlankClickProps) {
     useEffect(() => {
@@ -31,7 +31,7 @@ export function useClearSelectionOnBlankClick({
 
         const handleDocumentClick = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
-            
+
             if (target.closest(`[${dataAttribute}]`)) {
                 return;
             }
@@ -41,14 +41,14 @@ export function useClearSelectionOnBlankClick({
                     return;
                 }
             }
-            
+
             clearSelection();
         };
 
-        document.addEventListener('click', handleDocumentClick);
+        document.addEventListener("click", handleDocumentClick);
 
         return () => {
-            document.removeEventListener('click', handleDocumentClick);
+            document.removeEventListener("click", handleDocumentClick);
         };
     }, [clearSelection, enabled, dataAttribute, excludeSelectors]);
 }

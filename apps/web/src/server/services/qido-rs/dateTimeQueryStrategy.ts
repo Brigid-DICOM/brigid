@@ -9,7 +9,7 @@ export class DateTimeQueryStrategy extends QueryStrategy {
             const end = value.substring(1).trim();
             return {
                 sql: `${table}.${field} <= :endDateTime`,
-                parameters: { endDateTime: this.formatDateTime(end) }
+                parameters: { endDateTime: this.formatDateTime(end) },
             };
         }
 
@@ -18,7 +18,7 @@ export class DateTimeQueryStrategy extends QueryStrategy {
             const start = value.substring(0, dashIndex).trim();
             return {
                 sql: `${table}.${field} >= :startDateTime`,
-                parameters: { startDateTime: this.formatDateTime(start) }
+                parameters: { startDateTime: this.formatDateTime(start) },
             };
         }
 
@@ -30,15 +30,15 @@ export class DateTimeQueryStrategy extends QueryStrategy {
                 sql: `${table}.${field} >= :startDateTime AND ${table}.${field} <= :endDateTime`,
                 parameters: {
                     startDateTime: this.formatDateTime(start),
-                    endDateTime: this.formatDateTime(end)
-                }
+                    endDateTime: this.formatDateTime(end),
+                },
             };
         }
 
         // case: single datetime
         return {
             sql: `${table}.${field} = :dateTime`,
-            parameters: { dateTime: this.formatDateTime(value) }
+            parameters: { dateTime: this.formatDateTime(value) },
         };
     }
 
@@ -71,7 +71,10 @@ export class DateTimeQueryStrategy extends QueryStrategy {
             milliseconds = Math.floor(Number(`0.${fractionalDigits}`) * 1000);
         }
 
-        const offsetFormatted = offset === "+0000" ? "Z" : offset.replace(/([+-])(\d{2})(\d{2})$/, "$1$2:$3");
+        const offsetFormatted =
+            offset === "+0000"
+                ? "Z"
+                : offset.replace(/([+-])(\d{2})(\d{2})$/, "$1$2:$3");
         const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second}.${String(milliseconds).padStart(3, "0")}${offsetFormatted}`;
 
         return new Date(isoString).valueOf();

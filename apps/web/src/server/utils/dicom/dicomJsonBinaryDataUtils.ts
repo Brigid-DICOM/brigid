@@ -9,7 +9,10 @@ export class DicomJsonBinaryDataUtils {
     private binaryKeys: string[] | undefined = undefined;
     private binaryPropKeys: string[] | undefined = undefined;
 
-    constructor(dicomJson: DicomTag, private workspaceId: string) {
+    constructor(
+        dicomJson: DicomTag,
+        private workspaceId: string,
+    ) {
         this.dicomJson = dicomJson;
         this.getBinaryKeys();
         this.getBinaryPropKeys();
@@ -20,11 +23,12 @@ export class DicomJsonBinaryDataUtils {
             return this.binaryKeys;
         }
 
-        let binaryKeys = JSONPath({
-            json: this.dicomJson,
-            path: "$..[?(@ && @.vr && (@.vr === 'OB' || @.vr === 'OD' || @.vr === 'OF' || @.vr === 'OL' || @.vr === 'OV' || @.vr === 'OW'))]",
-            resultType: "path"
-        }) || [];
+        let binaryKeys =
+            JSONPath({
+                json: this.dicomJson,
+                path: "$..[?(@ && @.vr && (@.vr === 'OB' || @.vr === 'OD' || @.vr === 'OF' || @.vr === 'OL' || @.vr === 'OV' || @.vr === 'OW'))]",
+                resultType: "path",
+            }) || [];
 
         if (binaryKeys.length > 0) {
             binaryKeys = binaryKeys.map((key: string) => {
@@ -53,7 +57,10 @@ export class DicomJsonBinaryDataUtils {
 
         for (const key of this.binaryKeys) {
             const commonProps = get(this.dicomJson, `${key}.Value.0`);
-            const inlineBinaryProps = get(this.dicomJson, `${key}.InlineBinary`);
+            const inlineBinaryProps = get(
+                this.dicomJson,
+                `${key}.InlineBinary`,
+            );
 
             if (commonProps) {
                 binaryPropKeys.push(`${key}.Value.0`);
@@ -72,37 +79,28 @@ export class DicomJsonBinaryDataUtils {
         }
 
         const dicomJsonUtils = new DicomJsonUtils(this.dicomJson);
-        const { studyInstanceUid, seriesInstanceUid, sopInstanceUid } = dicomJsonUtils.getUidCollection();
+        const { studyInstanceUid, seriesInstanceUid, sopInstanceUid } =
+            dicomJsonUtils.getUidCollection();
 
-        for (let i = 0 ; i < this.binaryKeys.length; i++) {
+        for (let i = 0; i < this.binaryKeys.length; i++) {
             const binaryKey = this.binaryKeys[i];
 
-            set(
-                this.dicomJson,
-                `${binaryKey}.vr`,
-                "UR"
-            );
+            set(this.dicomJson, `${binaryKey}.vr`, "UR");
 
             const binaryPropKey = this.binaryPropKeys[i];
 
             set(
                 this.dicomJson,
                 `${binaryKey}.BulkDataURI`,
-                `/workspaces/${this.workspaceId}/studies/${studyInstanceUid}/series/${seriesInstanceUid}/instances/${sopInstanceUid}/bulkdata/${binaryPropKey}`
+                `/workspaces/${this.workspaceId}/studies/${studyInstanceUid}/series/${seriesInstanceUid}/instances/${sopInstanceUid}/bulkdata/${binaryPropKey}`,
             );
 
-            unset(
-                this.dicomJson,
-                `${binaryKey}.Value`
-            );
-            unset(
-                this.dicomJson,
-                `${binaryKey}.InlineBinary`
-            );
+            unset(this.dicomJson, `${binaryKey}.Value`);
+            unset(this.dicomJson, `${binaryKey}.InlineBinary`);
 
             this.dicomJson[DICOM_TAG_KEYWORD_REGISTRY.PixelData.tag] = {
                 vr: "UR",
-                BulkDataURI: `/workspaces/${this.workspaceId}/studies/${studyInstanceUid}/series/${seriesInstanceUid}/instances/${sopInstanceUid}/bulkdata/${binaryPropKey}`
+                BulkDataURI: `/workspaces/${this.workspaceId}/studies/${studyInstanceUid}/series/${seriesInstanceUid}/instances/${sopInstanceUid}/bulkdata/${binaryPropKey}`,
             };
         }
     }

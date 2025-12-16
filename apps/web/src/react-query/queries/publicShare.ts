@@ -50,7 +50,9 @@ export const verifyPasswordMutation = ({
 }) => {
     return mutationOptions({
         mutationFn: async () => {
-            const response = await apiClient.api.share[":token"]["verify-password"].$post({
+            const response = await apiClient.api.share[":token"][
+                "verify-password"
+            ].$post({
                 param: {
                     token,
                 },
@@ -65,14 +67,14 @@ export const verifyPasswordMutation = ({
             }
 
             return await response.json();
-        }
+        },
     });
 };
 
 function commonRetryHandler(failureCount: number, error: Error) {
     if (
-        error instanceof Error && 
-        (error.message === "Password is required" || 
+        error instanceof Error &&
+        (error.message === "Password is required" ||
             error.message === "Invalid password")
     ) {
         return false;
@@ -135,7 +137,9 @@ export const getShareStudiesQuery = ({
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Failed to fetch public share studies");
+                throw new Error(
+                    error.error || "Failed to fetch public share studies",
+                );
             }
 
             return (await response.json()) as DicomStudyData[];
@@ -168,7 +172,9 @@ export const getShareSeriesQuery = ({
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Failed to fetch public share series");
+                throw new Error(
+                    error.error || "Failed to fetch public share series",
+                );
             }
 
             return (await response.json()) as unknown as DicomSeriesData[];
@@ -206,20 +212,25 @@ export const getShareStudySeriesQuery = ({
 
             const response = await apiClient.api.share[":token"].studies[
                 ":studyInstanceUid"
-            ].series.$get({
-                param: { token, studyInstanceUid },
-                query: {
-                    password,
-                    offset: offset.toString(),
-                    limit: limit.toString(),
+            ].series.$get(
+                {
+                    param: { token, studyInstanceUid },
+                    query: {
+                        password,
+                        offset: offset.toString(),
+                        limit: limit.toString(),
+                    },
                 },
-            }, {
-                headers
-            });
+                {
+                    headers,
+                },
+            );
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Failed to fetch public share study series");
+                throw new Error(
+                    error.error || "Failed to fetch public share study series",
+                );
             }
 
             return (await response.json()) as unknown as DicomSeriesData[];
@@ -259,20 +270,26 @@ export const getShareStudySeriesInstancesQuery = ({
 
             const response = await apiClient.api.share[":token"].studies[
                 ":studyInstanceUid"
-            ].series[":seriesInstanceUid"].instances.$get({
-                param: { token, studyInstanceUid, seriesInstanceUid },
-                query: {
-                    password,
-                    offset: offset.toString(),
-                    limit: limit.toString(),
+            ].series[":seriesInstanceUid"].instances.$get(
+                {
+                    param: { token, studyInstanceUid, seriesInstanceUid },
+                    query: {
+                        password,
+                        offset: offset.toString(),
+                        limit: limit.toString(),
+                    },
                 },
-            }, {
-                headers
-            });
+                {
+                    headers,
+                },
+            );
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Failed to fetch public share study series instances");
+                throw new Error(
+                    error.error ||
+                        "Failed to fetch public share study series instances",
+                );
             }
 
             return (await response.json()) as DicomInstanceData[];
@@ -307,7 +324,9 @@ export const getShareInstancesQuery = ({
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Failed to fetch public share instances");
+                throw new Error(
+                    error.error || "Failed to fetch public share instances",
+                );
             }
 
             return (await response.json()) as DicomInstanceData[];
@@ -409,7 +428,9 @@ export const getShareSeriesThumbnailQuery = ({
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch public share series thumbnail");
+                throw new Error(
+                    "Failed to fetch public share series thumbnail",
+                );
             }
 
             return await response.blob();
@@ -466,7 +487,9 @@ export const getShareInstanceThumbnailQuery = ({
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch public share instance thumbnail");
+                throw new Error(
+                    "Failed to fetch public share instance thumbnail",
+                );
             }
 
             return await response.blob();

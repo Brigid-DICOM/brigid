@@ -13,10 +13,13 @@ interface DicomLayoutProps {
     children: React.ReactNode;
     params: Promise<{
         workspaceId: string;
-    }>
+    }>;
 }
 
-export default async function DicomLayout({ children, params }: DicomLayoutProps) {
+export default async function DicomLayout({
+    children,
+    params,
+}: DicomLayoutProps) {
     const { workspaceId } = await params;
 
     const queryClient = getQueryClient();
@@ -24,8 +27,8 @@ export default async function DicomLayout({ children, params }: DicomLayoutProps
 
     try {
         await queryClient.fetchQuery(
-            getWorkspaceByIdQuery(workspaceId, cookieStore.toString())
-        )
+            getWorkspaceByIdQuery(workspaceId, cookieStore.toString()),
+        );
     } catch {
         notFound();
     }

@@ -31,10 +31,8 @@ const assignShareTagRoute = new Hono().post(
         const workspaceId = c.get("workspaceId");
         const { tags, targets } = c.req.valid("json");
 
-        const { allowed: allowedTargets, denied: deniedTargets } = await batchVerifyTargetAccess(
-            shareLink,
-            targets
-        );
+        const { allowed: allowedTargets, denied: deniedTargets } =
+            await batchVerifyTargetAccess(shareLink, targets);
 
         if (allowedTargets.length === 0) {
             return c.json(
@@ -53,12 +51,12 @@ const assignShareTagRoute = new Hono().post(
             tags,
             targets: allowedTargets,
         });
-        
+
         return c.json(
             {
                 ok: true,
                 data: {
-                    results: results.map(r => ({
+                    results: results.map((r) => ({
                         tag: {
                             id: r.tag.id,
                             name: r.tag.name,
@@ -67,15 +65,18 @@ const assignShareTagRoute = new Hono().post(
                         created: r.created,
                         assignmentCount: r.assignments.length,
                     })),
-                    deniedTargets: deniedTargets.length > 0 ? deniedTargets.map(t => ({
-                        targetType: t.targetType,
-                        targetId: t.targetId,
-                    })) : null,
+                    deniedTargets:
+                        deniedTargets.length > 0
+                            ? deniedTargets.map((t) => ({
+                                  targetType: t.targetType,
+                                  targetId: t.targetId,
+                              }))
+                            : null,
                 },
                 error: null,
             },
-            201
-        )
+            201,
+        );
     },
 );
 

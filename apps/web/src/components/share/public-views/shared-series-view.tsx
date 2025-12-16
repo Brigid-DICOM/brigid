@@ -27,25 +27,27 @@ interface SharedSeriesViewProps {
 
 const ITEM_PER_PAGE = 10;
 
-export default function SharedSeriesView({ 
-    token, 
+export default function SharedSeriesView({
+    token,
     password,
     publicPermissions = 0,
 }: SharedSeriesViewProps) {
     const searchParams = useSearchParams();
     const layoutMode = useLayoutStore((state) => state.layoutMode);
-    const { 
-        currentPage, 
-        handlePreviousPage, 
-        handleNextPage, 
-        canGoPrevious 
-    } = usePagination();
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
+        usePagination();
 
-    const { clearSelection, getSelectedCount, selectAll, getSelectedSeriesIds } = useDicomSeriesSelectionStore();
+    const {
+        clearSelection,
+        getSelectedCount,
+        selectAll,
+        getSelectedSeriesIds,
+    } = useDicomSeriesSelectionStore();
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedSeriesIds();
 
-    const { open: openBlueLightViewer, close: closeBlueLightViewer } = useBlueLightViewerStore();
+    const { open: openBlueLightViewer, close: closeBlueLightViewer } =
+        useBlueLightViewerStore();
 
     const { data: series, isLoading } = useQuery(
         getShareSeriesQuery({
@@ -53,7 +55,7 @@ export default function SharedSeriesView({
             password,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
-        })
+        }),
     );
     const isAllSelected = selectedCount === series?.length;
     const studyInstanceUid = series?.[0]["0020000D"]?.Value?.[0] as string;
@@ -89,9 +91,13 @@ export default function SharedSeriesView({
         if (isAllSelected) {
             clearSelection();
         } else {
-            selectAll(series?.map((aSeries) => aSeries["0020000E"]?.Value?.[0] as string) || []);
+            selectAll(
+                series?.map(
+                    (aSeries) => aSeries["0020000E"]?.Value?.[0] as string,
+                ) || [],
+            );
         }
-    }
+    };
 
     const handleDownload = async () => {
         if (selectedIds.length === 0) {
@@ -115,7 +121,7 @@ export default function SharedSeriesView({
 
             toast.error("Failed to download selected series");
         }
-    }
+    };
 
     if (isLoading) {
         return layoutMode === "grid" ? (
@@ -135,7 +141,7 @@ export default function SharedSeriesView({
 
     return (
         <div className="space-y-6">
-            <SelectionControlBar 
+            <SelectionControlBar
                 selectedCount={selectedCount}
                 isAllSelected={isAllSelected}
                 onSelectAll={handleSelectAll}

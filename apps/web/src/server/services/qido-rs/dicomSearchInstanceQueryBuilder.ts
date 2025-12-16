@@ -5,7 +5,7 @@ import type { SearchStudySeriesInstancesQueryParam } from "@/server/schemas/sear
 import { BaseDicomSearchQueryBuilder } from "./baseDicomSearchQueryBuilder";
 import {
     INSTANCE_SEARCH_FIELDS,
-    type InstanceFieldConfig
+    type InstanceFieldConfig,
 } from "./dicomSearchInstanceQueryConfig";
 import type { SeriesFieldConfig } from "./dicomSearchSeriesQueryConfig";
 import type { FieldConfig } from "./dicomSearchStudyQueryConfig";
@@ -31,11 +31,14 @@ export class DicomSearchInstanceQueryBuilder extends BaseDicomSearchQueryBuilder
                 "person_name",
                 "patientName",
                 "patientName.id = patient.patientNameId",
-            )
-            
+            );
+
         this.applyTagJoin(query, "instance", tagName);
-        query.where("instance.workspaceId = :workspaceId", { workspaceId })
-        .andWhere("instance.deleteStatus = :deleteStatus", { deleteStatus });
+        query
+            .where("instance.workspaceId = :workspaceId", { workspaceId })
+            .andWhere("instance.deleteStatus = :deleteStatus", {
+                deleteStatus,
+            });
         this.applyTagFilter(query, tagName);
 
         return query;
@@ -43,12 +46,16 @@ export class DicomSearchInstanceQueryBuilder extends BaseDicomSearchQueryBuilder
 
     protected applyInstanceDeleteStatusFilter(
         query: SelectQueryBuilder<InstanceEntity>,
-        instanceDeleteStatus: number
+        instanceDeleteStatus: number,
     ): void {
         // instance level 不會有 instance delete status filter
     }
 
-    protected getSearchFields(): readonly (InstanceFieldConfig | FieldConfig | SeriesFieldConfig)[] {
+    protected getSearchFields(): readonly (
+        | InstanceFieldConfig
+        | FieldConfig
+        | SeriesFieldConfig
+    )[] {
         return INSTANCE_SEARCH_FIELDS;
     }
 }

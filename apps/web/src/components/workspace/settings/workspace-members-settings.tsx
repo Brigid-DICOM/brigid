@@ -80,9 +80,12 @@ export function WorkspaceMembersSettings({
             });
         } catch (error) {
             console.error("Failed to update member role", error);
-            toast.error(t("workspaceSettings.messages.memberRoleUpdatedError"), {
-                position: "bottom-center",
-            });
+            toast.error(
+                t("workspaceSettings.messages.memberRoleUpdatedError"),
+                {
+                    position: "bottom-center",
+                },
+            );
         }
     };
 
@@ -112,7 +115,9 @@ export function WorkspaceMembersSettings({
             <div className="flex flex-col h-full">
                 <div className="p-6 pb-4 flex items-center justify-between shrink-0">
                     <div className="space-y-1">
-                        <h3 className="text-lg font-medium">{t("workspaceSettings.membersTab.title")}</h3>
+                        <h3 className="text-lg font-medium">
+                            {t("workspaceSettings.membersTab.title")}
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                             {t("workspaceSettings.membersTab.description")}
                         </p>
@@ -204,18 +209,23 @@ export function WorkspaceMembersSettings({
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>
-                                                        {t("workspaceSettings.membersTab.removeMemberAlertTitle")}
+                                                        {t(
+                                                            "workspaceSettings.membersTab.removeMemberAlertTitle",
+                                                        )}
                                                     </AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        <Trans 
+                                                        <Trans
                                                             i18nKey="workspaceSettings.membersTab.removeMemberAlertDesc"
                                                             components={{
-                                                                1: <strong />
+                                                                1: <strong />,
                                                             }}
                                                             values={{
-                                                                memberName: member.name
+                                                                memberName:
+                                                                    member.name,
                                                             }}
-                                                            shouldUnescape={true}
+                                                            shouldUnescape={
+                                                                true
+                                                            }
                                                         />
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>

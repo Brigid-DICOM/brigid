@@ -90,7 +90,6 @@ export function ShareTagDropdownSub({
     const { mutate: assignShareTag } = useMutation({
         ...assignShareTagMutation(),
         onSuccess: (data, variables) => {
-            
             // Get the tagId from optimistic updates
             const tagIds = Array.from(optimisticUpdates.entries())
                 .filter(([_, state]) => state.action === "assign")
@@ -112,22 +111,25 @@ export function ShareTagDropdownSub({
                     const newTags = [];
                     for (const tag of variables.tags) {
                         const alreadyExists = oldData.data?.some(
-                            t => t.name === tag.name
+                            (t) => t.name === tag.name,
                         );
                         if (!alreadyExists) {
                             const resultTag = data?.data?.results?.find(
-                                (r: {tag: { name: string }}) => r.tag.name === tag.name
+                                (r: { tag: { name: string } }) =>
+                                    r.tag.name === tag.name,
                             )?.tag;
 
                             newTags.push({
                                 id: resultTag?.id ?? nanoid(),
                                 name: tag.name,
                                 color: tag.color,
-                                assignments: [{
-                                    id: nanoid(),
-                                    targetId,
-                                    targetType,
-                                }],
+                                assignments: [
+                                    {
+                                        id: nanoid(),
+                                        targetId,
+                                        targetType,
+                                    },
+                                ],
                             });
                         }
                     }
@@ -135,8 +137,8 @@ export function ShareTagDropdownSub({
                     return {
                         ...oldData,
                         data: [...(oldData.data || []), ...newTags],
-                    }
-                }
+                    };
+                },
             );
 
             setOptimisticUpdates((prev) => {
@@ -174,7 +176,7 @@ export function ShareTagDropdownSub({
             // 找到被移除的 tag 並暫存
             // Find the removed tag and cache it
             const removedTag = tags?.data?.find((t) =>
-                t.assignments?.some((a) => a.id === variables.assignmentId)
+                t.assignments?.some((a) => a.id === variables.assignmentId),
             );
             if (removedTag) {
                 addCachedTag(token, {
@@ -195,11 +197,11 @@ export function ShareTagDropdownSub({
                             oldData.data?.filter(
                                 (t) =>
                                     !t.assignments?.some(
-                                        (a) => a.id === variables.assignmentId
-                                    )
+                                        (a) => a.id === variables.assignmentId,
+                                    ),
                             ) || [],
                     };
-                }
+                },
             );
 
             setOptimisticUpdates((prev) => {
@@ -226,7 +228,11 @@ export function ShareTagDropdownSub({
         },
     });
 
-    const handleAssignTag = (tagId: string, tagName: string, tagColor: string) => {
+    const handleAssignTag = (
+        tagId: string,
+        tagName: string,
+        tagColor: string,
+    ) => {
         setOptimisticUpdates((prev) => {
             const newMap = new Map(prev);
             newMap.set(tagId, { tagId, action: "assign" });
@@ -244,7 +250,7 @@ export function ShareTagDropdownSub({
     const handleRemoveTagAssignment = (tagId: string) => {
         const tag = tags?.data?.find((t) => t.id === tagId);
         const assignmentId = tag?.assignments?.find(
-            (a) => a.targetId === targetId
+            (a) => a.targetId === targetId,
         )?.id;
 
         if (!assignmentId) return;
@@ -262,7 +268,7 @@ export function ShareTagDropdownSub({
         });
     };
 
-    const handleToggleTag = (tag: typeof combinedTags[number]) => {
+    const handleToggleTag = (tag: (typeof combinedTags)[number]) => {
         if (tag.isAssigned) {
             handleRemoveTagAssignment(tag.id);
         } else {
@@ -272,7 +278,9 @@ export function ShareTagDropdownSub({
 
     return (
         <DropdownMenuSub>
-            <DropdownMenuSubTrigger>{t("dicom.tagContextMenu.tags")}</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>
+                {t("dicom.tagContextMenu.tags")}
+            </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
                 <DropdownMenuItem
                     className="flex items-center space-x-2"

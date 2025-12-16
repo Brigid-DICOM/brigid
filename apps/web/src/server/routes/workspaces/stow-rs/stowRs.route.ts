@@ -4,13 +4,16 @@ import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { describeRoute, resolver, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
-import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
+import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
+import {
+    verifyWorkspaceExists,
+    verifyWorkspacePermission,
+} from "@/server/middlewares/workspace.middleware";
 import { StowRsService } from "@/server/services/stowRs.service";
 import { StowRsResponseMessageSchema } from "@/server/types/dicom";
 import type { MultipartFile } from "@/server/types/file";
 import { appLogger } from "@/server/utils/logger";
-import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
-import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 
 const logger = appLogger.child({
     module: "StowRsRoute",

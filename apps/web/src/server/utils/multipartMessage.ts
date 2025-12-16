@@ -35,7 +35,7 @@ function stringToUint8Array(str: string) {
 function multipartEncode(
     datasets: ArrayBuffer[],
     boundary: string = guid(),
-    contentType: string = "application/dicom"
+    contentType: string = "application/dicom",
 ) {
     const contentTypeString = `Content-Type: ${contentType}`;
     const header = `\r\n--${boundary}\r\n${contentTypeString}\r\n\r\n`;
@@ -48,7 +48,7 @@ function multipartEncode(
     let length = 0;
 
     // Calculate the total length for the final array
-    const contentArrays = datasets.map(datasetBuffer => {
+    const contentArrays = datasets.map((datasetBuffer) => {
         const contentArray = new Uint8Array(datasetBuffer);
         const contentLength = contentArray.length;
 
@@ -65,7 +65,7 @@ function multipartEncode(
 
     // Write each dataset into the multipart array
     let position = 0;
-    contentArrays.forEach(contentArray => {
+    contentArrays.forEach((contentArray) => {
         multipartArray.set(headerArray, position);
         multipartArray.set(contentArray, position + headerLength);
 
@@ -76,13 +76,18 @@ function multipartEncode(
 
     return {
         data: multipartArray.buffer,
-        boundary
+        boundary,
     };
 }
 
 function multipartEncodeByStream(
-    datasets: { stream: ReadStream | Readable; size?: number, contentLocation?: string }[],
-    boundary = guid(), contentType = "application/dicom"
+    datasets: {
+        stream: ReadStream | Readable;
+        size?: number;
+        contentLocation?: string;
+    }[],
+    boundary = guid(),
+    contentType = "application/dicom",
 ) {
     const body = [];
 
@@ -100,7 +105,7 @@ function multipartEncodeByStream(
     }
 
     body.push(new BufferListStream(`--${boundary}--`));
-    
+
     const stream = new multiStream(body);
     // @ts-expect-error
     stream._items = body;
@@ -109,7 +114,7 @@ function multipartEncodeByStream(
 
     return {
         data: stream,
-        boundary
+        boundary,
     };
 }
 
@@ -143,7 +148,7 @@ function guid() {
 const message = {
     multipartEncode: multipartEncode,
     multipartEncodeByStream: multipartEncodeByStream,
-    guid: guid
+    guid: guid,
 };
 
 export default message;

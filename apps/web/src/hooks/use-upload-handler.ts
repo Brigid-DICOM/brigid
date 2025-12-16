@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { isDicomFile } from "@/lib/dicom-validator"; 
+import { isDicomFile } from "@/lib/dicom-validator";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { useUploadManagerStore } from "@/stores/upload-manager-store";
 
@@ -37,7 +37,9 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
 
                 xhr.upload.addEventListener("progress", (e) => {
                     if (e.lengthComputable) {
-                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        const percentComplete = Math.round(
+                            (e.loaded / e.total) * 100,
+                        );
                         updateTaskProgress(taskId, percentComplete);
                     }
                 });
@@ -55,11 +57,13 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
                             resolve(
                                 new Response(xhr.response, {
                                     status: xhr.status,
-                                    statusText: xhr.statusText
-                                })
+                                    statusText: xhr.statusText,
+                                }),
                             );
                         } else {
-                            reject(new Error(`Upload Failed: ${xhr.statusText}`));
+                            reject(
+                                new Error(`Upload Failed: ${xhr.statusText}`),
+                            );
                         }
                     };
 
@@ -75,24 +79,31 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
 
                 updateTaskStatus(taskId, "completed");
                 toast.success(`Uploaded ${file.name}`, {
-                    position: "bottom-center"
+                    position: "bottom-center",
                 });
 
-                queryClient.invalidateQueries({ queryKey: ["dicom-study", workspaceId] });
-                queryClient.invalidateQueries({ queryKey: ["dicom-series", workspaceId] });
-                queryClient.invalidateQueries({ queryKey: ["dicom-instance", workspaceId] });
+                queryClient.invalidateQueries({
+                    queryKey: ["dicom-study", workspaceId],
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ["dicom-series", workspaceId],
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ["dicom-instance", workspaceId],
+                });
             } catch (error) {
                 if (abortController.signal.aborted) {
                     toast.info(`Upload cancelled ${file.name}`, {
-                        position: "bottom-center"
+                        position: "bottom-center",
                     });
                     return;
                 }
 
-                const errorMessage = error instanceof Error ? error.message : "Unknown error";
+                const errorMessage =
+                    error instanceof Error ? error.message : "Unknown error";
                 updateTaskStatus(taskId, "failed", errorMessage);
                 toast.error(`Failed to upload ${file.name}`, {
-                    position: "bottom-center"
+                    position: "bottom-center",
                 });
             }
         },
@@ -102,7 +113,7 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
             updateTaskStatus,
             setTaskAbortController,
             queryClient.invalidateQueries,
-        ]
+        ],
     );
 
     const processQueue = useCallback(async () => {
@@ -115,7 +126,7 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
             const tasksToUpload = pendingTasks.slice(0, availableSlots);
 
             await Promise.all(
-                tasksToUpload.map((task) => uploadFile(task.id, task.file))
+                tasksToUpload.map((task) => uploadFile(task.id, task.file)),
             );
 
             processQueue();
@@ -132,7 +143,7 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
             const taskIds = files.map((file) => addUploadTask(file));
 
             const validationResults = await Promise.all(
-                files.map((file) => isDicomFile(file))
+                files.map((file) => isDicomFile(file)),
             );
 
             taskIds.forEach((taskIds, index) => {
@@ -140,8 +151,8 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
                 updateTaskValidation(
                     taskIds,
                     isValid,
-                    isValid ? undefined : "Invalid DICOM file"
-                )
+                    isValid ? undefined : "Invalid DICOM file",
+                );
             });
 
             const validCount = validationResults.filter(Boolean).length;
@@ -149,21 +160,24 @@ export function useUploadHandler({ workspaceId }: UseUploadHandlerProps) {
 
             if (validCount > 0) {
                 toast.success(`added ${validCount} valid files`, {
-                    position: "bottom-center"
+                    position: "bottom-center",
                 });
             }
             if (invalidCount > 0) {
-                toast.warning(`${invalidCount} invalid DICOM files were skipped`, {
-                    position: "bottom-center"
-                });
+                toast.warning(
+                    `${invalidCount} invalid DICOM files were skipped`,
+                    {
+                        position: "bottom-center",
+                    },
+                );
             }
 
             processQueue();
         },
-        [addUploadTask, updateTaskValidation, processQueue]
+        [addUploadTask, updateTaskValidation, processQueue],
     );
 
     return {
-        addFiles
+        addFiles,
     };
 }

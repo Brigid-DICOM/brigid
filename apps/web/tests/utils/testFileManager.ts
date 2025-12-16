@@ -8,11 +8,11 @@ export class TestFileManager {
         const { data, boundary } = multipartMessage.multipartEncodeByStream(
             [
                 {
-                    stream: createReadStream(filename)
-                }
+                    stream: createReadStream(filename),
+                },
             ],
             undefined,
-            "application/dicom"
+            "application/dicom",
         );
 
         const response = await app.request(
@@ -22,10 +22,10 @@ export class TestFileManager {
                 // @ts-expect-error
                 body: data,
                 headers: new Headers({
-                    "Content-Type": `multipart/related; boundary=${boundary}`
+                    "Content-Type": `multipart/related; boundary=${boundary}`,
                 }),
-                duplex: "half"
-            }
+                duplex: "half",
+            },
         );
 
         return response;

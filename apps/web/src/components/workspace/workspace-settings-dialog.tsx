@@ -52,12 +52,17 @@ export function WorkspaceSettingsDialog({
     const [activeTab, setActiveTab] = useState<SettingsTab>("preferences");
     const { isMobile } = useSidebar();
 
-    const canManageMembers = hasPermission(workspace.membership.permissions, WORKSPACE_PERMISSIONS.INVITE);
+    const canManageMembers = hasPermission(
+        workspace.membership.permissions,
+        WORKSPACE_PERMISSIONS.INVITE,
+    );
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="overflow-hidden p-0 h-[60vh] md:max-h-[500px] md:max-w-[700px] lg:max-w-[800px]">
-                <DialogTitle className="sr-only">{t("workspaceSettings.title")}</DialogTitle>
+                <DialogTitle className="sr-only">
+                    {t("workspaceSettings.title")}
+                </DialogTitle>
                 <DialogDescription className="sr-only">
                     {t("workspaceSettings.description")}
                 </DialogDescription>
@@ -81,7 +86,11 @@ export function WorkspaceSettingsDialog({
                                                 }
                                             >
                                                 <Settings2Icon className="mr-2 size-4" />
-                                                <span>{t("workspaceSettings.preferences")}</span>
+                                                <span>
+                                                    {t(
+                                                        "workspaceSettings.preferences",
+                                                    )}
+                                                </span>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
                                     </SidebarMenu>
@@ -89,7 +98,9 @@ export function WorkspaceSettingsDialog({
                             </SidebarGroup>
                             <SidebarGroup>
                                 <SidebarGroupContent>
-                                    <SidebarGroupLabel>{t("workspaceSettings.group.workspace")}</SidebarGroupLabel>
+                                    <SidebarGroupLabel>
+                                        {t("workspaceSettings.group.workspace")}
+                                    </SidebarGroupLabel>
                                     <SidebarMenu>
                                         <SidebarMenuItem>
                                             <SidebarMenuButton
@@ -101,23 +112,33 @@ export function WorkspaceSettingsDialog({
                                                 }
                                             >
                                                 <SettingsIcon className="mr-2 size-4" />
-                                                <span>{t("workspaceSettings.general")}</span>
+                                                <span>
+                                                    {t(
+                                                        "workspaceSettings.general",
+                                                    )}
+                                                </span>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
 
-                                        {canManageMembers && <SidebarMenuItem>
-                                            <SidebarMenuButton
-                                                isActive={
-                                                    activeTab === "members"
-                                                }
-                                                onClick={() =>
-                                                    setActiveTab("members")
-                                                }
-                                            >
-                                                <UsersIcon className="mr-2 size-4" />
-                                                <span>{t("workspaceSettings.members")}</span>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>}
+                                        {canManageMembers && (
+                                            <SidebarMenuItem>
+                                                <SidebarMenuButton
+                                                    isActive={
+                                                        activeTab === "members"
+                                                    }
+                                                    onClick={() =>
+                                                        setActiveTab("members")
+                                                    }
+                                                >
+                                                    <UsersIcon className="mr-2 size-4" />
+                                                    <span>
+                                                        {t(
+                                                            "workspaceSettings.members",
+                                                        )}
+                                                    </span>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        )}
                                     </SidebarMenu>
                                 </SidebarGroupContent>
                             </SidebarGroup>
@@ -126,9 +147,7 @@ export function WorkspaceSettingsDialog({
 
                     <main className="flex h-full flex-1 flex-col min-h-0">
                         {isMobile && <SidebarTrigger />}
-                        {activeTab === "preferences" && (
-                            <PreferenceSettings />
-                        )}
+                        {activeTab === "preferences" && <PreferenceSettings />}
 
                         {activeTab === "general" && (
                             <WorkspaceGeneralSettings

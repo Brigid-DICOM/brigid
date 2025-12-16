@@ -6,7 +6,12 @@ import { useParams } from "next/navigation";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "../ui/input";
 
 interface ShareLinkDetailsDialogProps {
@@ -68,7 +73,9 @@ export function ShareLinkDetailsDialog({
                             readOnly
                             className="cursor-pointer hover:bg-muted"
                             onClick={() => {
-                                navigator.clipboard.writeText(`${window.location.origin}/${lng}/share/${token}`);
+                                navigator.clipboard.writeText(
+                                    `${window.location.origin}/${lng}/share/${token}`,
+                                );
                                 toast.success("Share link copied", {
                                     position: "bottom-center",
                                 });
@@ -78,7 +85,8 @@ export function ShareLinkDetailsDialog({
 
                     <div className="space-y-2">
                         {targets.map((target) => {
-                            const config = TARGET_TYPE_CONFIG[target.targetType];
+                            const config =
+                                TARGET_TYPE_CONFIG[target.targetType];
                             const Icon = config.icon;
 
                             return (
@@ -87,7 +95,9 @@ export function ShareLinkDetailsDialog({
                                         <div className="flex items-start gap-3">
                                             {/* Icon */}
                                             <div className="flex-shrink-0 mt-1">
-                                                <Icon className={`h-5 w-5 ${config.iconColor}`} />
+                                                <Icon
+                                                    className={`h-5 w-5 ${config.iconColor}`}
+                                                />
                                             </div>
 
                                             {/* Content */}
@@ -111,10 +121,16 @@ export function ShareLinkDetailsDialog({
                                                         type="button"
                                                         className="text-sm text-left font-mono break-all cursor-pointer hover:bg-muted/50 rounded px-1 -mx-1"
                                                         onClick={() => {
-                                                            navigator.clipboard.writeText(target.targetId);
-                                                            toast.success("Target ID copied", {
-                                                                position: "bottom-center",
-                                                            });
+                                                            navigator.clipboard.writeText(
+                                                                target.targetId,
+                                                            );
+                                                            toast.success(
+                                                                "Target ID copied",
+                                                                {
+                                                                    position:
+                                                                        "bottom-center",
+                                                                },
+                                                            );
                                                         }}
                                                         title="Click to copy"
                                                     >
@@ -131,6 +147,6 @@ export function ShareLinkDetailsDialog({
                 </div>
             </DialogContent>
         </Dialog>,
-        document.body
-    )   
+        document.body,
+    );
 }

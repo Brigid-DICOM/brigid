@@ -4,14 +4,14 @@ import { JSONPath } from "jsonpath-plus";
 import { cloneDeep, omit } from "lodash";
 import {
     DICOM_MEDIA_STORAGE_ID,
-    DICOM_MEDIA_STORAGE_UID
+    DICOM_MEDIA_STORAGE_UID,
 } from "@/server/const/dicom.const";
 import { DICOM_TAG_KEYWORD_REGISTRY } from "@/server/const/dicomTagKeywordRegistry";
 import { createHash } from "../createHash";
 import { appLogger } from "../logger";
 
 const logger = appLogger.child({
-    module: "DicomJsonUtils"
+    module: "DicomJsonUtils",
 });
 
 const BIG_VALUE_TAGS = ["52009230", "00480200"];
@@ -36,7 +36,7 @@ export class DicomJsonUtils {
             const hitJsonPath = JSONPath({
                 json: this.dicomJson,
                 path: `$..['${tag}']`,
-                resultType: "all"
+                resultType: "all",
             });
 
             if (hitJsonPath.length > 0) {
@@ -64,7 +64,7 @@ export class DicomJsonUtils {
             const hitJsonPath = JSONPath({
                 json: this.dicomJson,
                 path: sanitizedTag,
-                resultType: "all"
+                resultType: "all",
             });
 
             if (hitJsonPath.length > 0) {
@@ -95,7 +95,7 @@ export class DicomJsonUtils {
             ]?.Value?.[0] as string,
             sopInstanceUid: this.dicomJson[
                 DICOM_TAG_KEYWORD_REGISTRY.SOPInstanceUID.tag
-            ]?.Value?.[0] as string
+            ]?.Value?.[0] as string,
         };
     }
 
@@ -108,7 +108,7 @@ export class DicomJsonUtils {
      * @param options.pathPattern - 路徑 pattern，預設使用環境變數 DICOM_STORAGE_FILEPATH
      * @param options.workspaceId - 工作空間 ID
      */
-    getFilePath(options: { pathPattern?: string, workspaceId?: string }) {
+    getFilePath(options: { pathPattern?: string; workspaceId?: string }) {
         const pattern = options.pathPattern || env.DICOM_STORAGE_FILEPATH;
         const workspaceRegex = /\{workspaceId(?:,(hash))?\}/gi;
         const withWorkspace = pattern.replace(
@@ -119,9 +119,11 @@ export class DicomJsonUtils {
                     return match;
                 }
 
-                return shouldHash ? createHash(options.workspaceId) : options.workspaceId;
-            }
-        )
+                return shouldHash
+                    ? createHash(options.workspaceId)
+                    : options.workspaceId;
+            },
+        );
 
         const regex = /\{([0-9A-Fa-f]{8})(?:,(hash))?\}/g;
 
@@ -142,19 +144,23 @@ export class DicomJsonUtils {
                 }
 
                 return tagValue as string;
-            }
+            },
         );
     }
 
-    getStudyPath(options: { pathPattern?: string, workspaceId?: string }) {
+    getStudyPath(options: { pathPattern?: string; workspaceId?: string }) {
         return this.getPathUntilTag({ tagHex: "0020000D", ...options });
     }
 
-    getSeriesPath(options: { pathPattern?: string, workspaceId?: string }) {
+    getSeriesPath(options: { pathPattern?: string; workspaceId?: string }) {
         return this.getPathUntilTag({ tagHex: "0020000E", ...options });
     }
 
-    private getPathUntilTag(options: { tagHex: string, pathPattern?: string, workspaceId?: string }) {
+    private getPathUntilTag(options: {
+        tagHex: string;
+        pathPattern?: string;
+        workspaceId?: string;
+    }) {
         const pattern = options.pathPattern || env.DICOM_STORAGE_FILEPATH;
 
         const hasLeadingSlash = pattern.startsWith("/");
@@ -164,7 +170,10 @@ export class DicomJsonUtils {
         const placeholderRegex = /\{([0-9A-Fa-f]{8})(?:,(hash))?\}/g;
         const workspaceRegex = /\{workspaceId(?:,(hash))?\}/gi;
 
-        const stopOnTagRegex = new RegExp(`\\{(${options.tagHex})(?:,(hash))?\\}`, "i");
+        const stopOnTagRegex = new RegExp(
+            `\\{(${options.tagHex})(?:,(hash))?\\}`,
+            "i",
+        );
 
         const out: string[] = [];
 
@@ -173,12 +182,16 @@ export class DicomJsonUtils {
                 workspaceRegex,
                 (match: string, shouldHash?: string) => {
                     if (!options.workspaceId) {
-                        logger.warn("workspaceId not provided for path pattern");
+                        logger.warn(
+                            "workspaceId not provided for path pattern",
+                        );
                         return match;
                     }
 
-                    return shouldHash ? createHash(options.workspaceId) : options.workspaceId;
-                }
+                    return shouldHash
+                        ? createHash(options.workspaceId)
+                        : options.workspaceId;
+                },
             );
 
             const replaced = segWithWorkspace.replace(
@@ -191,7 +204,7 @@ export class DicomJsonUtils {
                     // If the tag is missing, keep original and log a warning to avoid broken path
                     if (!tagValue) {
                         logger.warn(
-                            `Tag ${foundTagHex} not found in DICOM JSON`
+                            `Tag ${foundTagHex} not found in DICOM JSON`,
                         );
                         return match;
                     }
@@ -199,7 +212,7 @@ export class DicomJsonUtils {
                     return shouldHash
                         ? createHash(tagValue as string)
                         : (tagValue as string);
-                }
+                },
             );
 
             out.push(replaced);
@@ -216,12 +229,12 @@ export class DicomJsonUtils {
         return {
             "00880130": {
                 vr: "SH",
-                Value: [DICOM_MEDIA_STORAGE_ID]
+                Value: [DICOM_MEDIA_STORAGE_ID],
             },
             "00880140": {
                 vr: "UI",
-                Value: [DICOM_MEDIA_STORAGE_UID]
-            }
+                Value: [DICOM_MEDIA_STORAGE_UID],
+            },
         };
     }
 
@@ -233,7 +246,7 @@ export class DicomJsonUtils {
             const hitJsonPath = JSONPath({
                 json: this.dicomJson,
                 path: sanitizedTag,
-                resultType: "all"
+                resultType: "all",
             });
 
             if (hitJsonPath.length > 0) {

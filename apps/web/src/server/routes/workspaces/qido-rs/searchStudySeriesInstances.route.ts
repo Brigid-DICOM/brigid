@@ -11,22 +11,24 @@ import {
 import { searchStudySeriesInstancesQueryParamSchema } from "@/server/schemas/searchStudySeriesInstancesSchema";
 import { DicomSearchInstanceQueryBuilder } from "@/server/services/qido-rs/dicomSearchInstanceQueryBuilder";
 
-
 const searchStudySeriesInstancesRoute = new Hono().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances",
     describeRoute({
         description:
             "Search for DICOM series instances (QIDO-RS), ref: [Search Transaction](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.6)",
-        tags: ["QIDO-RS"]
+        tags: ["QIDO-RS"],
     }),
     verifyAuthMiddleware,
     verifyWorkspaceExists,
     verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
-    zValidator("param", z.object({
-        workspaceId: z.string().describe("The ID of the workspace"),
-        studyInstanceUid: z.string().describe("The study instance UID"),
-        seriesInstanceUid: z.string().describe("The series instance UID"),
-    })),
+    zValidator(
+        "param",
+        z.object({
+            workspaceId: z.string().describe("The ID of the workspace"),
+            studyInstanceUid: z.string().describe("The study instance UID"),
+            seriesInstanceUid: z.string().describe("The series instance UID"),
+        }),
+    ),
     zValidator("query", searchStudySeriesInstancesQueryParamSchema),
     async (c) => {
         const workspaceId = c.req.param("workspaceId");
@@ -44,8 +46,10 @@ const searchStudySeriesInstancesRoute = new Hono().get(
             return c.body(null, 204);
         }
 
-        return c.json(instances.map((instance) => JSON.parse(instance.json) as DicomTag));
-    }
+        return c.json(
+            instances.map((instance) => JSON.parse(instance.json) as DicomTag),
+        );
+    },
 );
 
 export default searchStudySeriesInstancesRoute;

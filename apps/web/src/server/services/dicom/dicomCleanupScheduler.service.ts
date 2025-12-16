@@ -93,7 +93,8 @@ export class DicomCleanupSchedulerService {
 
             const permanentlyDeleteDate = new Date();
             permanentlyDeleteDate.setDate(
-                permanentlyDeleteDate.getDate() - env.DICOM_CLEANUP_RETENTION_DAYS,
+                permanentlyDeleteDate.getDate() -
+                    env.DICOM_CLEANUP_RETENTION_DAYS,
             );
 
             let totalMarkedInstances = 0;
@@ -109,7 +110,7 @@ export class DicomCleanupSchedulerService {
                             workspaceId,
                             recycleBinRetentionDate,
                         );
-    
+
                     if (markResult.markedInstances > 0) {
                         logger.info(
                             `Workspace ${workspaceId} marked ${markResult.markedInstances} instances as DELETED`,
@@ -118,28 +119,33 @@ export class DicomCleanupSchedulerService {
                         totalMarkedSeries += markResult.markedSeries;
                         totalMarkedStudies += markResult.markedStudies;
                     }
-    
+
                     // Step 2: Permanently delete items marked as DELETED
                     const deleteResult =
                         await this.deleteService.permanentlyDeleteMarkedItems(
                             workspaceId,
                             permanentlyDeleteDate,
                         );
-                    
+
                     if (deleteResult.deletedInstances > 0) {
                         logger.info(
-                            `Workspace ${workspaceId} permanently deleted ${deleteResult.deletedInstances} instances`
+                            `Workspace ${workspaceId} permanently deleted ${deleteResult.deletedInstances} instances`,
                         );
-    
-                        await this.deletePhysicalFiles(deleteResult.instancePaths);
+
+                        await this.deletePhysicalFiles(
+                            deleteResult.instancePaths,
+                        );
                         totalDeletedInstances += deleteResult.deletedInstances;
                     }
 
                     logger.info(
-                        `Cleanup completed - Marked: ${totalMarkedInstances} instances, ${totalMarkedSeries} series, ${totalMarkedStudies} studies | Deleted: ${totalDeletedInstances} instances`
+                        `Cleanup completed - Marked: ${totalMarkedInstances} instances, ${totalMarkedSeries} series, ${totalMarkedStudies} studies | Deleted: ${totalDeletedInstances} instances`,
                     );
-                } catch(error) {
-                    logger.error(`Failed to cleanup workspace ${workspaceId}`, error);
+                } catch (error) {
+                    logger.error(
+                        `Failed to cleanup workspace ${workspaceId}`,
+                        error,
+                    );
                 }
             }
         } catch (error) {

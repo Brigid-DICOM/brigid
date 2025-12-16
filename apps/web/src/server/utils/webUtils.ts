@@ -27,7 +27,7 @@ export const parseAcceptHeader = (acceptHeader: string) => {
         // "image/jpx", // not support yet
         // "image/jls", // not support yet
         "application/dicom",
-        "application/octet-stream"
+        "application/octet-stream",
     ];
 
     const acceptTypes = acceptHeader.split(",").map((item) => {
@@ -37,7 +37,7 @@ export const parseAcceptHeader = (acceptHeader: string) => {
             params.map((param) => {
                 const [key, value] = param.split("=").map((s) => s.trim());
                 return [key, value.replace(/(^"|"$)/g, "")]; // remote double quote
-            })
+            }),
         );
         return { type, params: paramMap };
     });
@@ -55,13 +55,13 @@ export const parseAcceptHeader = (acceptHeader: string) => {
         const multipart = acceptTypes.find(
             (accept) =>
                 accept.type === "multipart/related" &&
-                accept.params.type === type
+                accept.params.type === type,
         );
         if (multipart) {
             return {
                 type: multipart.params.type,
                 isMultipart: true,
-                params: multipart.params
+                params: multipart.params,
             };
         }
     }

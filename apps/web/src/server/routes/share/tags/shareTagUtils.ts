@@ -17,18 +17,20 @@ interface BatchVerifyResult {
 
 export async function batchVerifyTargetAccess(
     shareLink: ShareLinkEntity,
-    targets: Target[]
+    targets: Target[],
 ): Promise<BatchVerifyResult> {
     const shareLinkTargetType = shareLink.targets[0]?.targetType;
-    const shareLinkTargetIds = new Set(shareLink.targets.map(t => t.targetId));
+    const shareLinkTargetIds = new Set(
+        shareLink.targets.map((t) => t.targetId),
+    );
 
     const allowed: Target[] = [];
     const denied: Target[] = [];
 
     // Group target by type
-    const studyTargets = targets.filter(t => t.targetType === "study");
-    const seriesTargets = targets.filter(t => t.targetType === "series");
-    const instanceTargets = targets.filter(t => t.targetType === "instance");
+    const studyTargets = targets.filter((t) => t.targetType === "study");
+    const seriesTargets = targets.filter((t) => t.targetType === "series");
+    const instanceTargets = targets.filter((t) => t.targetType === "instance");
 
     if (shareLinkTargetType === "study") {
         for (const target of studyTargets) {
@@ -43,7 +45,7 @@ export async function batchVerifyTargetAccess(
             const allowedSeriesIds = await batchVerifySeriesUnderStudies(
                 shareLink.workspaceId,
                 Array.from(shareLinkTargetIds),
-                seriesTargets.map(t => t.targetId)
+                seriesTargets.map((t) => t.targetId),
             );
 
             for (const target of seriesTargets) {
@@ -59,7 +61,7 @@ export async function batchVerifyTargetAccess(
             const allowedInstanceUids = await batchVerifyInstancesUnderStudies(
                 shareLink.workspaceId,
                 Array.from(shareLinkTargetIds),
-                instanceTargets.map(t => t.targetId)
+                instanceTargets.map((t) => t.targetId),
             );
 
             for (const target of instanceTargets) {
@@ -86,7 +88,7 @@ export async function batchVerifyTargetAccess(
             const allowedInstanceUids = await batchVerifyInstancesUnderSeries(
                 shareLink.workspaceId,
                 Array.from(shareLinkTargetIds),
-                instanceTargets.map(t => t.targetId)
+                instanceTargets.map((t) => t.targetId),
             );
 
             for (const target of instanceTargets) {
@@ -120,15 +122,15 @@ export async function batchVerifyTargetAccess(
 
 /**
  * 批量驗證 series 是否屬於指定的 studies
- * @param workspaceId 
- * @param studyInstanceUids 
- * @param seriesInstanceUids 
- * @returns 
+ * @param workspaceId
+ * @param studyInstanceUids
+ * @param seriesInstanceUids
+ * @returns
  */
 async function batchVerifySeriesUnderStudies(
     workspaceId: string,
     studyInstanceUids: string[],
-    seriesInstanceUids: string[]
+    seriesInstanceUids: string[],
 ) {
     if (seriesInstanceUids.length === 0) return new Set();
 
@@ -137,14 +139,14 @@ async function batchVerifySeriesUnderStudies(
         where: {
             workspaceId,
             seriesInstanceUid: In(seriesInstanceUids),
-            studyInstanceUid: In(studyInstanceUids)
+            studyInstanceUid: In(studyInstanceUids),
         },
         select: {
             seriesInstanceUid: true,
-        }
+        },
     });
 
-    return new Set(validSeries.map(s => s.seriesInstanceUid));
+    return new Set(validSeries.map((s) => s.seriesInstanceUid));
 }
 
 async function batchVerifyInstancesUnderStudies(
@@ -158,11 +160,11 @@ async function batchVerifyInstancesUnderStudies(
     const series = await seriesRepo.find({
         where: {
             workspaceId,
-            studyInstanceUid: In(studyInstanceUids)
+            studyInstanceUid: In(studyInstanceUids),
         },
         select: {
             seriesInstanceUid: true,
-        }
+        },
     });
 
     if (series.length === 0) return new Set();
@@ -172,15 +174,15 @@ async function batchVerifyInstancesUnderStudies(
         where: {
             workspaceId,
             sopInstanceUid: In(sopInstanceUids),
-            seriesInstanceUid: In(series.map(s => s.seriesInstanceUid)),
+            seriesInstanceUid: In(series.map((s) => s.seriesInstanceUid)),
             studyInstanceUid: In(studyInstanceUids),
         },
         select: {
-            sopInstanceUid: true
-        }
+            sopInstanceUid: true,
+        },
     });
 
-    return new Set(validInstances.map(i => i.sopInstanceUid));
+    return new Set(validInstances.map((i) => i.sopInstanceUid));
 }
 
 async function batchVerifyInstancesUnderSeries(
@@ -198,27 +200,24 @@ async function batchVerifyInstancesUnderSeries(
             seriesInstanceUid: In(seriesInstanceUids),
         },
         select: {
-            sopInstanceUid: true
-        }
+            sopInstanceUid: true,
+        },
     });
 
-    return new Set(validInstances.map(i => i.sopInstanceUid));
+    return new Set(validInstances.map((i) => i.sopInstanceUid));
 }
 
 export async function verifyTargetAccess(
     shareLink: ShareLinkEntity,
     targetType: "study" | "series" | "instance",
-    targetId: string
+    targetId: string,
 ) {
-    const result = await batchVerifyTargetAccess(
-        shareLink,
-        [
-            {
-                targetType,
-                targetId
-            }
-        ]
-    );
+    const result = await batchVerifyTargetAccess(shareLink, [
+        {
+            targetType,
+            targetId,
+        },
+    ]);
 
     return result.allowed.length > 0;
 }

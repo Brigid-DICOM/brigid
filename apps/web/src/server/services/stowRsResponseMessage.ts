@@ -7,11 +7,13 @@ interface AddSuccessSopInstanceParams {
     sopClassUid: string;
 }
 
-type FailedSopSequenceElement = SopInstanceReference & { "00081197": DicomElement };
+type FailedSopSequenceElement = SopInstanceReference & {
+    "00081197": DicomElement;
+};
 
 type OtherFailureReason = {
     "00081197": { vr: "US"; Value?: string[] };
-}
+};
 
 interface AddFailedSopInstanceParams {
     sopInstanceUid?: string;
@@ -31,28 +33,28 @@ export class StowRsResponseMessage {
              */
             "00081190": {
                 vr: "UR",
-                Value: [] as string[]
+                Value: [] as string[],
             },
             /**
              * Failed SOP Sequence
              */
             "00081198": {
                 vr: "SQ",
-                Value: [] as FailedSopSequenceElement[]
+                Value: [] as FailedSopSequenceElement[],
             },
             /**
              * Referenced SOP Sequence
-             * 
+             *
              * A Sequence of Items where each Item references a single SOP Instance that was successfully stored.
              */
             "00081199": {
                 vr: "SQ",
-                Value: [] as SopInstanceReference[]
+                Value: [] as SopInstanceReference[],
             },
             "0008119A": {
                 vr: "SQ",
-                Value: [] as OtherFailureReason[]
-            }
+                Value: [] as OtherFailureReason[],
+            },
         };
     }
 
@@ -64,51 +66,51 @@ export class StowRsResponseMessage {
         studyInstanceUid,
         seriesInstanceUid,
         sopInstanceUid,
-        sopClassUid
+        sopClassUid,
     }: AddSuccessSopInstanceParams) {
-        const studyUrl = `/workspaces/${this.workspaceId}` +
-            `/studies/${studyInstanceUid}`;
+        const studyUrl =
+            `/workspaces/${this.workspaceId}` + `/studies/${studyInstanceUid}`;
         if (!this.message["00081190"].Value.includes(studyUrl)) {
             this.message["00081190"].Value.push(studyUrl);
         }
 
         const sopInstanceReference = this.getSopInstanceReference({
             sopInstanceUid,
-            sopClassUid
+            sopClassUid,
         });
 
         this.message["00081199"].Value.push({
-            ...sopInstanceReference, 
+            ...sopInstanceReference,
             "00081190": {
                 vr: "UR",
                 Value: [
                     `/workspaces/${this.workspaceId}` +
-                    `/studies/${studyInstanceUid}` +
-                    `/series/${seriesInstanceUid}` +
-                    `/instances/${sopInstanceUid}`
-                ]
-            }
+                        `/studies/${studyInstanceUid}` +
+                        `/series/${seriesInstanceUid}` +
+                        `/instances/${sopInstanceUid}`,
+                ],
+            },
         });
     }
 
     addFailedSopInstance({
         sopInstanceUid,
         sopClassUid,
-        failureCode
+        failureCode,
     }: AddFailedSopInstanceParams) {
         const failedSopInstance = {
             "00081150": {
                 vr: "UI",
-                Value: [sopClassUid]
+                Value: [sopClassUid],
             },
             "00081155": {
                 vr: "UI",
-                Value: [sopInstanceUid]
+                Value: [sopInstanceUid],
             },
             "00081197": {
                 vr: "CS",
-                Value: [failureCode]
-            }
+                Value: [failureCode],
+            },
         } as FailedSopSequenceElement;
         this.message["00081198"].Value.push(failedSopInstance);
     }
@@ -117,14 +119,14 @@ export class StowRsResponseMessage {
         this.message["0008119A"].Value.push({
             "00081197": {
                 vr: "US",
-                Value: [failureCode]
-            }
+                Value: [failureCode],
+            },
         });
     }
 
     private getSopInstanceReference({
         sopInstanceUid,
-        sopClassUid
+        sopClassUid,
     }: {
         sopInstanceUid: string;
         sopClassUid: string;
@@ -132,12 +134,12 @@ export class StowRsResponseMessage {
         return {
             "00081150": {
                 vr: "UI",
-                Value: [sopClassUid]
+                Value: [sopClassUid],
             },
             "00081155": {
                 vr: "UI",
-                Value: [sopInstanceUid]
-            }
+                Value: [sopInstanceUid],
+            },
         } as SopInstanceReference;
     }
 }

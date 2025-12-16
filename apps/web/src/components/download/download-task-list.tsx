@@ -1,17 +1,30 @@
 "use client";
 
-import { CheckCircleIcon, ChevronDownIcon, ChevronUpIcon, DownloadIcon, FileDownIcon, Trash2Icon, XCircleIcon, XIcon } from "lucide-react";
+import {
+    CheckCircleIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
+    DownloadIcon,
+    FileDownIcon,
+    Trash2Icon,
+    XCircleIcon,
+    XIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { cancelDownload } from "@/lib/clientDownload";
 import { formatFileSize } from "@/lib/utils";
-import { type DownloadStatus, type DownloadTask, useDownloadManagerStore } from "@/stores/download-manager-store";
+import {
+    type DownloadStatus,
+    type DownloadTask,
+    useDownloadManagerStore,
+} from "@/stores/download-manager-store";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { DownloadCloseDialog } from "./download-close-dialog";
 
 export function DownloadTaskList() {
-    const { 
+    const {
         tasks,
         removeTask,
         clearCompletedTasks,
@@ -21,7 +34,7 @@ export function DownloadTaskList() {
         getPendingTasksCount,
         getDownloadingTasksCount,
         getAllTasksCount,
-        hasOnlyCompletedOrFailedTasks
+        hasOnlyCompletedOrFailedTasks,
     } = useDownloadManagerStore();
 
     const [isExpanded, setIsExpanded] = useState(false);
@@ -42,7 +55,7 @@ export function DownloadTaskList() {
         clearAllTasks();
         setIsVisible(false);
         setShowCloseDialog(false);
-    }
+    };
 
     useEffect(() => {
         if (tasks.length > 0) {
@@ -58,8 +71,8 @@ export function DownloadTaskList() {
 
     const activeTasksCount = getActiveTasksCount();
     const hasActiveTasks = activeTasksCount > 0;
-    const hasCompletedTasks = tasks.some(task => 
-        task.status === "completed" || task.status === "failed"
+    const hasCompletedTasks = tasks.some(
+        (task) => task.status === "completed" || task.status === "failed",
     );
 
     if (!isVisible) return null;
@@ -72,7 +85,7 @@ export function DownloadTaskList() {
         if (minutes < 60) return `${minutes}m`;
 
         return `${minutes}m ${seconds % 60}s`;
-    }
+    };
 
     const getStatusIcon = (status: DownloadStatus) => {
         switch (status) {
@@ -91,12 +104,18 @@ export function DownloadTaskList() {
 
     const getStatusText = (status: DownloadTask["status"]) => {
         switch (status) {
-            case "pending": return "Pending";
-            case "downloading": return "Downloading";
-            case "completed": return "Completed";
-            case "failed": return "Failed";
-            case "cancelled": return "Cancelled";
-            default: return "Unknown";
+            case "pending":
+                return "Pending";
+            case "downloading":
+                return "Downloading";
+            case "completed":
+                return "Completed";
+            case "failed":
+                return "Failed";
+            case "cancelled":
+                return "Cancelled";
+            default:
+                return "Unknown";
         }
     };
 
@@ -128,7 +147,7 @@ export function DownloadTaskList() {
                             >
                                 {isExpanded ? (
                                     <ChevronDownIcon className="size-3" />
-                                ): (
+                                ) : (
                                     <ChevronUpIcon className="size-3" />
                                 )}
                             </Button>
@@ -158,10 +177,7 @@ export function DownloadTaskList() {
                     <CardContent className="pt-0 max-h-64 overflow-y-auto">
                         <div className="space-y-3">
                             {tasks.map((task) => (
-                                <div 
-                                    key={task.id}
-                                    className="space-y-2"
-                                >
+                                <div key={task.id} className="space-y-2">
                                     <div className="flex items-center justify-between text-sm">
                                         <div className="flex items-center space-x-2 flex-1 min-w-0">
                                             {getStatusIcon(task.status)}
@@ -170,20 +186,24 @@ export function DownloadTaskList() {
                                             </span>
                                         </div>
                                         <Button
-                                        variant={"ghost"}
-                                        size="sm"
-                                        onClick={() => {
-                                            if (task.status === "downloading") {
+                                            variant={"ghost"}
+                                            size="sm"
+                                            onClick={() => {
+                                                if (
+                                                    task.status ===
+                                                    "downloading"
+                                                ) {
                                                     cancelDownload(task.id);
-                                            } else {
-                                                removeTask(task.id);
-                                            }
-                                        }}
+                                                } else {
+                                                    removeTask(task.id);
+                                                }
+                                            }}
                                         >
                                             <XIcon className="size-3" />
                                         </Button>
                                     </div>
-                                    {(task.status === "downloading" || task.status === "pending") && (
+                                    {(task.status === "downloading" ||
+                                        task.status === "pending") && (
                                         <Progress
                                             value={task.progress}
                                             className="h-1"
@@ -191,12 +211,21 @@ export function DownloadTaskList() {
                                     )}
 
                                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                        <span>{getStatusText(task.status)}</span>
+                                        <span>
+                                            {getStatusText(task.status)}
+                                        </span>
                                         <div className="flex items-center space-x-2">
                                             {task.size && (
-                                                <span>{formatFileSize(task.size)}</span>
+                                                <span>
+                                                    {formatFileSize(task.size)}
+                                                </span>
                                             )}
-                                            <span>{formatDuration(task.startTime, task.endTime)}</span>
+                                            <span>
+                                                {formatDuration(
+                                                    task.startTime,
+                                                    task.endTime,
+                                                )}
+                                            </span>
                                         </div>
                                     </div>
 
@@ -217,7 +246,7 @@ export function DownloadTaskList() {
                     </CardContent>
                 )}
 
-                <DownloadCloseDialog 
+                <DownloadCloseDialog
                     open={showCloseDialog}
                     onOpenChange={setShowCloseDialog}
                     onConfirm={handleConfirmClose}
@@ -226,5 +255,5 @@ export function DownloadTaskList() {
                 />
             </Card>
         </div>
-    )
+    );
 }

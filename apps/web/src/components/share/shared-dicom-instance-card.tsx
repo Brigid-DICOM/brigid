@@ -44,8 +44,12 @@ export function SharedDicomInstanceCard({
     const rows = instance["00280010"]?.Value?.[0] || "N/A";
     const columns = instance["00280011"]?.Value?.[0] || "N/A";
 
-    const studyUidFromInstance = instance["0020000D"]?.Value?.[0] as string | undefined;
-    const seriesUidFromInstance = instance["0020000E"]?.Value?.[0] as string | undefined;
+    const studyUidFromInstance = instance["0020000D"]?.Value?.[0] as
+        | string
+        | undefined;
+    const seriesUidFromInstance = instance["0020000E"]?.Value?.[0] as
+        | string
+        | undefined;
     const effectiveStudyUid = studyInstanceUid || studyUidFromInstance;
     const effectiveSeriesUid = seriesInstanceUid || seriesUidFromInstance;
 
@@ -65,15 +69,20 @@ export function SharedDicomInstanceCard({
             studyInstanceUid: effectiveStudyUid || "N/A",
             seriesInstanceUid: effectiveSeriesUid || "N/A",
             sopInstanceUid,
-            viewport: "224,224"
-        })
+            viewport: "224,224",
+        }),
     );
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
     const { data: tags, isLoading: isLoadingTags } = useQuery(
-        getTargetShareTagsQuery(token, "instance", sopInstanceUid, password ?? undefined)
-    )
+        getTargetShareTagsQuery(
+            token,
+            "instance",
+            sopInstanceUid,
+            password ?? undefined,
+        ),
+    );
 
     const { handleCardClick, handleContextMenu } = useDicomCardSelection({
         itemId: sopInstanceUid,
@@ -111,7 +120,7 @@ export function SharedDicomInstanceCard({
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
             >
-                <DicomCardHeaderTagsDisplay 
+                <DicomCardHeaderTagsDisplay
                     tags={tags?.data ?? []}
                     isLoadingTags={isLoadingTags}
                     isSelected={isSelected}
@@ -148,7 +157,8 @@ export function SharedDicomInstanceCard({
                         {/* Instance Number Badge */}
                         <div className="flex items-center gap-2">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                {t("dicom.columns.instance.number")}{instanceNumber}
+                                {t("dicom.columns.instance.number")}
+                                {instanceNumber}
                             </span>
                         </div>
 
@@ -191,6 +201,5 @@ export function SharedDicomInstanceCard({
                 </CardContent>
             </Card>
         </SharedDicomInstanceContextMenu>
-        
     );
 }

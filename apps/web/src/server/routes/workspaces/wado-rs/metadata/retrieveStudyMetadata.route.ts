@@ -9,7 +9,10 @@ import tmp from "tmp";
 import { z } from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
-import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
+import {
+    verifyWorkspaceExists,
+    verifyWorkspacePermission,
+} from "@/server/middlewares/workspace.middleware";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { StudyService } from "@/server/services/study.service";
 import { DicomJsonBinaryDataUtils } from "@/server/utils/dicom/dicomJsonBinaryDataUtils";
@@ -17,41 +20,40 @@ import { appLogger } from "@/server/utils/logger";
 import { getStorageProvider } from "@/server/utils/storage/storageFactory";
 
 const logger = appLogger.child({
-    module: "RetrieveStudyMetadataRoute"
+    module: "RetrieveStudyMetadataRoute",
 });
 
-const retrieveStudyMetadataRoute = new Hono()
-.get(
+const retrieveStudyMetadataRoute = new Hono().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/metadata",
     describeRoute({
         description:
             "Retrieve Study Metadata (WADO-RS), ref: [Retrieve Transaction Metadata Resources](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_10.4.1-2)",
-        tags: ["WADO-RS"]
+        tags: ["WADO-RS"],
     }),
     verifyAuthMiddleware,
     verifyWorkspaceExists,
     verifyWorkspacePermission(WORKSPACE_PERMISSIONS.READ),
-    zValidator("param", z.object({
-        workspaceId: z.string().describe("The ID of the workspace"),
-        studyInstanceUid: z.string().describe("The study instance UID")
-    })),
+    zValidator(
+        "param",
+        z.object({
+            workspaceId: z.string().describe("The ID of the workspace"),
+            studyInstanceUid: z.string().describe("The study instance UID"),
+        }),
+    ),
     async (c) => {
-        const {
-            workspaceId,
-            studyInstanceUid
-        } = c.req.valid("param");
+        const { workspaceId, studyInstanceUid } = c.req.valid("param");
 
         const studyService = new StudyService();
         const study = await studyService.getStudyByUid({
             workspaceId,
-            studyInstanceUid
+            studyInstanceUid,
         });
         if (!study) {
             return c.json(
                 {
-                    message: "Study not found"
+                    message: "Study not found",
                 },
-                404
+                404,
             );
         }
 
@@ -59,12 +61,13 @@ const retrieveStudyMetadataRoute = new Hono()
         const limit = env.QUERY_MAX_LIMIT;
 
         const instances: InstanceEntity[] = [];
-        let { instances: studyInstances, hasNextPage } = await studyService.getStudyInstances({
-            workspaceId,
-            studyInstanceUid,
-            limit,
-            offset
-        });
+        let { instances: studyInstances, hasNextPage } =
+            await studyService.getStudyInstances({
+                workspaceId,
+                studyInstanceUid,
+                limit,
+                offset,
+            });
         instances.push(...studyInstances);
 
         while (hasNextPage) {
@@ -73,7 +76,7 @@ const retrieveStudyMetadataRoute = new Hono()
                 workspaceId,
                 studyInstanceUid,
                 limit,
-                offset
+                offset,
             });
             instances.push(...result.instances);
             hasNextPage = result.hasNextPage;
@@ -82,12 +85,12 @@ const retrieveStudyMetadataRoute = new Hono()
         if (instances.length === 0) {
             return c.json(
                 {
-                    message: `Study instances not found, study instance UID: ${studyInstanceUid}`
+                    message: `Study instances not found, study instance UID: ${studyInstanceUid}`,
                 },
-                404
+                404,
             );
         }
-        
+
         const metadata = [];
         for (const instance of instances) {
             const storage = getStorageProvider();
@@ -98,17 +101,24 @@ const retrieveStudyMetadataRoute = new Hono()
 
             const dicomJson = await parseFromFilename(tempFile.name);
 
-            const dicomJsonBinaryDataUtils = new DicomJsonBinaryDataUtils(dicomJson, workspaceId);
+            const dicomJsonBinaryDataUtils = new DicomJsonBinaryDataUtils(
+                dicomJson,
+                workspaceId,
+            );
             dicomJsonBinaryDataUtils.replaceBinaryPropsToUriProp();
 
             metadata.push(dicomJson);
-            fsE.remove(tempFile.name).then(() => {
-                logger.info(`Deleted temp file successfully: ${tempFile.name}`);
-            }).catch();
+            fsE.remove(tempFile.name)
+                .then(() => {
+                    logger.info(
+                        `Deleted temp file successfully: ${tempFile.name}`,
+                    );
+                })
+                .catch();
         }
 
         return c.json(metadata);
-    }
+    },
 );
 
 export default retrieveStudyMetadataRoute;

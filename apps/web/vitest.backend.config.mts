@@ -1,23 +1,18 @@
-import path from "path";
+import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
     test: {
         alias: {
-            "@": path.resolve(__dirname, "./src")
+            "@": path.resolve(__dirname, "./src"),
         },
-        setupFiles: [
-            path.resolve(__dirname, "./tests/backend/setup.ts")
-        ],
+        setupFiles: [path.resolve(__dirname, "./tests/backend/setup.ts")],
         environment: "node",
         globals: true,
-        include: [
-            "tests/backend/**/*.test.ts"
-        ],
+        include: ["tests/backend/**/*.test.ts"],
         globalSetup: [
-            path.resolve(__dirname, "./tests/backend/globalSetup.ts")
+            path.resolve(__dirname, "./tests/backend/globalSetup.ts"),
         ],
-        fileParallelism: false
-    }
+        fileParallelism: false,
+    },
 });
-

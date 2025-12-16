@@ -6,14 +6,22 @@ import { authSessionQuery } from "@/react-query/queries/session";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { NavWorkspace } from "./nav-workspace";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "./ui/sidebar";
 
 export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     const cookieStore = await cookies();
     const queryClient = getQueryClient();
-    const session = await queryClient.fetchQuery(authSessionQuery(
-        cookieStore.toString()
-    ));
+    const session = await queryClient.fetchQuery(
+        authSessionQuery(cookieStore.toString()),
+    );
 
     const user = session?.user;
 
@@ -27,8 +35,15 @@ export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
                             <a href="/">
-                                <Image src="/logo.png" alt="Brigid Logo" width={32} height={32} />
-                                <span className="text-base font-semibold">Brigid</span>
+                                <Image
+                                    src="/logo.png"
+                                    alt="Brigid Logo"
+                                    width={32}
+                                    height={32}
+                                />
+                                <span className="text-base font-semibold">
+                                    Brigid
+                                </span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -42,13 +57,15 @@ export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             </SidebarContent>
             <SidebarFooter>
                 {user && (
-                    <NavUser user={{
-                        name: user.name ?? "",
-                        email: user.email ?? "",
-                        image: user.image ?? ""
-                    }} />
+                    <NavUser
+                        user={{
+                            name: user.name ?? "",
+                            email: user.email ?? "",
+                            image: user.image ?? "",
+                        }}
+                    />
                 )}
             </SidebarFooter>
         </Sidebar>
-    )
+    );
 }

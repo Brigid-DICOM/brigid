@@ -1,8 +1,5 @@
 import { Hono } from "hono";
-import { 
-    describeRoute,
-    validator as zValidator
-} from "hono-openapi";
+import { describeRoute, validator as zValidator } from "hono-openapi";
 import z from "zod";
 import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
@@ -21,13 +18,16 @@ const removeShareAssignmentRoute = new Hono().delete(
         z.object({
             token: z.string().describe("The share link token"),
             assignmentId: z.string().describe("The ID of the tag assignment"),
-        })
+        }),
     ),
     zValidator(
         "query",
         z.object({
-            password: z.string().optional().describe("The password for the share link"),
-        })
+            password: z
+                .string()
+                .optional()
+                .describe("The password for the share link"),
+        }),
     ),
     setUserMiddleware,
     verifyShareLinkToken,
@@ -51,8 +51,8 @@ const removeShareAssignmentRoute = new Hono().delete(
                         message: "Tag assignment not found",
                     },
                 },
-                404
-            )
+                404,
+            );
         }
 
         return c.json(
@@ -61,9 +61,9 @@ const removeShareAssignmentRoute = new Hono().delete(
                 data: null,
                 error: null,
             },
-            200
+            200,
         );
-    }
-)
+    },
+);
 
 export default removeShareAssignmentRoute;

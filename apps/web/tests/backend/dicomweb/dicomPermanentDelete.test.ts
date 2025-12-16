@@ -40,9 +40,9 @@ describe("DICOM Permanent Delete Operations", () => {
             // Arrange: 先 recycle instances
             const series = seedData.series[0];
             const instances = seedData.instances.filter(
-                i => i.seriesInstanceUid === series.seriesInstanceUid
+                (i) => i.seriesInstanceUid === series.seriesInstanceUid,
             );
-            const sopInstanceUids = instances.map(i => i.sopInstanceUid);
+            const sopInstanceUids = instances.map((i) => i.sopInstanceUid);
 
             await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/dicom/instances/recycle`,
@@ -54,7 +54,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: sopInstanceUids,
                     }),
-                }
+                },
             );
 
             // Act: Delete (RECYCLED -> DELETED)
@@ -68,7 +68,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: sopInstanceUids,
                     }),
-                }
+                },
             );
 
             expect(response.status).toBe(200);
@@ -82,8 +82,8 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         sopInstanceUid: In(sopInstanceUids),
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
 
             for (const instance of updatedInstances) {
@@ -96,9 +96,9 @@ describe("DICOM Permanent Delete Operations", () => {
             // Arrange
             const series = seedData.series[0];
             const instances = seedData.instances.filter(
-                i => i.seriesInstanceUid === series.seriesInstanceUid
+                (i) => i.seriesInstanceUid === series.seriesInstanceUid,
             );
-            const sopInstanceUids = instances.map(i => i.sopInstanceUid);
+            const sopInstanceUids = instances.map((i) => i.sopInstanceUid);
 
             // Recycle then delete
             await app.request(
@@ -111,7 +111,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: sopInstanceUids,
                     }),
-                }
+                },
             );
 
             await app.request(
@@ -124,7 +124,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: sopInstanceUids,
                     }),
-                }
+                },
             );
 
             // Assert: series should be deleted
@@ -134,12 +134,14 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         seriesInstanceUid: series.seriesInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
-            
+
             expect(updatedSeries).not.toBeNull();
-            expect(updatedSeries?.deleteStatus).toBe(DICOM_DELETE_STATUS.DELETED);
+            expect(updatedSeries?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.DELETED,
+            );
             expect(updatedSeries?.deletedAt).not.toBeNull();
         });
 
@@ -161,7 +163,7 @@ describe("DICOM Permanent Delete Operations", () => {
             });
 
             const firstInstance = seedData.instances.find(
-                i => i.seriesInstanceUid === series.seriesInstanceUid
+                (i) => i.seriesInstanceUid === series.seriesInstanceUid,
             );
 
             // Recycle first instance
@@ -175,7 +177,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: [firstInstance?.sopInstanceUid],
                     }),
-                }
+                },
             );
 
             // Act: Delete recycled instance
@@ -189,7 +191,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: [firstInstance?.sopInstanceUid],
                     }),
-                }
+                },
             );
 
             // Assert: series should remain active (because there's an active instance)
@@ -199,11 +201,13 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         seriesInstanceUid: series.seriesInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
             expect(updatedSeries).not.toBeNull();
-            expect(updatedSeries?.deleteStatus).toBe(DICOM_DELETE_STATUS.ACTIVE);
+            expect(updatedSeries?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.ACTIVE,
+            );
         });
 
         it("should return 200 with 0 affected for active instances", async () => {
@@ -220,7 +224,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: [instance.sopInstanceUid],
                     }),
-                }
+                },
             );
 
             expect(response.status).toBe(200);
@@ -233,7 +237,7 @@ describe("DICOM Permanent Delete Operations", () => {
     describe("Series Level Delete (RECYCLED -> DELETED)", () => {
         it("should mark recycled series and its instances as deleted", async () => {
             const series = seedData.series[0];
-            
+
             await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/dicom/series/recycle`,
                 {
@@ -244,7 +248,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         seriesIds: [series.seriesInstanceUid],
                     }),
-                }
+                },
             );
 
             // Act: Delete Series
@@ -258,7 +262,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         seriesIds: [series.seriesInstanceUid],
                     }),
-                }
+                },
             );
 
             // Assert
@@ -272,21 +276,23 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         seriesInstanceUid: series.seriesInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
 
             expect(updatedSeries).not.toBeNull();
-            expect(updatedSeries?.deleteStatus).toBe(DICOM_DELETE_STATUS.DELETED);
+            expect(updatedSeries?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.DELETED,
+            );
 
-            const instances= await testDb.dataSource.manager.find(
+            const instances = await testDb.dataSource.manager.find(
                 InstanceEntity,
                 {
                     where: {
                         seriesInstanceUid: series.seriesInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
 
             for (const instance of instances) {
@@ -299,9 +305,11 @@ describe("DICOM Permanent Delete Operations", () => {
             // Arrange
             const study = seedData.studies[0];
             const allSeries = seedData.series.filter(
-                s => s.studyInstanceUid === study.studyInstanceUid
+                (s) => s.studyInstanceUid === study.studyInstanceUid,
             );
-            const seriesInstanceUids = allSeries.map(s => s.seriesInstanceUid);
+            const seriesInstanceUids = allSeries.map(
+                (s) => s.seriesInstanceUid,
+            );
 
             // Recycle all Series
             await app.request(
@@ -314,7 +322,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         seriesIds: seriesInstanceUids,
                     }),
-                }
+                },
             );
 
             // Act: Delete all Series
@@ -328,7 +336,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         seriesIds: seriesInstanceUids,
                     }),
-                }
+                },
             );
 
             // Assert
@@ -338,12 +346,14 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         studyInstanceUid: study.studyInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
 
             expect(updatedStudy).not.toBeNull();
-            expect(updatedStudy?.deleteStatus).toBe(DICOM_DELETE_STATUS.DELETED);
+            expect(updatedStudy?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.DELETED,
+            );
             expect(updatedStudy?.deletedAt).not.toBeNull();
         });
     });
@@ -353,10 +363,10 @@ describe("DICOM Permanent Delete Operations", () => {
             // Arrant
             const study = seedData.studies[0];
             const relatedSeries = seedData.series.filter(
-                s => s.studyInstanceUid === study.studyInstanceUid
+                (s) => s.studyInstanceUid === study.studyInstanceUid,
             );
             const relatedInstances = seedData.instances.filter(
-                i => i.studyInstanceUid === study.studyInstanceUid
+                (i) => i.studyInstanceUid === study.studyInstanceUid,
             );
 
             // Recycle Study
@@ -370,7 +380,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         studyIds: [study.studyInstanceUid],
                     }),
-                }
+                },
             );
 
             // Act: Delete Study
@@ -384,7 +394,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         studyIds: [study.studyInstanceUid],
                     }),
-                }
+                },
             );
 
             // Assert
@@ -399,11 +409,13 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         studyInstanceUid: study.studyInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
             expect(updatedStudy).not.toBeNull();
-            expect(updatedStudy?.deleteStatus).toBe(DICOM_DELETE_STATUS.DELETED);
+            expect(updatedStudy?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.DELETED,
+            );
 
             // 驗證所有 series
             const updatedSeries = await testDb.dataSource.manager.find(
@@ -412,8 +424,8 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         studyInstanceUid: study.studyInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
             expect(updatedSeries.length).toBe(relatedSeries.length);
             for (const series of updatedSeries) {
@@ -427,8 +439,8 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         studyInstanceUid: study.studyInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
             expect(updatedInstances.length).toBe(relatedInstances.length);
             for (const instance of updatedInstances) {
@@ -442,9 +454,9 @@ describe("DICOM Permanent Delete Operations", () => {
         it("should permanently delete instances marked as deleted", async () => {
             const series = seedData.series[0];
             const instances = seedData.instances.filter(
-                i => i.seriesInstanceUid === series.seriesInstanceUid
+                (i) => i.seriesInstanceUid === series.seriesInstanceUid,
             );
-            const sopInstanceUids = instances.map(i => i.sopInstanceUid);
+            const sopInstanceUids = instances.map((i) => i.sopInstanceUid);
 
             // Step 1: Recycle
             await app.request(
@@ -455,9 +467,9 @@ describe("DICOM Permanent Delete Operations", () => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        instanceIds: instances.map(i => i.sopInstanceUid),
+                        instanceIds: instances.map((i) => i.sopInstanceUid),
                     }),
-                }
+                },
             );
 
             // Step 2: Delete
@@ -469,9 +481,9 @@ describe("DICOM Permanent Delete Operations", () => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        instanceIds: instances.map(i => i.sopInstanceUid),
+                        instanceIds: instances.map((i) => i.sopInstanceUid),
                     }),
-                }
+                },
             );
 
             // 修改 deletedAt 為過去的時間
@@ -486,15 +498,20 @@ describe("DICOM Permanent Delete Operations", () => {
                 },
                 {
                     deletedAt: pastDate,
-                }
+                },
             );
 
             // Act: Permanent Delete
-            const deleteService = new (await import("@/server/services/dicom/dicomDelete.service")).DicomDeleteService();
+            const deleteService = new (
+                await import("@/server/services/dicom/dicomDelete.service")
+            ).DicomDeleteService();
             const beforeDate = new Date();
             beforeDate.setDate(beforeDate.getDate() - 30);
 
-            const result = await deleteService.permanentlyDeleteMarkedItems(WORKSPACE_ID, beforeDate);
+            const result = await deleteService.permanentlyDeleteMarkedItems(
+                WORKSPACE_ID,
+                beforeDate,
+            );
 
             // Assert
             expect(result.deletedInstances).toBe(instances.length);
@@ -508,7 +525,7 @@ describe("DICOM Permanent Delete Operations", () => {
                         sopInstanceUid: In(sopInstanceUids),
                         workspaceId: WORKSPACE_ID,
                     },
-                }
+                },
             );
 
             expect(remainingInstances.length).toBe(0);
@@ -521,7 +538,7 @@ describe("DICOM Permanent Delete Operations", () => {
                         seriesInstanceUid: series.seriesInstanceUid,
                         workspaceId: WORKSPACE_ID,
                     },
-                }
+                },
             );
             expect(remainingSeries).toBeNull();
         });
@@ -541,7 +558,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: [instance.sopInstanceUid],
                     }),
-                }
+                },
             );
 
             await app.request(
@@ -554,14 +571,19 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: [instance.sopInstanceUid],
                     }),
-                }
+                },
             );
 
-            const deleteService = new (await import("@/server/services/dicom/dicomDelete.service")).DicomDeleteService();
+            const deleteService = new (
+                await import("@/server/services/dicom/dicomDelete.service")
+            ).DicomDeleteService();
             const futureDate = new Date();
             futureDate.setDate(futureDate.getDate() - 31); // 檢查31天前的，但剛剛才刪除
 
-            const result = await deleteService.permanentlyDeleteMarkedItems(WORKSPACE_ID, futureDate);
+            const result = await deleteService.permanentlyDeleteMarkedItems(
+                WORKSPACE_ID,
+                futureDate,
+            );
 
             // Assert: 應該沒有刪除任何東西
             expect(result.deletedInstances).toBe(0);
@@ -574,10 +596,12 @@ describe("DICOM Permanent Delete Operations", () => {
                         sopInstanceUid: instance.sopInstanceUid,
                         workspaceId: WORKSPACE_ID,
                     },
-                }
+                },
             );
             expect(remainingInstances).not.toBeNull();
-            expect(remainingInstances?.deleteStatus).toBe(DICOM_DELETE_STATUS.DELETED);
+            expect(remainingInstances?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.DELETED,
+            );
         });
 
         it("should cleanup empty series and studies when permanently deleting", async () => {
@@ -595,7 +619,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         studyIds: [study.studyInstanceUid],
                     }),
-                }
+                },
             );
 
             await app.request(
@@ -608,7 +632,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         studyIds: [study.studyInstanceUid],
                     }),
-                }
+                },
             );
 
             const pastDate = new Date();
@@ -617,21 +641,23 @@ describe("DICOM Permanent Delete Operations", () => {
             await testDb.dataSource.manager.update(
                 InstanceEntity,
                 {
-                    studyInstanceUid: study.studyInstanceUid
+                    studyInstanceUid: study.studyInstanceUid,
                 },
                 {
                     deletedAt: pastDate,
-                }
+                },
             );
 
             // Act: Permanent Delete
-            const deleteService = new (await import("@/server/services/dicom/dicomDelete.service")).DicomDeleteService();
+            const deleteService = new (
+                await import("@/server/services/dicom/dicomDelete.service")
+            ).DicomDeleteService();
             const beforeDate = new Date();
             beforeDate.setDate(beforeDate.getDate() - 30);
 
             await deleteService.permanentlyDeleteMarkedItems(
                 WORKSPACE_ID,
-                beforeDate
+                beforeDate,
             );
 
             // Assert
@@ -642,7 +668,7 @@ describe("DICOM Permanent Delete Operations", () => {
                         studyInstanceUid: study.studyInstanceUid,
                         workspaceId: WORKSPACE_ID,
                     },
-                }
+                },
             );
             expect(remainingInstance).toBe(0);
 
@@ -653,7 +679,7 @@ describe("DICOM Permanent Delete Operations", () => {
                         studyInstanceUid: study.studyInstanceUid,
                         workspaceId: WORKSPACE_ID,
                     },
-                }
+                },
             );
             expect(remainingSeries).toBe(0);
 
@@ -664,7 +690,7 @@ describe("DICOM Permanent Delete Operations", () => {
                         studyInstanceUid: study.studyInstanceUid,
                         workspaceId: WORKSPACE_ID,
                     },
-                }
+                },
             );
             expect(remainingStudy).toBeNull();
         });
@@ -683,7 +709,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: [],
                     }),
-                }
+                },
             );
 
             // Assert
@@ -691,7 +717,7 @@ describe("DICOM Permanent Delete Operations", () => {
         });
 
         it("should handle mixed status instances (only delete RECYCLED)", async () => {
-            const instance1= seedData.instances[0];
+            const instance1 = seedData.instances[0];
             const instance2 = seedData.instances[1];
 
             await app.request(
@@ -704,7 +730,7 @@ describe("DICOM Permanent Delete Operations", () => {
                     body: JSON.stringify({
                         instanceIds: [instance1.sopInstanceUid],
                     }),
-                }
+                },
             );
 
             // Act: 嘗試 delete 兩個 instance (只有第一個會被 delete)
@@ -716,9 +742,12 @@ describe("DICOM Permanent Delete Operations", () => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        instanceIds: [instance1.sopInstanceUid, instance2.sopInstanceUid],
+                        instanceIds: [
+                            instance1.sopInstanceUid,
+                            instance2.sopInstanceUid,
+                        ],
                     }),
-                }
+                },
             );
 
             expect(response.status).toBe(200);
@@ -732,11 +761,13 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         sopInstanceUid: instance1.sopInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
             expect(updatedInstance).not.toBeNull();
-            expect(updatedInstance?.deleteStatus).toBe(DICOM_DELETE_STATUS.DELETED);
+            expect(updatedInstance?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.DELETED,
+            );
 
             const updatedInstance2 = await testDb.dataSource.manager.findOne(
                 InstanceEntity,
@@ -744,12 +775,14 @@ describe("DICOM Permanent Delete Operations", () => {
                     where: {
                         sopInstanceUid: instance2.sopInstanceUid,
                         workspaceId: WORKSPACE_ID,
-                    }
-                }
+                    },
+                },
             );
 
             expect(updatedInstance2).not.toBeNull();
-            expect(updatedInstance2?.deleteStatus).toBe(DICOM_DELETE_STATUS.ACTIVE);
+            expect(updatedInstance2?.deleteStatus).toBe(
+                DICOM_DELETE_STATUS.ACTIVE,
+            );
         });
     });
 });

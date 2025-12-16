@@ -1,5 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckIcon, Loader2Icon, TagIcon, TagsIcon, Trash2Icon } from "lucide-react";
+import {
+    CheckIcon,
+    Loader2Icon,
+    TagIcon,
+    TagsIcon,
+    Trash2Icon,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";

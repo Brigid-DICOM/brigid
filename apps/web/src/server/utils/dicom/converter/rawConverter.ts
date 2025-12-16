@@ -83,11 +83,7 @@ export class RawConverter implements DicomToImageConverter {
                 for (let i = 1; i <= numberOfFrames; i++) {
                     const destFile = `${tmpFile.name}.${i}.raw`;
                     writeFileSync(destFile, "");
-                    await generateRawFrameFn(
-                        tmpFile.name,
-                        destFile,
-                        i,
-                    );
+                    await generateRawFrameFn(tmpFile.name, destFile, i);
 
                     const fileStream = createReadStream(destFile);
                     fileStream.once("close", async () => {
@@ -216,7 +212,7 @@ export class RawConverter implements DicomToImageConverter {
             // 因此我們可以檢查檔案大小是否為 0，如果為 0，則拋出異常
             const fileSize = (await stat(dest)).size;
             if (fileSize === 0) {
-                throw e
+                throw e;
             }
         }
         await outputStream.close();

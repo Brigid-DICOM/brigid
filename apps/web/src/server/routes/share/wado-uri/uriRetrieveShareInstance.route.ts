@@ -1,8 +1,5 @@
 import { Hono } from "hono";
-import {
-    describeRoute,
-    validator as zValidator
-} from "hono-openapi";
+import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { uriRetrieveInstanceHandler } from "@/server/handlers/wado-uri/uriRetrieveInstance.handler";
 import { setUserMiddleware } from "@/server/middlewares/setUser.middleware";
@@ -10,17 +7,19 @@ import { verifyShareLinkToken } from "@/server/middlewares/shareLink.middleware"
 import { verifyInstanceAccess } from "@/server/middlewares/shareLinkAccess.middleware";
 import { wadoUriQueryParamSchema } from "@/server/schemas/wadoUri";
 
-const uriRetrieveShareInstanceRoute = new Hono()
-.get(
+const uriRetrieveShareInstanceRoute = new Hono().get(
     "/:token/wado-uri",
     describeRoute({
         description: "Retrieve DICOM instance (WADO-URI) for shared content",
         tags: ["Share Links - Public"],
     }),
     zValidator("query", wadoUriQueryParamSchema),
-    zValidator("param", z.object({
-        token: z.string().describe("The token of the share link"),
-    })),
+    zValidator(
+        "param",
+        z.object({
+            token: z.string().describe("The token of the share link"),
+        }),
+    ),
     setUserMiddleware,
     verifyShareLinkToken,
     verifyInstanceAccess,
@@ -35,7 +34,7 @@ const uriRetrieveShareInstanceRoute = new Hono()
             sopInstanceUid: objectUID,
             accept,
         });
-    }
+    },
 );
 
 export default uriRetrieveShareInstanceRoute;

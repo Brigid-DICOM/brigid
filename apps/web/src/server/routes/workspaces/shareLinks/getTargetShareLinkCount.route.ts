@@ -36,15 +36,12 @@ const getTargetShareLinkCountRoute = new Hono().get(
     zValidator(
         "query",
         z.object({
-            targetIds: z.preprocess(
-                (val) => {
-                    if (typeof val === "string") {
-                        return [val];
-                    }
-                    return val;
-                },
-                z.array(z.string()).describe("The IDs of the targets"),
-            ),
+            targetIds: z.preprocess((val) => {
+                if (typeof val === "string") {
+                    return [val];
+                }
+                return val;
+            }, z.array(z.string()).describe("The IDs of the targets")),
         }),
     ),
     async (c) => {

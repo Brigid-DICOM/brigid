@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import {
-    describeRoute,
-    validator as zValidator
-} from "hono-openapi";
+import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
-import { verifyWorkspaceExists, verifyWorkspacePermission } from "@/server/middlewares/workspace.middleware";
+import {
+    verifyWorkspaceExists,
+    verifyWorkspacePermission,
+} from "@/server/middlewares/workspace.middleware";
 import { deleteSeriesBodySchema } from "@/server/schemas/dicomDelete";
 import { DicomDeleteService } from "@/server/services/dicom/dicomDelete.service";
 import { SeriesService } from "@/server/services/series.service";
@@ -15,14 +15,17 @@ const deleteSeriesRoute = new Hono().post(
     "/workspaces/:workspaceId/dicom/series/delete",
     describeRoute({
         description: "Delete DICOM series",
-        tags: ["DICOM"]
+        tags: ["DICOM"],
     }),
     verifyAuthMiddleware,
     verifyWorkspaceExists,
     verifyWorkspacePermission(WORKSPACE_PERMISSIONS.DELETE),
-    zValidator("param", z.object({
-        workspaceId: z.string().describe("The ID of the workspace")
-    })),
+    zValidator(
+        "param",
+        z.object({
+            workspaceId: z.string().describe("The ID of the workspace"),
+        }),
+    ),
     zValidator("json", deleteSeriesBodySchema),
     async (c) => {
         const workspaceId = c.req.param("workspaceId");
@@ -31,32 +34,42 @@ const deleteSeriesRoute = new Hono().post(
         const distinctSeriesIds = [...new Set(seriesIds)];
 
         const seriesService = new SeriesService();
-        const localSeriesIds = await seriesService.getSeriesBySeriesInstanceUids(workspaceId, distinctSeriesIds);
+        const localSeriesIds =
+            await seriesService.getSeriesBySeriesInstanceUids(
+                workspaceId,
+                distinctSeriesIds,
+            );
 
         if (localSeriesIds.length === 0) {
-            return c.json({
-                ok: false,
-                data: null,
-                error: {
-                    message: "Series not found"
-                }
-            }, 404);
+            return c.json(
+                {
+                    ok: false,
+                    data: null,
+                    error: {
+                        message: "Series not found",
+                    },
+                },
+                404,
+            );
         }
 
         const deleteService = new DicomDeleteService();
         const result = await deleteService.deleteSeries(
             workspaceId,
-            localSeriesIds.map((series) => series.id)
+            localSeriesIds.map((series) => series.id),
         );
 
-        return c.json({
-            ok: true,
-            data: {
-                affected: result.affected
+        return c.json(
+            {
+                ok: true,
+                data: {
+                    affected: result.affected,
+                },
+                error: null,
             },
-            error: null
-        }, 200);
-    }
+            200,
+        );
+    },
 );
 
 export default deleteSeriesRoute;

@@ -149,7 +149,7 @@ export const DICOM_STATUS = {
     UPSPerformerCannotBeContacted: 0xc312,
     UPSPerformerChoosesNotToCancel: 0xc313,
     UPSActionNotAppropriate: 0xc314,
-    UPSDoesNotSupportEventReports: 0xc315
+    UPSDoesNotSupportEventReports: 0xc315,
 } as const;
 
 /**

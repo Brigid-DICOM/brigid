@@ -6,10 +6,10 @@ import {
     describe,
     expect,
     it,
-    vi
+    vi,
 } from "vitest";
 import { app } from "@/app/api/[...route]/route";
-import { SHARE_PERMISSIONS, SHARE_PERMISSIONS_NAMES } from "@/server/const/share.const";
+import { SHARE_PERMISSIONS } from "@/server/const/share.const";
 import { TestDatabaseManager } from "../../utils/testDatabaseManager";
 
 declare global {
@@ -56,8 +56,8 @@ describe("Share Links Routes", () => {
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
 
             expect(response.status).toBe(201);
@@ -82,8 +82,8 @@ describe("Share Links Routes", () => {
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
 
             expect(response.status).toBe(201);
@@ -95,28 +95,25 @@ describe("Share Links Routes", () => {
     describe("GET /workspaces/:workspaceId/share-links", () => {
         it("should return all share links for the workspace", async () => {
             // Arrange: Create a share link first
-            await app.request(
-                `/api/workspaces/${workspaceId}/share-links`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        targetType: "study",
-                        targetIds: [studyUid],
-                        publicPermissions: SHARE_PERMISSIONS.READ,
-                        requiredPassword: false,
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    })
-                }
-            );
+            await app.request(`/api/workspaces/${workspaceId}/share-links`, {
+                method: "POST",
+                body: JSON.stringify({
+                    targetType: "study",
+                    targetIds: [studyUid],
+                    publicPermissions: SHARE_PERMISSIONS.READ,
+                    requiredPassword: false,
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
                 `/api/workspaces/${workspaceId}/share-links`,
                 {
                     method: "GET",
-                }
+                },
             );
 
             // Assert
@@ -148,8 +145,8 @@ describe("Share Links Routes", () => {
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
             const createdShareLink = await createResponse.json();
             const shareLinkId = createdShareLink.data.id;
@@ -160,12 +157,12 @@ describe("Share Links Routes", () => {
                 {
                     method: "PATCH",
                     body: JSON.stringify({
-                        publicPermissions: SHARE_PERMISSIONS.FULL
+                        publicPermissions: SHARE_PERMISSIONS.FULL,
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
 
             // Assert
@@ -187,12 +184,12 @@ describe("Share Links Routes", () => {
                         targetIds: [studyUid],
                         publicPermissions: SHARE_PERMISSIONS.READ,
                         requiredPassword: true,
-                        password: "mysecretpassword"
+                        password: "mysecretpassword",
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
             const createdLink = await createResponse.json();
             const token = createdLink.data.token;
@@ -202,12 +199,12 @@ describe("Share Links Routes", () => {
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        password: "mysecretpassword"
+                        password: "mysecretpassword",
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
 
             // Assert
@@ -227,12 +224,12 @@ describe("Share Links Routes", () => {
                         targetIds: [studyUid],
                         publicPermissions: SHARE_PERMISSIONS.READ,
                         requiredPassword: true,
-                        password: "mysecretpassword"
+                        password: "mysecretpassword",
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
             const createdLink = await createResponse.json();
             const token = createdLink.data.token;
@@ -242,12 +239,12 @@ describe("Share Links Routes", () => {
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        password: "wrongpassword"
+                        password: "wrongpassword",
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
-                    })
-                }
+                    }),
+                },
             );
 
             // Assert
@@ -255,6 +252,6 @@ describe("Share Links Routes", () => {
             const json = await response.json();
             expect(json.ok).toBe(false);
             expect(json.error).toBe("Invalid password");
-        })
+        });
     });
-})
+});

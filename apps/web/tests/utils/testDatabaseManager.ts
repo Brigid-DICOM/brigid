@@ -47,7 +47,7 @@ export class TestDatabaseManager {
                 TagAssignmentEntity,
                 ShareLinkEntity,
                 ShareLinkTargetEntity,
-                ShareLinkRecipientEntity
+                ShareLinkRecipientEntity,
             ],
             synchronize: true,
             logging: false,

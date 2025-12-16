@@ -3,20 +3,29 @@
 import { useEffect, useState } from "react";
 import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
-import { 
+import {
     Dialog,
     DialogContent,
-    DialogDescription, 
+    DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle
+    DialogTitle,
 } from "@/components/ui/dialog";
-import { type SearchType, useGlobalSearchStore } from "@/stores/global-search-store";
+import {
+    type SearchType,
+    useGlobalSearchStore,
+} from "@/stores/global-search-store";
 import { DicomSearchConditionItem } from "./dicom-search-condition-item";
 import { SearchFieldDropdownMenu } from "./search-field-dropdown-menu";
 import { SEARCH_FIELD_CONFIGS } from "./search-field-types";
 
-export type SearchLevel = "study" | "series" | "instance" | "recycle-study" | "recycle-series" | "recycle-instance";
+export type SearchLevel =
+    | "study"
+    | "series"
+    | "instance"
+    | "recycle-study"
+    | "recycle-series"
+    | "recycle-instance";
 
 interface SearchCondition {
     id: string;
@@ -55,14 +64,17 @@ const createDefaultConditions = (level: SearchLevel) => {
         field: field,
         value: "",
     }));
-}
+};
 
 const getSupportedFieldsForLevel = (level: SearchLevel): Set<string> => {
     const configs = SEARCH_FIELD_CONFIGS[level];
-    return new Set(configs.map(config => config.key));
-}
+    return new Set(configs.map((config) => config.key));
+};
 
-const convertSearchParamsToConditions = (searchParams: Record<string, string>, level: SearchLevel) => {
+const convertSearchParamsToConditions = (
+    searchParams: Record<string, string>,
+    level: SearchLevel,
+) => {
     const supportedFields = getSupportedFieldsForLevel(level);
 
     return Object.entries(searchParams)
@@ -70,9 +82,9 @@ const convertSearchParamsToConditions = (searchParams: Record<string, string>, l
         .map(([field, value], index) => ({
             id: `${field}-${index}`,
             field,
-            value
+            value,
         }));
-}
+};
 
 export function DicomSearchModal({
     open,
@@ -82,21 +94,26 @@ export function DicomSearchModal({
 }: SearchModalProps) {
     const { t } = useT("translation");
     const { getSearchConditionsForType } = useGlobalSearchStore();
-    const [conditions, setConditions] = useState<SearchCondition[]>(createDefaultConditions(level));
+    const [conditions, setConditions] = useState<SearchCondition[]>(
+        createDefaultConditions(level),
+    );
 
     const initializeConditions = (currentLevel: SearchLevel) => {
         const searchType = SEARCH_TYPE_MAPPING[currentLevel];
         const existingConditions = getSearchConditionsForType(searchType);
-    
-        const convertedConditions = convertSearchParamsToConditions(existingConditions, currentLevel);
+
+        const convertedConditions = convertSearchParamsToConditions(
+            existingConditions,
+            currentLevel,
+        );
 
         if (convertedConditions.length > 0) {
             setConditions(convertedConditions);
         } else {
             setConditions(createDefaultConditions(currentLevel));
         }
-    }
-    
+    };
+
     // biome-ignore lint/correctness/useExhaustiveDependencies: 只在 level 變化時初始化
     useEffect(() => {
         initializeConditions(level);
@@ -114,49 +131,71 @@ export function DicomSearchModal({
     }, [level]);
 
     const addCondition = (key: string) => {
-        setConditions(prev => [
+        setConditions((prev) => [
             ...prev,
             {
                 id: key,
                 field: key,
                 value: "",
-            }
+            },
         ]);
     };
 
     const removeCondition = (id: string) => {
-        setConditions(prev => prev.filter(condition => condition.id !== id));
+        setConditions((prev) =>
+            prev.filter((condition) => condition.id !== id),
+        );
     };
 
     const updateCondition = (id: string, field: string, value: string) => {
-        setConditions(prev => prev.map(condition => condition.id === id ? { ...condition, field, value } : condition));
-    }
+        setConditions((prev) =>
+            prev.map((condition) =>
+                condition.id === id
+                    ? { ...condition, field, value }
+                    : condition,
+            ),
+        );
+    };
 
     const handleSearch = () => {
-        const validConditions = conditions.filter(condition => condition.value.trim() !== "");
+        const validConditions = conditions.filter(
+            (condition) => condition.value.trim() !== "",
+        );
         onSearch(validConditions);
-    }
+    };
 
     const handleClearAll = () => {
         setConditions(createDefaultConditions(level));
-    }
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
-                        {t("dicom.search.title")} {level === "study" ? "Study" : level === "series" ? "Series" : "Instance"}
+                        {t("dicom.search.title")}{" "}
+                        {level === "study"
+                            ? "Study"
+                            : level === "series"
+                              ? "Series"
+                              : "Instance"}
                     </DialogTitle>
                     <DialogDescription>
-                        {t("dicom.search.description", { level: level === "study" ? "studies" : level === "series" ? "series" : "instances" })}
+                        {t("dicom.search.description", {
+                            level:
+                                level === "study"
+                                    ? "studies"
+                                    : level === "series"
+                                      ? "series"
+                                      : "instances",
+                        })}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     <div className="space-y-3">
                         {conditions.map((condition) => (
-                            <DicomSearchConditionItem 
+                            <DicomSearchConditionItem
                                 key={condition.id}
                                 condition={condition}
                                 level={level}
@@ -170,13 +209,15 @@ export function DicomSearchModal({
 
                 <DialogFooter className="flex sm:justify-between">
                     <div className="flex gap-2">
-                        <SearchFieldDropdownMenu 
+                        <SearchFieldDropdownMenu
                             level={level}
                             onSelect={addCondition}
-                            existingFields={conditions.map(condition => condition.field)}
+                            existingFields={conditions.map(
+                                (condition) => condition.field,
+                            )}
                         />
 
-                        {conditions.some(c => c.value.trim()) && (
+                        {conditions.some((c) => c.value.trim()) && (
                             <Button
                                 variant={"ghost"}
                                 size={"sm"}
@@ -208,6 +249,5 @@ export function DicomSearchModal({
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    )
+    );
 }
-

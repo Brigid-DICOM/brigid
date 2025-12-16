@@ -49,7 +49,7 @@ export function SharedDicomStudyCard({
         toggleStudySelection,
         isStudySelected,
         selectStudy,
-        clearSelection
+        clearSelection,
     } = useDicomStudySelectionStore();
 
     const isSelected = isStudySelected(studyInstanceUid);
@@ -60,27 +60,40 @@ export function SharedDicomStudyCard({
             password,
             studyInstanceUid,
             viewport: "224,224",
-        })
+        }),
     );
 
     const thumbnailUrl = useDicomThumbnail(thumbnail);
 
     const { data: tags, isLoading: isLoadingTags } = useQuery(
-        getTargetShareTagsQuery(token, "study", studyInstanceUid, password ?? undefined)
+        getTargetShareTagsQuery(
+            token,
+            "study",
+            studyInstanceUid,
+            password ?? undefined,
+        ),
     );
 
     const handleDoubleClick = () => {
-        const params = password ? `?password=${encodeURIComponent(password)}` : "";
-        router.push(`/${lng}/share/${token}/studies/${studyInstanceUid}${params}`);
+        const params = password
+            ? `?password=${encodeURIComponent(password)}`
+            : "";
+        router.push(
+            `/${lng}/share/${token}/studies/${studyInstanceUid}${params}`,
+        );
     };
 
-    const { handleCardClick, handleContextMenu, handleDoubleClick: onDoubleClick } = useDicomCardSelection({
+    const {
+        handleCardClick,
+        handleContextMenu,
+        handleDoubleClick: onDoubleClick,
+    } = useDicomCardSelection({
         itemId: studyInstanceUid,
         isSelected,
         toggleSelection: toggleStudySelection,
         selectItem: selectStudy,
         clearSelection,
-        onDoubleClick: handleDoubleClick
+        onDoubleClick: handleDoubleClick,
     });
 
     return (
@@ -99,21 +112,19 @@ export function SharedDicomStudyCard({
                     "pt-0 gap-0",
                     "select-none",
                     "relative",
-                    isSelected ? [
-                        "ring-2 ring-primary",
-                        "shadow-lg",
-                        "bg-accent"
-                    ] : [
-                        "hover:shadow-lg",
-                        "hover:ring-2 hover:ring-accent hover:bg-accent/10",
-                    ],
+                    isSelected
+                        ? ["ring-2 ring-primary", "shadow-lg", "bg-accent"]
+                        : [
+                              "hover:shadow-lg",
+                              "hover:ring-2 hover:ring-accent hover:bg-accent/10",
+                          ],
                     className,
                 )}
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
                 onDoubleClick={onDoubleClick}
             >
-                <DicomCardHeaderTagsDisplay 
+                <DicomCardHeaderTagsDisplay
                     tags={tags?.data ?? []}
                     isLoadingTags={isLoadingTags}
                     isSelected={isSelected}
@@ -137,7 +148,8 @@ export function SharedDicomStudyCard({
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
                             <FolderIcon className="h-12 w-12 opacity-50" />
                             <div className="text-xs">
-                                {numberOfSeries} series • {numberOfInstances} images
+                                {numberOfSeries} series • {numberOfInstances}{" "}
+                                images
                             </div>
                         </div>
                     )}
@@ -193,6 +205,5 @@ export function SharedDicomStudyCard({
                 </CardContent>
             </Card>
         </SharedDicomStudyContextMenu>
-        
     );
 }

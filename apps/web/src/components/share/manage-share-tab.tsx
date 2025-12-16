@@ -17,7 +17,10 @@ import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { usePagination } from "@/hooks/use-pagination";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getTargetShareLinksQuery, parseShareLinkFromApi } from "@/react-query/queries/share";
+import {
+    getTargetShareLinksQuery,
+    parseShareLinkFromApi,
+} from "@/react-query/queries/share";
 import { PaginationControls } from "../common/pagination-controls";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -38,7 +41,8 @@ export function ManageShareTab({
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
     const queryClient = getQueryClient();
-    const [editingShare, setEditingShare] = useState<ClientShareLinkData | null>(null);
+    const [editingShare, setEditingShare] =
+        useState<ClientShareLinkData | null>(null);
     const [targetIdToDelete, setTargetIdToDelete] = useState<string | null>(
         null,
     );
@@ -202,7 +206,9 @@ export function ManageShareTab({
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setEditingShare(
-                                                        parseShareLinkFromApi(share)
+                                                        parseShareLinkFromApi(
+                                                            share,
+                                                        ),
                                                     );
                                                 }}
                                                 title="Edit share link"
@@ -277,13 +283,15 @@ export function ManageShareTab({
     return (
         <div className="space-y-6 py-4 max-h-[600px] overflow-y-auto">
             <div className="flex items-center justify-between">
-                <h3 className="font-semibold">{t("shareLink.editDialog.title")}</h3>
+                <h3 className="font-semibold">
+                    {t("shareLink.editDialog.title")}
+                </h3>
                 <p className="text-xs text-gray-500 mt-1">
                     Token: {editingShare.token.slice(0, 16)}...
                 </p>
             </div>
 
-            <ShareLinkEditForm 
+            <ShareLinkEditForm
                 shareLink={editingShare}
                 workspaceId={workspaceId}
                 onSuccess={() => {

@@ -70,14 +70,18 @@ export function SharedDicomSeriesContextMenu({
         );
     };
 
-    const handleDownloadSelected = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleDownloadSelected = async (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
 
         const currentSelectedIds = getSelectedSeriesIds();
 
         if (currentSelectedIds.length === 0) {
-            toast.error(t("dicom.messages.selectToDownload", { level: "series" }));
+            toast.error(
+                t("dicom.messages.selectToDownload", { level: "series" }),
+            );
             return;
         }
 
@@ -89,13 +93,18 @@ export function SharedDicomSeriesContextMenu({
                 password,
             );
         } catch (error) {
-            console.error(t("dicom.messages.downloadSelectedError", { level: "series" }), error);
+            console.error(
+                t("dicom.messages.downloadSelectedError", { level: "series" }),
+                error,
+            );
 
             if (error instanceof Error && error.name === "AbortError") {
                 return;
             }
 
-            toast.error(t("dicom.messages.downloadSelectedError", { level: "series" }));
+            toast.error(
+                t("dicom.messages.downloadSelectedError", { level: "series" }),
+            );
         }
     };
 
@@ -110,87 +119,102 @@ export function SharedDicomSeriesContextMenu({
         });
     };
 
-    const handleCopySeriesInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleCopySeriesInstanceUid = (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
         navigator.clipboard.writeText(seriesInstanceUid);
-        toast.success(t("dicom.messages.copiedToClipboard", { level: "seriesInstanceUid" }));
-    }
+        toast.success(
+            t("dicom.messages.copiedToClipboard", {
+                level: "seriesInstanceUid",
+            }),
+        );
+    };
 
     return (
-            <ContextMenu>
-                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-                <ContextMenuContent className="w-60">
-                    {selectedIds.length === 1 && (
-                        <>
-                            <ContextMenuItem
-                                onClick={handleCopySeriesInstanceUid}
-                                className="flex items-center space-x-2"
-                            >
-                                <CopyIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.series.seriesInstanceUid")}</span>
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                                onClick={handleEnterInstances}
-                                className="flex items-center space-x-2"
-                            >
-                                <CornerDownLeftIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.enterInstances")}</span>
-                            </ContextMenuItem>
+        <ContextMenu>
+            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+            <ContextMenuContent className="w-60">
+                {selectedIds.length === 1 && (
+                    <>
+                        <ContextMenuItem
+                            onClick={handleCopySeriesInstanceUid}
+                            className="flex items-center space-x-2"
+                        >
+                            <CopyIcon className="size-4" />
+                            <span>
+                                {t("dicom.contextMenu.copy")}{" "}
+                                {t("dicom.columns.series.seriesInstanceUid")}
+                            </span>
+                        </ContextMenuItem>
+                        <ContextMenuItem
+                            onClick={handleEnterInstances}
+                            className="flex items-center space-x-2"
+                        >
+                            <CornerDownLeftIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.enterInstances")}</span>
+                        </ContextMenuItem>
 
-                            <ContextMenuItem
-                                onClick={handleOpenBlueLightViewer}
-                                className="flex items-center space-x-2"
-                            >
-                                <EyeIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.openInBlueLight")}</span>
-                            </ContextMenuItem>
+                        <ContextMenuItem
+                            onClick={handleOpenBlueLightViewer}
+                            className="flex items-center space-x-2"
+                        >
+                            <EyeIcon className="size-4" />
+                            <span>
+                                {t("dicom.contextMenu.openInBlueLight")}
+                            </span>
+                        </ContextMenuItem>
 
-                            <ContextMenuItem
-                                onClick={handleDownloadSelected}
-                                className="flex items-center space-x-2"
-                            >
-                                <DownloadIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.download")}</span>
-                            </ContextMenuItem>
+                        <ContextMenuItem
+                            onClick={handleDownloadSelected}
+                            className="flex items-center space-x-2"
+                        >
+                            <DownloadIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.download")}</span>
+                        </ContextMenuItem>
 
-                            {canUpdate && (
-                                <>
-                                    <ContextMenuSeparator />
+                        {canUpdate && (
+                            <>
+                                <ContextMenuSeparator />
 
-                                    <ShareTagContextMenuSub
-                                        token={token}
-                                        targetType="series"
-                                        targetId={seriesInstanceUid}
-                                        password={password}
-                                        onOpenCreateTagDialog={() => openCreateTagDialog({
+                                <ShareTagContextMenuSub
+                                    token={token}
+                                    targetType="series"
+                                    targetId={seriesInstanceUid}
+                                    password={password}
+                                    onOpenCreateTagDialog={() =>
+                                        openCreateTagDialog({
                                             token,
                                             targetType: "series",
                                             targetId: seriesInstanceUid,
                                             password,
-                                        })}
-                                    />
-                                </>
-                            )}
-                        </>
-                    )}
+                                        })
+                                    }
+                                />
+                            </>
+                        )}
+                    </>
+                )}
 
-                    {selectedIds.length > 1 && (
-                        <>
-                            <ContextMenuLabel>
-                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
-                            </ContextMenuLabel>
+                {selectedIds.length > 1 && (
+                    <>
+                        <ContextMenuLabel>
+                            {t("dicom.contextMenu.selectedItems", {
+                                count: selectedIds.length,
+                            })}
+                        </ContextMenuLabel>
 
-                            <ContextMenuItem
-                                onClick={handleDownloadSelected}
-                                className="flex items-center space-x-2"
-                            >
-                                <DownloadIcon className="size-4" />
-                                <span>{t("dicom.contextMenu.download")}</span>
-                            </ContextMenuItem>
-                        </>
-                    )}
-                </ContextMenuContent>
-            </ContextMenu>
+                        <ContextMenuItem
+                            onClick={handleDownloadSelected}
+                            className="flex items-center space-x-2"
+                        >
+                            <DownloadIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.download")}</span>
+                        </ContextMenuItem>
+                    </>
+                )}
+            </ContextMenuContent>
+        </ContextMenu>
     );
 }

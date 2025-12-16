@@ -1,6 +1,11 @@
 import { createReadStream } from "node:fs";
 import type { Readable } from "node:stream";
-import { DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+    DeleteObjectCommand,
+    DeleteObjectsCommand,
+    GetObjectCommand,
+    S3Client,
+} from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import env from "@brigid/env";
 import type { MultipartFile } from "@/server/types/file";
@@ -8,7 +13,7 @@ import { appLogger } from "../logger";
 import type { DownloadResult, StorageProvider } from "./storage.interface";
 
 const logger = appLogger.child({
-    module: "S3StorageProvider"
+    module: "S3StorageProvider",
 });
 
 export class S3StorageProvider implements StorageProvider {
@@ -25,8 +30,8 @@ export class S3StorageProvider implements StorageProvider {
             endpoint: env.S3_ENDPOINT,
             credentials: {
                 accessKeyId: env.S3_ACCESS_KEY,
-                secretAccessKey: env.S3_SECRET_KEY
-            }
+                secretAccessKey: env.S3_SECRET_KEY,
+            },
         });
     }
 
@@ -43,9 +48,9 @@ export class S3StorageProvider implements StorageProvider {
                 Bucket: env.S3_BUCKET,
                 Key: key,
                 Body: fileStream,
-                ContentType: file.mediaType
+                ContentType: file.mediaType,
             },
-            leavePartsOnError: false
+            leavePartsOnError: false,
         });
 
         parallelUpload.on("httpUploadProgress", (progress) => {
@@ -53,7 +58,9 @@ export class S3StorageProvider implements StorageProvider {
             const total = progress.total || file.size;
             const percentage = Math.round((loaded / total) * 100);
 
-            logger.info(`Uploaded ${loaded} bytes of ${total} bytes (${percentage}%)`);
+            logger.info(
+                `Uploaded ${loaded} bytes of ${total} bytes (${percentage}%)`,
+            );
         });
 
         try {
@@ -62,7 +69,7 @@ export class S3StorageProvider implements StorageProvider {
             await parallelUpload.done();
 
             return { key, filePath: file.filename };
-        } catch(error) {
+        } catch (error) {
             if (this.uploadingFiles.has(key)) {
                 this.uploadingFiles.get(key)?.abort();
                 this.uploadingFiles.delete(key);
@@ -84,7 +91,6 @@ export class S3StorageProvider implements StorageProvider {
         }
     }
 
-
     async downloadFile(key: string): Promise<DownloadResult> {
         if (env.STORAGE_PROVIDER !== "s3") {
             throw new Error("STORAGE_PROVIDER is not set to s3");
@@ -92,7 +98,7 @@ export class S3StorageProvider implements StorageProvider {
 
         const command = new GetObjectCommand({
             Bucket: env.S3_BUCKET,
-            Key: key
+            Key: key,
         });
 
         const response = await this.s3Client.send(command);
@@ -103,7 +109,7 @@ export class S3StorageProvider implements StorageProvider {
 
         return {
             body: response.Body as Readable,
-            size: response.ContentLength
+            size: response.ContentLength,
         };
     }
 
@@ -114,32 +120,32 @@ export class S3StorageProvider implements StorageProvider {
 
         const command = new DeleteObjectCommand({
             Bucket: env.S3_BUCKET,
-            Key: key
+            Key: key,
         });
 
         try {
             await this.s3Client.send(command);
-        } catch(error) {
+        } catch (error) {
             logger.error("Failed to delete file", error);
             throw error;
         }
     }
 
     async deleteFiles(keys: string[]) {
-        if (env.STORAGE_PROVIDER !== "s3")  {
+        if (env.STORAGE_PROVIDER !== "s3") {
             throw new Error("STORAGE_PROVIDER is not set to s3");
         }
 
         const deleteCommand = new DeleteObjectsCommand({
             Bucket: env.S3_BUCKET,
             Delete: {
-                Objects: keys.map((key) => ({ Key: key }))
-            }
+                Objects: keys.map((key) => ({ Key: key })),
+            },
         });
 
         try {
             await this.s3Client.send(deleteCommand);
-        } catch(error) {
+        } catch (error) {
             logger.error("Failed to delete files in batch", error);
             throw error;
         }

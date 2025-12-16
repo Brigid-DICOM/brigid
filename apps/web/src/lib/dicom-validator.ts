@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * DICOM files have "DICM" magick number of byte offset 128
  */
 export async function isDicomFile(file: File): Promise<boolean> {
@@ -10,7 +10,7 @@ export async function isDicomFile(file: File): Promise<boolean> {
             const arrayBuffer = e.target?.result as ArrayBuffer;
 
             if (!arrayBuffer || arrayBuffer.byteLength < 132) {
-                resolve(false)
+                resolve(false);
                 return;
             }
 
@@ -37,7 +37,9 @@ export interface DicomValidationResult {
     validationError?: string;
 }
 
-export async function validateDicomFiles(files: File[]): Promise<DicomValidationResult[]> {
+export async function validateDicomFiles(
+    files: File[],
+): Promise<DicomValidationResult[]> {
     const validations = await Promise.all(
         files.map(async (file) => {
             const isValid = await isDicomFile(file);
@@ -46,7 +48,7 @@ export async function validateDicomFiles(files: File[]): Promise<DicomValidation
                 isValid,
                 validationError: isValid ? undefined : "Invalid DICOM file",
             } as DicomValidationResult;
-        })
+        }),
     );
 
     return validations;

@@ -47,9 +47,14 @@ export function ShareLinkContextMenu({
     const isCreator = useMemo(() => {
         return userSession?.user?.id === shareLink.creatorId;
     }, [userSession, shareLink.creatorId]);
-    
+
     const canEdit = useMemo(() => {
-        return hasPermission(shareLink.publicPermissions, SHARE_PERMISSIONS.UPDATE) || isCreator;
+        return (
+            hasPermission(
+                shareLink.publicPermissions,
+                SHARE_PERMISSIONS.UPDATE,
+            ) || isCreator
+        );
     }, [shareLink.publicPermissions, isCreator]);
 
     const handleOpenShare = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -123,20 +128,24 @@ export function ShareLinkContextMenu({
                 </ContextMenuContent>
             </ContextMenu>
 
-            {canEdit && <ShareLinkEditDialog
-                open={showEditDialog}
-                onOpenChange={setShowEditDialog}
-                shareLink={shareLink}
-                workspaceId={workspaceId}
-            />}
+            {canEdit && (
+                <ShareLinkEditDialog
+                    open={showEditDialog}
+                    onOpenChange={setShowEditDialog}
+                    shareLink={shareLink}
+                    workspaceId={workspaceId}
+                />
+            )}
 
-            {isCreator && <ShareDeleteConfirmDialog
-                open={showDeleteDialog}
-                onOpenChange={setShowDeleteDialog}
-                shareLinkId={shareLink.id}
-                workspaceId={workspaceId}
-                onSuccess={onDeleted}
-            />}
+            {isCreator && (
+                <ShareDeleteConfirmDialog
+                    open={showDeleteDialog}
+                    onOpenChange={setShowDeleteDialog}
+                    shareLinkId={shareLink.id}
+                    workspaceId={workspaceId}
+                    onSuccess={onDeleted}
+                />
+            )}
         </>
     );
 }

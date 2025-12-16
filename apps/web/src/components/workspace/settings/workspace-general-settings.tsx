@@ -50,7 +50,8 @@ export function WorkspaceGeneralSettings({
 
     const updateWorkspace = useMutation(updateWorkspaceMutation());
     const deleteWorkspace = useMutation(deleteWorkspaceMutation());
-    const { mutateAsync: leaveWorkspace, isPending: isLeavingWorkspace } = useMutation(leaveWorkspaceMutation());
+    const { mutateAsync: leaveWorkspace, isPending: isLeavingWorkspace } =
+        useMutation(leaveWorkspaceMutation());
 
     useEffect(() => {
         setName(workspace.name);
@@ -120,7 +121,7 @@ export function WorkspaceGeneralSettings({
         } finally {
             onClose();
         }
-    }
+    };
 
     return (
         <div className="flex h-full flex-col">
@@ -137,10 +138,14 @@ export function WorkspaceGeneralSettings({
                     <div className="grid gap-2">
                         <div className="space-y-1">
                             <h4 className="text-sm font-medium leading-none">
-                                {t("workspaceSettings.generalTab.workspace.workspaceName.title")}
+                                {t(
+                                    "workspaceSettings.generalTab.workspace.workspaceName.title",
+                                )}
                             </h4>
                             <p className="text-sm text-muted-foreground">
-                                {t("workspaceSettings.generalTab.workspace.workspaceName.desc")}
+                                {t(
+                                    "workspaceSettings.generalTab.workspace.workspaceName.desc",
+                                )}
                             </p>
                         </div>
                         <div className="flex gap-2">
@@ -156,7 +161,11 @@ export function WorkspaceGeneralSettings({
                 {/* Danger Zone */}
                 <div className="grid gap-4 mt-6">
                     <div className="space-y-1">
-                        <h3 className="text-lg font-medium">{t("workspaceSettings.generalTab.workspace.dangerZone.title")}</h3>
+                        <h3 className="text-lg font-medium">
+                            {t(
+                                "workspaceSettings.generalTab.workspace.dangerZone.title",
+                            )}
+                        </h3>
                         <Separator />
                     </div>
 
@@ -165,16 +174,22 @@ export function WorkspaceGeneralSettings({
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button variant={"destructive"} size="sm">
-                                        {t("workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspace")}
+                                        {t(
+                                            "workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspace",
+                                        )}
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>
-                                            {t("workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspaceAlertTitle")}
+                                            {t(
+                                                "workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspaceAlertTitle",
+                                            )}
                                         </AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            {t("workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspaceAlertDesc")}
+                                            {t(
+                                                "workspaceSettings.generalTab.workspace.dangerZone.leaveWorkspaceAlertDesc",
+                                            )}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
@@ -185,7 +200,9 @@ export function WorkspaceGeneralSettings({
                                             onClick={handleLeaveWorkspace}
                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         >
-                                            {isLeavingWorkspace ? t("common.leaving") : t("common.leave")}
+                                            {isLeavingWorkspace
+                                                ? t("common.leaving")
+                                                : t("common.leave")}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -193,62 +210,76 @@ export function WorkspaceGeneralSettings({
                         </div>
                     )}
 
-                    {workspace.membership.role === "owner" && <div className="grid gap-2">
-                        <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-1 mb-2">
-                                    <p className="text-sm font-medium text-destructive">
-                                        {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspace")}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceDesc")}
-                                    </p>
+                    {workspace.membership.role === "owner" && (
+                        <div className="grid gap-2">
+                            <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1 mb-2">
+                                        <p className="text-sm font-medium text-destructive">
+                                            {t(
+                                                "workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspace",
+                                            )}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {t(
+                                                "workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceDesc",
+                                            )}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button 
-                                        variant={"destructive"} size="sm"
-                                    >
-                                        {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspace")}
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>
-                                            {t("workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceAlertTitle")}
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            <Trans
-                                                i18nKey="workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceAlertDesc"
-                                                components={{
-                                                    1: <strong />
-                                                }}
-                                                values={{
-                                                    workspaceName: workspace.name
-                                                }}
-                                                shouldUnescape={true}
-                                            />
-                                        </AlertDialogDescription>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>
-                                                {t("common.cancel")}
-                                            </AlertDialogCancel>
-                                            <AlertDialogAction
-                                                onClick={handleDeleteWorkspace}
-                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                            >
-                                                {deleteWorkspace.isPending
-                                                    ? t("common.deleting")
-                                                    : t("common.delete")}
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogHeader>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            variant={"destructive"}
+                                            size="sm"
+                                        >
+                                            {t(
+                                                "workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspace",
+                                            )}
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                {t(
+                                                    "workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceAlertTitle",
+                                                )}
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                <Trans
+                                                    i18nKey="workspaceSettings.generalTab.workspace.dangerZone.deleteWorkspaceAlertDesc"
+                                                    components={{
+                                                        1: <strong />,
+                                                    }}
+                                                    values={{
+                                                        workspaceName:
+                                                            workspace.name,
+                                                    }}
+                                                    shouldUnescape={true}
+                                                />
+                                            </AlertDialogDescription>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>
+                                                    {t("common.cancel")}
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={
+                                                        handleDeleteWorkspace
+                                                    }
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                >
+                                                    {deleteWorkspace.isPending
+                                                        ? t("common.deleting")
+                                                        : t("common.delete")}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogHeader>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
                         </div>
-                    </div>}
+                    )}
                 </div>
             </div>
 
@@ -257,8 +288,13 @@ export function WorkspaceGeneralSettings({
                     <Button variant={"outline"} onClick={onClose}>
                         {t("common.cancel")}
                     </Button>
-                    <Button onClick={handleUpdateWorkspace} disabled={updateWorkspace.isPending}>
-                        {updateWorkspace.isPending ? t("common.saving") : t("common.saveChanges")}
+                    <Button
+                        onClick={handleUpdateWorkspace}
+                        disabled={updateWorkspace.isPending}
+                    >
+                        {updateWorkspace.isPending
+                            ? t("common.saving")
+                            : t("common.saveChanges")}
                     </Button>
                 </DialogFooter>
             </div>

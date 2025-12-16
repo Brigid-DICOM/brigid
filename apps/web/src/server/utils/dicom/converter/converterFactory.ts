@@ -5,7 +5,9 @@ import { JpegConverter } from "./jpegConverter";
 import { PngConverter } from "./pngConverter";
 import { RawConverter } from "./rawConverter";
 
-export function getDicomToImageConverter(format: OutputFormat): DicomToImageConverter {
+export function getDicomToImageConverter(
+    format: OutputFormat,
+): DicomToImageConverter {
     switch (format) {
         case "jpeg":
             return new JpegConverter();

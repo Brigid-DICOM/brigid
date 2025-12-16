@@ -7,7 +7,11 @@ interface GetDicomStatsQueryParams {
     cookie?: string;
 }
 
-export const getDicomStatsQuery = ({ workspaceId, range, cookie }: GetDicomStatsQueryParams) => {
+export const getDicomStatsQuery = ({
+    workspaceId,
+    range,
+    cookie,
+}: GetDicomStatsQueryParams) => {
     return queryOptions({
         queryKey: ["stats", "dicom", workspaceId],
         queryFn: async () => {
@@ -16,22 +20,27 @@ export const getDicomStatsQuery = ({ workspaceId, range, cookie }: GetDicomStats
                 headers.cookie = cookie;
             }
 
-            const response = await apiClient.api.workspaces[":workspaceId"].dicom.stats.$get({
-                param: {
-                    workspaceId
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.stats.$get(
+                {
+                    param: {
+                        workspaceId,
+                    },
+                    query: {
+                        range,
+                    },
                 },
-                query: {
-                    range
-                }
-            }, {
-                headers: headers
-            });
+                {
+                    headers: headers,
+                },
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to fetch DICOM stats");
             }
 
             return response.json();
-        }
+        },
     });
 };

@@ -35,7 +35,9 @@ export function DicomSearchConditionItem({
     onRemove,
 }: DicomSearchConditionItemProps) {
     const { t } = useT("translation");
-    const workspaceId = useWorkspaceStore(useShallow((state) => state.workspace?.id));
+    const workspaceId = useWorkspaceStore(
+        useShallow((state) => state.workspace?.id),
+    );
 
     const fieldConfig = SEARCH_FIELD_CONFIGS[level].find(
         (config) => config.key === condition.field,
@@ -46,20 +48,25 @@ export function DicomSearchConditionItem({
         queryFn: async () => {
             if (!workspaceId) return [];
 
-            const targetTypeMap: Record<string, "study" | "series" | "instance"> = {
+            const targetTypeMap: Record<
+                string,
+                "study" | "series" | "instance"
+            > = {
                 study: "study",
                 series: "series",
                 instance: "instance",
                 "recycle-study": "study",
                 "recycle-series": "series",
-                "recycle-instance": "instance"
+                "recycle-instance": "instance",
             };
-            
-            const res = await apiClient.api.workspaces[":workspaceId"].tags.$get({
+
+            const res = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].tags.$get({
                 param: { workspaceId },
-                query: { 
-                    targetType: targetTypeMap[level] 
-                }
+                query: {
+                    targetType: targetTypeMap[level],
+                },
             });
 
             if (!res.ok) {
@@ -92,7 +99,11 @@ export function DicomSearchConditionItem({
                     <Input
                         placeholder={
                             fieldConfig.placeholder ||
-                            t("dicom.search.placeholders.enter", { label: t(`dicom.search.fields.${fieldConfig.key}`) })
+                            t("dicom.search.placeholders.enter", {
+                                label: t(
+                                    `dicom.search.fields.${fieldConfig.key}`,
+                                ),
+                            })
                         }
                         value={condition.value}
                         onChange={(e) =>
@@ -118,36 +129,42 @@ export function DicomSearchConditionItem({
                     </div>
                 );
             case "select": {
-                const selectedValues = condition.value 
-                    ? condition.value.split(",").filter(value => value.trim() !== "")
+                const selectedValues = condition.value
+                    ? condition.value
+                          .split(",")
+                          .filter((value) => value.trim() !== "")
                     : [];
 
-                let options: Option[] = fieldConfig.options?.map((opt) => ({
-                    label: opt.label,
-                    value: opt.value,
-                })) || [];
+                let options: Option[] =
+                    fieldConfig.options?.map((opt) => ({
+                        label: opt.label,
+                        value: opt.value,
+                    })) || [];
 
                 if (condition.field === "tagName") {
-                    options = tags?.map((tag) => ({
-                        label: tag.name,
-                        value: tag.name,
-                    })) || [];
+                    options =
+                        tags?.map((tag) => ({
+                            label: tag.name,
+                            value: tag.name,
+                        })) || [];
                 }
 
                 return (
-                    <MultiSelect 
+                    <MultiSelect
                         options={options}
                         selected={selectedValues}
                         onChange={(selected) => {
                             const value = selected.join(",");
                             onUpdate(condition.id, condition.field, value);
                         }}
-                        placeholder={t("dicom.search.placeholders.select", { label: t(`dicom.search.fields.${fieldConfig.key}`) })}
+                        placeholder={t("dicom.search.placeholders.select", {
+                            label: t(`dicom.search.fields.${fieldConfig.key}`),
+                        })}
                         className="flex-1"
                     />
                 );
             }
-                
+
             default:
                 return (
                     <Input
@@ -169,9 +186,7 @@ export function DicomSearchConditionItem({
     return (
         <div className="flex flex-col items-start gap-2 rounded-md border p-2">
             <div className="flex items-center justify-between w-full">
-                <p className="text-sm font-semibold">
-                    {fieldConfig?.label}
-                </p>
+                <p className="text-sm font-semibold">{fieldConfig?.label}</p>
                 {canRemove && (
                     <Button
                         variant={"ghost"}
@@ -187,7 +202,6 @@ export function DicomSearchConditionItem({
             <div className="flex flex-1 items-center gap-2 w-full">
                 <div className="flex-1">{renderValueInput()}</div>
             </div>
-
         </div>
     );
 }

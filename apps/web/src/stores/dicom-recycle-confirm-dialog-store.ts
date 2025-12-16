@@ -18,37 +18,40 @@ interface DicomRecycleConfirmDialogState {
     closeDialog: () => void;
 }
 
-export const useDicomRecycleConfirmDialogStore = create<DicomRecycleConfirmDialogState>()(
-    devtools((set) => ({
-        isOpen: false,
-        dicomLevel: null,
-        selectedCount: 0,
-        onConfirm: null,
+export const useDicomRecycleConfirmDialogStore =
+    create<DicomRecycleConfirmDialogState>()(
+        devtools(
+            (set) => ({
+                isOpen: false,
+                dicomLevel: null,
+                selectedCount: 0,
+                onConfirm: null,
 
-        openDialog: ({ dicomLevel, selectedCount, onConfirm }) => {
-            set({
-                isOpen: true,
-                dicomLevel,
-                selectedCount,
-                onConfirm,
-            });
-        },
+                openDialog: ({ dicomLevel, selectedCount, onConfirm }) => {
+                    set({
+                        isOpen: true,
+                        dicomLevel,
+                        selectedCount,
+                        onConfirm,
+                    });
+                },
 
-        closeDialog: () => {
-            set({
-                isOpen: false
-            });
+                closeDialog: () => {
+                    set({
+                        isOpen: false,
+                    });
 
-            setTimeout(() => {
-                set({
-                    dicomLevel: null,
-                    selectedCount: 0,
-                    onConfirm: null,
-                });
-            }, 200);
-        }
-    }),
-    {
-        name: "dicom-recycle-confirm-dialog-store"
-    }
-));
+                    setTimeout(() => {
+                        set({
+                            dicomLevel: null,
+                            selectedCount: 0,
+                            onConfirm: null,
+                        });
+                    }, 200);
+                },
+            }),
+            {
+                name: "dicom-recycle-confirm-dialog-store",
+            },
+        ),
+    );

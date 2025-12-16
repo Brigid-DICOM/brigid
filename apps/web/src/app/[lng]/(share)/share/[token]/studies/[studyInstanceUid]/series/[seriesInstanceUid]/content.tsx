@@ -20,7 +20,10 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
 import { downloadShareMultipleInstances } from "@/lib/clientDownload";
-import { getPublicShareLinkQuery, getShareStudySeriesInstancesQuery } from "@/react-query/queries/publicShare";
+import {
+    getPublicShareLinkQuery,
+    getShareStudySeriesInstancesQuery,
+} from "@/react-query/queries/publicShare";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -34,33 +37,44 @@ interface ShareStudySeriesInstancesContentProps {
 
 const ITEM_PER_PAGE = 10;
 
-export default function ShareStudySeriesInstancesContent({ token, studyInstanceUid, seriesInstanceUid, password }: ShareStudySeriesInstancesContentProps) {
+export default function ShareStudySeriesInstancesContent({
+    token,
+    studyInstanceUid,
+    seriesInstanceUid,
+    password,
+}: ShareStudySeriesInstancesContentProps) {
     const router = useRouter();
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const searchParams = useSearchParams();
     const layoutMode = useLayoutStore((state) => state.layoutMode);
-    const { 
-        currentPage, 
-        handlePreviousPage, 
-        handleNextPage, 
-        canGoPrevious 
-    } = usePagination();
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
+        usePagination();
 
-    const { clearSelection, getSelectedCount, selectAll, getSelectedInstanceIds } = useDicomInstanceSelectionStore();
+    const {
+        clearSelection,
+        getSelectedCount,
+        selectAll,
+        getSelectedInstanceIds,
+    } = useDicomInstanceSelectionStore();
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedInstanceIds();
 
-    const { open: openBlueLightViewer, close: closeBlueLightViewer } = useBlueLightViewerStore();
+    const { open: openBlueLightViewer, close: closeBlueLightViewer } =
+        useBlueLightViewerStore();
 
     const { data: publicShareLink } = useQuery(
         getPublicShareLinkQuery({
             token,
             password,
-        })
+        }),
     );
 
-    const { data: instances, isLoading, error } = useQuery(
+    const {
+        data: instances,
+        isLoading,
+        error,
+    } = useQuery(
         getShareStudySeriesInstancesQuery({
             token,
             password,
@@ -68,12 +82,15 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
             seriesInstanceUid,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
-        })
+        }),
     );
     const isAllSelected = selectedCount === instances?.length;
 
     useEffect(() => {
-        if (error instanceof Error && error.message === "Password is required") {
+        if (
+            error instanceof Error &&
+            error.message === "Password is required"
+        ) {
             router.push(`/${lng}/share/${token}`);
         }
     }, [error, token, lng, router]);
@@ -97,7 +114,12 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
         const sopInstanceUid = searchParams.get("openSopInstanceUid");
         const password = searchParams.get("password");
 
-        if (shareToken && studyInstanceUid && seriesInstanceUid && sopInstanceUid) {
+        if (
+            shareToken &&
+            studyInstanceUid &&
+            seriesInstanceUid &&
+            sopInstanceUid
+        ) {
             openBlueLightViewer({
                 shareToken,
                 studyInstanceUid,
@@ -110,39 +132,42 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
 
     const canGoNext = instances && instances.length === ITEM_PER_PAGE;
 
-    const truncateUid = (uid: string) => 
+    const truncateUid = (uid: string) =>
         uid.length > 20 ? `${uid.slice(0, 10)}...${uid.slice(-10)}` : uid;
 
-    const breadcrumbItems = publicShareLink?.data?.targetType === "study" ? [
-        { 
-            label: "Studies", 
-            href: `/${lng}/share/${token}` 
-        },
-        { 
-            label: truncateUid(studyInstanceUid),
-        },
-        { 
-            label: "Series",
-            href: `/${lng}/share/${token}/studies/${studyInstanceUid}`
-        },
-        { 
-            label: truncateUid(seriesInstanceUid)
-        },
-        { 
-            label: "Instances" 
-        },
-    ] : [
-        {
-            label: "Series",
-            href: `/${lng}/share/${token}`
-        },
-        {
-            label: truncateUid(seriesInstanceUid),
-        },
-        {
-            label: "Instances"
-        }
-    ];
+    const breadcrumbItems =
+        publicShareLink?.data?.targetType === "study"
+            ? [
+                  {
+                      label: "Studies",
+                      href: `/${lng}/share/${token}`,
+                  },
+                  {
+                      label: truncateUid(studyInstanceUid),
+                  },
+                  {
+                      label: "Series",
+                      href: `/${lng}/share/${token}/studies/${studyInstanceUid}`,
+                  },
+                  {
+                      label: truncateUid(seriesInstanceUid),
+                  },
+                  {
+                      label: "Instances",
+                  },
+              ]
+            : [
+                  {
+                      label: "Series",
+                      href: `/${lng}/share/${token}`,
+                  },
+                  {
+                      label: truncateUid(seriesInstanceUid),
+                  },
+                  {
+                      label: "Instances",
+                  },
+              ];
 
     const columns = useMemo(() => createInstanceColumns(t), [t]);
 
@@ -150,9 +175,13 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
         if (isAllSelected) {
             clearSelection();
         } else {
-            selectAll(instances?.map((instance) => instance["00080018"]?.Value?.[0] as string) || []);
+            selectAll(
+                instances?.map(
+                    (instance) => instance["00080018"]?.Value?.[0] as string,
+                ) || [],
+            );
         }
-    }
+    };
 
     const handleDownload = async () => {
         if (selectedIds.length === 0) {
@@ -177,7 +206,7 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
 
             toast.error("Failed to download selected instances");
         }
-    }
+    };
 
     if (isLoading) {
         return (
@@ -190,10 +219,13 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
                 {layoutMode === "grid" ? (
                     <LoadingGrid itemCount={ITEM_PER_PAGE} />
                 ) : (
-                    <LoadingDataTable columns={columns.length} rows={ITEM_PER_PAGE} />
+                    <LoadingDataTable
+                        columns={columns.length}
+                        rows={ITEM_PER_PAGE}
+                    />
                 )}
             </div>
-        )
+        );
     }
 
     if (!instances || instances.length === 0) {
@@ -218,7 +250,7 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
                     </CardHeader>
                 </Card>
 
-                <SelectionControlBar 
+                <SelectionControlBar
                     selectedCount={selectedCount}
                     isAllSelected={isAllSelected}
                     onSelectAll={handleSelectAll}
@@ -239,8 +271,8 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
                             />
                         ))}
                     </div>
-                ): (
-                    <SharedDicomInstancesDataTable 
+                ) : (
+                    <SharedDicomInstancesDataTable
                         token={token}
                         password={password}
                         publicPermissions={publicPermissions}
@@ -258,5 +290,5 @@ export default function ShareStudySeriesInstancesContent({ token, studyInstanceU
 
             <ShareCreateTagDialogProvider />
         </>
-    )
+    );
 }

@@ -11,7 +11,7 @@ interface OpenOptions {
 interface BlueLightViewerState {
     shareToken: string | null;
     password: string | null;
-    studyInstanceUid: string| null;
+    studyInstanceUid: string | null;
     seriesInstanceUid: string | null;
     sopInstanceUid: string | null;
     isOpen: boolean;
@@ -55,7 +55,7 @@ export const useBlueLightViewerStore = create<BlueLightViewerState>((set) => ({
 }));
 
 function updateUrlParams(options: OpenOptions) {
-    const params = new URLSearchParams(window.location.search); 
+    const params = new URLSearchParams(window.location.search);
 
     if (options.shareToken) {
         params.set("shareToken", options.shareToken);
@@ -81,7 +81,7 @@ function updateUrlParams(options: OpenOptions) {
         params.delete("openSopInstanceUid");
     }
 
-    window.history.replaceState(null, '', `?${params.toString()}`);
+    window.history.replaceState(null, "", `?${params.toString()}`);
 }
 
 function removeUrlParams() {
@@ -91,6 +91,6 @@ function removeUrlParams() {
     params.delete("openSopInstanceUid");
     params.delete("shareToken");
 
-    const newUrl = params.toString() ? `?${params.toString()}` : '';
-    window.history.replaceState(null, '', newUrl || window.location.pathname);
+    const newUrl = params.toString() ? `?${params.toString()}` : "";
+    window.history.replaceState(null, "", newUrl || window.location.pathname);
 }

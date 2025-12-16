@@ -10,7 +10,7 @@ import {
     DialogContent,
     DialogDescription,
     DialogHeader,
-    DialogTitle
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getTargetShareLinkCountQuery } from "@/react-query/queries/share";
@@ -20,7 +20,7 @@ import { CreateShareTab } from "./create-share-tab";
 import { ManageShareTab } from "./manage-share-tab";
 
 interface ShareManagementDialogProps {
-    open: boolean;  
+    open: boolean;
     onOpenChange: (open: boolean) => void;
     workspaceId: string;
     targetType: ShareTargetType;
@@ -32,23 +32,24 @@ export function ShareManagementDialog({
     onOpenChange,
     workspaceId,
     targetType,
-    targetIds
+    targetIds,
 }: ShareManagementDialogProps) {
     const { t } = useT("translation");
     const [activeTab, setActiveTab] = useState("create");
 
-    const { data: shareLinkCount, isLoading: isLoadingShareLinkCount } = useQuery(
-        getTargetShareLinkCountQuery({
-            targetType,
-            targetIds,
-            workspaceId,
-        })
-    )
+    const { data: shareLinkCount, isLoading: isLoadingShareLinkCount } =
+        useQuery(
+            getTargetShareLinkCountQuery({
+                targetType,
+                targetIds,
+                workspaceId,
+            }),
+        );
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl">
-            <DialogHeader>
+                <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Share2Icon className="w-5 h-5" />
                         {t("shareManagementDialog.title")}
@@ -58,22 +59,27 @@ export function ShareManagementDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+                <Tabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    className="mt-4"
+                >
                     <TabsList>
                         <TabsTrigger value="create">
                             {t("shareManagementDialog.create")}
                         </TabsTrigger>
                         <TabsTrigger value="manage">
                             {t("shareManagementDialog.manage")}
-                            {isLoadingShareLinkCount ? 
-                                <Skeleton className="w-10 h-4" /> : 
+                            {isLoadingShareLinkCount ? (
+                                <Skeleton className="w-10 h-4" />
+                            ) : (
                                 <Badge>{shareLinkCount?.data?.count}</Badge>
-                            }
+                            )}
                         </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="create">
-                        <CreateShareTab 
+                        <CreateShareTab
                             workspaceId={workspaceId}
                             targetType={targetType}
                             targetIds={targetIds}
@@ -81,7 +87,7 @@ export function ShareManagementDialog({
                     </TabsContent>
 
                     <TabsContent value="manage">
-                        <ManageShareTab 
+                        <ManageShareTab
                             workspaceId={workspaceId}
                             targetType={targetType}
                             targetIds={targetIds}
@@ -90,5 +96,5 @@ export function ShareManagementDialog({
                 </Tabs>
             </DialogContent>
         </Dialog>
-    )
+    );
 }

@@ -73,11 +73,10 @@ export function DicomInstanceCard({
         clearSelection,
     });
 
-    const ContextMenu = type === "management" ? (
-        DicomInstanceContextMenu
-    ) : (
-        DicomRecycleInstanceContextMenu
-    );
+    const ContextMenu =
+        type === "management"
+            ? DicomInstanceContextMenu
+            : DicomRecycleInstanceContextMenu;
 
     return (
         <ContextMenu
@@ -106,13 +105,13 @@ export function DicomInstanceCard({
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
             >
-                <DicomCardHeaderTagsDisplay 
+                <DicomCardHeaderTagsDisplay
                     tags={tags?.data ?? []}
                     isLoadingTags={isLoadingTags}
                     isSelected={isSelected}
                     maxTagDisplay={2}
                 />
-                
+
                 <div className="aspect-square w-full bg-gray-100 flex items-center justify-center mb-4">
                     {isLoadingThumbnail ? (
                         <Skeleton className="w-full h-full" />

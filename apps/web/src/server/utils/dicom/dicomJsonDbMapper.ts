@@ -1,6 +1,6 @@
 import {
     DICOM_DELETE_STATUS,
-    DICOM_INSTANCE_AVAILABILITY
+    DICOM_INSTANCE_AVAILABILITY,
 } from "@brigid/database/src/const/dicom";
 import { DicomCodeSequenceEntity } from "@brigid/database/src/entities/dicomCodeSequence.entity";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
@@ -16,13 +16,13 @@ import {
     INSTANCE_TAGS_TO_STORE,
     PATIENT_TAGS_TO_STORE,
     SERIES_TAGS_TO_STORE,
-    STUDY_TAGS_TO_STORE
+    STUDY_TAGS_TO_STORE,
 } from "@/server/const/dicomTagsToStore";
 import type { DicomJsonUtils } from "./dicomJsonUtils";
 
 function extractCodeSequenceEntity(
     dicomJsonUtils: DicomJsonUtils,
-    tag: string
+    tag: string,
 ): DicomCodeSequenceEntity | null {
     const sequence = dicomJsonUtils.getValue<DicomTag[]>(tag);
     if (!sequence || sequence.length === 0) {
@@ -65,9 +65,11 @@ function extractCodeSequenceEntity(
 }
 
 function extractSeriesRequestAttributesEntity(
-    dicomJsonUtils: DicomJsonUtils
+    dicomJsonUtils: DicomJsonUtils,
 ): SeriesRequestAttributesEntity | null {
-    const sequence = dicomJsonUtils.getValue<DicomTag>(DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag);
+    const sequence = dicomJsonUtils.getValue<DicomTag>(
+        DICOM_TAG_KEYWORD_REGISTRY.RequestAttributesSequence.tag,
+    );
     if (!sequence) {
         return null;
     }
@@ -76,18 +78,34 @@ function extractSeriesRequestAttributesEntity(
 
     const entity = new SeriesRequestAttributesEntity();
 
-    entity.studyInstanceUid = item[DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag]?.Value?.[0] as string | undefined;
-    entity.accessionNumber = item[DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag]?.Value?.[0] as string | undefined;
-    
-    const issuerOfAccessionNumberSequence = item?.[DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag]?.Value?.[0] as DicomTag | undefined;
+    entity.studyInstanceUid = item[
+        DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag
+    ]?.Value?.[0] as string | undefined;
+    entity.accessionNumber = item[
+        DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag
+    ]?.Value?.[0] as string | undefined;
+
+    const issuerOfAccessionNumberSequence = item?.[
+        DICOM_TAG_KEYWORD_REGISTRY.IssuerOfAccessionNumberSequence.tag
+    ]?.Value?.[0] as DicomTag | undefined;
     if (issuerOfAccessionNumberSequence) {
-        entity.accLocalNamespaceEntityId = issuerOfAccessionNumberSequence[DICOM_TAG_KEYWORD_REGISTRY.LocalNamespaceEntityID.tag]?.Value?.[0] as string | undefined;
-        entity.accUniversalEntityId = issuerOfAccessionNumberSequence[DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityID.tag]?.Value?.[0] as string | undefined;
-        entity.accUniversalEntityIdType = issuerOfAccessionNumberSequence[DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityIDType.tag]?.Value?.[0] as string | undefined;
+        entity.accLocalNamespaceEntityId = issuerOfAccessionNumberSequence[
+            DICOM_TAG_KEYWORD_REGISTRY.LocalNamespaceEntityID.tag
+        ]?.Value?.[0] as string | undefined;
+        entity.accUniversalEntityId = issuerOfAccessionNumberSequence[
+            DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityID.tag
+        ]?.Value?.[0] as string | undefined;
+        entity.accUniversalEntityIdType = issuerOfAccessionNumberSequence[
+            DICOM_TAG_KEYWORD_REGISTRY.UniversalEntityIDType.tag
+        ]?.Value?.[0] as string | undefined;
     }
 
-    entity.requestedProcedureId = item[DICOM_TAG_KEYWORD_REGISTRY.RequestedProcedureID.tag]?.Value?.[0] as string | undefined;
-    entity.scheduledProcedureStepId = item[DICOM_TAG_KEYWORD_REGISTRY.ScheduledProcedureStepID.tag]?.Value?.[0] as string | undefined;
+    entity.requestedProcedureId = item[
+        DICOM_TAG_KEYWORD_REGISTRY.RequestedProcedureID.tag
+    ]?.Value?.[0] as string | undefined;
+    entity.scheduledProcedureStepId = item[
+        DICOM_TAG_KEYWORD_REGISTRY.ScheduledProcedureStepID.tag
+    ]?.Value?.[0] as string | undefined;
 
     return entity;
 }
@@ -95,11 +113,11 @@ function extractSeriesRequestAttributesEntity(
 // #region Patient
 export const toPatientDbEntity = (
     dicomJsonUtils: DicomJsonUtils,
-    workspaceId: string
+    workspaceId: string,
 ) => {
     const patient = new PatientEntity();
     const dicomPatientName = dicomJsonUtils.getValue<DicomPersonName>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientName.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientName.tag,
     );
 
     if (dicomPatientName) {
@@ -109,7 +127,7 @@ export const toPatientDbEntity = (
     }
 
     const dicomPatientId = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientID.tag,
     );
     if (!dicomPatientId) {
         throw new Error("Patient ID is required");
@@ -117,28 +135,28 @@ export const toPatientDbEntity = (
     patient.dicomPatientId = dicomPatientId;
 
     patient.issuerOfPatientId = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.IssuerOfPatientID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.IssuerOfPatientID.tag,
     );
     patient.birthDate = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientBirthDate.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientBirthDate.tag,
     );
     patient.birthTime = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientBirthTime.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientBirthTime.tag,
     );
     patient.sex = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientSex.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientSex.tag,
     );
     patient.age = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientAge.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientAge.tag,
     );
     patient.ethnicGroup = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.EthnicGroup.tag
+        DICOM_TAG_KEYWORD_REGISTRY.EthnicGroup.tag,
     );
     patient.comment = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientComments.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientComments.tag,
     );
     patient.json = JSON.stringify(
-        dicomJsonUtils.getSelectionDicomJson([...PATIENT_TAGS_TO_STORE])
+        dicomJsonUtils.getSelectionDicomJson([...PATIENT_TAGS_TO_STORE]),
     );
     patient.workspaceId = workspaceId;
 
@@ -151,55 +169,56 @@ export const toPatientDbEntity = (
 export const toStudyDbEntity = (
     dicomJsonUtils: DicomJsonUtils,
     workspaceId: string,
-    patientId: string
+    patientId: string,
 ) => {
     const study = new StudyEntity();
     study.workspaceId = workspaceId;
     study.patientId = patientId;
     study.studyPath = dicomJsonUtils.getFilePath({ workspaceId });
     const dicomPatientId = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PatientID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PatientID.tag,
     );
     if (!dicomPatientId) {
         throw new Error("Patient ID is required");
     }
     study.dicomPatientId = dicomPatientId;
-    const characterSet = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SpecificCharacterSet.tag
-    ) || "ISO_IR 192";
+    const characterSet =
+        dicomJsonUtils.getValue<string>(
+            DICOM_TAG_KEYWORD_REGISTRY.SpecificCharacterSet.tag,
+        ) || "ISO_IR 192";
     study.characterSet = characterSet;
     study.studyDate = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.StudyDate.tag
+        DICOM_TAG_KEYWORD_REGISTRY.StudyDate.tag,
     );
     study.studyTime = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.StudyTime.tag
+        DICOM_TAG_KEYWORD_REGISTRY.StudyTime.tag,
     );
     study.accessionNumber = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag
+        DICOM_TAG_KEYWORD_REGISTRY.AccessionNumber.tag,
     );
     study.instanceAvailability = DICOM_INSTANCE_AVAILABILITY.UNAVAILABLE;
     study.timezoneOffsetFromUTC = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.TimezoneOffsetFromUTC.tag
+        DICOM_TAG_KEYWORD_REGISTRY.TimezoneOffsetFromUTC.tag,
     );
     study.studyDescription = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.StudyDescription.tag
+        DICOM_TAG_KEYWORD_REGISTRY.StudyDescription.tag,
     );
 
     const studyInstanceUid = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag,
     );
     if (!studyInstanceUid) {
         throw new Error("Study instance UID is required");
     }
     study.studyInstanceUid = studyInstanceUid;
     study.studyId = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.StudyID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.StudyID.tag,
     );
     study.json = JSON.stringify(
         dicomJsonUtils.getSelectionDicomJson([
             ...STUDY_TAGS_TO_STORE,
-            ...PATIENT_TAGS_TO_STORE
-        ])
+            ...PATIENT_TAGS_TO_STORE,
+        ]),
     );
     study.deleteStatus = DICOM_DELETE_STATUS.ACTIVE;
 
@@ -212,7 +231,7 @@ export const toStudyDbEntity = (
 export const toSeriesDbEntity = (
     dicomJsonUtils: DicomJsonUtils,
     workspaceId: string,
-    studyId: string
+    studyId: string,
 ) => {
     const series = new SeriesEntity();
 
@@ -220,63 +239,64 @@ export const toSeriesDbEntity = (
     series.workspaceId = workspaceId;
     series.seriesPath = dicomJsonUtils.getFilePath({ workspaceId });
     const studyInstanceUid = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag,
     );
     if (!studyInstanceUid) {
         throw new Error("Study instance UID is required");
     }
     series.studyInstanceUid = studyInstanceUid;
     const seriesInstanceUid = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SeriesInstanceUID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SeriesInstanceUID.tag,
     );
     if (!seriesInstanceUid) {
         throw new Error("Series instance UID is required");
     }
     series.seriesInstanceUid = seriesInstanceUid;
     series.seriesDate = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SeriesDate.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SeriesDate.tag,
     );
     series.seriesTime = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SeriesTime.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SeriesTime.tag,
     );
     const modality = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.Modality.tag
+        DICOM_TAG_KEYWORD_REGISTRY.Modality.tag,
     );
     if (!modality) {
         throw new Error("Modality is required");
     }
     series.modality = modality;
     series.seriesDescription = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SeriesDescription.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SeriesDescription.tag,
     );
     series.seriesNumber = dicomJsonUtils.getValue<number>(
-        DICOM_TAG_KEYWORD_REGISTRY.SeriesNumber.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SeriesNumber.tag,
     );
     series.performedProcedureStepStartDate = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartDate.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartDate.tag,
     );
     series.performedProcedureStepStartTime = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartTime.tag
+        DICOM_TAG_KEYWORD_REGISTRY.PerformedProcedureStepStartTime.tag,
     );
     series.json = JSON.stringify(
         dicomJsonUtils.getSelectionDicomJson([
             ...SERIES_TAGS_TO_STORE,
             ...STUDY_TAGS_TO_STORE,
-            ...PATIENT_TAGS_TO_STORE
-        ])
+            ...PATIENT_TAGS_TO_STORE,
+        ]),
     );
     series.deleteStatus = DICOM_DELETE_STATUS.ACTIVE;
 
     const seriesDescriptionCodeSequenceEntity = extractCodeSequenceEntity(
         dicomJsonUtils,
-        DICOM_TAG_KEYWORD_REGISTRY.SeriesDescriptionCodeSequence.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SeriesDescriptionCodeSequence.tag,
     );
     if (seriesDescriptionCodeSequenceEntity) {
         series.seriesDescriptionCodeSequence =
             seriesDescriptionCodeSequenceEntity;
     }
 
-    const seriesRequestAttributesEntity = extractSeriesRequestAttributesEntity(dicomJsonUtils);
+    const seriesRequestAttributesEntity =
+        extractSeriesRequestAttributesEntity(dicomJsonUtils);
     if (seriesRequestAttributesEntity) {
         series.seriesRequestAttributes = seriesRequestAttributesEntity;
     }
@@ -292,7 +312,7 @@ export const toInstanceDbEntity = async (
     dicomJsonUtils: DicomJsonUtils,
     workspaceId: string,
     seriesId: string,
-    storedFilePath: string
+    storedFilePath: string,
 ) => {
     const instance = new InstanceEntity();
 
@@ -302,7 +322,7 @@ export const toInstanceDbEntity = async (
 
     const transferSyntaxUid = dicomJsonUtils.getValue<string>(
         // Transfer Syntax UID
-        "00020010"
+        "00020010",
     );
     if (!transferSyntaxUid) {
         throw new Error("Transfer syntax UID is required");
@@ -310,7 +330,7 @@ export const toInstanceDbEntity = async (
     instance.transferSyntaxUid = transferSyntaxUid;
 
     const studyInstanceUid = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.StudyInstanceUID.tag,
     );
     if (!studyInstanceUid) {
         throw new Error("Study instance UID is required");
@@ -318,7 +338,7 @@ export const toInstanceDbEntity = async (
     instance.studyInstanceUid = studyInstanceUid;
 
     const seriesInstanceUid = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SeriesInstanceUID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SeriesInstanceUID.tag,
     );
     if (!seriesInstanceUid) {
         throw new Error("Series instance UID is required");
@@ -326,7 +346,7 @@ export const toInstanceDbEntity = async (
     instance.seriesInstanceUid = seriesInstanceUid;
 
     const sopClassUid = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SOPClassUID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SOPClassUID.tag,
     );
     if (!sopClassUid) {
         throw new Error("SOP class UID is required");
@@ -334,23 +354,43 @@ export const toInstanceDbEntity = async (
     instance.sopClassUid = sopClassUid;
 
     const sopInstanceUid = dicomJsonUtils.getValue<string>(
-        DICOM_TAG_KEYWORD_REGISTRY.SOPInstanceUID.tag
+        DICOM_TAG_KEYWORD_REGISTRY.SOPInstanceUID.tag,
     );
     if (!sopInstanceUid) {
         throw new Error("SOP instance UID is required");
     }
     instance.sopInstanceUid = sopInstanceUid;
 
-    instance.acquisitionDate = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.AcquisitionDate.tag);
-    instance.acquisitionDateTime = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.AcquisitionDateTime.tag);
-    instance.contentDate = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.ContentDate.tag);
-    instance.contentTime = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.ContentTime.tag);
-    instance.instanceNumber = dicomJsonUtils.getValue<number>(DICOM_TAG_KEYWORD_REGISTRY.InstanceNumber.tag);
-    instance.numberOfFrames = dicomJsonUtils.getValue<number>(DICOM_TAG_KEYWORD_REGISTRY.NumberOfFrames.tag);
-    instance.windowCenter = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.WindowCenter.tag);
-    instance.windowWidth = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.WindowWidth.tag);
-    instance.completionFlag = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.CompletionFlag.tag);
-    instance.verificationFlag = dicomJsonUtils.getValue<string>(DICOM_TAG_KEYWORD_REGISTRY.VerificationFlag.tag);
+    instance.acquisitionDate = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.AcquisitionDate.tag,
+    );
+    instance.acquisitionDateTime = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.AcquisitionDateTime.tag,
+    );
+    instance.contentDate = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.ContentDate.tag,
+    );
+    instance.contentTime = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.ContentTime.tag,
+    );
+    instance.instanceNumber = dicomJsonUtils.getValue<number>(
+        DICOM_TAG_KEYWORD_REGISTRY.InstanceNumber.tag,
+    );
+    instance.numberOfFrames = dicomJsonUtils.getValue<number>(
+        DICOM_TAG_KEYWORD_REGISTRY.NumberOfFrames.tag,
+    );
+    instance.windowCenter = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.WindowCenter.tag,
+    );
+    instance.windowWidth = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.WindowWidth.tag,
+    );
+    instance.completionFlag = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.CompletionFlag.tag,
+    );
+    instance.verificationFlag = dicomJsonUtils.getValue<string>(
+        DICOM_TAG_KEYWORD_REGISTRY.VerificationFlag.tag,
+    );
     instance.deleteStatus = DICOM_DELETE_STATUS.ACTIVE;
 
     const hashSum = await hashFile(storedFilePath);
@@ -364,8 +404,8 @@ export const toInstanceDbEntity = async (
             ...INSTANCE_TAGS_TO_STORE,
             ...SERIES_TAGS_TO_STORE,
             ...STUDY_TAGS_TO_STORE,
-            ...PATIENT_TAGS_TO_STORE
-        ])
+            ...PATIENT_TAGS_TO_STORE,
+        ]),
     );
 
     return instance;

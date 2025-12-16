@@ -10,7 +10,8 @@ export const SHARE_PERMISSIONS_NAMES = {
     [SHARE_PERMISSIONS.FULL]: "FULL",
 } as const;
 
-export type SharePermissionsType = typeof SHARE_PERMISSIONS[keyof typeof SHARE_PERMISSIONS];
+export type SharePermissionsType =
+    (typeof SHARE_PERMISSIONS)[keyof typeof SHARE_PERMISSIONS];
 
 export const PBKDF2_ITERATIONS = 600000;
 export const PBKDF2_KEYLEN = 64;

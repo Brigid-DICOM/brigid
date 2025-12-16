@@ -1,18 +1,13 @@
 import { Hono } from "hono";
-import {
-    describeRoute,
-    validator as zValidator
-} from "hono-openapi";
+import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import {
     verifyWorkspaceExists,
-    verifyWorkspacePermission
+    verifyWorkspacePermission,
 } from "@/server/middlewares/workspace.middleware";
-import {
-    restoreStudyBodySchema
-} from "@/server/schemas/dicomDelete";
+import { restoreStudyBodySchema } from "@/server/schemas/dicomDelete";
 import { DicomDeleteService } from "@/server/services/dicom/dicomDelete.service";
 import { StudyService } from "@/server/services/study.service";
 
@@ -20,14 +15,17 @@ const restoreStudyRoute = new Hono().post(
     "/workspaces/:workspaceId/dicom/studies/restore",
     describeRoute({
         description: "Restore DICOM study",
-        tags: ["DICOM"]
+        tags: ["DICOM"],
     }),
     verifyAuthMiddleware,
     verifyWorkspaceExists,
     verifyWorkspacePermission(WORKSPACE_PERMISSIONS.DELETE),
-    zValidator("param", z.object({
-        workspaceId: z.string().describe("The ID of the workspace")
-    })),
+    zValidator(
+        "param",
+        z.object({
+            workspaceId: z.string().describe("The ID of the workspace"),
+        }),
+    ),
     zValidator("json", restoreStudyBodySchema),
     async (c) => {
         const workspaceId = c.req.param("workspaceId");
@@ -35,28 +33,40 @@ const restoreStudyRoute = new Hono().post(
         const distinctStudyIds = [...new Set(studyIds)];
 
         const studyService = new StudyService();
-        const localStudyIds = await studyService.getStudiesByStudyInstanceUids(workspaceId, distinctStudyIds);
+        const localStudyIds = await studyService.getStudiesByStudyInstanceUids(
+            workspaceId,
+            distinctStudyIds,
+        );
 
         if (localStudyIds.length === 0) {
-            return c.json({
-                ok: false,
-                data: null,
-                error: {
-                    message: "Studies not found"
-                }
-            }, 404);
+            return c.json(
+                {
+                    ok: false,
+                    data: null,
+                    error: {
+                        message: "Studies not found",
+                    },
+                },
+                404,
+            );
         }
 
         const deleteService = new DicomDeleteService();
-        const result = await deleteService.restoreStudies(workspaceId, localStudyIds.map((study) => study.id));
+        const result = await deleteService.restoreStudies(
+            workspaceId,
+            localStudyIds.map((study) => study.id),
+        );
 
-        return c.json({
-            ok: true,
-            data: {
-                affected: result.affected
+        return c.json(
+            {
+                ok: true,
+                data: {
+                    affected: result.affected,
+                },
+                error: null,
             },
-            error: null
-        }, 200);
+            200,
+        );
     },
 );
 

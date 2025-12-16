@@ -52,16 +52,24 @@ export function DicomRecycleConfirmDialog({
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{t("dicom.recycleDialog.title")}</AlertDialogTitle>
+                    <AlertDialogTitle>
+                        {t("dicom.recycleDialog.title")}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                         {isSingle
-                            ? t("dicom.recycleDialog.single", { level: itemLabel })
-                            : t("dicom.recycleDialog.multiple", { count: selectedCount, level: itemLabel })
-                        }
+                            ? t("dicom.recycleDialog.single", {
+                                  level: itemLabel,
+                              })
+                            : t("dicom.recycleDialog.multiple", {
+                                  count: selectedCount,
+                                  level: itemLabel,
+                              })}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>{t("dicom.recycleDialog.cancel")}</AlertDialogCancel>
+                    <AlertDialogCancel>
+                        {t("dicom.recycleDialog.cancel")}
+                    </AlertDialogCancel>
                     <AlertDialogAction onClick={handleConfirm}>
                         {t("dicom.recycleDialog.confirm")}
                     </AlertDialogAction>

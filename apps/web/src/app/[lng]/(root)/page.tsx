@@ -17,11 +17,11 @@ export default async function RootPage({ params }: RootPageProps) {
     let redirectUrl = "/api/auth/signin";
     try {
         const data = await queryClient.fetchQuery(
-            getDefaultWorkspaceQuery(cookieStore.toString())
+            getDefaultWorkspaceQuery(cookieStore.toString()),
         );
 
-        const defaultId = data?.workspace?.id
-        
+        const defaultId = data?.workspace?.id;
+
         if (defaultId) {
             redirectUrl = `/${lng}/${defaultId}`;
         }

@@ -66,20 +66,23 @@ export function DicomSeriesCard({
         getTargetTagsQuery(workspaceId, "series", seriesInstanceUid),
     );
 
-    const { handleCardClick, handleContextMenu, handleDoubleClick } = useDicomCardSelection({
-        itemId: seriesInstanceUid,
-        isSelected,
-        toggleSelection: toggleSeriesSelection,
-        selectItem: selectSeries,
-        clearSelection,
-        onDoubleClick: () => router.push(`/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`),
-    });
+    const { handleCardClick, handleContextMenu, handleDoubleClick } =
+        useDicomCardSelection({
+            itemId: seriesInstanceUid,
+            isSelected,
+            toggleSelection: toggleSeriesSelection,
+            selectItem: selectSeries,
+            clearSelection,
+            onDoubleClick: () =>
+                router.push(
+                    `/${lng}/${workspaceId}/dicom-studies/${studyInstanceUid}/series/${seriesInstanceUid}`,
+                ),
+        });
 
-    const ContextMenu = type === "management" ? (
-        DicomSeriesContextMenu
-    ) : (
-        DicomRecycleSeriesContextMenu
-    );
+    const ContextMenu =
+        type === "management"
+            ? DicomSeriesContextMenu
+            : DicomRecycleSeriesContextMenu;
 
     return (
         <ContextMenu
@@ -99,16 +102,16 @@ export function DicomSeriesCard({
                     isSelected
                         ? ["ring-2 ring-primary", "shadow-lg", "bg-accent"]
                         : [
-                            "hover:shadow-lg",
-                            "hover:ring-2 hover:ring-accent hover:bg-accent/10",
-                        ],
+                              "hover:shadow-lg",
+                              "hover:ring-2 hover:ring-accent hover:bg-accent/10",
+                          ],
                     className,
                 )}
                 onClick={handleCardClick}
                 onContextMenu={handleContextMenu}
                 onDoubleClick={handleDoubleClick}
             >
-                <DicomCardHeaderTagsDisplay 
+                <DicomCardHeaderTagsDisplay
                     tags={tags?.data ?? []}
                     isLoadingTags={isLoadingTags}
                     isSelected={isSelected}
@@ -143,7 +146,9 @@ export function DicomSeriesCard({
                             <span className="font-medium text-gray-600">
                                 {t("dicom.columns.series.modality")}:
                             </span>
-                            <div className="text-gray-900 truncate">{modality}</div>
+                            <div className="text-gray-900 truncate">
+                                {modality}
+                            </div>
                         </div>
 
                         <div className="text-sm">

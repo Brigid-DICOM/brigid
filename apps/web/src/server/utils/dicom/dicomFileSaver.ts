@@ -9,7 +9,7 @@ import {
     toInstanceDbEntity,
     toPatientDbEntity,
     toSeriesDbEntity,
-    toStudyDbEntity
+    toStudyDbEntity,
 } from "./dicomJsonDbMapper";
 import type { DicomJsonUtils } from "./dicomJsonUtils";
 
@@ -18,18 +18,20 @@ export class DicomFileSaver {
 
     constructor(
         dicomJsonUtils: DicomJsonUtils,
-        private readonly workspaceId: string
+        private readonly workspaceId: string,
     ) {
         this.dicomJsonUtils = dicomJsonUtils;
     }
 
     async saveDicomFileToStorage(file: MultipartFile) {
         // save to storage
-        const filePath = this.dicomJsonUtils.getFilePath({ workspaceId: this.workspaceId });
+        const filePath = this.dicomJsonUtils.getFilePath({
+            workspaceId: this.workspaceId,
+        });
         const storageProvider = getStorageProvider();
         const { filePath: storedFilePath } = await storageProvider.uploadFile(
             file,
-            filePath
+            filePath,
         );
 
         return { storedFilePath };
@@ -38,64 +40,62 @@ export class DicomFileSaver {
     async saveToDb(storedFilePath: string) {
         const patientEntity = toPatientDbEntity(
             this.dicomJsonUtils,
-            this.workspaceId
+            this.workspaceId,
         );
 
         const result = await AppDataSource.transaction(
             async (transactionalEntityManager) => {
                 const patientService = new PatientService(
-                    transactionalEntityManager
+                    transactionalEntityManager,
                 );
-                const patient = await patientService.insertOrUpdatePatient(
-                    patientEntity
-                );
+                const patient =
+                    await patientService.insertOrUpdatePatient(patientEntity);
 
                 const studyEntity = toStudyDbEntity(
                     this.dicomJsonUtils,
                     this.workspaceId,
-                    patient.id
+                    patient.id,
                 );
 
                 const studyService = new StudyService(
-                    transactionalEntityManager
+                    transactionalEntityManager,
                 );
-                const study = await studyService.insertOrUpdateStudy(
-                    studyEntity
-                );
+                const study =
+                    await studyService.insertOrUpdateStudy(studyEntity);
 
                 const seriesEntity = toSeriesDbEntity(
                     this.dicomJsonUtils,
                     this.workspaceId,
-                    study.id
+                    study.id,
                 );
                 const seriesService = new SeriesService(
-                    transactionalEntityManager
+                    transactionalEntityManager,
                 );
-                const series = await seriesService.insertOrUpdateSeries(
-                    seriesEntity
-                );
+                const series =
+                    await seriesService.insertOrUpdateSeries(seriesEntity);
 
                 const instanceEntity = await toInstanceDbEntity(
                     this.dicomJsonUtils,
                     this.workspaceId,
                     series.id,
-                    storedFilePath
+                    storedFilePath,
                 );
 
                 const instanceService = new InstanceService(
-                    transactionalEntityManager
+                    transactionalEntityManager,
                 );
-                const instance = await instanceService.insertOrUpdateInstance(
-                    instanceEntity
-                );
+                const instance =
+                    await instanceService.insertOrUpdateInstance(
+                        instanceEntity,
+                    );
 
                 return {
                     patient,
                     study,
                     series,
-                    instance
+                    instance,
                 };
-            }
+            },
         );
 
         return result;

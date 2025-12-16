@@ -2,12 +2,16 @@ import type { DicomInstanceData } from "@brigid/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
 
-export const createInstanceColumns = (t: TFunction): ColumnDef<DicomInstanceData>[] => {
+export const createInstanceColumns = (
+    t: TFunction,
+): ColumnDef<DicomInstanceData>[] => {
     return [
         {
             accessorKey: "instanceNumber",
             header: t("dicom.columns.instance.number"),
-            cell: ({ row }) => <div>{row.original["00200013"]?.Value?.[0] || "N/A"}</div>,
+            cell: ({ row }) => (
+                <div>{row.original["00200013"]?.Value?.[0] || "N/A"}</div>
+            ),
         },
         {
             accessorKey: "acquisitionDate",
@@ -45,5 +49,5 @@ export const createInstanceColumns = (t: TFunction): ColumnDef<DicomInstanceData
                 </div>
             ),
         },
-    ]
-}
+    ];
+};

@@ -50,7 +50,9 @@ export function PreferenceSettings() {
             <div className="flex-1 gap-6 overflow-y-auto p-6">
                 <div className="grid gap-4 mb-3">
                     <div className="space-y-1 flex items-center gap-2">
-                        <h3 className="text-lg font-medium">{t("workspaceSettings.preferencesTab.title")}</h3>
+                        <h3 className="text-lg font-medium">
+                            {t("workspaceSettings.preferencesTab.title")}
+                        </h3>
                     </div>
                 </div>
 

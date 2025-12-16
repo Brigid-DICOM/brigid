@@ -7,16 +7,16 @@ interface ShareViewerPageProps {
     params: Promise<{ token: string }>;
 }
 
-export default async function ShareViewerPage({ params }: ShareViewerPageProps) {
+export default async function ShareViewerPage({
+    params,
+}: ShareViewerPageProps) {
     const queryClient = getQueryClient();
     const { token } = await params;
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ShareContent
-                token={token}
-            />
+            <ShareContent token={token} />
             <BlueLightViewerDialog />
         </HydrationBoundary>
-    )
+    );
 }

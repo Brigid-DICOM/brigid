@@ -1,41 +1,39 @@
 import path from "node:path";
 import { format, loggers, transports } from "winston";
 
-const {
-    combine,
-    label,
-    json,
-    timestamp,
-    errors,
-    colorize,
-    printf
-} = format;
+const { combine, label, json, timestamp, errors, colorize, printf } = format;
 
-const customConsoleFormat = printf(({ level, message, label, timestamp, stack, ...meta }) => {
-    const args = meta[Symbol.for("splat")] as any[] || [];
-    const argString = args.map(arg => {
-        if (typeof arg === "object") {
-            const argCopy = structuredClone(arg);
-            return Object.entries(argCopy).map(([key, value]) => `${key}: ${value}`).join(", ");
-        }
-        return arg;
-    }).join(", ");
+const customConsoleFormat = printf(
+    ({ level, message, label, timestamp, stack, ...meta }) => {
+        const args = (meta[Symbol.for("splat")] as any[]) || [];
+        const argString = args
+            .map((arg) => {
+                if (typeof arg === "object") {
+                    const argCopy = structuredClone(arg);
+                    return Object.entries(argCopy)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(", ");
+                }
+                return arg;
+            })
+            .join(", ");
 
-    const text = `[${timestamp}] [${label}] [${level}] ${message} ${argString}`;
-    return stack ? `${text}\n${stack}` : text;
-});
+        const text = `[${timestamp}] [${label}] [${level}] ${message} ${argString}`;
+        return stack ? `${text}\n${stack}` : text;
+    },
+);
 
 loggers.add("brigid", {
     level: "info",
     transports: [
-        new transports.Console({ 
+        new transports.Console({
             format: combine(
                 errors({ stack: true }),
                 label({ label: "brigid-node" }),
                 timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
                 customConsoleFormat,
-                colorize({ all: true })
-            )
+                colorize({ all: true }),
+            ),
         }),
         new transports.File({
             filename: path.join(process.cwd(), "logs", "brigid-node.log"),
@@ -46,10 +44,10 @@ loggers.add("brigid", {
                 errors({ stack: true }),
                 label({ label: "brigid-node" }),
                 timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-                json()
-            )
-        })
-    ]
+                json(),
+            ),
+        }),
+    ],
 });
 
 export const appLogger = loggers.get("brigid");

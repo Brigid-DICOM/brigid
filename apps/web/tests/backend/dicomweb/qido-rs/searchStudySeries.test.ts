@@ -513,15 +513,15 @@ describe("QIDO-RS Search Study Series Route", () => {
             itShouldSearchStudySeriesWith({
                 queryParamPath: "RequestAttributesSequence.StudyInstanceUID",
                 searchValue: "1.2.3.4.5.1",
-                expectedCount: 2
+                expectedCount: 2,
             });
 
             itShouldSearchStudySeriesWith({
                 queryParamPath: keywordPathToTagPath(
-                    "RequestAttributesSequence.StudyInstanceUID"
+                    "RequestAttributesSequence.StudyInstanceUID",
                 ),
                 searchValue: "1.2.3.4.5.1",
-                expectedCount: 2
+                expectedCount: 2,
             });
         });
 
@@ -529,46 +529,49 @@ describe("QIDO-RS Search Study Series Route", () => {
             itShouldSearchStudySeriesWith({
                 queryParamPath: "RequestAttributesSequence.AccessionNumber",
                 searchValue: "REQACC001",
-                expectedCount: 1
+                expectedCount: 1,
             });
 
             itShouldSearchStudySeriesWith({
                 queryParamPath: keywordPathToTagPath(
-                    "RequestAttributesSequence.AccessionNumber"
+                    "RequestAttributesSequence.AccessionNumber",
                 ),
                 searchValue: "REQACC001",
-                expectedCount: 1
+                expectedCount: 1,
             });
         });
 
         describe("SeriesRequestAttributes.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID queries", () => {
             itShouldSearchStudySeriesWith({
-                queryParamPath: "RequestAttributesSequence.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID",
+                queryParamPath:
+                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID",
                 searchValue: "LOCAL_ENTITY_ID_1",
-                expectedCount: 1
+                expectedCount: 1,
             });
-           
+
             itShouldSearchStudySeriesWith({
                 queryParamPath: keywordPathToTagPath(
-                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID"
+                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID",
                 ),
                 searchValue: "LOCAL_ENTITY_ID_1",
-                expectedCount: 1
+                expectedCount: 1,
             });
 
             itShouldSearchStudySeriesWith({
                 title: "should support wildcard",
-                queryParamPath: "RequestAttributesSequence.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID",
+                queryParamPath:
+                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.LocalNamespaceEntityID",
                 searchValue: "LOCAL*",
-                expectedCount: 2
+                expectedCount: 2,
             });
         });
 
         describe("SeriesRequestAttributes.IssuerOfAccessionNumberSequence.UniversalEntityID queries", () => {
             itShouldSearchStudySeriesWith({
-                queryParamPath: "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityID",
+                queryParamPath:
+                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityID",
                 searchValue: "2f6316f6-0d26-4f17-b5b4-0d296673da0c",
-                expectedCount: 1
+                expectedCount: 1,
             });
 
             itShouldSearchStudySeriesWith({
@@ -576,55 +579,58 @@ describe("QIDO-RS Search Study Series Route", () => {
                     "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityID",
                 ),
                 searchValue: "2f6316f6-0d26-4f17-b5b4-0d296673da0c",
-                expectedCount: 1
+                expectedCount: 1,
             });
         });
 
         describe("SeriesRequestAttributes.IssuerOfAccessionNumberSequence.UniversalEntityIDType queries", () => {
             itShouldSearchStudySeriesWith({
-                queryParamPath: "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityIDType",
+                queryParamPath:
+                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityIDType",
                 searchValue: "UUID",
-                expectedCount: 2
+                expectedCount: 2,
             });
-           
+
             itShouldSearchStudySeriesWith({
                 queryParamPath: keywordPathToTagPath(
-                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityIDType"
+                    "RequestAttributesSequence.IssuerOfAccessionNumberSequence.UniversalEntityIDType",
                 ),
                 searchValue: "UUID",
-                expectedCount: 2
+                expectedCount: 2,
             });
         });
 
         describe("SeriesRequestAttributes.ScheduledProcedureStepID queries", () => {
             itShouldSearchStudySeriesWith({
-                queryParamPath: "RequestAttributesSequence.ScheduledProcedureStepID",
+                queryParamPath:
+                    "RequestAttributesSequence.ScheduledProcedureStepID",
                 searchValue: "SPS-1",
-                expectedCount: 1
+                expectedCount: 1,
             });
-           
+
             itShouldSearchStudySeriesWith({
                 queryParamPath: keywordPathToTagPath(
-                    "RequestAttributesSequence.ScheduledProcedureStepID"
+                    "RequestAttributesSequence.ScheduledProcedureStepID",
                 ),
                 searchValue: "SPS-1",
-                expectedCount: 1
+                expectedCount: 1,
             });
         });
 
         describe("SeriesRequestAttributes.RequestedProcedureID queries", () => {
             itShouldSearchStudySeriesWith({
-                queryParamPath: "RequestAttributesSequence.RequestedProcedureID",
+                queryParamPath:
+                    "RequestAttributesSequence.RequestedProcedureID",
                 searchValue: "RP-1",
-                expectedCount: 1
+                expectedCount: 1,
             });
-           
+
             itShouldSearchStudySeriesWith({
                 queryParamPath: keywordPathToTagPath(
-                    "RequestAttributesSequence.RequestedProcedureID"
+                    "RequestAttributesSequence.RequestedProcedureID",
                 ),
                 searchValue: "RP-1",
-                expectedCount: 1
+                expectedCount: 1,
             });
         });
 

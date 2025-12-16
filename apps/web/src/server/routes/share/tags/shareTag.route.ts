@@ -6,6 +6,6 @@ import removeShareAssignmentRoute from "./removeShareAssignment.route";
 const shareTagRoute = new Hono()
     .route("/", getShareTargetTagsRoute)
     .route("/", assignShareTagRoute)
-    .route("/", removeShareAssignmentRoute)
+    .route("/", removeShareAssignmentRoute);
 
 export default shareTagRoute;

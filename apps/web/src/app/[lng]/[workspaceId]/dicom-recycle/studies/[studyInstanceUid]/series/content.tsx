@@ -47,9 +47,14 @@ export default function DicomRecycleSeriesContent({
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
 
-    const { setSearchConditionsForType, setSearchType, getSearchConditionsForType } =
-        useGlobalSearchStore();
-    const searchConditions  = mounted ? getSearchConditionsForType("dicom-recycle-series") : {};
+    const {
+        setSearchConditionsForType,
+        setSearchType,
+        getSearchConditionsForType,
+    } = useGlobalSearchStore();
+    const searchConditions = mounted
+        ? getSearchConditionsForType("dicom-recycle-series")
+        : {};
 
     const { layoutMode } = useLayoutStore(
         useShallow((state) => ({
@@ -124,12 +129,13 @@ export default function DicomRecycleSeriesContent({
     }, [series]);
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedSeriesIds();
-    const isAllSelected = useMemo(() => 
-        currentPageSeriesUids.length > 0 &&
-        currentPageSeriesUids.every((seriesId) =>
-            selectedSeriesIds.has(seriesId as string),
-        ),
-        [currentPageSeriesUids, selectedSeriesIds]
+    const isAllSelected = useMemo(
+        () =>
+            currentPageSeriesUids.length > 0 &&
+            currentPageSeriesUids.every((seriesId) =>
+                selectedSeriesIds.has(seriesId as string),
+            ),
+        [currentPageSeriesUids, selectedSeriesIds],
     );
 
     const { mutate: restoreSeries } = useMutation({
@@ -239,11 +245,14 @@ export default function DicomRecycleSeriesContent({
             <div className="mb-8 flex flex-col items-start space-x-4">
                 <div className="flex flex-1 items-center space-x-4">
                     <Link href={`/${workspaceId}/dicom-recycle/studies`}>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             className="flex items-center"
                             onClick={() => {
-                                setSearchConditionsForType("dicom-recycle-series", {});
+                                setSearchConditionsForType(
+                                    "dicom-recycle-series",
+                                    {},
+                                );
                             }}
                         >
                             <ArrowLeftIcon className="size-4" />

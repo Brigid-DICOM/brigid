@@ -12,7 +12,7 @@ export class StowRsService {
 
     constructor(private readonly workspaceId: string) {
         this.stowRsResponseMessage = new StowRsResponseMessage(
-            this.workspaceId
+            this.workspaceId,
         );
         this.httpStatusCode = 200;
     }
@@ -26,12 +26,16 @@ export class StowRsService {
                 studyInstanceUid,
                 seriesInstanceUid,
                 sopInstanceUid,
-                sopClassUid
+                sopClassUid,
             } = dicomJsonUtils.getUidCollection();
 
             // store/upload dicom file to storage
-            const dicomFileSaver = new DicomFileSaver(dicomJsonUtils, this.workspaceId);
-            const { storedFilePath } = await dicomFileSaver.saveDicomFileToStorage(file);
+            const dicomFileSaver = new DicomFileSaver(
+                dicomJsonUtils,
+                this.workspaceId,
+            );
+            const { storedFilePath } =
+                await dicomFileSaver.saveDicomFileToStorage(file);
             await dicomFileSaver.saveToDb(storedFilePath);
 
             // TODO: 儲存 metadata 和 binary data
@@ -44,7 +48,7 @@ export class StowRsService {
             });
         } catch (error) {
             this.stowRsResponseMessage.addOtherFailureReason(
-                DICOM_STATUS.ProcessingFailure.toString()
+                DICOM_STATUS.ProcessingFailure.toString(),
             );
             console.error("Failed to store DICOM file", error);
             throw error;
@@ -58,7 +62,7 @@ export class StowRsService {
 
         return {
             message: this.stowRsResponseMessage.getMessage(),
-            httpStatusCode: this.httpStatusCode
+            httpStatusCode: this.httpStatusCode,
         };
     }
 

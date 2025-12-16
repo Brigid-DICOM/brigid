@@ -25,7 +25,7 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
     protected buildBaseQuery(
         workspaceId: string,
         deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
-        tagName?: string
+        tagName?: string,
     ): SelectQueryBuilder<StudyEntity> {
         const query = this.entityManager
             .createQueryBuilder(StudyEntity, this.studyTable)
@@ -34,11 +34,12 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
                 "person_name",
                 "patientName",
                 "patientName.id = patient.patientNameId",
-            )
-            
+            );
+
         this.applyTagJoin(query, "study", tagName);
-        query.where("study.workspaceId = :workspaceId", { workspaceId })
-        .andWhere("study.deleteStatus = :deleteStatus", { deleteStatus });
+        query
+            .where("study.workspaceId = :workspaceId", { workspaceId })
+            .andWhere("study.deleteStatus = :deleteStatus", { deleteStatus });
         this.applyTagFilter(query, tagName);
 
         return query;
@@ -55,12 +56,12 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
     }: {
         workspaceId: string;
     } & SearchStudiesQueryParam & {
-        limit?: number;
-        offset?: number;
-        deleteStatus?: number;
-        instanceDeleteStatus?: number;
-        tagName?: string;
-    }): Promise<StudyQueryResult[]> {
+            limit?: number;
+            offset?: number;
+            deleteStatus?: number;
+            instanceDeleteStatus?: number;
+            tagName?: string;
+        }): Promise<StudyQueryResult[]> {
         const studies = await this.execQuery({
             workspaceId,
             limit,
@@ -68,80 +69,89 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
             deleteStatus,
             instanceDeleteStatus,
             tagName,
-            ...queryParams
+            ...queryParams,
         });
 
-        const studyInstances = studies.map(
-            s => s.studyInstanceUid
-        );
+        const studyInstances = studies.map((s) => s.studyInstanceUid);
 
         if (studyInstances.length === 0) {
             return [];
         }
 
-        const counts = await this.entityManager
+        const counts = (await this.entityManager
             .createQueryBuilder(StudyEntity, "study")
             .select("study.studyInstanceUid", "studyInstanceUid")
             .addSelect(
                 "COUNT(DISTINCT s.seriesInstanceUid)",
-                "numberOfStudyRelatedSeries"
+                "numberOfStudyRelatedSeries",
             )
             .addSelect(
                 "COUNT(DISTINCT i.sopInstanceUid)",
-                "numberOfStudyRelatedInstances"
+                "numberOfStudyRelatedInstances",
             )
             .leftJoin(
                 SeriesEntity,
                 "s",
                 "s.studyInstanceUid = study.studyInstanceUid AND s.deleteStatus = :deleteStatus AND s.workspaceId = study.workspaceId",
-                { deleteStatus, workspaceId }
+                { deleteStatus, workspaceId },
             )
             .leftJoin(
                 InstanceEntity,
                 "i",
                 "i.studyInstanceUid = study.studyInstanceUid AND i.deleteStatus = :deleteStatus AND i.workspaceId = study.workspaceId",
-                { deleteStatus, workspaceId }
+                { deleteStatus, workspaceId },
             )
-            .where(
-                "study.studyInstanceUid IN (:...studyInstances)",
-                { studyInstances }
-            )
+            .where("study.studyInstanceUid IN (:...studyInstances)", {
+                studyInstances,
+            })
             .groupBy("study.studyInstanceUid")
-            .getRawMany() as Array<{
-                studyInstanceUid: string;
-                numberOfStudyRelatedSeries: string;
-                numberOfStudyRelatedInstances: string;
-            }>;
-        
+            .getRawMany()) as Array<{
+            studyInstanceUid: string;
+            numberOfStudyRelatedSeries: string;
+            numberOfStudyRelatedInstances: string;
+        }>;
+
         const countMap = new Map(
-            counts.map(c => [
+            counts.map((c) => [
                 c.studyInstanceUid,
                 {
-                    numberOfStudyRelatedSeries: parseInt(c.numberOfStudyRelatedSeries || "0", 10),
-                    numberOfStudyRelatedInstances: parseInt(c.numberOfStudyRelatedInstances || "0", 10),
-                }
-            ])
+                    numberOfStudyRelatedSeries: parseInt(
+                        c.numberOfStudyRelatedSeries || "0",
+                        10,
+                    ),
+                    numberOfStudyRelatedInstances: parseInt(
+                        c.numberOfStudyRelatedInstances || "0",
+                        10,
+                    ),
+                },
+            ]),
         );
 
-        return studies.map(s => ({
+        return studies.map((s) => ({
             ...s,
-            numberOfStudyRelatedSeries: countMap.get(s.studyInstanceUid)?.numberOfStudyRelatedSeries ?? 0,
-            numberOfStudyRelatedInstances: countMap.get(s.studyInstanceUid)?.numberOfStudyRelatedInstances ?? 0,
+            numberOfStudyRelatedSeries:
+                countMap.get(s.studyInstanceUid)?.numberOfStudyRelatedSeries ??
+                0,
+            numberOfStudyRelatedInstances:
+                countMap.get(s.studyInstanceUid)
+                    ?.numberOfStudyRelatedInstances ?? 0,
         }));
     }
 
     protected applyInstanceDeleteStatusFilter(
         query: SelectQueryBuilder<StudyEntity>,
-        instanceDeleteStatus: number
+        instanceDeleteStatus: number,
     ): void {
         const subQuery = this.entityManager
             .createQueryBuilder(InstanceEntity, "instance")
             .select("instance.studyInstanceUid")
             .where("instance.workspaceId = study.workspaceId")
             .andWhere("instance.studyInstanceUid = study.studyInstanceUid")
-            .andWhere("instance.deleteStatus = :instanceDeleteStatus", { instanceDeleteStatus })
+            .andWhere("instance.deleteStatus = :instanceDeleteStatus", {
+                instanceDeleteStatus,
+            })
             .getQuery();
-            
+
         query.andWhere(`EXISTS (${subQuery})`, { instanceDeleteStatus });
     }
 

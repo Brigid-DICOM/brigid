@@ -1,17 +1,11 @@
 "use client";
 
-import {
-    ChevronDownIcon,
-    ChevronUpIcon,
-    XIcon
-} from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useShallow } from "zustand/react/shallow";
-import {
-    Button
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 
@@ -29,13 +23,21 @@ export function BlueLightViewerDialog() {
     const [isMounted, setIsMounted] = useState(false);
 
     const { isOpen, close } = useBlueLightViewerStore();
-    const { studyInstanceUid, seriesInstanceUid, sopInstanceUid, shareToken, password }= useBlueLightViewerStore(useShallow((state) => ({
-        studyInstanceUid: state.studyInstanceUid,
-        seriesInstanceUid: state.seriesInstanceUid,
-        shareToken: state.shareToken,
-        sopInstanceUid: state.sopInstanceUid,
-        password: state.password,
-    })));
+    const {
+        studyInstanceUid,
+        seriesInstanceUid,
+        sopInstanceUid,
+        shareToken,
+        password,
+    } = useBlueLightViewerStore(
+        useShallow((state) => ({
+            studyInstanceUid: state.studyInstanceUid,
+            seriesInstanceUid: state.seriesInstanceUid,
+            shareToken: state.shareToken,
+            sopInstanceUid: state.sopInstanceUid,
+            password: state.password,
+        })),
+    );
 
     // 使用 ref 來儲存 position，避免重新觸發渲染
     const positionRef = useRef({ x: 100, y: 100 });
@@ -64,7 +66,13 @@ export function BlueLightViewerDialog() {
         } else {
             return `/html/bluelight/bluelight/html/start.html?${params.toString()}`;
         }
-    }, [studyInstanceUid, seriesInstanceUid, sopInstanceUid, shareToken, password]);
+    }, [
+        studyInstanceUid,
+        seriesInstanceUid,
+        sopInstanceUid,
+        shareToken,
+        password,
+    ]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -77,7 +85,7 @@ export function BlueLightViewerDialog() {
             document.body.style.overflow = "auto";
         }
     }, [isOpen, isMinimized]);
-    
+
     const clampPosition = useCallback((pos: Position) => {
         const maxX = window.innerWidth - MINIMIZED_WIDTH;
         const maxY = window.innerHeight - MINIMIZED_HEIGHT;
@@ -85,7 +93,7 @@ export function BlueLightViewerDialog() {
         return {
             x: Math.max(0, Math.min(pos.x, maxX)),
             y: Math.max(0, Math.min(pos.y, maxY)),
-        }
+        };
     }, []);
 
     const updateContainerPosition = useCallback(() => {
@@ -107,48 +115,55 @@ export function BlueLightViewerDialog() {
         dragStartPositionRef.current = { ...positionRef.current };
 
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    }
+    };
 
-    const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        if (!isMinimized || !isDragging) return;
+    const handlePointerMove = useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            if (!isMinimized || !isDragging) return;
 
-        if (e.buttons === 0) return;
+            if (e.buttons === 0) return;
 
-        e.preventDefault();
+            e.preventDefault();
 
-        const deltaX = e.clientX - dragStartRef.current.x;
-        const deltaY = e.clientY - dragStartRef.current.y;
+            const deltaX = e.clientX - dragStartRef.current.x;
+            const deltaY = e.clientY - dragStartRef.current.y;
 
-        const newPosition = {
-            x: dragStartPositionRef.current.x + deltaX,
-            y: dragStartPositionRef.current.y + deltaY,
-        };
+            const newPosition = {
+                x: dragStartPositionRef.current.x + deltaX,
+                y: dragStartPositionRef.current.y + deltaY,
+            };
 
-        positionRef.current = clampPosition(newPosition);
+            positionRef.current = clampPosition(newPosition);
 
-        if (animationFrameRef.current !== null) {
-            cancelAnimationFrame(animationFrameRef.current);
-        }
-        
-        animationFrameRef.current = requestAnimationFrame(updateContainerPosition);
-    }, [isDragging, clampPosition, isMinimized, updateContainerPosition]);
+            if (animationFrameRef.current !== null) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
 
-    const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        setIsDragging(false);
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    }, []);
+            animationFrameRef.current = requestAnimationFrame(
+                updateContainerPosition,
+            );
+        },
+        [isDragging, clampPosition, isMinimized, updateContainerPosition],
+    );
+
+    const handlePointerUp = useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            setIsDragging(false);
+            (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+        },
+        [],
+    );
 
     useEffect(() => {
         const handleResize = () => {
             positionRef.current = clampPosition(positionRef.current);
             updateContainerPosition();
-        }
+        };
 
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, [clampPosition, updateContainerPosition]);
 
-    
     // biome-ignore lint/correctness/useExhaustiveDependencies: 加入 isMinimized 會導致無法縮小化
     useEffect(() => {
         if (isOpen && isMinimized) {
@@ -165,33 +180,37 @@ export function BlueLightViewerDialog() {
             if (animationFrameRef.current !== null) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
-        }
+        };
     }, []);
 
     if (!isOpen || !isMounted) return null;
 
-    const containerStyle = isMinimized ? {
-        position: "absolute" as const,
-        left: `${positionRef.current.x}px`,
-        top: `${positionRef.current.y}px`,
-        width: "20rem",
-        height: "3.5rem",
-        userSelect: "none" as const,
-    } : {
-        position: "fixed" as const,
-        inset: 0,
-        userSelect: "auto" as const,
-    };
+    const containerStyle = isMinimized
+        ? {
+              position: "absolute" as const,
+              left: `${positionRef.current.x}px`,
+              top: `${positionRef.current.y}px`,
+              width: "20rem",
+              height: "3.5rem",
+              userSelect: "none" as const,
+          }
+        : {
+              position: "fixed" as const,
+              inset: 0,
+              userSelect: "auto" as const,
+          };
 
     const iframeContainerStyle = {
         display: isMinimized ? "none" : "block",
     };
 
     const content = (
-        <div 
+        <div
             className={cn(
                 "bg-background border rounded-lg shadow-lg transition-all duration-300 z-50",
-                isMinimized ? "transition-all duration-200 ease-out" : "transition-none"
+                isMinimized
+                    ? "transition-all duration-200 ease-out"
+                    : "transition-none",
             )}
             style={containerStyle}
             onPointerDown={handlePointerDown}
@@ -201,10 +220,10 @@ export function BlueLightViewerDialog() {
         >
             {/* 半透明背景，僅在全屏時顯示 | Semi-transparent backdrop, only visible in fullscreen */}
             {!isMinimized && (
-                <button 
+                <button
                     type="button"
                     aria-label="Close backdrop"
-                    className="absolute inset-0 bg-black/50 -z-10" 
+                    className="absolute inset-0 bg-black/50 -z-10"
                     onClick={() => close()}
                     onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") close();
@@ -213,10 +232,10 @@ export function BlueLightViewerDialog() {
             )}
 
             {/* 標題欄 | Header */}
-            <div 
+            <div
                 className={cn(
                     "flex items-center justify-between p-2 bg-background",
-                    isMinimized ? "cursor-move" : "border-b"
+                    isMinimized ? "cursor-move" : "border-b",
                 )}
                 style={{
                     userSelect: "none",
@@ -249,7 +268,10 @@ export function BlueLightViewerDialog() {
             </div>
 
             {/* iframe 容器，始終在 DOM 中但根據 isMinimized 隱藏 | iframe container always in DOM but hidden based on isMinimized */}
-            <div style={iframeContainerStyle} className="w-full h-[calc(100%-3rem)]">
+            <div
+                style={iframeContainerStyle}
+                className="w-full h-[calc(100%-3rem)]"
+            >
                 <iframe
                     ref={iframeRef}
                     src={iframeSrc}

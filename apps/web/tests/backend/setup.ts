@@ -3,7 +3,7 @@ import type { DataSource } from "typeorm";
 import { vi } from "vitest";
 
 raccoonDcm4cheJavaLoader({
-    isPackagedElectron: true
+    isPackagedElectron: true,
 });
 let testDataSource: any = null;
 
@@ -28,8 +28,8 @@ vi.mock("@brigid/database", () => ({
         }),
         initialize: vi.fn(),
         destroy: vi.fn(),
-        isInitialized: true
-    }
+        isInitialized: true,
+    },
 }));
 
 // Mock environment variables
@@ -41,8 +41,9 @@ vi.mock("@brigid/env", () => ({
         LOG_LEVEL: "error",
         STORAGE_PROVIDER: "local",
         STORAGE_LOCAL_DIR: "tests/fixtures/dicomFiles/temp",
-        DICOM_STORAGE_FILEPATH: "/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm"
-    }
+        DICOM_STORAGE_FILEPATH:
+            "/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm",
+    },
 }));
 
 (global as any).setTestDataSource = (dataSource: DataSource) => {

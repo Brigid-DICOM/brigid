@@ -70,8 +70,10 @@ function ActionsCell({
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
-    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
-    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
+    const { openDialog: openShareManagementDialog } =
+        useShareManagementDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } =
+        useDicomRecycleConfirmDialogStore();
     const { openDialog: openCreateTagDialog } = useCreateTagDialogStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
@@ -93,11 +95,11 @@ function ActionsCell({
             workspace.membership?.permissions ?? 0,
             WORKSPACE_PERMISSIONS.UPDATE,
         );
-    const canShare = 
+    const canShare =
         !!workspace &&
         hasPermission(
             workspace.membership?.permissions ?? 0,
-            WORKSPACE_PERMISSIONS.MANAGE
+            WORKSPACE_PERMISSIONS.MANAGE,
         );
 
     const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
@@ -113,7 +115,9 @@ function ActionsCell({
             });
         },
         onSuccess: () => {
-            toast.success(t("dicom.messages.recycleSuccess", { level: "series" }));
+            toast.success(
+                t("dicom.messages.recycleSuccess", { level: "series" }),
+            );
             toast.dismiss(`recycle-${seriesInstanceUid}`);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId, studyInstanceUid],
@@ -148,7 +152,9 @@ function ActionsCell({
 
     const handleRecycleSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "series" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "series" }),
+            );
             return;
         }
 
@@ -162,7 +168,9 @@ function ActionsCell({
 
     const handleConfirmRecycle = () => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "series" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "series" }),
+            );
             return;
         }
 
@@ -178,59 +186,59 @@ function ActionsCell({
     };
 
     return (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} className="size-8 p-0">
-                        <span className="sr-only">{t("dicom.contextMenu.openMenu")}</span>
-                        <MoreHorizontalIcon className="size-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    {canRead && (
-                        <>
-                            <DropdownMenuItem
-                                onClick={handleCopySeriesInstanceUid}
-                            >
-                                {t("dicom.contextMenu.copy")} {t("dicom.columns.series.seriesInstanceUid")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleEnterInstances}>
-                                {t("dicom.contextMenu.enterInstances")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={handleOpenBlueLightViewer}
-                            >
-                                {t("dicom.contextMenu.openInBlueLight")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDownloadSeries}>
-                                {t("dicom.contextMenu.download")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"} className="size-8 p-0">
+                    <span className="sr-only">
+                        {t("dicom.contextMenu.openMenu")}
+                    </span>
+                    <MoreHorizontalIcon className="size-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {canRead && (
+                    <>
+                        <DropdownMenuItem onClick={handleCopySeriesInstanceUid}>
+                            {t("dicom.contextMenu.copy")}{" "}
+                            {t("dicom.columns.series.seriesInstanceUid")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEnterInstances}>
+                            {t("dicom.contextMenu.enterInstances")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleOpenBlueLightViewer}>
+                            {t("dicom.contextMenu.openInBlueLight")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDownloadSeries}>
+                            {t("dicom.contextMenu.download")}
+                        </DropdownMenuItem>
+                    </>
+                )}
 
-                    {canUpdate && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canUpdate && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <TagDropdownSub
-                                workspaceId={workspaceId}
-                                targetId={seriesInstanceUid}
-                                targetType="series"
-                                onOpenCreateTagDialog={() =>
-                                    openCreateTagDialog({
-                                        workspaceId,
-                                        targetType: "series",
-                                        targetId: seriesInstanceUid,
-                                    })
-                                }
-                            />
-                        </>
-                    )}
+                        <TagDropdownSub
+                            workspaceId={workspaceId}
+                            targetId={seriesInstanceUid}
+                            targetType="series"
+                            onOpenCreateTagDialog={() =>
+                                openCreateTagDialog({
+                                    workspaceId,
+                                    targetType: "series",
+                                    targetId: seriesInstanceUid,
+                                })
+                            }
+                        />
+                    </>
+                )}
 
-                    {canShare && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canShare && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <DropdownMenuItem onClick={(e) => {
+                        <DropdownMenuItem
+                            onClick={(e) => {
                                 e.preventDefault();
                                 closeDropdownMenu();
                                 openShareManagementDialog({
@@ -238,23 +246,24 @@ function ActionsCell({
                                     targetType: "series",
                                     targetIds: [seriesInstanceUid],
                                 });
-                            }} >
-                                {t("dicom.contextMenu.share")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
+                            }}
+                        >
+                            {t("dicom.contextMenu.share")}
+                        </DropdownMenuItem>
+                    </>
+                )}
 
-                    {canRecycle && (
-                        <>
-                            <DropdownMenuSeparator />
+                {canRecycle && (
+                    <>
+                        <DropdownMenuSeparator />
 
-                            <DropdownMenuItem onClick={handleRecycleSeries}>
-                                {t("dicom.contextMenu.recycle")}
-                            </DropdownMenuItem>
-                        </>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                        <DropdownMenuItem onClick={handleRecycleSeries}>
+                            {t("dicom.contextMenu.recycle")}
+                        </DropdownMenuItem>
+                    </>
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 
@@ -295,8 +304,8 @@ export function DicomSeriesDataTable({
                                     selectAll(
                                         rows.map(
                                             (row) =>
-                                                row.original["0020000E"]?.Value?.[0] ||
-                                                "",
+                                                row.original["0020000E"]
+                                                    ?.Value?.[0] || "",
                                         ),
                                     );
                                 } else {
@@ -386,7 +395,7 @@ export function DicomSeriesDataTable({
             isSeriesSelected,
             toggleSeriesSelection,
             generalColumns,
-            t
+            t,
         ],
     );
 
@@ -502,7 +511,9 @@ export function DicomSeriesDataTable({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    {t("dicom.messages.noData", { level: "series" })}
+                                    {t("dicom.messages.noData", {
+                                        level: "series",
+                                    })}
                                 </TableCell>
                             </TableRow>
                         )}

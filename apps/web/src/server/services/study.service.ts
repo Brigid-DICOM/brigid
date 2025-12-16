@@ -10,47 +10,52 @@ export class StudyService {
 
     constructor(entityManager?: EntityManager) {
         this.entityManager = entityManager ?? AppDataSource.manager;
-    }   
+    }
 
     async insertOrUpdateStudy(studyEntity: StudyEntity) {
         const existingStudy = await this.entityManager.findOne(StudyEntity, {
             where: {
                 studyInstanceUid: studyEntity.studyInstanceUid,
-                workspaceId: studyEntity.workspaceId
+                workspaceId: studyEntity.workspaceId,
             },
             relations: {
-                referringPhysicianName: true
+                referringPhysicianName: true,
             },
             select: {
                 id: true,
                 json: true,
                 referringPhysicianName: {
-                    id: true
-                }
-            }
+                    id: true,
+                },
+            },
         });
 
         if (existingStudy) {
             studyEntity.id = existingStudy.id;
-            
+
             if (
                 "referringPhysicianName" in studyEntity &&
                 studyEntity.referringPhysicianName &&
                 "id" in studyEntity.referringPhysicianName &&
                 existingStudy.referringPhysicianName
             ) {
-                studyEntity.referringPhysicianName.id = existingStudy.referringPhysicianName.id;
+                studyEntity.referringPhysicianName.id =
+                    existingStudy.referringPhysicianName.id;
             }
 
-            const existingStudyJson = JSON.parse(existingStudy.json ?? "{}") as DicomTag;
-            const incomingStudyJson = JSON.parse(studyEntity.json ?? "{}") as DicomTag;
+            const existingStudyJson = JSON.parse(
+                existingStudy.json ?? "{}",
+            ) as DicomTag;
+            const incomingStudyJson = JSON.parse(
+                studyEntity.json ?? "{}",
+            ) as DicomTag;
 
-            studyEntity.json  = JSON.stringify({
+            studyEntity.json = JSON.stringify({
                 ...existingStudyJson,
                 ...incomingStudyJson,
             });
         }
-        
+
         return await this.entityManager.save(StudyEntity, studyEntity);
     }
 
@@ -59,19 +64,28 @@ export class StudyService {
         studyInstanceUid: string;
     }) {
         return await this.entityManager.findOne(StudyEntity, {
-            where: { workspaceId: options.workspaceId, studyInstanceUid: options.studyInstanceUid }
+            where: {
+                workspaceId: options.workspaceId,
+                studyInstanceUid: options.studyInstanceUid,
+            },
         });
     }
 
-    async getStudiesByStudyInstanceUids(workspaceId: string, studyInstanceUids: string[]) {
+    async getStudiesByStudyInstanceUids(
+        workspaceId: string,
+        studyInstanceUids: string[],
+    ) {
         return await this.entityManager.find(StudyEntity, {
-            where: { workspaceId: workspaceId, studyInstanceUid: In(studyInstanceUids) },
+            where: {
+                workspaceId: workspaceId,
+                studyInstanceUid: In(studyInstanceUids),
+            },
             select: {
                 id: true,
                 studyInstanceUid: true,
                 deleteStatus: true,
-                deletedAt: true
-            }
+                deletedAt: true,
+            },
         });
     }
 
@@ -82,23 +96,26 @@ export class StudyService {
         offset: number;
     }) {
         const { workspaceId, studyInstanceUid, limit, offset } = options;
-        const [instances, total] = await this.entityManager.findAndCount(InstanceEntity, {
-            where: {
-                workspaceId: workspaceId,
-                studyInstanceUid: studyInstanceUid
+        const [instances, total] = await this.entityManager.findAndCount(
+            InstanceEntity,
+            {
+                where: {
+                    workspaceId: workspaceId,
+                    studyInstanceUid: studyInstanceUid,
+                },
+                skip: offset,
+                take: limit,
+                relations: {
+                    series: true,
+                },
             },
-            skip: offset,
-            take: limit,
-            relations: {
-                series: true
-            }
-        });
+        );
 
         return {
             instances,
             total,
             hasNextPage: instances.length + offset < total,
-        }
+        };
     }
 
     async getStudyInstanceCount(options: {
@@ -134,24 +151,27 @@ export class StudyService {
         studyInstanceUid: string;
         limit: number;
         lastUpdatedAt?: Date;
-        lastId?: string
+        lastId?: string;
     }) {
-        const { workspaceId, studyInstanceUid, limit, lastUpdatedAt, lastId } = options;
+        const { workspaceId, studyInstanceUid, limit, lastUpdatedAt, lastId } =
+            options;
 
         const queryBuilder = this.entityManager
             .createQueryBuilder(InstanceEntity, "instance")
             .where("instance.workspaceId = :workspaceId", { workspaceId })
-            .andWhere("instance.studyInstanceUid = :studyInstanceUid", { studyInstanceUid })
+            .andWhere("instance.studyInstanceUid = :studyInstanceUid", {
+                studyInstanceUid,
+            })
             .leftJoinAndSelect("instance.series", "series")
             .orderBy("instance.updatedAt", "ASC")
             .addOrderBy("instance.id", "ASC")
             .take(limit);
-        
+
         if (lastUpdatedAt && lastId) {
             queryBuilder.andWhere(
                 `(instance.updatedAt > :lastUpdatedAt OR (instance.updatedAt = :lastUpdatedAt AND instance.id > :lastId))`,
-                { lastUpdatedAt, lastId }
-            )
+                { lastUpdatedAt, lastId },
+            );
         }
 
         // !這裡只返回資料，不計算總數 (count)

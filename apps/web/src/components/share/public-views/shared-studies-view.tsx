@@ -26,24 +26,22 @@ interface SharedStudiesViewProps {
 
 const ITEM_PER_PAGE = 10;
 
-export default function SharedStudiesView({ 
-    token, 
+export default function SharedStudiesView({
+    token,
     password,
     publicPermissions = 0,
 }: SharedStudiesViewProps) {
     const searchParams = useSearchParams();
     const layoutMode = useLayoutStore((state) => state.layoutMode);
 
-    const { 
-        currentPage, 
-        handlePreviousPage, 
-        handleNextPage, 
-        canGoPrevious 
-    } = usePagination();
+    const { currentPage, handlePreviousPage, handleNextPage, canGoPrevious } =
+        usePagination();
 
-    const { open: openBlueLightViewer, close: closeBlueLightViewer } = useBlueLightViewerStore();
+    const { open: openBlueLightViewer, close: closeBlueLightViewer } =
+        useBlueLightViewerStore();
 
-    const { clearSelection, getSelectedCount, selectAll, getSelectedStudyIds } = useDicomStudySelectionStore();
+    const { clearSelection, getSelectedCount, selectAll, getSelectedStudyIds } =
+        useDicomStudySelectionStore();
     const selectedCount = getSelectedCount();
     const selectedIds = getSelectedStudyIds();
 
@@ -53,7 +51,7 @@ export default function SharedStudiesView({
             password,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
-        })
+        }),
     );
     const isAllSelected = selectedCount === studies?.length;
 
@@ -86,7 +84,11 @@ export default function SharedStudiesView({
         if (isAllSelected) {
             clearSelection();
         } else {
-            selectAll(studies?.map((study) => study["0020000D"]?.Value?.[0] as string) || []);
+            selectAll(
+                studies?.map(
+                    (study) => study["0020000D"]?.Value?.[0] as string,
+                ) || [],
+            );
         }
     };
 
@@ -97,12 +99,8 @@ export default function SharedStudiesView({
         }
 
         try {
-            await downloadShareMultipleStudies(
-                token,
-                selectedIds,
-                password
-            );
-        } catch(error) {
+            await downloadShareMultipleStudies(token, selectedIds, password);
+        } catch (error) {
             console.error("Failed to download selected studies", error);
 
             if (error instanceof Error && error.name === "AbortError") {
@@ -111,7 +109,7 @@ export default function SharedStudiesView({
 
             toast.error("Failed to download selected studies");
         }
-    }
+    };
 
     if (isLoading) {
         return layoutMode === "grid" ? (
@@ -131,7 +129,7 @@ export default function SharedStudiesView({
 
     return (
         <div className="space-y-6">
-            <SelectionControlBar 
+            <SelectionControlBar
                 selectedCount={selectedCount}
                 isAllSelected={isAllSelected}
                 onSelectAll={handleSelectAll}
@@ -152,8 +150,8 @@ export default function SharedStudiesView({
                         />
                     ))}
                 </div>
-            ): (
-                <SharedDicomStudiesDataTable 
+            ) : (
+                <SharedDicomStudiesDataTable
                     studies={studies}
                     token={token}
                     password={password}

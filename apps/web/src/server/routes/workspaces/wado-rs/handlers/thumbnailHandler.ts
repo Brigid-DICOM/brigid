@@ -15,52 +15,57 @@ export class ThumbnailHandler implements WadoResponseHandler {
             "image/jpeg",
             "image/jp2",
             "image/png",
-            "*/*"
+            "*/*",
         ]);
 
         return acceptSchema.safeParse(accept).success;
     }
 
-    async handle(c: Context, args: { instances: InstanceEntity[]; accept: string, frameNumber: number }) {
+    async handle(
+        c: Context,
+        args: {
+            instances: InstanceEntity[];
+            accept: string;
+            frameNumber: number;
+        },
+    ) {
         const { instances, accept, frameNumber } = args;
         const storage = getStorageProvider();
-        const acceptType = parseAcceptHeader(accept)?.type || "image/jpeg"
+        const acceptType = parseAcceptHeader(accept)?.type || "image/jpeg";
         const outputFormat = resolveOutputFormat(acceptType) || "jpeg";
-        
-        const keys = instances.map(instance => instance.instancePath);
-        if (!keys.every(key => key)) {
+
+        const keys = instances.map((instance) => instance.instancePath);
+        if (!keys.every((key) => key)) {
             return c.json(
                 {
-                    message: "Instance paths not found"
+                    message: "Instance paths not found",
                 },
-                404
+                404,
             );
         }
 
         const converter = getDicomToImageConverter(outputFormat);
         const key = instances[0].instancePath;
-        const convertOptions = toConvertOptions(
-            {
-                ...c.req.query()
-            }
-        );
-        
+        const convertOptions = toConvertOptions({
+            ...c.req.query(),
+        });
+
         const { body } = await storage.downloadFile(key);
         const source: DicomSource = { kind: "stream", stream: body };
         const result = await converter.convert(source, {
             resize: {
                 width: convertOptions.resize?.width || 64,
-                height: convertOptions.resize?.height || 64
+                height: convertOptions.resize?.height || 64,
             },
-            frameNumber: frameNumber || 1
+            frameNumber: frameNumber || 1,
         });
 
         if (!result.frames.length) {
             return c.json(
                 {
-                    message: "No frames found"
+                    message: "No frames found",
                 },
-                404
+                404,
             );
         }
 
@@ -68,8 +73,8 @@ export class ThumbnailHandler implements WadoResponseHandler {
         return new Response(result.frames[0].stream, {
             headers: {
                 "Content-Type": result.contentType,
-                "Content-Length": result.frames[0].size?.toString() || "0"
-            }
+                "Content-Length": result.frames[0].size?.toString() || "0",
+            },
         });
     }
 }

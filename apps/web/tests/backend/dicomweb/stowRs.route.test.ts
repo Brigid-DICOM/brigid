@@ -41,14 +41,14 @@ describe("STOW-RS Route", () => {
                         stream: createReadStream(
                             path.resolve(
                                 __dirname,
-                                "../../fixtures/dicomFiles/1-01-mod-vo"
-                            )
+                                "../../fixtures/dicomFiles/1-01-mod-vo",
+                            ),
                         ),
-                        contentLocation: "1-01-mod-vo"
-                    }
+                        contentLocation: "1-01-mod-vo",
+                    },
                 ],
                 undefined, // default to use guid boundary
-                "application/dicom"
+                "application/dicom",
             );
             // Act
             const response = await app.request(
@@ -58,10 +58,10 @@ describe("STOW-RS Route", () => {
                     //@ts-expect-error
                     body: data,
                     headers: new Headers({
-                        "Content-Type": `multipart/related; boundary=${boundary}`
+                        "Content-Type": `multipart/related; boundary=${boundary}`,
                     }),
-                    duplex: "half"
-                }
+                    duplex: "half",
+                },
             );
 
             // Assert
@@ -85,14 +85,14 @@ describe("STOW-RS Route", () => {
                         stream: createReadStream(
                             path.resolve(
                                 __dirname,
-                                "../../fixtures/dicomFiles/1-01-mod-vo"
-                            )
+                                "../../fixtures/dicomFiles/1-01-mod-vo",
+                            ),
                         ),
-                        contentLocation: "1-01-mod-vo"
-                    }
+                        contentLocation: "1-01-mod-vo",
+                    },
                 ],
                 undefined, // default to use guid boundary
-                "application/dicom"
+                "application/dicom",
             );
 
             // Act
@@ -103,19 +103,23 @@ describe("STOW-RS Route", () => {
                     //@ts-expect-error
                     body: data,
                     headers: new Headers({
-                        "Content-Type": `multipart/related; boundary=${boundary}`
+                        "Content-Type": `multipart/related; boundary=${boundary}`,
                     }),
-                    duplex: "half"
-                }
+                    duplex: "half",
+                },
             );
             // Assert
             expect(response.status).toBe(404);
         });
 
         it("should handle file upload errors gracefully", async () => {
-            const { StowRsService } = await import("@/server/services/stowRs.service");
-            vi.spyOn(StowRsService.prototype, "storeDicomFiles")
-                .mockRejectedValue(new Error("File upload error"));
+            const { StowRsService } = await import(
+                "@/server/services/stowRs.service"
+            );
+            vi.spyOn(
+                StowRsService.prototype,
+                "storeDicomFiles",
+            ).mockRejectedValue(new Error("File upload error"));
             // Arrange
             const { data, boundary } = multipartMessage.multipartEncodeByStream(
                 [
@@ -123,16 +127,16 @@ describe("STOW-RS Route", () => {
                         stream: createReadStream(
                             path.resolve(
                                 __dirname,
-                                "../../fixtures/dicomFiles/1-01-mod-vo"
-                            )
+                                "../../fixtures/dicomFiles/1-01-mod-vo",
+                            ),
                         ),
-                        contentLocation: "1-01-mod-vo"
-                    }
+                        contentLocation: "1-01-mod-vo",
+                    },
                 ],
                 undefined, // default to use guid boundary
-                "application/dicom"
+                "application/dicom",
             );
-    
+
             // Act
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies`,
@@ -141,12 +145,12 @@ describe("STOW-RS Route", () => {
                     //@ts-expect-error
                     body: data,
                     headers: new Headers({
-                        "Content-Type": `multipart/related; boundary=${boundary}`
+                        "Content-Type": `multipart/related; boundary=${boundary}`,
                     }),
-                    duplex: "half"
-                }
+                    duplex: "half",
+                },
             );
-    
+
             // Assert
             expect(response.status).toBe(500);
         });

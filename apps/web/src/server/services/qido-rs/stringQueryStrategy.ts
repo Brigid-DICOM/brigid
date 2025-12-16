@@ -27,7 +27,7 @@ export class StringQueryStrategy extends QueryStrategy {
         const cleanedValues = value
             .split(/(?<!\\),/)
             .map((v) => v.replace(/\\,/g, ","));
-            
+
         if (cleanedValues.some((v) => v.includes("*") || v.includes("?"))) {
             return this.buildMultiWildcardQuery(table, field, cleanedValues);
         }
@@ -37,7 +37,7 @@ export class StringQueryStrategy extends QueryStrategy {
             parameters: {
                 values: cleanedValues,
             },
-        }
+        };
     }
 
     private buildMultiWildcardQuery(

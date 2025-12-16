@@ -111,22 +111,25 @@ export function ShareTagContextMenuSub({
                     const newTags = [];
                     for (const tag of variables.tags) {
                         const alreadyExists = oldData.data?.some(
-                            t => t.name === tag.name
+                            (t) => t.name === tag.name,
                         );
                         if (!alreadyExists) {
                             const resultTag = data?.data?.results?.find(
-                                (r: {tag: { name: string }}) => r.tag.name === tag.name
+                                (r: { tag: { name: string } }) =>
+                                    r.tag.name === tag.name,
                             )?.tag;
 
                             newTags.push({
                                 id: resultTag?.id ?? nanoid(),
                                 name: tag.name,
                                 color: tag.color,
-                                assignments: [{
-                                    id: nanoid(),
-                                    targetId,
-                                    targetType,
-                                }],
+                                assignments: [
+                                    {
+                                        id: nanoid(),
+                                        targetId,
+                                        targetType,
+                                    },
+                                ],
                             });
                         }
                     }
@@ -134,9 +137,9 @@ export function ShareTagContextMenuSub({
                     return {
                         ...oldData,
                         data: [...(oldData.data || []), ...newTags],
-                    }
-                }
-            )
+                    };
+                },
+            );
 
             setOptimisticUpdates((prev) => {
                 const newMap = new Map(prev);
@@ -171,7 +174,7 @@ export function ShareTagContextMenuSub({
         ...removeShareTagAssignmentMutation(),
         onSuccess: (_, variables) => {
             const removedTag = tags?.data?.find((t) =>
-                t.assignments?.some((a) => a.id === variables.assignmentId)
+                t.assignments?.some((a) => a.id === variables.assignmentId),
             );
             if (removedTag) {
                 addCachedTag(token, {
@@ -192,11 +195,11 @@ export function ShareTagContextMenuSub({
                             oldData.data?.filter(
                                 (t) =>
                                     !t.assignments?.some(
-                                        (a) => a.id === variables.assignmentId
-                                    )
+                                        (a) => a.id === variables.assignmentId,
+                                    ),
                             ) || [],
                     };
-                }
+                },
             );
 
             setOptimisticUpdates((prev) => {
@@ -223,7 +226,11 @@ export function ShareTagContextMenuSub({
         },
     });
 
-    const handleAssignTag = (tagId: string, tagName: string, tagColor: string) => {
+    const handleAssignTag = (
+        tagId: string,
+        tagName: string,
+        tagColor: string,
+    ) => {
         setOptimisticUpdates((prev) => {
             const newMap = new Map(prev);
             newMap.set(tagId, { tagId, action: "assign" });
@@ -259,13 +266,13 @@ export function ShareTagContextMenuSub({
         });
     };
 
-    const handleToggleTag = (tag: typeof combinedTags[number]) => {
+    const handleToggleTag = (tag: (typeof combinedTags)[number]) => {
         if (tag.isAssigned) {
             handleRemoveTagAssignment(tag.id);
         } else {
             handleAssignTag(tag.id, tag.name, tag.color);
         }
-    }
+    };
 
     return (
         <ContextMenuSub>
@@ -292,10 +299,7 @@ export function ShareTagContextMenuSub({
                 )}
 
                 {!isLoadingTags && combinedTags.length === 0 && (
-                    <ContextMenuItem
-                        disabled
-                        className="text-muted-foreground"
-                    >
+                    <ContextMenuItem disabled className="text-muted-foreground">
                         <span>{t("dicom.tagContextMenu.noTags")}</span>
                     </ContextMenuItem>
                 )}
@@ -328,5 +332,5 @@ export function ShareTagContextMenuSub({
                 })}
             </ContextMenuSubContent>
         </ContextMenuSub>
-    )
+    );
 }

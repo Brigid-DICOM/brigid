@@ -23,7 +23,7 @@ function getAuthProvider() {
         return CasdoorProvider({
             clientId: env.AUTH_CASDOOR_ID,
             clientSecret: env.AUTH_CASDOOR_SECRET,
-            issuer: env.AUTH_CASDOOR_ISSUER
+            issuer: env.AUTH_CASDOOR_ISSUER,
         });
     }
 
@@ -32,7 +32,7 @@ function getAuthProvider() {
 
 export const app = new Hono()
     .basePath("/api")
-    .use(async (c, next) => {
+    .use(async (_, next) => {
         if (!AppDataSource.isInitialized) {
             await AppDataSource.initialize();
         }
@@ -44,7 +44,7 @@ export const app = new Hono()
             return initAuthConfig(() => ({
                 basePath: "/api/auth",
                 pages: {
-                    signIn: "/auth/signin"
+                    signIn: "/auth/signin",
                 },
                 secret: env.NEXTAUTH_SECRET,
                 providers: [getAuthProvider()],
@@ -95,7 +95,7 @@ export const app = new Hono()
     .route("/hello", helloRoute)
     .route("/", workspacesRoute)
     .route("/", userRoute)
-    .route("/", shareRoute)
+    .route("/", shareRoute);
 
 if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
     app.route("/", guestRoute);

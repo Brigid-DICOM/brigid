@@ -3,5 +3,8 @@ import type { Context } from "hono";
 
 export interface WadoResponseHandler {
     canHandle(accept: string): boolean;
-    handle(c: Context, args: { instances: InstanceEntity[]; accept: string }): Promise<Response>;
-};
+    handle(
+        c: Context,
+        args: { instances: InstanceEntity[]; accept: string },
+    ): Promise<Response>;
+}

@@ -23,8 +23,8 @@ export class UserService {
 
         let user = await this.userRepository.findOne({
             where: {
-                id: GUEST_USER_ID
-            }
+                id: GUEST_USER_ID,
+            },
         });
 
         if (!user) {
@@ -33,36 +33,47 @@ export class UserService {
                 name: "Guest User",
                 email: "guest@brigid.local",
                 emailVerified: new Date().toISOString(),
-                image: "/guest-avatar.jpg"
+                image: "/guest-avatar.jpg",
             });
         }
 
         return user;
     }
 
-    async searchUsers({ query, limit = 10, page = 1, excludeUserIds }: SearchUsersOptions) {
+    async searchUsers({
+        query,
+        limit = 10,
+        page = 1,
+        excludeUserIds,
+    }: SearchUsersOptions) {
         const offset = (page - 1) * limit;
 
         const queryBuilder = this.userRepository.createQueryBuilder("user");
-        queryBuilder.where("(user.name ILIKE :query OR user.email ILIKE :query)", { query: `%${query}%` });
+        queryBuilder.where(
+            "(user.name ILIKE :query OR user.email ILIKE :query)",
+            { query: `%${query}%` },
+        );
 
         if (excludeUserIds) {
-            queryBuilder.andWhere("user.id NOT IN (:...excludeUserIds)", { excludeUserIds });
+            queryBuilder.andWhere("user.id NOT IN (:...excludeUserIds)", {
+                excludeUserIds,
+            });
         }
 
         const [users, total] = await queryBuilder
-        .select(["user.id", "user.name", "user.email", "user.image"])
-        .skip(offset)
-        .take(limit).getManyAndCount();
+            .select(["user.id", "user.name", "user.email", "user.image"])
+            .skip(offset)
+            .take(limit)
+            .getManyAndCount();
 
-        return { 
+        return {
             users,
             pagination: {
                 page,
                 limit,
                 total,
                 hasNextPage: offset + limit < total,
-            }
+            },
         };
     }
 }

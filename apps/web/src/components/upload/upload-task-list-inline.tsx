@@ -99,7 +99,9 @@ export function UploadTaskListInLine() {
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex text-sm font-medium items-center space-x-2">
                         <UploadIcon className="size-4" />
-                        <span>{t("upload.uploadingTasks")} ({tasks.length})</span>
+                        <span>
+                            {t("upload.uploadingTasks")} ({tasks.length})
+                        </span>
                     </CardTitle>
 
                     {hasCompletedTasks && (
@@ -117,7 +119,9 @@ export function UploadTaskListInLine() {
 
                 <div className="flex gap-4 text-xs text-muted-foreground">
                     {activeTasksCount > 0 && (
-                        <span>{t("upload.uploading")} {activeTasksCount}</span>
+                        <span>
+                            {t("upload.uploading")} {activeTasksCount}
+                        </span>
                     )}
                     {validCount > 0 && (
                         <span className="text-green-600">

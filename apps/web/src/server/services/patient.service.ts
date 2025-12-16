@@ -13,33 +13,35 @@ export class PatientService {
     }
 
     async insertOrUpdatePatient(patientEntity: PatientEntity) {
-        const existingPatient = await this.entityManager.findOne(PatientEntity, {
-            where: {
-                dicomPatientId: patientEntity.dicomPatientId,
-                workspaceId: patientEntity.workspaceId
+        const existingPatient = await this.entityManager.findOne(
+            PatientEntity,
+            {
+                where: {
+                    dicomPatientId: patientEntity.dicomPatientId,
+                    workspaceId: patientEntity.workspaceId,
+                },
+                relations: {
+                    patientName: true,
+                },
+                select: {
+                    id: true,
+                    patientName: {
+                        id: true,
+                    },
+                },
             },
-            relations: {
-                patientName: true
-            },
-            select: {
-                id: true,
-                patientName: {
-                    id: true
-                }
-            }
-        });
-        
+        );
+
         if (existingPatient) {
             patientEntity.id = existingPatient.id;
-            
+
             if (
                 "patientName" in patientEntity &&
                 patientEntity.patientName &&
                 "id" in patientEntity.patientName &&
                 existingPatient.patientName
             ) {
-                patientEntity.patientName.id =
-                    existingPatient.patientName.id;
+                patientEntity.patientName.id = existingPatient.patientName.id;
             }
         }
 
@@ -47,28 +49,34 @@ export class PatientService {
     }
 
     async getPatientCount(
-        workspaceId: string, 
+        workspaceId: string,
         range?: string,
-        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE
+        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
     ) {
         const countQuery = this.entityManager
-        .createQueryBuilder(PatientEntity, "patient")
-        .where("patient.workspaceId = :workspaceId", { workspaceId })
-        .andWhere((qb) => {
-            const subQuery = qb
-                .subQuery()
-                .select("1")
-                .from(StudyEntity, "study")
-                .where("study.patientId = patient.id")
-                .andWhere("study.deleteStatus = :deleteStatus", { deleteStatus })
-                .getQuery();
-            
-            return `EXISTS (${subQuery})`;
-        });
+            .createQueryBuilder(PatientEntity, "patient")
+            .where("patient.workspaceId = :workspaceId", { workspaceId })
+            .andWhere((qb) => {
+                const subQuery = qb
+                    .subQuery()
+                    .select("1")
+                    .from(StudyEntity, "study")
+                    .where("study.patientId = patient.id")
+                    .andWhere("study.deleteStatus = :deleteStatus", {
+                        deleteStatus,
+                    })
+                    .getQuery();
+
+                return `EXISTS (${subQuery})`;
+            });
 
         if (range) {
             const dateQueryStrategy = new DateQueryStrategy();
-            const dateQuery = dateQueryStrategy.buildQuery("patient", "createdAt", range);
+            const dateQuery = dateQueryStrategy.buildQuery(
+                "patient",
+                "createdAt",
+                range,
+            );
             countQuery.andWhere(dateQuery.sql, dateQuery.parameters);
         }
 

@@ -9,10 +9,12 @@ interface DicomRecycleSeriesPageProps {
     params: Promise<{
         workspaceId: string;
         studyInstanceUid: string;
-    }>
+    }>;
 }
 
-export default async function DicomRecycleSeriesPage({ params }: DicomRecycleSeriesPageProps) {
+export default async function DicomRecycleSeriesPage({
+    params,
+}: DicomRecycleSeriesPageProps) {
     const cookieStore = await cookies();
     const { studyInstanceUid, workspaceId } = await params;
     const queryClient = getQueryClient();
@@ -21,16 +23,16 @@ export default async function DicomRecycleSeriesPage({ params }: DicomRecycleSer
             workspaceId: workspaceId,
             studyInstanceUid: studyInstanceUid,
             deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
-            cookie: cookieStore.toString()
-        })
-    )
+            cookie: cookieStore.toString(),
+        }),
+    );
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <DicomRecycleSeriesContent 
+            <DicomRecycleSeriesContent
                 workspaceId={workspaceId}
                 studyInstanceUid={studyInstanceUid}
             />
         </HydrationBoundary>
-    )
+    );
 }

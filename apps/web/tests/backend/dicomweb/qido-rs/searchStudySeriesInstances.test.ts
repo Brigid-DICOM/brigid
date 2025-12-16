@@ -2,21 +2,12 @@ import type { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { get } from "lodash";
 import type { DataSource } from "typeorm";
-import {
-    afterAll,
-    beforeAll,
-    beforeEach,
-    describe,
-    expect,
-    it
-} from "vitest";
-import {
-    app
-} from "@/app/api/[...route]/route";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { app } from "@/app/api/[...route]/route";
 import { TestDatabaseManager } from "../../../utils/testDatabaseManager";
 import {
     keywordPathToTagPath,
-    type SearchDicomTestOptions
+    type SearchDicomTestOptions,
 } from "../../../utils/testUtils";
 import { WORKSPACE_ID } from "../../workspace.const";
 
@@ -35,7 +26,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
 
         global.setTestDataSource(testDb.dataSource);
     });
-    
+
     afterAll(async () => {
         await testDb.cleanup();
     });
@@ -48,7 +39,9 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
         testSeries = seedData.series;
     });
 
-    const itShouldSearchStudySeriesInstancesWith = (options: SearchDicomTestOptions) => {
+    const itShouldSearchStudySeriesInstancesWith = (
+        options: SearchDicomTestOptions,
+    ) => {
         const {
             queryParamPath,
             searchValue,
@@ -56,7 +49,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             statusCode = 200,
             expectDicomValue,
             customAssertion,
-            title
+            title,
         } = options;
 
         const runTest = async (param: string) => {
@@ -111,7 +104,8 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
         });
 
         it("should return 204 for non-existent study", async () => {
-            const nonExistentStudyInstanceUid = "non-existent-study-instance-uid";
+            const nonExistentStudyInstanceUid =
+                "non-existent-study-instance-uid";
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${nonExistentStudyInstanceUid}/series/${testSeries[0].seriesInstanceUid}/instances`,
             );
@@ -120,7 +114,8 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
         });
 
         it("should return 204 for non-existent series", async () => {
-            const nonExistentSeriesInstanceUid = "non-existent-series-instance-uid";
+            const nonExistentSeriesInstanceUid =
+                "non-existent-series-instance-uid";
 
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${testStudies[0].studyInstanceUid}/series/${nonExistentSeriesInstanceUid}/instances`,
@@ -176,7 +171,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/studies/${testStudy.studyInstanceUid}/series/${aTestSeries.seriesInstanceUid}/instances?limit=1001`,
             );
-            
+
             expect(response.status).toBe(400);
         });
 
@@ -211,7 +206,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080016",
                 value: "1.2.840.113619.5.1",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -221,7 +216,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080016",
                 value: "1.2.840.113619.5.1",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -236,7 +231,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             queryParamPath: "SOPClassUID",
             searchValue: "non-existent-sop-class-uid",
             expectedCount: 0,
-            statusCode: 204
+            statusCode: 204,
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -255,7 +250,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080018",
                 value: "1.2.840.113619.5.1.1",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -265,7 +260,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080018",
                 value: "1.2.840.113619.5.1.1",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -280,7 +275,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             queryParamPath: "SOPInstanceUID",
             searchValue: "non-existent-sop-instance-uid",
             expectedCount: 0,
-            statusCode: 204
+            statusCode: 204,
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -299,7 +294,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00200013",
                 value: 1,
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -309,7 +304,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00200013",
                 value: 1,
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -317,7 +312,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             queryParamPath: "InstanceNumber",
             searchValue: "1111",
             expectedCount: 0,
-            statusCode: 204
+            statusCode: 204,
         });
     });
 
@@ -329,7 +324,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080022",
                 value: "20241017",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -339,7 +334,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080022",
                 value: "20241017",
-            }
+            },
         });
     });
 
@@ -376,7 +371,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080023",
                 value: "20241017",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -386,7 +381,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080023",
                 value: "20241017",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -419,7 +414,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080033",
                 value: "150500.000000",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -429,7 +424,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             expectDicomValue: {
                 tag: "00080033",
                 value: "150500.000000",
-            }
+            },
         });
 
         itShouldSearchStudySeriesInstancesWith({
@@ -438,7 +433,7 @@ describe("QIDO-RS Search Study Series Instances Route", () => {
             searchValue: "100500.000000-150500.999999",
             expectedCount: 1,
         });
-        
+
         itShouldSearchStudySeriesInstancesWith({
             title: "should support start time",
             queryParamPath: "ContentTime",

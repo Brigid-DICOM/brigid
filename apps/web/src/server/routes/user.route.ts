@@ -1,8 +1,5 @@
 import { Hono } from "hono";
-import {
-    describeRoute,
-    validator as zValidator
-} from "hono-openapi";
+import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { verifyAuthMiddleware } from "../middlewares/verifyAuth.middleware";
 import { UserService } from "../services/user.service";
@@ -32,9 +29,12 @@ const userRoute = new Hono().get(
         const { query, limit, page } = c.req.valid("query");
 
         if (!userId) {
-            return c.json({
-                message: "Unauthorized"
-            }, 401);
+            return c.json(
+                {
+                    message: "Unauthorized",
+                },
+                401,
+            );
         }
 
         try {
@@ -43,7 +43,7 @@ const userRoute = new Hono().get(
                 query,
                 limit,
                 page,
-                excludeUserIds: [userId]
+                excludeUserIds: [userId],
             });
 
             return c.json({
@@ -54,17 +54,20 @@ const userRoute = new Hono().get(
                     limit: pagination.limit,
                     total: pagination.total,
                     hasNextPage: pagination.hasNextPage,
-                }
+                },
             });
-        } catch(error) {
+        } catch (error) {
             logger.error("Error searching users", error);
-            return c.json({
-                ok: false,
-                data: null,
-                error: "Error searching users"
-            }, 500);
+            return c.json(
+                {
+                    ok: false,
+                    data: null,
+                    error: "Error searching users",
+                },
+                500,
+            );
         }
-    }
-)
+    },
+);
 
 export default userRoute;

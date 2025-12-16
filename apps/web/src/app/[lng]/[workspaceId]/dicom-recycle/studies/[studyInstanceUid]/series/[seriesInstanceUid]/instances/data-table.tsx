@@ -37,8 +37,8 @@ import {
 import { cn } from "@/lib/utils";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
-    deleteDicomInstanceMutation, 
-    restoreDicomInstanceMutation
+    deleteDicomInstanceMutation,
+    restoreDicomInstanceMutation,
 } from "@/react-query/queries/dicomInstance";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
@@ -59,16 +59,23 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const { t } = useT("translation");
-    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
+        useState(false);
     const queryClient = getQueryClient();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
 
-    const workspace = useWorkspaceStore(useShallow(state => state.workspace));
+    const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
-    const canRead = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.READ);
-    const canDelete = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
+    const canRead = hasPermission(
+        workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.READ,
+    );
+    const canDelete = hasPermission(
+        workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.DELETE,
+    );
 
     const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -81,24 +88,34 @@ function ActionsCell({
             instanceIds: [sopInstanceUid],
         }),
         onMutate: () => {
-            toast.loading(t("dicom.messages.restoring", { level: "instance" }), {
-                id: `restore-${sopInstanceUid}`,
-            });
-
+            toast.loading(
+                t("dicom.messages.restoring", { level: "instance" }),
+                {
+                    id: `restore-${sopInstanceUid}`,
+                },
+            );
         },
         onSuccess: () => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "instance" }));
+            toast.success(
+                t("dicom.messages.restoreSuccess", { level: "instance" }),
+            );
             toast.dismiss(`restore-${sopInstanceUid}`);
             queryClient.invalidateQueries({
-                queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid],
+                queryKey: [
+                    "dicom-instance",
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                ],
             });
         },
         onError: () => {
-            toast.error(t("dicom.messages.restoreError", { level: "instance" }));
+            toast.error(
+                t("dicom.messages.restoreError", { level: "instance" }),
+            );
             toast.dismiss(`restore-${sopInstanceUid}`);
         },
     });
-
 
     const { mutate: deleteDicomInstance } = useMutation({
         ...deleteDicomInstanceMutation({
@@ -111,47 +128,59 @@ function ActionsCell({
             });
         },
         onSuccess: () => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "instance" }));
+            toast.success(
+                t("dicom.messages.deleteSuccess", { level: "instance" }),
+            );
             toast.dismiss(`delete-${sopInstanceUid}`);
             queryClient.invalidateQueries({
-                queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid],
+                queryKey: [
+                    "dicom-instance",
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                ],
             });
         },
         onError: () => {
             toast.error(t("dicom.messages.deleteError", { level: "instance" }));
             toast.dismiss(`delete-${sopInstanceUid}`);
-        }
+        },
     });
-
 
     const handleRestoreInstance = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canDelete) {
-            toast.error(t("dicom.messages.noPermissionRestore", { level: "instance" }));
+            toast.error(
+                t("dicom.messages.noPermissionRestore", { level: "instance" }),
+            );
             return;
         }
 
         e.preventDefault();
         restoreDicomInstance();
-    }
+    };
 
     const handleDeleteInstance = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canDelete) {
-            toast.error(t("dicom.messages.noPermissionDelete", { level: "instance" }));
+            toast.error(
+                t("dicom.messages.noPermissionDelete", { level: "instance" }),
+            );
             return;
         }
 
         e.preventDefault();
         setShowDeleteConfirmDialog(true);
-    }
+    };
 
     const handleConfirmDelete = () => {
         if (!canDelete) {
-            toast.error(t("dicom.messages.noPermissionDelete", { level: "instance" }));
+            toast.error(
+                t("dicom.messages.noPermissionDelete", { level: "instance" }),
+            );
             return;
         }
 
         deleteDicomInstance();
-    }
+    };
 
     return (
         <>
@@ -165,7 +194,8 @@ function ActionsCell({
                 <DropdownMenuContent align="end">
                     {canRead && (
                         <DropdownMenuItem onClick={handleCopySopInstanceUid}>
-                            {t("dicom.contextMenu.copy")} {t("dicom.columns.instance.sopInstanceUid")}
+                            {t("dicom.contextMenu.copy")}{" "}
+                            {t("dicom.columns.instance.sopInstanceUid")}
                         </DropdownMenuItem>
                     )}
 
@@ -184,13 +214,15 @@ function ActionsCell({
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {canDelete && <DicomDeleteConfirmDialog 
-                open={showDeleteConfirmDialog}
-                onOpenChange={setShowDeleteConfirmDialog}
-                dicomLevel="instance"
-                selectedCount={1}
-                onConfirm={handleConfirmDelete}
-            />}
+            {canDelete && (
+                <DicomDeleteConfirmDialog
+                    open={showDeleteConfirmDialog}
+                    onOpenChange={setShowDeleteConfirmDialog}
+                    dicomLevel="instance"
+                    selectedCount={1}
+                    onConfirm={handleConfirmDelete}
+                />
+            )}
         </>
     );
 }
@@ -220,26 +252,26 @@ export function DicomRecycleInstancesDataTable({
                     const rows = table.getRowModel().rows;
 
                     return (
-                    <Checkbox
-                        checked={
-                            getSelectedCount() > 0 &&
-                            getSelectedCount() === rows.length
-                        }
-                        onCheckedChange={(value) => {
-                            const isChecked = !!value;
-                            if (isChecked) {
-                                selectAll(
-                                    rows.map(
-                                        (row) =>
-                                            row.original["00080018"]?.Value?.[0] ||
-                                            "",
-                                    ),
-                                );
-                            } else {
-                                clearSelection();
+                        <Checkbox
+                            checked={
+                                getSelectedCount() > 0 &&
+                                getSelectedCount() === rows.length
                             }
-                        }}
-                        aria-label="Select all"
+                            onCheckedChange={(value) => {
+                                const isChecked = !!value;
+                                if (isChecked) {
+                                    selectAll(
+                                        rows.map(
+                                            (row) =>
+                                                row.original["00080018"]
+                                                    ?.Value?.[0] || "",
+                                        ),
+                                    );
+                                } else {
+                                    clearSelection();
+                                }
+                            }}
+                            aria-label="Select all"
                         />
                     );
                 },
@@ -271,9 +303,15 @@ export function DicomRecycleInstancesDataTable({
                                 type: "workspace",
                                 workspaceId,
                             }}
-                            studyInstanceUid={row.original["0020000D"]?.Value?.[0] || "N/A"}
-                            seriesInstanceUid={row.original["0020000E"]?.Value?.[0] || "N/A"}
-                            sopInstanceUid={row.original["00080018"]?.Value?.[0] || "N/A"}
+                            studyInstanceUid={
+                                row.original["0020000D"]?.Value?.[0] || "N/A"
+                            }
+                            seriesInstanceUid={
+                                row.original["0020000E"]?.Value?.[0] || "N/A"
+                            }
+                            sopInstanceUid={
+                                row.original["00080018"]?.Value?.[0] || "N/A"
+                            }
                             size={64}
                         />
                     );
@@ -301,7 +339,7 @@ export function DicomRecycleInstancesDataTable({
             isInstanceSelected,
             toggleInstanceSelection,
             generalColumns,
-            t
+            t,
         ],
     );
 

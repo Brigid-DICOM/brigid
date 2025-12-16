@@ -1,6 +1,13 @@
 "use client";
 
-import { Grid3x3Icon, ListChecksIcon, ListIcon, Trash2Icon, UndoIcon, XIcon } from "lucide-react";
+import {
+    Grid3x3Icon,
+    ListChecksIcon,
+    ListIcon,
+    Trash2Icon,
+    UndoIcon,
+    XIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
@@ -32,13 +39,20 @@ export function DicomRecycleSelectionControlBar({
     dicomLevel,
 }: DicomRecycleSelectionControlBarProps) {
     const { t } = useT("translation");
-    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
+        useState(false);
     const layoutMode = useLayoutStore((state) => state.layoutMode);
     const setLayoutMode = useLayoutStore((state) => state.setLayoutMode);
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
-    const canRestore = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
-    const canDelete = hasPermission(workspace?.membership?.permissions ?? 0, WORKSPACE_PERMISSIONS.DELETE);
+    const canRestore = hasPermission(
+        workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.DELETE,
+    );
+    const canDelete = hasPermission(
+        workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.DELETE,
+    );
 
     const handleLayoutChange = (mode: LayoutMode) => {
         setLayoutMode(mode);
@@ -47,12 +61,12 @@ export function DicomRecycleSelectionControlBar({
     const handleDelete = () => {
         if (selectedCount === 0) return;
         setShowDeleteConfirmDialog(true);
-    }
+    };
 
     const handleConfirmDelete = () => {
         if (selectedCount === 0) return;
         onDelete();
-    }
+    };
 
     return (
         <>
@@ -64,7 +78,9 @@ export function DicomRecycleSelectionControlBar({
                                 variant={"outline"}
                                 size="sm"
                                 onClick={onClearSelection}
-                                title={t("dicom.selectionControl.clearSelection")}
+                                title={t(
+                                    "dicom.selectionControl.clearSelection",
+                                )}
                             >
                                 <XIcon className="size-4" />
                             </Button>
@@ -81,32 +97,39 @@ export function DicomRecycleSelectionControlBar({
                         )}
                         {selectedCount > 0 && (
                             <ButtonGroupText className="bg-background">
-                                {t("dicom.selectionControl.selectedCount", { count: selectedCount })}
+                                {t("dicom.selectionControl.selectedCount", {
+                                    count: selectedCount,
+                                })}
                             </ButtonGroupText>
                         )}
                     </ButtonGroup>
 
-                    {selectedCount > 0 && <ButtonGroup>
-                        {canRestore && <Button
-                            variant={"outline"}
-                            size="sm"
-                            onClick={onRestore}
-                            title={t("dicom.selectionControl.restore")}
-                        >
-                            <UndoIcon className="size-4" />
-                        </Button>}
+                    {selectedCount > 0 && (
+                        <ButtonGroup>
+                            {canRestore && (
+                                <Button
+                                    variant={"outline"}
+                                    size="sm"
+                                    onClick={onRestore}
+                                    title={t("dicom.selectionControl.restore")}
+                                >
+                                    <UndoIcon className="size-4" />
+                                </Button>
+                            )}
 
-                        {canDelete && <Button
-                            variant={"outline"}
-                            size="sm"
-                            onClick={handleDelete}
-                            title={t("dicom.selectionControl.delete")}
-                        >
-                            <Trash2Icon className="size-4 text-destructive" />
-                        </Button>}
-                    </ButtonGroup>}
+                            {canDelete && (
+                                <Button
+                                    variant={"outline"}
+                                    size="sm"
+                                    onClick={handleDelete}
+                                    title={t("dicom.selectionControl.delete")}
+                                >
+                                    <Trash2Icon className="size-4 text-destructive" />
+                                </Button>
+                            )}
+                        </ButtonGroup>
+                    )}
                 </ButtonGroup>
-
 
                 <div className="flex items-end justify-end ml-auto">
                     <Button
@@ -128,7 +151,7 @@ export function DicomRecycleSelectionControlBar({
                 </div>
             </div>
 
-            <DicomDeleteConfirmDialog 
+            <DicomDeleteConfirmDialog
                 open={showDeleteConfirmDialog}
                 onOpenChange={setShowDeleteConfirmDialog}
                 dicomLevel={dicomLevel}

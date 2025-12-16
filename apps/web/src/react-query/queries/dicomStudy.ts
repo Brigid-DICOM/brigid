@@ -17,43 +17,59 @@ export const getDicomStudyQuery = ({
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
     cookie,
     ...searchParams
-}: DicomStudyQueryParams) => queryOptions({
-    queryKey: ["dicom-study", workspaceId, offset, limit, deleteStatus, ...Object.keys(searchParams)],
-    queryFn: async () => {
-        const headers: HeadersInit = {};
-        if (typeof window === "undefined" && typeof cookie === "string") {
-            headers.cookie = cookie;
-        }
-
-        const response = await apiClient.api.workspaces[":workspaceId"].studies.$get({
-            param: {
-                workspaceId,
-            },
-            query: {
-                offset: offset.toString(),
-                limit: limit.toString(),
-                deleteStatus: deleteStatus.toString(),
-                ...Object.fromEntries(
-                    Object.entries(searchParams).filter(([_, value]) =>
-                        value !== undefined && value !== null && value !== ""
-                    )
-                )
+}: DicomStudyQueryParams) =>
+    queryOptions({
+        queryKey: [
+            "dicom-study",
+            workspaceId,
+            offset,
+            limit,
+            deleteStatus,
+            ...Object.keys(searchParams),
+        ],
+        queryFn: async () => {
+            const headers: HeadersInit = {};
+            if (typeof window === "undefined" && typeof cookie === "string") {
+                headers.cookie = cookie;
             }
-        }, {
-            headers: headers
-        });
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch DICOM study instances");
-        }
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].studies.$get(
+                {
+                    param: {
+                        workspaceId,
+                    },
+                    query: {
+                        offset: offset.toString(),
+                        limit: limit.toString(),
+                        deleteStatus: deleteStatus.toString(),
+                        ...Object.fromEntries(
+                            Object.entries(searchParams).filter(
+                                ([_, value]) =>
+                                    value !== undefined &&
+                                    value !== null &&
+                                    value !== "",
+                            ),
+                        ),
+                    },
+                },
+                {
+                    headers: headers,
+                },
+            );
 
-        if (response.status === 204) {
-            return [];
-        }
+            if (!response.ok) {
+                throw new Error("Failed to fetch DICOM study instances");
+            }
 
-        return await response.json();
-    }
-});
+            if (response.status === 204) {
+                return [];
+            }
+
+            return await response.json();
+        },
+    });
 
 export const recycleDicomStudyMutation = ({
     workspaceId,
@@ -61,24 +77,27 @@ export const recycleDicomStudyMutation = ({
 }: {
     workspaceId: string;
     studyIds: string[];
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.studies.recycle.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                studyIds,
-            },
-        });
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.studies.recycle.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    studyIds,
+                },
+            });
 
-        if (!response.ok) {
-            throw new Error("Failed to recycle DICOM study");
-        }
+            if (!response.ok) {
+                throw new Error("Failed to recycle DICOM study");
+            }
 
-        return await response.json();
-    }
-});
+            return await response.json();
+        },
+    });
 
 export const restoreDicomStudyMutation = ({
     workspaceId,
@@ -86,24 +105,27 @@ export const restoreDicomStudyMutation = ({
 }: {
     workspaceId: string;
     studyIds: string[];
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.studies.restore.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                studyIds,
-            },
-        });
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.studies.restore.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    studyIds,
+                },
+            });
 
-        if (!response.ok) {
-            throw new Error("Failed to restore DICOM study");
-        }
+            if (!response.ok) {
+                throw new Error("Failed to restore DICOM study");
+            }
 
-        return await response.json();
-    }
-});
+            return await response.json();
+        },
+    });
 
 export const deleteDicomStudyMutation = ({
     workspaceId,
@@ -111,21 +133,24 @@ export const deleteDicomStudyMutation = ({
 }: {
     workspaceId: string;
     studyIds: string[];
-}) => mutationOptions({
-    mutationFn: async () => {
-        const response = await apiClient.api.workspaces[":workspaceId"].dicom.studies.delete.$post({
-            param: {
-                workspaceId,
-            },
-            json: {
-                studyIds,
-            },
-        });
+}) =>
+    mutationOptions({
+        mutationFn: async () => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].dicom.studies.delete.$post({
+                param: {
+                    workspaceId,
+                },
+                json: {
+                    studyIds,
+                },
+            });
 
-        if (!response.ok) {
-            throw new Error("Failed to delete DICOM study");
-        }
+            if (!response.ok) {
+                throw new Error("Failed to delete DICOM study");
+            }
 
-        return await response.json();
-    }
-})
+            return await response.json();
+        },
+    });

@@ -78,11 +78,13 @@ const verifyPasswordRoute = new Hono().post(
                 verified: true,
                 exp: Math.floor(Date.now() / 1000) + 60 * 60 * 12, // 12 hours
             };
-            const jwt = await sign(payload, JWT_SECRET);  
+            const jwt = await sign(payload, JWT_SECRET);
 
             setCookie(c, `share-auth-${token}`, jwt, {
                 httpOnly: true,
-                secure: env.IS_LOCAL_APP ? false : process.env.NODE_ENV === "production",
+                secure: env.IS_LOCAL_APP
+                    ? false
+                    : process.env.NODE_ENV === "production",
                 sameSite: "Lax",
                 path: "/",
                 maxAge: 60 * 60 * 12, // 12 hours

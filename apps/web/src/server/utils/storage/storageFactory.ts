@@ -12,4 +12,4 @@ export const getStorageProvider = (): StorageProvider => {
         default:
             throw new Error("Invalid storage provider");
     }
-}
+};

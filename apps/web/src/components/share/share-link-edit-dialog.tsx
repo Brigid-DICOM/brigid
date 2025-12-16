@@ -9,9 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {
-    ShareLinkEditForm,
-} from "./share-link-edit-form";
+import { ShareLinkEditForm } from "./share-link-edit-form";
 
 interface ShareLinkEditDialogProps {
     open: boolean;
@@ -27,7 +25,7 @@ export function ShareLinkEditDialog({
     workspaceId,
 }: ShareLinkEditDialogProps) {
     const { t } = useT("translation");
-    
+
     return createPortal(
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">

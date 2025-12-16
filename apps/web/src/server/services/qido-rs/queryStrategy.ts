@@ -7,6 +7,6 @@ export abstract class QueryStrategy {
     abstract buildQuery(
         table: string,
         field: string,
-        value: string
+        value: string,
     ): QueryDicomResult;
 }

@@ -52,7 +52,11 @@ function identifyBoundary(header: string): string {
  * @param {Number} offset offset in message content from where search should start
  * @returns {Boolean} whether message contains token at offset
  */
-function containsToken(message: Uint8Array, token: Uint8Array, offset = 0): boolean {
+function containsToken(
+    message: Uint8Array,
+    token: Uint8Array,
+    offset = 0,
+): boolean {
     if (offset + token.length > message.length) {
         return false;
     }
@@ -73,7 +77,12 @@ function containsToken(message: Uint8Array, token: Uint8Array, offset = 0): bool
  * @param {Number} offset message body offset from where search should start
  * @returns {Boolean} whether message has a part at given offset or not
  */
-function findToken(message: Uint8Array, token: Uint8Array, offset = 0, maxSearchLength?: number): number {
+function findToken(
+    message: Uint8Array,
+    token: Uint8Array,
+    offset = 0,
+    maxSearchLength?: number,
+): number {
     let searchLength = message.length;
     if (maxSearchLength) {
         searchLength = Math.min(offset + maxSearchLength, message.length);
@@ -151,7 +160,7 @@ export function multipartDecode(response: ArrayBuffer): ArrayBuffer[] {
             message,
             separator,
             boundaryIndex + 1,
-            maxSearchLength
+            maxSearchLength,
         );
         if (boundaryEnd === -1) break;
         // Move the offset to the end of the identified boundary

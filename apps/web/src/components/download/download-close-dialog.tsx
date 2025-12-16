@@ -83,7 +83,8 @@ export function DownloadCloseDialog({
                             <div className="text-sm text-amber-800">
                                 <p className="font-medium">Warning:</p>
                                 <p>
-                                    {downloadingCount > 0 && "Active downloads will be interrupted and may result in incomplete files. "}
+                                    {downloadingCount > 0 &&
+                                        "Active downloads will be interrupted and may result in incomplete files. "}
                                     This action cannot be undone.
                                 </p>
                             </div>
@@ -99,7 +100,9 @@ export function DownloadCloseDialog({
                         Cancel
                     </Button>
                     <Button
-                        variant={totalActiveTasks > 0 ? "destructive" : "default"}
+                        variant={
+                            totalActiveTasks > 0 ? "destructive" : "default"
+                        }
                         onClick={() => {
                             onConfirm();
                             onOpenChange(false);
@@ -110,5 +113,5 @@ export function DownloadCloseDialog({
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    )
+    );
 }

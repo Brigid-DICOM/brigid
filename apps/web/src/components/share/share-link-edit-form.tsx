@@ -25,14 +25,22 @@ interface ShareLinkEditFormProps {
     onCancel?: () => void;
 }
 
-export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel }: ShareLinkEditFormProps) {
+export function ShareLinkEditForm({
+    shareLink,
+    workspaceId,
+    onSuccess,
+    onCancel,
+}: ShareLinkEditFormProps) {
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
     const queryClient = getQueryClient();
-    const [updatedShare, setUpdatedShare] = useState<Partial<ClientShareLinkData>>({});
+    const [updatedShare, setUpdatedShare] = useState<
+        Partial<ClientShareLinkData>
+    >({});
 
     const recipients = useMemo(() => {
-        const recipients = updatedShare.recipients ?? shareLink.recipients ?? [];
+        const recipients =
+            updatedShare.recipients ?? shareLink.recipients ?? [];
 
         return recipients.map((r) => ({
             userId: r.userId,
@@ -42,8 +50,16 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
     }, [updatedShare, shareLink]);
 
     const { mutate: updateShareLink, isPending: isUpdating } = useMutation({
-        mutationFn: async ({ shareLinkId, updates }: { shareLinkId: string, updates: Partial<ClientShareLinkData> }) => {
-            const response = await apiClient.api.workspaces[":workspaceId"]["share-links"][":shareLinkId"].$patch({
+        mutationFn: async ({
+            shareLinkId,
+            updates,
+        }: {
+            shareLinkId: string;
+            updates: Partial<ClientShareLinkData>;
+        }) => {
+            const response = await apiClient.api.workspaces[":workspaceId"][
+                "share-links"
+            ][":shareLinkId"].$patch({
                 param: { workspaceId, shareLinkId },
                 json: updates,
             });
@@ -70,7 +86,7 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             toast.error(t("shareLink.messages.shareLinkUpdatedError"), {
                 position: "bottom-center",
             });
-        }
+        },
     });
 
     const handleUpdate = () => {
@@ -85,15 +101,22 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             shareLinkId: shareLink.id,
             updates: updatedShare,
         });
-    }
+    };
 
-    const handleSelectUser = (user: ClientShareLinkData["recipients"][number]) => {
+    const handleSelectUser = (
+        user: ClientShareLinkData["recipients"][number],
+    ) => {
         setUpdatedShare((prev) => {
-            const existing = prev.recipients?.find((u) => u.userId === user.userId);
+            const existing = prev.recipients?.find(
+                (u) => u.userId === user.userId,
+            );
             if (existing) {
                 return {
                     ...prev,
-                    recipients: prev.recipients?.map((u) => (u.userId === user.userId ? user : u)) ?? [],
+                    recipients:
+                        prev.recipients?.map((u) =>
+                            u.userId === user.userId ? user : u,
+                        ) ?? [],
                 };
             }
             return {
@@ -101,12 +124,13 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                 recipients: [...(prev.recipients ?? []), user],
             };
         });
-    }
+    };
 
     const handleRemoveUser = (userId: string) => {
         setUpdatedShare((prev) => ({
             ...prev,
-            recipients: prev.recipients?.filter((u) => u.userId !== userId) ?? [],
+            recipients:
+                prev.recipients?.filter((u) => u.userId !== userId) ?? [],
         }));
     };
 
@@ -119,7 +143,9 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                     readOnly
                     className="cursor-pointer hover:bg-muted"
                     onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/${lng}/share/${shareLink.token}`);
+                        navigator.clipboard.writeText(
+                            `${window.location.origin}/${lng}/share/${shareLink.token}`,
+                        );
                         toast.success(t("shareLink.messages.shareLinkCopied"), {
                             position: "bottom-center",
                         });
@@ -147,13 +173,19 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                 <Label>{t("shareLink.form.publicPermissionsLabel")}</Label>
                 <SharePermissionDropdown
                     mode="public"
-                    publicPermissions={updatedShare.publicPermissions ?? shareLink.publicPermissions ?? 0}
+                    publicPermissions={
+                        updatedShare.publicPermissions ??
+                        shareLink.publicPermissions ??
+                        0
+                    }
                     onTogglePermission={(permission) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
                             publicPermissions: toggleSharePermission(
-                                prev.publicPermissions ?? shareLink.publicPermissions ?? 0,
-                                permission
+                                prev.publicPermissions ??
+                                    shareLink.publicPermissions ??
+                                    0,
+                                permission,
                             ),
                         }));
                     }}
@@ -171,7 +203,10 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                 <div className="flex items-center space-x-2">
                     <Checkbox
                         id="editRequiredPassword"
-                        checked={updatedShare.requiredPassword ?? shareLink.requiredPassword}
+                        checked={
+                            updatedShare.requiredPassword ??
+                            shareLink.requiredPassword
+                        }
                         onCheckedChange={(checked) => {
                             setUpdatedShare((prev) => ({
                                 ...prev,
@@ -180,12 +215,16 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                         }}
                         disabled={isUpdating}
                     />
-                    <Label htmlFor="editRequiredPassword" className="font-normal">
+                    <Label
+                        htmlFor="editRequiredPassword"
+                        className="font-normal"
+                    >
                         {t("shareLink.form.requiredPasswordLabel")}
                     </Label>
                 </div>
 
-                {(updatedShare.requiredPassword ?? shareLink.requiredPassword) && (
+                {(updatedShare.requiredPassword ??
+                    shareLink.requiredPassword) && (
                     <Input
                         type="password"
                         placeholder={t("shareLink.form.passwordPlaceholder")}
@@ -203,9 +242,15 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             </div>
 
             <div className="space-y-3">
-                <Label htmlFor="editExpiresInSec">{t("shareLink.form.expiresInLabel")}</Label>
+                <Label htmlFor="editExpiresInSec">
+                    {t("shareLink.form.expiresInLabel")}
+                </Label>
                 <ShareExpirationDropdown
-                    expiresInSec={updatedShare.expiresInSec ?? shareLink.expiresInSec ?? null}
+                    expiresInSec={
+                        updatedShare.expiresInSec ??
+                        shareLink.expiresInSec ??
+                        null
+                    }
                     onSelect={(expiresInSec) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
@@ -220,7 +265,9 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
                 <Label>{t("shareLink.form.descriptionLabel")}</Label>
                 <Textarea
                     placeholder={t("shareLink.form.descriptionPlaceholder")}
-                    value={updatedShare.description ?? shareLink.description ?? ""}
+                    value={
+                        updatedShare.description ?? shareLink.description ?? ""
+                    }
                     onChange={(e) => {
                         setUpdatedShare((prev) => ({
                             ...prev,
@@ -234,12 +281,18 @@ export function ShareLinkEditForm({ shareLink, workspaceId, onSuccess, onCancel 
             <div className="flex gap-2">
                 <Button
                     onClick={handleUpdate}
-                    disabled={isUpdating || Object.keys(updatedShare).length === 0}
+                    disabled={
+                        isUpdating || Object.keys(updatedShare).length === 0
+                    }
                     className="flex-1"
                 >
                     {isUpdating ? "Updating..." : "Update"}
                 </Button>
-                <Button variant="outline" onClick={onCancel} disabled={isUpdating}>
+                <Button
+                    variant="outline"
+                    onClick={onCancel}
+                    disabled={isUpdating}
+                >
                     Cancel
                 </Button>
             </div>

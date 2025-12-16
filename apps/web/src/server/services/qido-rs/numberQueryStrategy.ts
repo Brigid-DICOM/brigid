@@ -11,10 +11,14 @@ export class NumberQueryStrategy extends QueryStrategy {
             parameters: {
                 value: Number(value),
             },
-        }
+        };
     }
 
-    private buildMultiValueQuery(table: string, field: string, value: string): QueryDicomResult {
+    private buildMultiValueQuery(
+        table: string,
+        field: string,
+        value: string,
+    ): QueryDicomResult {
         const values = value.split(",").map(Number);
 
         return {
@@ -22,6 +26,6 @@ export class NumberQueryStrategy extends QueryStrategy {
             parameters: {
                 values: values,
             },
-        }
+        };
     }
 }

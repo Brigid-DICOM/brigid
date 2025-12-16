@@ -64,7 +64,8 @@ const getShareStudySeriesInstancesRoute = new Hono().get(
 
             return c.json(
                 instances.map(
-                    (instance) => JSON.parse(instance.json) as DicomInstanceData,
+                    (instance) =>
+                        JSON.parse(instance.json) as DicomInstanceData,
                 ),
                 200,
             );

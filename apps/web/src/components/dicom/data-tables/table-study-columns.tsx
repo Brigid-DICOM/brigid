@@ -8,8 +8,7 @@ export function createStudyColumns(t: TFunction): ColumnDef<DicomStudyData>[] {
             accessorKey: "patientId",
             header: t("dicom.columns.study.patientId"),
             cell: ({ row }) => {
-                const patientId =
-                    row.original["00100020"]?.Value?.[0] || "N/A";
+                const patientId = row.original["00100020"]?.Value?.[0] || "N/A";
                 return <div className="font-medium">{patientId}</div>;
             },
         },
@@ -18,8 +17,7 @@ export function createStudyColumns(t: TFunction): ColumnDef<DicomStudyData>[] {
             header: t("dicom.columns.study.patientName"),
             cell: ({ row }) => {
                 const patientName =
-                    row.original["00100010"]?.Value?.[0]?.Alphabetic ||
-                    "N/A";
+                    row.original["00100010"]?.Value?.[0]?.Alphabetic || "N/A";
 
                 return <div>{patientName}</div>;
             },
@@ -58,9 +56,7 @@ export function createStudyColumns(t: TFunction): ColumnDef<DicomStudyData>[] {
                 const studyInstanceUid =
                     row.original["0020000D"]?.Value?.[0] || "N/A";
                 return (
-                    <div className="font-mono text-sm">
-                        {studyInstanceUid}
-                    </div>
+                    <div className="font-mono text-sm">{studyInstanceUid}</div>
                 );
             },
         },

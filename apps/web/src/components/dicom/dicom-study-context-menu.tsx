@@ -221,12 +221,18 @@ export function DicomStudyContextMenu({
         });
     };
 
-    const handleCopyStudyInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleCopyStudyInstanceUid = (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
         navigator.clipboard.writeText(studyInstanceUid);
-        toast.success(t("dicom.messages.copiedToClipboard", { level: "studyInstanceUid" }));
-    }
+        toast.success(
+            t("dicom.messages.copiedToClipboard", {
+                level: "studyInstanceUid",
+            }),
+        );
+    };
 
     return (
         <ContextMenu>
@@ -237,12 +243,17 @@ export function DicomStudyContextMenu({
                     <>
                         {canRead && (
                             <>
-                                <ContextMenuItem 
+                                <ContextMenuItem
                                     onClick={handleCopyStudyInstanceUid}
                                     className="flex items-center space-x-2"
                                 >
                                     <CopyIcon className="size-4" />
-                                    <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.study.studyInstanceUid")}</span>
+                                    <span>
+                                        {t("dicom.contextMenu.copy")}{" "}
+                                        {t(
+                                            "dicom.columns.study.studyInstanceUid",
+                                        )}
+                                    </span>
                                 </ContextMenuItem>
                                 <ContextMenuItem
                                     onClick={handleEnterSeries}

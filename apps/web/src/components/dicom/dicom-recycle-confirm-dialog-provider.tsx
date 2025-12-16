@@ -5,26 +5,21 @@ import { useDicomRecycleConfirmDialogStore } from "@/stores/dicom-recycle-confir
 import { DicomRecycleConfirmDialog } from "./dicom-recycle-confirm-dialog";
 
 export function DicomRecycleConfirmDialogProvider() {
-    const {
-        isOpen,
-        dicomLevel,
-        selectedCount,
-        onConfirm,
-        closeDialog
-    } = useDicomRecycleConfirmDialogStore(
-        useShallow((state) => ({
-            isOpen: state.isOpen,
-            dicomLevel: state.dicomLevel,
-            selectedCount: state.selectedCount,
-            onConfirm: state.onConfirm,
-            closeDialog: state.closeDialog,
-        }))
-    );
+    const { isOpen, dicomLevel, selectedCount, onConfirm, closeDialog } =
+        useDicomRecycleConfirmDialogStore(
+            useShallow((state) => ({
+                isOpen: state.isOpen,
+                dicomLevel: state.dicomLevel,
+                selectedCount: state.selectedCount,
+                onConfirm: state.onConfirm,
+                closeDialog: state.closeDialog,
+            })),
+        );
 
     if (!dicomLevel || !onConfirm || selectedCount === 0) return null;
 
     return (
-        <DicomRecycleConfirmDialog 
+        <DicomRecycleConfirmDialog
             open={isOpen}
             onOpenChange={(open) => {
                 if (!open) {
@@ -35,5 +30,5 @@ export function DicomRecycleConfirmDialogProvider() {
             selectedCount={selectedCount}
             onConfirm={onConfirm}
         />
-    )
+    );
 }

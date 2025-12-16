@@ -237,12 +237,18 @@ export function DicomSeriesContextMenu({
         });
     };
 
-    const handleCopySeriesInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleCopySeriesInstanceUid = (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         e.preventDefault();
         closeContextMenu();
         navigator.clipboard.writeText(seriesInstanceUid);
-        toast.success(t("dicom.messages.copiedToClipboard", { level: "seriesInstanceUid" }));
-    }
+        toast.success(
+            t("dicom.messages.copiedToClipboard", {
+                level: "seriesInstanceUid",
+            }),
+        );
+    };
 
     return (
         <ContextMenu>
@@ -258,7 +264,12 @@ export function DicomSeriesContextMenu({
                                     className="flex items-center space-x-2"
                                 >
                                     <CopyIcon className="size-4" />
-                                    <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.series.seriesInstanceUid")}</span>
+                                    <span>
+                                        {t("dicom.contextMenu.copy")}{" "}
+                                        {t(
+                                            "dicom.columns.series.seriesInstanceUid",
+                                        )}
+                                    </span>
                                 </ContextMenuItem>
                                 <ContextMenuItem
                                     onClick={handleEnterInstances}

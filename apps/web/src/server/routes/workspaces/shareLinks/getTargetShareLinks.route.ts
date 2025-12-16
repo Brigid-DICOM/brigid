@@ -38,15 +38,12 @@ const getTargetShareLinksRoute = new Hono().get(
         "query",
         z.object({
             page: z.coerce.number().default(1).describe("The page number"),
-            targetIds: z.preprocess(
-                (val) => {
-                    if (typeof val === "string") {
-                        return [val];
-                    }
-                    return val;
-                },
-                z.array(z.string()).describe("The IDs of the targets"),
-            ),
+            targetIds: z.preprocess((val) => {
+                if (typeof val === "string") {
+                    return [val];
+                }
+                return val;
+            }, z.array(z.string()).describe("The IDs of the targets")),
         }),
     ),
     async (c) => {

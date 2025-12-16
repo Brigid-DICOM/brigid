@@ -8,7 +8,7 @@ export interface SearchDicomTestOptions {
     statusCode?: number;
     expectDicomValue?: {
         tag: string;
-        value: string | number,
+        value: string | number;
         index?: number;
     };
 
@@ -19,10 +19,15 @@ export function keywordPathToTagPath(keywordPath: string): string {
     const keywords = keywordPath.split(".");
 
     const tags = keywords.map((keyword) => {
-        const tagInfo = DICOM_TAG_KEYWORD_REGISTRY[keyword as keyof typeof DICOM_TAG_KEYWORD_REGISTRY];
+        const tagInfo =
+            DICOM_TAG_KEYWORD_REGISTRY[
+                keyword as keyof typeof DICOM_TAG_KEYWORD_REGISTRY
+            ];
 
         if (!tagInfo) {
-            throw new Error(`Keyword ${keyword} not found in DICOM_TAG_KEYWORD_REGISTRY`);
+            throw new Error(
+                `Keyword ${keyword} not found in DICOM_TAG_KEYWORD_REGISTRY`,
+            );
         }
 
         return tagInfo.tag;

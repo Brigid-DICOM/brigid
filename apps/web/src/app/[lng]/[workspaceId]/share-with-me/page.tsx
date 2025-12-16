@@ -12,12 +12,12 @@ export default async function ShareWithMePage() {
             page: 1,
             limit: 10,
             cookie: cookieStore.toString(),
-        })
+        }),
     );
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
             <ShareWithMeContent />
         </HydrationBoundary>
-    )
+    );
 }

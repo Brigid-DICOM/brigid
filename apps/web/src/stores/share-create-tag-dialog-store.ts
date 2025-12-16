@@ -38,7 +38,7 @@ export const useShareCreateTagDialogStore = create<ShareCreateTagDialogState>()(
                     password,
                 });
             },
-            
+
             closeDialog: () => {
                 set({
                     isOpen: false,

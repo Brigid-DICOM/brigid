@@ -15,6 +15,7 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomInstanceCard } from "@/components/dicom/dicom-instance-card";
 import { DicomRecycleConfirmDialogProvider } from "@/components/dicom/dicom-recycle-confirm-dialog-provider";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
+import { CreateTagDialogProvider } from "@/components/dicom/tag/create-tag-dialog-provider";
 import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
 import { Button } from "@/components/ui/button";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
@@ -30,12 +31,14 @@ import {
     downloadMultipleInstancesAsPng,
 } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getDicomInstanceQuery, recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
+import {
+    getDicomInstanceQuery,
+    recycleDicomInstanceMutation,
+} from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
 import { DicomInstancesDataTable } from "./data-table";
-import { CreateTagDialogProvider } from "@/components/dicom/tag/create-tag-dialog-provider";
 
 interface DicomInstancesContentProps {
     workspaceId: string;
@@ -58,10 +61,16 @@ export default function DicomInstancesContent({
     const ITEM_PER_PAGE = 10;
     const { layoutMode } = useLayoutStore();
 
-    const { getSearchConditionsForType, setSearchConditionsForType, setSearchType } = useGlobalSearchStore();
+    const {
+        getSearchConditionsForType,
+        setSearchConditionsForType,
+        setSearchType,
+    } = useGlobalSearchStore();
     // 在 Hydration 完成前 (mounted 為 false)，使用空物件以確保與 Server Side 渲染一致
     // Hydration 完成後 (mounted 為 true)，才使用 zustand store 中的狀態
-    const searchConditions = mounted ? getSearchConditionsForType("dicom-instance") : {};
+    const searchConditions = mounted
+        ? getSearchConditionsForType("dicom-instance")
+        : {};
 
     const {
         selectedInstanceIds,
@@ -71,17 +80,25 @@ export default function DicomInstancesContent({
         getSelectedInstanceIds,
     } = useDicomInstanceSelectionStore();
 
-    const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } =
-        usePagination();
+    const {
+        currentPage,
+        handlePreviousPage,
+        handleNextPage,
+        handleResetToFirstPage,
+        canGoPrevious,
+    } = usePagination();
 
-    const handleSearchParamsChange = useCallback((urlParams: Record<string, string>) => {
-        setSearchConditionsForType("dicom-instance", urlParams);
-        setSearchType("dicom-instance");
-    }, [setSearchConditionsForType, setSearchType]);
+    const handleSearchParamsChange = useCallback(
+        (urlParams: Record<string, string>) => {
+            setSearchConditionsForType("dicom-instance", urlParams);
+            setSearchType("dicom-instance");
+        },
+        [setSearchConditionsForType, setSearchType],
+    );
 
     const { syncSearchParamsToUrl } = useUrlSearchParams({
         searchLevel: "instance",
-        onSearchParamsChange: handleSearchParamsChange
+        onSearchParamsChange: handleSearchParamsChange,
     });
 
     useEffect(() => {
@@ -136,7 +153,7 @@ export default function DicomInstancesContent({
             instanceIds: selectedIds,
         }),
         meta: {
-            toastId: nanoid()
+            toastId: nanoid(),
         },
         onMutate: (_, context) => {
             toast.loading("Recycling DICOM instances...", {
@@ -148,7 +165,12 @@ export default function DicomInstancesContent({
             toast.dismiss(context.meta?.toastId as string);
             clearSelection();
             queryClient.invalidateQueries({
-                queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid],
+                queryKey: [
+                    "dicom-instance",
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                ],
             });
         },
         onError: (_, __, ___, context) => {
@@ -166,7 +188,14 @@ export default function DicomInstancesContent({
     useEffect(() => {
         handleResetToFirstPage();
         queryClient.invalidateQueries({
-            queryKey: ["dicom-instance", workspaceId, studyInstanceUid, seriesInstanceUid, 0, ITEM_PER_PAGE],
+            queryKey: [
+                "dicom-instance",
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                0,
+                ITEM_PER_PAGE,
+            ],
         });
     }, [searchConditions]);
 
@@ -244,8 +273,8 @@ export default function DicomInstancesContent({
         {
             label: "PNG",
             onClick: () => handlePngDownload(selectedIds),
-        }
-    ]
+        },
+    ];
 
     if (error) {
         return (
@@ -261,12 +290,17 @@ export default function DicomInstancesContent({
             <div className="container mx-auto px-4 py-8">
                 <div className="mb-8 flex flex-col items-start space-x-4">
                     <div className="flex flex-1 items-center space-x-4">
-                        <Link href={`/${workspaceId}/dicom-studies/${studyInstanceUid}`}>
-                            <Button 
-                                variant="outline" 
+                        <Link
+                            href={`/${workspaceId}/dicom-studies/${studyInstanceUid}`}
+                        >
+                            <Button
+                                variant="outline"
                                 className="flex items-center"
                                 onClick={() => {
-                                    setSearchConditionsForType("dicom-instance", {});
+                                    setSearchConditionsForType(
+                                        "dicom-instance",
+                                        {},
+                                    );
                                 }}
                             >
                                 <ArrowLeftIcon className="size-4" />

@@ -44,7 +44,7 @@ function getBlueLightConfig(workspaceId: string) {
                 "WADO-hostname": appUrl.hostname,
                 "QIDO-PORT": appUrl.port,
                 "WADO-PORT": appUrl.port,
-            contentType: "application/json",
+                contentType: "application/json",
                 timeout: 80000,
                 limit: env.QUERY_MAX_LIMIT,
                 charset: "UTF=8",

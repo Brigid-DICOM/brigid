@@ -15,25 +15,28 @@ export class SingleFrameHandler implements WadoResponseHandler {
             "image/jpeg",
             "image/jp2",
             "image/png",
-            "*/*"
+            "*/*",
         ]);
 
         return acceptSchema.safeParse(accept).success;
     }
 
-    async handle(c: Context, args: { instances: InstanceEntity[]; accept: string }) {
+    async handle(
+        c: Context,
+        args: { instances: InstanceEntity[]; accept: string },
+    ) {
         const { instances, accept } = args;
         const storage = getStorageProvider();
-        const acceptType = parseAcceptHeader(accept)?.type || "image/jpeg"
+        const acceptType = parseAcceptHeader(accept)?.type || "image/jpeg";
         const outputFormat = resolveOutputFormat(acceptType) || "jpeg";
-        
-        const keys = instances.map(instance => instance.instancePath);
-        if (!keys.every(key => key)) {
+
+        const keys = instances.map((instance) => instance.instancePath);
+        if (!keys.every((key) => key)) {
             return c.json(
                 {
-                    message: "Instance paths not found"
+                    message: "Instance paths not found",
                 },
-                404
+                404,
             );
         }
 
@@ -42,11 +45,9 @@ export class SingleFrameHandler implements WadoResponseHandler {
         for (const instance of instances) {
             const key = instance.instancePath;
 
-            const convertOptions = toConvertOptions(
-                {
-                    ...c.req.query()
-                }
-            );
+            const convertOptions = toConvertOptions({
+                ...c.req.query(),
+            });
             const { body } = await storage.downloadFile(key);
 
             const source: DicomSource = { kind: "stream", stream: body };
@@ -57,9 +58,9 @@ export class SingleFrameHandler implements WadoResponseHandler {
         if (!result?.frames.length) {
             return c.json(
                 {
-                    message: "No frames found"
+                    message: "No frames found",
                 },
-                404
+                404,
             );
         }
 
@@ -67,8 +68,8 @@ export class SingleFrameHandler implements WadoResponseHandler {
         return new Response(result?.frames[0].stream, {
             headers: {
                 "Content-Type": result?.contentType,
-                "Content-Length": result?.frames[0].size?.toString() || "0"
-            }
+                "Content-Length": result?.frames[0].size?.toString() || "0",
+            },
         });
     }
 }

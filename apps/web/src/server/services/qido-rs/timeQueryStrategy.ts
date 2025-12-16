@@ -4,34 +4,39 @@ export class TimeQueryStrategy extends QueryStrategy {
     buildQuery(table: string, field: string, value: string): QueryDicomResult {
         const dashIndex = value.indexOf("-");
 
-        if (dashIndex === 0) {  // -HHMMSS.FFFFFF
+        if (dashIndex === 0) {
+            // -HHMMSS.FFFFFF
             return {
                 sql: `${table}.${field} <= :endTime`,
-                parameters: { endTime: this.formatTime(value.substring(1)) }
+                parameters: { endTime: this.formatTime(value.substring(1)) },
             };
         }
-        
-        if (dashIndex === value.length - 1) {  // HHMMSS.FFFFFF-
+
+        if (dashIndex === value.length - 1) {
+            // HHMMSS.FFFFFF-
             return {
                 sql: `${table}.${field} >= :startTime`,
-                parameters: { startTime: this.formatTime(value.substring(0, dashIndex)) }
+                parameters: {
+                    startTime: this.formatTime(value.substring(0, dashIndex)),
+                },
             };
         }
-        
-        if (dashIndex > 0) {  // HHMMSS.FFFFFF-HHMMSS.FFFFFF
+
+        if (dashIndex > 0) {
+            // HHMMSS.FFFFFF-HHMMSS.FFFFFF
             return {
                 sql: `${table}.${field} >= :startTime AND ${table}.${field} <= :endTime`,
                 parameters: {
                     startTime: this.formatTime(value.substring(0, dashIndex)),
-                    endTime: this.formatTime(value.substring(dashIndex + 1))
-                }
+                    endTime: this.formatTime(value.substring(dashIndex + 1)),
+                },
             };
         }
-        
+
         // HHMMSS.FFFFFF
         return {
             sql: `${table}.${field} = :time`,
-            parameters: { time: this.formatTime(value) }
+            parameters: { time: this.formatTime(value) },
         };
     }
 

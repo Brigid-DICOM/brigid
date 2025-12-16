@@ -20,7 +20,7 @@ export function DicomCardTagBadge({
     tags,
     maxDisplay = 3,
     className,
-    size = "sm"
+    size = "sm",
 }: CardTagBadgeProps) {
     if (!tags || tags.length === 0) return null;
 
@@ -31,7 +31,7 @@ export function DicomCardTagBadge({
     const sizeClasses = {
         sm: "px-1.5 py-0.5 text-xs",
         md: "px-2 py-1 text-sm",
-    }
+    };
 
     return (
         <div className={cn("flex items-center gap-1 flex-wrap", className)}>
@@ -53,11 +53,13 @@ export function DicomCardTagBadge({
             {hasRemaining && (
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div className={cn(
-                            "rounded-full font-medium",
-                            "bg-gray-300 text-gray-700 cursor-pointer hover:bg-gray-400 transition-colors",
-                            sizeClasses[size],
-                        )}>
+                        <div
+                            className={cn(
+                                "rounded-full font-medium",
+                                "bg-gray-300 text-gray-700 cursor-pointer hover:bg-gray-400 transition-colors",
+                                sizeClasses[size],
+                            )}
+                        >
                             +{remainingCount}
                         </div>
                     </TooltipTrigger>
@@ -84,5 +86,5 @@ export function DicomCardTagBadge({
                 </Tooltip>
             )}
         </div>
-    )
+    );
 }

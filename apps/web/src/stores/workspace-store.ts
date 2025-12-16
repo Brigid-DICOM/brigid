@@ -11,7 +11,7 @@ interface Workspace {
         role: string;
         permissions: number;
         isDefault: boolean;
-    }
+    };
 }
 
 interface WorkspaceState {
@@ -20,11 +20,9 @@ interface WorkspaceState {
 }
 
 export const useWorkspaceStore = create<WorkspaceState>()(
-    devtools(
-        (set, get) => ({
-            workspace: null,
+    devtools((set, get) => ({
+        workspace: null,
 
-            setWorkspace: (workspace: Workspace) => set({ workspace }),
-        })
-    )
-)
+        setWorkspace: (workspace: Workspace) => set({ workspace }),
+    })),
+);

@@ -2,7 +2,9 @@ import type { DicomSeriesData } from "@brigid/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
 
-export const createSeriesColumns = (t: TFunction): ColumnDef<DicomSeriesData>[] => {
+export const createSeriesColumns = (
+    t: TFunction,
+): ColumnDef<DicomSeriesData>[] => {
     return [
         {
             accessorKey: "modality",

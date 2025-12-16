@@ -41,7 +41,11 @@ const getShareTargetTagsRoute = new Hono().get(
 
         // 驗證 target 是否在 share link 允許的範圍內
         // Verify target is within share link's allowed scope
-        const isTargetAllowed = await verifyTargetAccess(shareLink, targetType, targetId);
+        const isTargetAllowed = await verifyTargetAccess(
+            shareLink,
+            targetType,
+            targetId,
+        );
         if (!isTargetAllowed) {
             return c.json(
                 {
@@ -69,6 +73,6 @@ const getShareTargetTagsRoute = new Hono().get(
             200,
         );
     },
-)
+);
 
 export default getShareTargetTagsRoute;

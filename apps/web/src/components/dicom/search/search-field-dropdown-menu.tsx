@@ -58,7 +58,8 @@ export function SearchFieldDropdownMenu({
                             disabled={isDisabled}
                         >
                             {field.label}
-                            {isDisabled && ` (${t("dicom.search.fieldExists")})`}
+                            {isDisabled &&
+                                ` (${t("dicom.search.fieldExists")})`}
                         </DropdownMenuItem>
                     );
                 })}

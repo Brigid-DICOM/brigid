@@ -18,7 +18,9 @@ describe("QueryStrategyFactory", () => {
         expect(strategy).toBeInstanceOf(TimeQueryStrategy);
     });
     it("should throw error for unknown type", () => {
-        expect(() => getQueryStrategy("unknown")).toThrow("Unknown query strategy: unknown");
+        expect(() => getQueryStrategy("unknown")).toThrow(
+            "Unknown query strategy: unknown",
+        );
     });
     it("should return same instance (Singleton)", () => {
         const strategy1 = getQueryStrategy("string");

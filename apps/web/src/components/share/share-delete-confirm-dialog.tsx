@@ -58,13 +58,15 @@ export function ShareDeleteConfirmDialog({
 
     const handleConfirm = () => {
         deleteShareLink(shareLinkId);
-    }
+    };
 
     return createPortal(
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{t("shareLink.deleteConfirmDialog.title")}</AlertDialogTitle>
+                    <AlertDialogTitle>
+                        {t("shareLink.deleteConfirmDialog.title")}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                         {t("shareLink.deleteConfirmDialog.description")}
                     </AlertDialogDescription>

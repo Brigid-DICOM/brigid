@@ -25,7 +25,10 @@ import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { getDicomSeriesQuery, recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
+import {
+    getDicomSeriesQuery,
+    recycleDicomSeriesMutation,
+} from "@/react-query/queries/dicomSeries";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
@@ -46,27 +49,30 @@ export default function DicomSeriesContent({
     useEffect(() => {
         setMounted(true);
     }, []);
-    
+
     const ITEM_PER_PAGE = 10;
     const queryClient = getQueryClient();
     const searchParams = useSearchParams();
 
-    const { 
+    const {
         getSearchConditionsForType,
         setSearchConditionsForType,
-        setSearchType
+        setSearchType,
     } = useGlobalSearchStore();
-    const searchConditions = mounted ? getSearchConditionsForType("dicom-series") : {};
+    const searchConditions = mounted
+        ? getSearchConditionsForType("dicom-series")
+        : {};
 
     const { layoutMode } = useLayoutStore();
-    const { close: closeBlueLightViewer, open: openBlueLightViewer } = useBlueLightViewerStore();
+    const { close: closeBlueLightViewer, open: openBlueLightViewer } =
+        useBlueLightViewerStore();
 
     const {
         selectedSeriesIds,
         clearSelection,
         selectAll,
         getSelectedCount,
-        getSelectedSeriesIds
+        getSelectedSeriesIds,
     } = useDicomSeriesSelectionStore();
 
     useEffect(() => {
@@ -80,16 +86,25 @@ export default function DicomSeriesContent({
         }
     }, [searchParams, openBlueLightViewer]);
 
-    const { currentPage, handlePreviousPage, handleNextPage, handleResetToFirstPage, canGoPrevious } = usePagination();
+    const {
+        currentPage,
+        handlePreviousPage,
+        handleNextPage,
+        handleResetToFirstPage,
+        canGoPrevious,
+    } = usePagination();
 
-    const handleSearchParamsChange = useCallback((urlParams: Record<string, string>) => {
-        setSearchConditionsForType("dicom-series", urlParams);
-        setSearchType("dicom-series");
-    }, [setSearchConditionsForType, setSearchType]);
+    const handleSearchParamsChange = useCallback(
+        (urlParams: Record<string, string>) => {
+            setSearchConditionsForType("dicom-series", urlParams);
+            setSearchType("dicom-series");
+        },
+        [setSearchConditionsForType, setSearchType],
+    );
 
-    const  { syncSearchParamsToUrl } = useUrlSearchParams({
+    const { syncSearchParamsToUrl } = useUrlSearchParams({
         searchLevel: "series",
-        onSearchParamsChange: handleSearchParamsChange
+        onSearchParamsChange: handleSearchParamsChange,
     });
 
     useEffect(() => {
@@ -145,7 +160,7 @@ export default function DicomSeriesContent({
             seriesIds: selectedIds,
         }),
         meta: {
-            toastId: nanoid()
+            toastId: nanoid(),
         },
         onMutate: (_, context) => {
             toast.loading("Recycling DICOM series...", {
@@ -175,7 +190,13 @@ export default function DicomSeriesContent({
     useEffect(() => {
         handleResetToFirstPage();
         queryClient.invalidateQueries({
-            queryKey: ["dicom-series", workspaceId, studyInstanceUid, 0, ITEM_PER_PAGE],
+            queryKey: [
+                "dicom-series",
+                workspaceId,
+                studyInstanceUid,
+                0,
+                ITEM_PER_PAGE,
+            ],
         });
     }, [searchConditions]);
 
@@ -188,14 +209,16 @@ export default function DicomSeriesContent({
     };
 
     const { handleDownload } = useDownloadHandler({
-        downloadSingle: (id: string) => downloadSeries(workspaceId, studyInstanceUid, id),
-        downloadMultiple: (ids: string[]) => downloadMultipleSeries(workspaceId, studyInstanceUid, ids),
+        downloadSingle: (id: string) =>
+            downloadSeries(workspaceId, studyInstanceUid, id),
+        downloadMultiple: (ids: string[]) =>
+            downloadMultipleSeries(workspaceId, studyInstanceUid, ids),
         errorMessage: "Failed to download selected series",
     });
 
     if (error) {
         return (
-            <EmptyState 
+            <EmptyState
                 title="載入失敗"
                 description="無法載入 DICOM series 資料"
             />
@@ -205,7 +228,6 @@ export default function DicomSeriesContent({
     return (
         <>
             <div className="container mx-auto px-4 py-8">
-
                 <div className="mb-8 flex flex-col items-start space-x-4">
                     <div className="flex flex-1 items-center space-x-4">
                         <Link href={`/${workspaceId}/dicom-studies`}>
@@ -213,7 +235,10 @@ export default function DicomSeriesContent({
                                 variant="outline"
                                 className="flex items-center"
                                 onClick={() => {
-                                    setSearchConditionsForType("dicom-series", {});
+                                    setSearchConditionsForType(
+                                        "dicom-series",
+                                        {},
+                                    );
                                 }}
                             >
                                 <ArrowLeftIcon className="size-4" />
@@ -229,11 +254,10 @@ export default function DicomSeriesContent({
                             </p>
                         </div>
                     </div>
-
                 </div>
 
                 {!isLoading && series && series.length > 0 && (
-                    <SelectionControlBar 
+                    <SelectionControlBar
                         selectedCount={selectedCount}
                         isAllSelected={isAllSelected}
                         onSelectAll={handleSelectAll}
@@ -246,14 +270,9 @@ export default function DicomSeriesContent({
 
                 {isLoading ? (
                     layoutMode === "grid" ? (
-                        <LoadingGrid 
-                            itemCount={ITEM_PER_PAGE} 
-                        />
+                        <LoadingGrid itemCount={ITEM_PER_PAGE} />
                     ) : (
-                        <LoadingDataTable 
-                            columns={7}
-                            rows={ITEM_PER_PAGE}
-                        />
+                        <LoadingDataTable columns={7} rows={ITEM_PER_PAGE} />
                     )
                 ) : series && series.length > 0 ? (
                     <>
@@ -272,14 +291,14 @@ export default function DicomSeriesContent({
                             </div>
                         ) : (
                             <div className="mb-8">
-                                <DicomSeriesDataTable 
+                                <DicomSeriesDataTable
                                     series={series as DicomSeriesData[]}
                                     workspaceId={workspaceId}
                                 />
                             </div>
                         )}
 
-                        <PaginationControls 
+                        <PaginationControls
                             canGoPrevious={canGoPrevious}
                             canGoNext={Boolean(canGoNext)}
                             onPrevious={handlePreviousPage}
@@ -292,7 +311,9 @@ export default function DicomSeriesContent({
                             <h2 className="text-lg font-semibold text-gray-900 mb-2">
                                 沒有資料
                             </h2>
-                            <p className="text-gray-600">目前沒有可顯示的 Series</p>
+                            <p className="text-gray-600">
+                                目前沒有可顯示的 Series
+                            </p>
                         </div>
                     </div>
                 )}

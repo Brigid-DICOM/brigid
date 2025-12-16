@@ -234,8 +234,10 @@ export function SharedDicomInstanceContextMenu({
         e.preventDefault();
         closeContextMenu();
         navigator.clipboard.writeText(sopInstanceUid);
-        toast.success(t("dicom.messages.copiedToClipboard", { level: "sopInstanceUid" }));
-    }
+        toast.success(
+            t("dicom.messages.copiedToClipboard", { level: "sopInstanceUid" }),
+        );
+    };
 
     useEffect(() => {
         return () => {
@@ -254,7 +256,10 @@ export function SharedDicomInstanceContextMenu({
                             className="flex items-center space-x-2"
                         >
                             <CopyIcon className="size-4" />
-                            <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.instance.sopInstanceUid")}</span>
+                            <span>
+                                {t("dicom.contextMenu.copy")}{" "}
+                                {t("dicom.columns.instance.sopInstanceUid")}
+                            </span>
                         </ContextMenuItem>
                         <ContextMenuItem
                             onClick={handleOpenBlueLightViewer}

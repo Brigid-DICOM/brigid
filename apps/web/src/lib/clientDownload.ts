@@ -462,9 +462,7 @@ export const downloadShareStudy = async (
         },
         defaultFilename: filename || `study-${studyInstanceUid}.zip`,
         apiRequest: (abortController) =>
-            apiClient.api.share[":token"].studies[
-                ":studyInstanceUid"
-            ].$get(
+            apiClient.api.share[":token"].studies[":studyInstanceUid"].$get(
                 {
                     header: {
                         accept: "application/zip",
@@ -525,7 +523,8 @@ interface DownloadShareSeriesOptions {
 export const downloadShareSeries = async (
     options: DownloadShareSeriesOptions,
 ): Promise<string> => {
-    const { token, studyInstanceUid, seriesInstanceUid, filename, password } = options;
+    const { token, studyInstanceUid, seriesInstanceUid, filename, password } =
+        options;
 
     const config: DownloadConfig = {
         taskParams: {
@@ -534,9 +533,9 @@ export const downloadShareSeries = async (
         },
         defaultFilename: filename || `series-${seriesInstanceUid}.zip`,
         apiRequest: (abortController) =>
-            apiClient.api.share[":token"].studies[
-                ":studyInstanceUid"
-            ].series[":seriesInstanceUid"].$get(
+            apiClient.api.share[":token"].studies[":studyInstanceUid"].series[
+                ":seriesInstanceUid"
+            ].$get(
                 {
                     header: {
                         accept: "application/zip",
@@ -558,7 +557,7 @@ export const downloadShareSeries = async (
             ),
         errorMessage: "Failed to download series",
     };
-    
+
     return downloadDicomResource(config, filename);
 };
 
@@ -601,7 +600,14 @@ interface DownloadShareInstanceOptions {
 export const downloadShareInstance = async (
     options: DownloadShareInstanceOptions,
 ): Promise<string> => {
-    const { token, studyInstanceUid, seriesInstanceUid, sopInstanceUid, filename, password } = options;
+    const {
+        token,
+        studyInstanceUid,
+        seriesInstanceUid,
+        sopInstanceUid,
+        filename,
+        password,
+    } = options;
 
     const config: DownloadConfig = {
         taskParams: {
@@ -639,7 +645,14 @@ export const downloadShareInstance = async (
 export const downloadShareInstanceAsJpg = async (
     options: DownloadShareInstanceOptions,
 ): Promise<string> => {
-    const { token, studyInstanceUid, seriesInstanceUid, sopInstanceUid, filename, password } = options;
+    const {
+        token,
+        studyInstanceUid,
+        seriesInstanceUid,
+        sopInstanceUid,
+        filename,
+        password,
+    } = options;
 
     const config: DownloadConfig = {
         taskParams: {
@@ -677,7 +690,14 @@ export const downloadShareInstanceAsJpg = async (
 export const downloadShareInstanceAsPng = async (
     options: DownloadShareInstanceOptions,
 ): Promise<string> => {
-    const { token, studyInstanceUid, seriesInstanceUid, sopInstanceUid, filename, password } = options;
+    const {
+        token,
+        studyInstanceUid,
+        seriesInstanceUid,
+        sopInstanceUid,
+        filename,
+        password,
+    } = options;
 
     const config: DownloadConfig = {
         taskParams: {

@@ -6,7 +6,7 @@ type OverwriteMode = "a" | "s" | "u" | "t";
 
 export class SevenZip {
     private type: ArchiveType;
-    private source: string
+    private source: string;
     private dest: string;
     private cmd: string[] = [];
 
