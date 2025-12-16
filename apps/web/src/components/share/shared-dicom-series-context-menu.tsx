@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    CopyIcon,
     CornerDownLeftIcon,
     DownloadIcon,
     EyeIcon,
@@ -109,12 +110,26 @@ export function SharedDicomSeriesContextMenu({
         });
     };
 
+    const handleCopySeriesInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        navigator.clipboard.writeText(seriesInstanceUid);
+        toast.success(t("dicom.messages.copiedToClipboard", { level: "seriesInstanceUid" }));
+    }
+
     return (
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
                 <ContextMenuContent className="w-60">
                     {selectedIds.length === 1 && (
                         <>
+                            <ContextMenuItem
+                                onClick={handleCopySeriesInstanceUid}
+                                className="flex items-center space-x-2"
+                            >
+                                <CopyIcon className="size-4" />
+                                <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.series.seriesInstanceUid")}</span>
+                            </ContextMenuItem>
                             <ContextMenuItem
                                 onClick={handleEnterInstances}
                                 className="flex items-center space-x-2"

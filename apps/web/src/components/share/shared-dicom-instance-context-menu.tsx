@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadIcon, EyeIcon } from "lucide-react";
+import { CopyIcon, DownloadIcon, EyeIcon } from "lucide-react";
 import type React from "react";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -230,6 +230,13 @@ export function SharedDicomInstanceContextMenu({
         });
     };
 
+    const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        navigator.clipboard.writeText(sopInstanceUid);
+        toast.success(t("dicom.messages.copiedToClipboard", { level: "sopInstanceUid" }));
+    }
+
     useEffect(() => {
         return () => {
             clearSelection();
@@ -242,6 +249,13 @@ export function SharedDicomInstanceContextMenu({
             <ContextMenuContent className="w-60">
                 {selectedIds.length === 1 && (
                     <>
+                        <ContextMenuItem
+                            onClick={handleCopySopInstanceUid}
+                            className="flex items-center space-x-2"
+                        >
+                            <CopyIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.instance.sopInstanceUid")}</span>
+                        </ContextMenuItem>
                         <ContextMenuItem
                             onClick={handleOpenBlueLightViewer}
                             className="flex items-center space-x-2"

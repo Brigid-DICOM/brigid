@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import {
+    CopyIcon,
     CornerDownLeftIcon,
     DownloadIcon,
     EyeIcon,
@@ -220,6 +221,13 @@ export function DicomStudyContextMenu({
         });
     };
 
+    const handleCopyStudyInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        navigator.clipboard.writeText(studyInstanceUid);
+        toast.success(t("dicom.messages.copiedToClipboard", { level: "studyInstanceUid" }));
+    }
+
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
@@ -229,6 +237,13 @@ export function DicomStudyContextMenu({
                     <>
                         {canRead && (
                             <>
+                                <ContextMenuItem 
+                                    onClick={handleCopyStudyInstanceUid}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <CopyIcon className="size-4" />
+                                    <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.study.studyInstanceUid")}</span>
+                                </ContextMenuItem>
                                 <ContextMenuItem
                                     onClick={handleEnterSeries}
                                     className="flex items-center space-x-2"

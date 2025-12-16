@@ -1,6 +1,6 @@
 "use client";
 
-import { CornerDownLeftIcon, DownloadIcon, EyeIcon } from "lucide-react";
+import { CopyIcon, CornerDownLeftIcon, DownloadIcon, EyeIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
@@ -108,6 +108,13 @@ export function SharedDicomStudyContextMenu({
         });
     };
 
+    const handleCopyStudyInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        navigator.clipboard.writeText(studyInstanceUid);
+        toast.success(t("dicom.messages.copiedToClipboard", { level: "studyInstanceUid" }));
+    }
+
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
@@ -115,6 +122,13 @@ export function SharedDicomStudyContextMenu({
             <ContextMenuContent className="w-60">
                 {selectedIds.length === 1 && (
                     <>
+                        <ContextMenuItem
+                            onClick={handleCopyStudyInstanceUid}
+                            className="flex items-center space-x-2"
+                        >
+                            <CopyIcon className="size-4" />
+                            <span>{t("dicom.contextMenu.copy")} {t("dicom.columns.study.studyInstanceUid")}</span>
+                        </ContextMenuItem>
                         <ContextMenuItem
                             onClick={handleEnterSeries}
                             className="flex items-center space-x-2"

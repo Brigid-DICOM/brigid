@@ -1,7 +1,13 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { DownloadIcon, EyeIcon, Share2Icon, Trash2Icon } from "lucide-react";
+import {
+    CopyIcon,
+    DownloadIcon,
+    EyeIcon,
+    Share2Icon,
+    Trash2Icon,
+} from "lucide-react";
 import { nanoid } from "nanoid";
 import type React from "react";
 import { useState } from "react";
@@ -98,8 +104,10 @@ export function DicomInstanceContextMenu({
     const { getSelectedInstanceIds, clearSelection } =
         useDicomInstanceSelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
-    const { openDialog: openShareManagementDialog } = useShareManagementDialogStore();
-    const { openDialog: openDicomRecycleConfirmDialog } = useDicomRecycleConfirmDialogStore();
+    const { openDialog: openShareManagementDialog } =
+        useShareManagementDialogStore();
+    const { openDialog: openDicomRecycleConfirmDialog } =
+        useDicomRecycleConfirmDialogStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
     const canRead =
@@ -162,7 +170,9 @@ export function DicomInstanceContextMenu({
                 seriesInstanceUid,
                 ids,
             ),
-        errorMessage: t("dicom.messages.downloadInstanceImageError", { format: "JPG" }),
+        errorMessage: t("dicom.messages.downloadInstanceImageError", {
+            format: "JPG",
+        }),
     });
 
     const { handleDownload: handlePngDownload } = useDownloadHandler({
@@ -180,7 +190,9 @@ export function DicomInstanceContextMenu({
                 seriesInstanceUid,
                 ids,
             ),
-        errorMessage: t("dicom.messages.downloadInstanceImageError", { format: "PNG" }),
+        errorMessage: t("dicom.messages.downloadInstanceImageError", {
+            format: "PNG",
+        }),
     });
 
     const { mutate: recycleDicomInstance } = useMutation({
@@ -192,12 +204,17 @@ export function DicomInstanceContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.recycling", { level: "instances" }), {
-                id: context.meta?.toastId as string,
-            });
+            toast.loading(
+                t("dicom.messages.recycling", { level: "instances" }),
+                {
+                    id: context.meta?.toastId as string,
+                },
+            );
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.recycleSuccess", { level: "instances" }));
+            toast.success(
+                t("dicom.messages.recycleSuccess", { level: "instances" }),
+            );
             toast.dismiss(context.meta?.toastId as string);
             clearSelection();
             queryClient.invalidateQueries({
@@ -210,7 +227,9 @@ export function DicomInstanceContextMenu({
             });
         },
         onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.recycleError", { level: "instances" }));
+            toast.error(
+                t("dicom.messages.recycleError", { level: "instances" }),
+            );
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -227,7 +246,9 @@ export function DicomInstanceContextMenu({
 
     const handleRecycle = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "instances" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "instances" }),
+            );
             return;
         }
 
@@ -242,11 +263,22 @@ export function DicomInstanceContextMenu({
 
     const handleConfirmRecycle = () => {
         if (!canRecycle) {
-            toast.error(t("dicom.messages.noPermissionRecycle", { level: "instances" }));
+            toast.error(
+                t("dicom.messages.noPermissionRecycle", { level: "instances" }),
+            );
             return;
         }
 
         recycleDicomInstance();
+    };
+
+    const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        closeContextMenu();
+        navigator.clipboard.writeText(sopInstanceUid);
+        toast.success(
+            t("dicom.messages.copiedToClipboard", { level: "sopInstanceUid" }),
+        );
     };
 
     return (
@@ -260,16 +292,36 @@ export function DicomInstanceContextMenu({
                             {canRead && (
                                 <>
                                     <ContextMenuItem
+                                        onClick={handleCopySopInstanceUid}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <CopyIcon className="size-4" />
+                                        <span>
+                                            {t("dicom.contextMenu.copy")}{" "}
+                                            {t(
+                                                "dicom.columns.instance.sopInstanceUid",
+                                            )}
+                                        </span>
+                                    </ContextMenuItem>
+                                    <ContextMenuItem
                                         onClick={handleOpenBlueLightViewer}
                                         className="flex items-center space-x-2"
                                     >
                                         <EyeIcon className="size-4" />
-                                        <span>{t("dicom.contextMenu.openInBlueLight")}</span>
+                                        <span>
+                                            {t(
+                                                "dicom.contextMenu.openInBlueLight",
+                                            )}
+                                        </span>
                                     </ContextMenuItem>
                                     <ContextMenuSub>
                                         <ContextMenuSubTrigger>
                                             <DownloadIcon className="size-4 mr-4" />
-                                            <span>{t("dicom.contextMenu.download")}</span>
+                                            <span>
+                                                {t(
+                                                    "dicom.contextMenu.download",
+                                                )}
+                                            </span>
                                         </ContextMenuSubTrigger>
                                         <ContextMenuSubContent>
                                             <DownloadSubMenuItems
@@ -329,7 +381,9 @@ export function DicomInstanceContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.share")}</span>
+                                        <span>
+                                            {t("dicom.contextMenu.share")}
+                                        </span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -343,7 +397,9 @@ export function DicomInstanceContextMenu({
                                         className="flex items-center space-x-2"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.recycle")}</span>
+                                        <span>
+                                            {t("dicom.contextMenu.recycle")}
+                                        </span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -353,14 +409,18 @@ export function DicomInstanceContextMenu({
                     {selectedIds.length > 1 && (
                         <>
                             <ContextMenuLabel>
-                                {t("dicom.contextMenu.selectedItems", { count: selectedIds.length })}
+                                {t("dicom.contextMenu.selectedItems", {
+                                    count: selectedIds.length,
+                                })}
                             </ContextMenuLabel>
 
                             {canRead && (
                                 <ContextMenuSub>
                                     <ContextMenuSubTrigger>
                                         <DownloadIcon className="size-4 mr-2" />
-                                        <span>{t("dicom.contextMenu.download")}</span>
+                                        <span>
+                                            {t("dicom.contextMenu.download")}
+                                        </span>
                                     </ContextMenuSubTrigger>
                                     <ContextMenuSubContent>
                                         <DownloadSubMenuItems
@@ -400,7 +460,9 @@ export function DicomInstanceContextMenu({
                                         }}
                                     >
                                         <Share2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.share")}</span>
+                                        <span>
+                                            {t("dicom.contextMenu.share")}
+                                        </span>
                                     </ContextMenuItem>
                                 </>
                             )}
@@ -414,7 +476,9 @@ export function DicomInstanceContextMenu({
                                         className="flex items-center"
                                     >
                                         <Trash2Icon className="size-4" />
-                                        <span>{t("dicom.contextMenu.recycle")}</span>
+                                        <span>
+                                            {t("dicom.contextMenu.recycle")}
+                                        </span>
                                     </ContextMenuItem>
                                 </>
                             )}
