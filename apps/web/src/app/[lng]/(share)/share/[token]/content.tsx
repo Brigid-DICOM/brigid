@@ -1,9 +1,11 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
+import type { TFunction } from "i18next";
 import { AlertCircleIcon, FileIcon, FolderIcon, LockIcon } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import { LoadingGrid } from "@/components/common/loading-grid";
 import SharedInstancesView from "@/components/share/public-views/shared-instances-view";
 import SharedSeriesView from "@/components/share/public-views/shared-series-view";
@@ -29,6 +31,7 @@ interface ShareContentProps {
 export default function ShareContent({
     token,
 }: ShareContentProps) {
+    const { t } = useT("translation");
     const queryClient = getQueryClient();
 
     const [password, setPassword] = useState("");
@@ -95,16 +98,16 @@ export default function ShareContent({
                         <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                             <LockIcon className="size-6 text-primary" />
                         </div>
-                        <CardTitle>Password Protected</CardTitle>
+                        <CardTitle>{t("sharePublicView.passwordProtected.title")}</CardTitle>
                         <CardDescription>
-                            This share content requires a password to access.
+                            {t("sharePublicView.passwordProtected.description")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handlePasswordSubmit}>
                             <Input
                                 type="password"
-                                placeholder="Enter password"
+                                placeholder={t("sharePublicView.passwordProtected.placeholder")}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 disabled={isVerifyingPassword}
@@ -113,7 +116,7 @@ export default function ShareContent({
                             {verifyPasswordError?.message === "Invalid password" && (
                                 <p className="text-sm text-destructive flex items-center gap-1 mt-2">
                                     <AlertCircleIcon className="size-4" />
-                                    Invalid password. Please try again.
+                                    {t("sharePublicView.passwordProtected.invalidPassword")}
                                 </p>
                             )}
                             <Button 
@@ -121,7 +124,7 @@ export default function ShareContent({
                                 className="w-full mt-4"
                                 disabled={isVerifyingPassword}
                             >
-                                {isVerifyingPassword ? "Verifying..." : "Unlock Content"}
+                                {isVerifyingPassword ? t("sharePublicView.passwordProtected.verifying") : t("sharePublicView.passwordProtected.unlock")}
                             </Button>
                         </form>
                     </CardContent>
@@ -139,10 +142,10 @@ export default function ShareContent({
                         <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
                             <AlertCircleIcon className="size-6 text-destructive" />
                         </div>
-                        <CardTitle>Unable to Load</CardTitle>
+                        <CardTitle>{t("sharePublicView.error.title")}</CardTitle>
                         <CardDescription>
                             {error?.message ||
-                                "The share link may have expired or been removed."}
+                                t("sharePublicView.error.defaultMessage")}
                         </CardDescription>
                     </CardHeader>
                 </Card>
@@ -180,17 +183,17 @@ export default function ShareContent({
     };
 
     // Get count label based on target type
-    const getCountLabel = () => {
+    const getCountLabel = (t: TFunction) => {
         const count = targets.length;
         switch (targetType) {
             case "study":
-                return `${count} ${count === 1 ? "study" : "studies"} shared`;
+                return count === 1 ? t("sharePublicView.countLabel.study", { count }) : t("sharePublicView.countLabel.studies", { count });
             case "series":
-                return `${count} series shared`;
+                return t("sharePublicView.countLabel.series", { count });
             case "instance":
-                return `${count} ${count === 1 ? "instance" : "instances"} shared`;
+                return count === 1 ? t("sharePublicView.countLabel.instance", { count }) : t("sharePublicView.countLabel.instances", { count });
             default:
-                return `${count} items shared`;
+                return t("sharePublicView.countLabel.items", { count });
         }
     };
 
@@ -205,7 +208,7 @@ export default function ShareContent({
                             </div>
                             <div>
                                 <CardTitle className="capitalize">
-                                    Shared {getTargetTitle()}
+                                    {t("sharePublicView.sharedTitle", { targetType: getTargetTitle() })}
                                 </CardTitle>
                                 {description && (
                                     <CardDescription>
@@ -215,7 +218,7 @@ export default function ShareContent({
                             </div>
                         </div>
                         <div className="text-sm text-muted-foreground mt-2">
-                            {getCountLabel()}
+                            {getCountLabel(t)}
                         </div>
                     </CardHeader>
                 </Card>

@@ -397,6 +397,29 @@
             "error": "Failed to invite member"
         }
     },
+    "sharePublicView": {
+        "passwordProtected": {
+            "title": "Password Protected",
+            "description": "This share content requires a password to access.",
+            "placeholder": "Enter password",
+            "invalidPassword": "Invalid password. Please try again.",
+            "verifying": "Verifying...",
+            "unlock": "Unlock Content"
+        },
+        "error": {
+            "title": "Unable to Load",
+            "defaultMessage": "The share link may have expired or been removed."
+        },
+        "sharedTitle": "Shared {{targetType}}",
+        "countLabel": {
+            "study": "{{count}} study shared",
+            "studies": "{{count}} studies shared",
+            "series": "{{count}} series shared",
+            "instance": "{{count}} instance shared",
+            "instances": "{{count}} instances shared",
+            "items": "{{count}} items shared"
+        }
+    },
     "shareManagementDialog": {
         "title": "Share Management",
         "description": "Manage share links for {{targetType}}",

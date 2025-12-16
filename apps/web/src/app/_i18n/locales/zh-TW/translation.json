@@ -396,6 +396,29 @@
             "error": "邀請成員失敗"
         }
     },
+    "sharePublicView": {
+        "passwordProtected": {
+            "title": "密碼保護",
+            "description": "此分享內容需要密碼才能存取。",
+            "placeholder": "輸入密碼",
+            "invalidPassword": "密碼無效。請再試一次。",
+            "verifying": "驗證中...",
+            "unlock": "解鎖內容"
+        },
+        "error": {
+            "title": "無法載入",
+            "defaultMessage": "分享連結可能已過期或已被移除。"
+        },
+        "sharedTitle": "分享 {{targetType}}",
+        "countLabel": {
+            "study": "{{count}} 個 Study 分享",
+            "studies": "{{count}} 個 Studies 分享",
+            "series": "{{count}} 個 Series 分享",
+            "instance": "{{count}} 個 Instance 分享",
+            "instances": "{{count}} 個 Instances 分享",
+            "items": "{{count}} 個項目分享"
+        }
+    },
     "shareManagementDialog": {
         "title": "分享管理",
         "description": "管理 {{targetType}} 的分享連結",
