@@ -1,7 +1,6 @@
 packages:
   - ./packages/*
   - ./apps/web/**
-  - '!./apps/brigid-desktop*/**'
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - better-sqlite3
