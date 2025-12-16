@@ -217,7 +217,11 @@
         "tagContextMenu": {
             "tags": "Tags",
             "createTag": "Create Tag",
-            "noTags": "No tags"
+            "noTags": "No tags",
+            "messages": {
+                "tagDeleted": "Tag deleted successfully",
+                "failedToDeleteTag": "Failed to delete tag"
+            }
         },
         "recycleDialog": {
             "title": "Confirm Recycle",

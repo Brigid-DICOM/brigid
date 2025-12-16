@@ -82,7 +82,7 @@ export const createTagMutation = () =>
         },
     });
 
-export const updateTagMutation = () => 
+export const updateTagMutation = () =>
     mutationOptions({
         mutationFn: async ({
             workspaceId,
@@ -107,7 +107,7 @@ export const updateTagMutation = () =>
                     color,
                 },
             });
-            
+
             if (!response.ok) {
                 throw new Error("Failed to update tag");
             }
@@ -170,6 +170,32 @@ export const removeTagAssignmentMutation = () =>
 
             if (!response.ok) {
                 throw new Error("Failed to remove tag assignment");
+            }
+
+            return await response.json();
+        },
+    });
+
+export const deleteTagMutation = () =>
+    mutationOptions({
+        mutationFn: async ({
+            workspaceId,
+            tagId,
+        }: {
+            workspaceId: string;
+            tagId: string;
+        }) => {
+            const response = await apiClient.api.workspaces[
+                ":workspaceId"
+            ].tags[":tagId"].$delete({
+                param: {
+                    workspaceId,
+                    tagId,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to delete tag");
             }
 
             return await response.json();

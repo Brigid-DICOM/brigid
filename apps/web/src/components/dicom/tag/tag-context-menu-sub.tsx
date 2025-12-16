@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckIcon, Loader2Icon, TagIcon, TagsIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon, TagIcon, TagsIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
@@ -13,6 +13,7 @@ import {
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
     assignTagMutation,
+    deleteTagMutation,
     getTargetTagsQuery,
     getWorkspaceTagsQuery,
     removeTagAssignmentMutation,
@@ -41,10 +42,13 @@ export function TagContextMenuSub({
     const [optimisticUpdates, setOptimisticUpdates] = useState<
         Map<string, OptimisticState>
     >(new Map());
+    const [hoveredTagId, setHoveredTagId] = useState<string | null>(null);
 
-    const { data: workspaceTags, isLoading: isLoadingWorkspaceTags } = useQuery({
-        ...getWorkspaceTagsQuery(workspaceId),
-    });
+    const { data: workspaceTags, isLoading: isLoadingWorkspaceTags } = useQuery(
+        {
+            ...getWorkspaceTagsQuery(workspaceId),
+        },
+    );
 
     const { data: tags, isLoading: isLoadingTags } = useQuery({
         ...getTargetTagsQuery(workspaceId, targetType, targetId),
@@ -52,19 +56,22 @@ export function TagContextMenuSub({
 
     const getIsAssigned = (tagId: string) => {
         const optimistic = optimisticUpdates.get(tagId);
-        const currentAssigned = tags?.data?.some((t) => t.id === tagId) ?? false;
-        
+        const currentAssigned =
+            tags?.data?.some((t) => t.id === tagId) ?? false;
+
         if (optimistic) {
             return optimistic.action === "assign";
         }
 
         return currentAssigned;
-    }
+    };
 
-    const combinedTags = (workspaceTags?.data?.map((tag) => ({
-        ...tag,
-        isAssigned: getIsAssigned(tag.id),
-    })) ?? []).sort((a, b) => a.name.localeCompare(b.name));
+    const combinedTags = (
+        workspaceTags?.data?.map((tag) => ({
+            ...tag,
+            isAssigned: getIsAssigned(tag.id),
+        })) ?? []
+    ).sort((a, b) => a.name.localeCompare(b.name));
 
     const { mutate: assignTag } = useMutation({
         ...assignTagMutation(),
@@ -75,21 +82,21 @@ export function TagContextMenuSub({
                     if (!oldData) return oldData;
 
                     const alreadyExists = oldData.data?.some(
-                        (t: any) => t.id === variables.tagId 
+                        (t: any) => t.id === variables.tagId,
                     );
                     if (alreadyExists) return oldData;
 
                     // 從 workspace tags 中找到該標籤
                     const tagToAdd = workspaceTags?.data?.find(
-                        (t: any) => t.id === variables.tagId
+                        (t: any) => t.id === variables.tagId,
                     );
                     if (!tagToAdd) return oldData;
 
                     return {
                         ...oldData,
-                        data: [...(oldData.data || []), tagToAdd]
-                    }
-                }
+                        data: [...(oldData.data || []), tagToAdd],
+                    };
+                },
             );
 
             queryClient.invalidateQueries({
@@ -113,7 +120,7 @@ export function TagContextMenuSub({
     });
 
     const { mutate: removeTagAssignment } = useMutation({
-        ...removeTagAssignmentMutation()
+        ...removeTagAssignmentMutation(),
     });
 
     const handleAssignTag = (tagId: string) => {
@@ -121,7 +128,7 @@ export function TagContextMenuSub({
             const newMap = new Map(prev);
             newMap.set(tagId, { tagId, action: "assign" });
             return newMap;
-        })
+        });
 
         assignTag({
             workspaceId,
@@ -145,41 +152,47 @@ export function TagContextMenuSub({
             return newMap;
         });
 
-        removeTagAssignment({
-            workspaceId,
-            assignmentId: assignmentId as string,
-        }, {
-            onSuccess: () => {
-                queryClient.setQueryData(
-                    ["tags", workspaceId, targetType, targetId],
-                    (oldData: any) => {
-                        if (!oldData) return oldData;
-                        
-                        // 移除該標籤
-                        return {
-                            ...oldData,
-                            data: oldData.data?.filter(
-                                (t: any) => t.id !== tagId
-                            ) || [],
-                        };
-                    }
-                );
-    
-                setOptimisticUpdates((prev) => {
-                    const next = new Map(prev);
-                    next.delete(tagId);
-                    return next;
-                });
+        removeTagAssignment(
+            {
+                workspaceId,
+                assignmentId: assignmentId as string,
             },
-            onError: () => {
-                setOptimisticUpdates((prev) => {
-                    const newMap = new Map(prev);
-                    newMap.delete(tagId);
-                    return newMap;
-                });
-                toast.error(t("dicom.messages.failedToRemoveTagAssignment"));
+            {
+                onSuccess: () => {
+                    queryClient.setQueryData(
+                        ["tags", workspaceId, targetType, targetId],
+                        (oldData: any) => {
+                            if (!oldData) return oldData;
+
+                            // 移除該標籤
+                            return {
+                                ...oldData,
+                                data:
+                                    oldData.data?.filter(
+                                        (t: any) => t.id !== tagId,
+                                    ) || [],
+                            };
+                        },
+                    );
+
+                    setOptimisticUpdates((prev) => {
+                        const next = new Map(prev);
+                        next.delete(tagId);
+                        return next;
+                    });
+                },
+                onError: () => {
+                    setOptimisticUpdates((prev) => {
+                        const newMap = new Map(prev);
+                        newMap.delete(tagId);
+                        return newMap;
+                    });
+                    toast.error(
+                        t("dicom.messages.failedToRemoveTagAssignment"),
+                    );
+                },
             },
-        });
+        );
     };
 
     const handleToggleTag = (tagId: string) => {
@@ -190,7 +203,60 @@ export function TagContextMenuSub({
         } else {
             handleAssignTag(tagId);
         }
-    }
+    };
+
+    const { mutate: deleteTag, isPending: isDeletingTag } = useMutation({
+        ...deleteTagMutation(),
+        onMutate: async (variables) => {
+            await queryClient.cancelQueries({
+                queryKey: ["tags", workspaceId],
+            });
+
+            const previousWorkspaceTags = queryClient.getQueryData([
+                "tags",
+                workspaceId,
+            ]);
+
+            queryClient.setQueryData(
+                ["tags", workspaceId],
+                (oldData: typeof workspaceTags) => {
+                    if (!oldData) return oldData;
+
+                    return {
+                        ...oldData,
+                        data: oldData.data?.filter(
+                            (t) => t.id !== variables.tagId,
+                        ),
+                    };
+                },
+            );
+
+            return { previousWorkspaceTags };
+        },
+        onError: (_, __, context) => {
+            if (context?.previousWorkspaceTags) {
+                queryClient.setQueryData(
+                    ["tags", workspaceId],
+                    context.previousWorkspaceTags,
+                );
+            }
+            toast.error(t("dicom.messages.failedToDeleteTag"));
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["tags", workspaceId],
+            });
+        },
+    });
+
+    const handleDeleteTag = (e: React.MouseEvent, tagId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteTag({
+            workspaceId,
+            tagId,
+        });
+    };
 
     const isLoading = isLoadingWorkspaceTags || isLoadingTags;
 
@@ -221,6 +287,9 @@ export function TagContextMenuSub({
                 {combinedTags?.map((tag) => {
                     const isAssigned = getIsAssigned(tag.id);
                     const isUpdating = optimisticUpdates.has(tag.id);
+                    const isHovered = hoveredTagId === tag.id;
+                    const showDeleteButton =
+                        isHovered && !isAssigned && !isUpdating;
 
                     return (
                         <ContextMenuItem
@@ -229,7 +298,9 @@ export function TagContextMenuSub({
                                 e.preventDefault();
                                 handleToggleTag(tag.id);
                             }}
-                            disabled={isUpdating}
+                            onMouseEnter={() => setHoveredTagId(tag.id)}
+                            onMouseLeave={() => setHoveredTagId(null)}
+                            disabled={isUpdating || isDeletingTag}
                             className="opacity-100 data-[disabled]:opacity-50"
                         >
                             {isAssigned ? (
@@ -240,10 +311,20 @@ export function TagContextMenuSub({
                             <div
                                 className="size-4 rounded-full"
                                 style={{ backgroundColor: tag.color }}
-                            ></div>
-                            <span>{tag.name}</span>
+                            />
+                            <span className="flex-1">{tag.name}</span>
+                            {showDeleteButton && (
+                                <button
+                                    type="button"
+                                    className="ml-auto p-0.5 rounded hover:bg-destructive/10 transition-colors"
+                                    onClick={(e) => handleDeleteTag(e, tag.id)}
+                                    disabled={isDeletingTag}
+                                >
+                                    <Trash2Icon className="size-4 text-destructive hover:text-destructive/80 z-10" />
+                                </button>
+                            )}
                         </ContextMenuItem>
-                    )
+                    );
                 })}
             </ContextMenuSubContent>
         </ContextMenuSub>

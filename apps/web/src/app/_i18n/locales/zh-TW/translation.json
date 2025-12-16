@@ -217,7 +217,11 @@
         "tagContextMenu": {
             "tags": "標籤",
             "createTag": "建立標籤",
-            "noTags": "尚無標籤"
+            "noTags": "尚無標籤",
+            "messages": {
+                "tagDeleted": "標籤刪除成功",
+                "failedToDeleteTag": "刪除標籤失敗"
+            }
         },
         "recycleDialog": {
             "title": "確認回收",
