@@ -73,7 +73,7 @@
         "raccoon-dcm4che-bridge": "^0.7.1",
         "react": "19.1.4",
         "react-day-picker": "^9.11.1",
-        "react-dom": "19.1.0",
+        "react-dom": "19.1.4",
         "react-i18next": "^16.4.0",
         "sonner": "^2.0.7",
         "sqlite3": "^5.1.7",
