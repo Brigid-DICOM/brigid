@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings2Icon, SettingsIcon, UsersIcon } from "lucide-react";
+import { NetworkIcon, Settings2Icon, SettingsIcon, UsersIcon } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/app/_i18n/client";
 import {
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
+import { DimseSettings } from "./settings/dimse-settings";
 import { PreferenceSettings } from "./settings/preference-settings";
 import { WorkspaceGeneralSettings } from "./settings/workspace-general-settings";
 import { WorkspaceMembersSettings } from "./settings/workspace-members-settings";
@@ -41,7 +42,7 @@ interface SettingsDialogProps {
     };
 }
 
-type SettingsTab = "preferences" | "general" | "members";
+type SettingsTab = "preferences" | "general" | "members" | "dimse";
 
 export function WorkspaceSettingsDialog({
     open,
@@ -139,6 +140,22 @@ export function WorkspaceSettingsDialog({
                                                 </SidebarMenuButton>
                                             </SidebarMenuItem>
                                         )}
+
+                                        <SidebarMenuItem>
+                                            <SidebarMenuButton
+                                                isActive={
+                                                    activeTab === "dimse"
+                                                }
+                                                onClick={() =>
+                                                    setActiveTab("dimse")
+                                                }
+                                            >
+                                                <NetworkIcon className="mr-2 size-4" />
+                                                <span>
+                                                    {t("workspaceSettings.dimse")}
+                                                </span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
                                     </SidebarMenu>
                                 </SidebarGroupContent>
                             </SidebarGroup>
@@ -158,6 +175,13 @@ export function WorkspaceSettingsDialog({
 
                         {activeTab === "members" && canManageMembers && (
                             <WorkspaceMembersSettings workspace={workspace} />
+                        )}
+
+                        {activeTab === "dimse" && (
+                            <DimseSettings
+                                workspace={workspace}
+                                onClose={() => onOpenChange(false)}
+                            />
                         )}
                     </main>
                 </SidebarProvider>

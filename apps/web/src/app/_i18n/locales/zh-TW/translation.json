@@ -18,6 +18,7 @@
         "remove": "移除",
         "updating": "更新中...",
         "update": "更新",
+        "optional": "選填",
         "expiration": {
             "never": "永不",
             "day": "天",
@@ -108,6 +109,7 @@
         "preferences": "偏好設定",
         "general": "一般",
         "members": "成員",
+        "dimse": "DIMSE (SCP)",
         "messages": {
             "workspaceUpdated": "工作區更新成功",
             "workspaceUpdatedError": "工作區更新失敗",
@@ -456,6 +458,44 @@
             "creatingSuccess": "標籤建立成功",
             "assigningError": "建立標籤失敗",
             "creatingError": "建立標籤失敗"
+        }
+    },
+    "dimseSettings": {
+        "title": "DIMSE 設定",
+        "description": "配置此 workspace 的 DICOM DIMSE 服務設定。",
+        "aeTitle": "AE Title",
+        "aeTitleHint": "DICOM Application Entity Title，最多 16 個字元（大寫字母、數字、底線）",
+        "enabled": "啟用 DIMSE 服務",
+        "createConfig": "建立設定",
+        "createHint": "請先建立 DIMSE 設定，然後才能新增允許的 IP 和遠端 AE。",
+        "allowedIps": {
+            "title": "允許的 IP",
+            "description": "設定允許連線的 IP 位址或 CIDR 掩碼。",
+            "ipMask": "IP 掩碼",
+            "descriptionField": "描述",
+            "empty": "尚未設定任何允許的 IP"
+        },
+        "allowedRemotes": {
+            "title": "允許的遠端 AE",
+            "description": "設定允許連線的遠端 DICOM Application Entity。",
+            "aeTitle": "AE Title",
+            "host": "主機 IP",
+            "port": "連接埠",
+            "empty": "尚未設定任何允許的遠端 AE",
+            "descriptionField": "描述"
+        },
+        "messages": {
+            "saved": "DIMSE 設定已儲存",
+            "saveError": "儲存 DIMSE 設定失敗",
+            "aeTitleRequired": "請輸入 AE Title",
+            "ipAdded": "已新增允許的 IP",
+            "ipAddError": "新增 IP 失敗",
+            "ipRemoved": "已移除允許的 IP",
+            "ipRemoveError": "移除 IP 失敗",
+            "remoteAdded": "已新增允許的遠端 AE",
+            "remoteAddError": "新增遠端 AE 失敗",
+            "remoteRemoved": "已移除允許的遠端 AE",
+            "remoteRemoveError": "移除遠端 AE 失敗"
         }
     }
 }

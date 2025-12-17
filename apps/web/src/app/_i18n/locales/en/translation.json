@@ -18,6 +18,7 @@
         "remove": "Remove",
         "updating": "Updating...",
         "update": "Update",
+        "optional": "Optional",
         "expiration": {
             "never": "Never",
             "day": "Day",
@@ -108,6 +109,7 @@
         "preferences": "Preferences",
         "general": "General",
         "members": "Members",
+        "dimse": "DIMSE (SCP)",
         "messages": {
             "workspaceUpdated": "Workspace updated successfully",
             "workspaceUpdatedError": "Failed to update workspace",
@@ -457,6 +459,35 @@
             "creatingSuccess": "Tag created successfully",
             "assigningError": "Failed to assign tag",
             "creatingError": "Failed to create tag"
+        }
+    },
+    "dimseSettings": {
+        "title": "DIMSE Settings",
+        "description": "Configure the DIMSE service settings for this workspace.",
+        "aeTitle": "AE Title",
+        "aeTitleHint": "DICOM Application Entity Title, maximum 16 characters (uppercase letters, numbers, underscores)",
+        "enabled": "Enable DIMSE Service",
+        "createConfig": "Create Config",
+        "createHint": "Please create a DIMSE config first before adding allowed IPs and remote AEs.",
+        "allowedIps": {
+            "title": "Allowed IPs",
+            "description": "Set allowed connection IP addresses or CIDR masks.",
+            "ipMask": "IP Mask",
+            "descriptionField": "Description",
+            "empty": "No allowed IPs set yet"
+        },
+        "allowedRemotes": {
+            "title": "Allowed Remote AEs",
+            "description": "Set allowed connection remote DICOM Application Entities.",
+            "aeTitle": "AE Title",
+            "host": "Host IP",
+            "port": "Port",
+            "empty": "No allowed remote AEs set yet",
+            "descriptionField": "Description"
+        },
+        "messages": {
+            "ipAdded": "IP address added successfully",
+            "ipAddError": "Failed to add IP address"
         }
     }
 }
