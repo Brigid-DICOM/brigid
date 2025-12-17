@@ -19,3 +19,4 @@ export { ChangeTagAssignmentUqIdx1763710517185 } from "./1763710517185-changeTag
 export { CreateShareLinkTables1763731186544 } from "./1763731186544-createShareLinkTables";
 export { AddNameColumnToShareLink1764653977927 } from "./1764653977927-addNameColumnToShareLink";
 export { AddDeletedAtToWorkspace1764837781160 } from "./1764837781160-addDeletedAtToWorkspace";
+export { CreateDimseTables1765948809824 } from "./1765948809824-createDimseTables";
