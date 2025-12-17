@@ -19,6 +19,7 @@ import restoreInstancesRoute from "./dicom/delete/restoreInstances.route";
 import restoreSeriesRoute from "./dicom/delete/restoreSeries.route";
 import restoreStudyRoute from "./dicom/delete/restoreStudy.route";
 import getStatsRoute from "./dicom/getStats.route";
+import dimseRoute from "./dimse/dimse.route";
 import searchInstancesRoute from "./qido-rs/searchInstances.route";
 import searchSeriesRoute from "./qido-rs/searchSeries.route";
 import searchStudiesRoute from "./qido-rs/searchStudies.route";
@@ -386,6 +387,7 @@ const workspacesRoute = new Hono()
             );
         },
     )
-    .route("/", workspaceMemberRoute);
+    .route("/", workspaceMemberRoute)
+    .route("/", dimseRoute);
 
 export default workspacesRoute;

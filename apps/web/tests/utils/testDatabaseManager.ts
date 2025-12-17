@@ -1,6 +1,9 @@
 import { PATIENT_SEX } from "@brigid/database/src/const/dicom";
 import { AccountEntity } from "@brigid/database/src/entities/account.entity";
 import { DicomCodeSequenceEntity } from "@brigid/database/src/entities/dicomCodeSequence.entity";
+import { DimseAllowedIpEntity } from "@brigid/database/src/entities/dimseAllowedIp.entity";
+import { DimseAllowedRemoteEntity } from "@brigid/database/src/entities/dimseAllowedRemote.entity";
+import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
 import { PersonNameEntity } from "@brigid/database/src/entities/personName.entity";
@@ -48,6 +51,9 @@ export class TestDatabaseManager {
                 ShareLinkEntity,
                 ShareLinkTargetEntity,
                 ShareLinkRecipientEntity,
+                DimseConfigEntity,
+                DimseAllowedIpEntity,
+                DimseAllowedRemoteEntity
             ],
             synchronize: true,
             logging: false,
@@ -70,6 +76,9 @@ export class TestDatabaseManager {
     }
 
     async clearDatabase() {
+        await this.dataSource.manager.clear(DimseAllowedRemoteEntity);
+        await this.dataSource.manager.clear(DimseAllowedIpEntity);
+        await this.dataSource.manager.clear(DimseConfigEntity);
         await this.dataSource.manager.clear(ShareLinkRecipientEntity);
         await this.dataSource.manager.clear(ShareLinkTargetEntity);
         await this.dataSource.manager.clear(ShareLinkEntity);
