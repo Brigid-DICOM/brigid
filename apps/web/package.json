@@ -17,7 +17,6 @@
         "@aws-sdk/client-s3": "^3.901.0",
         "@aws-sdk/lib-storage": "^3.905.0",
         "@brigid/database": "workspace:^",
-        "@brigid/dimse": "workspace:^",
         "@brigid/env": "workspace:*",
         "@brigid/types": "workspace:^",
         "@hono/auth-js": "^1.1.0",
@@ -87,7 +86,7 @@
         "zustand": "^5.0.8"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.2.0",
+        "@biomejs/biome": "2.3.10",
         "@tailwindcss/postcss": "^4",
         "@types/formidable": "^3.4.5",
         "@types/fs-extra": "^11.0.4",
