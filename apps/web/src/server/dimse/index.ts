@@ -1,4 +1,7 @@
 import path from "node:path";
+import { AppDataSource } from "@brigid/database";
+import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
+import env from "@brigid/env";
 import fsE from "fs-extra";
 import { importClass } from "java-bridge";
 import type Class from "raccoon-dcm4che-bridge/src/wrapper/java/lang/Class";
@@ -12,9 +15,6 @@ import { DicomServiceRegistry } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm
 import { TransferCapability } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/TransferCapability";
 import { TransferCapability$Role } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/TransferCapability$Role";
 import { Common } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/common/Common";
-import { AppDataSource } from "../../database/src/dataSource";
-import { DimseConfigEntity } from "../../database/src/entities/dimseConfig.entity";
-import env from "../../env/src/index";
 
 interface DimseConfigInfo {
     aeTitle: string;

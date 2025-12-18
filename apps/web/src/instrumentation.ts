@@ -28,7 +28,7 @@ export async function register() {
             console.error("Failed to start dicom cleanup scheduler", error);
         }
 
-        const { DimseApp } = await import("@brigid/dimse");
+        const { DimseApp } = await import("./server/dimse/index");
         if (env.DIMSE_HOSTNAME && env.DIMSE_PORT) {
             const dimseApp = new DimseApp(env.DIMSE_HOSTNAME, env.DIMSE_PORT);
             await dimseApp.start();
