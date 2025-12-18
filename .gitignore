@@ -81,6 +81,7 @@ $RECYCLE.BIN/
 
 # Logs
 **/logs
+apps/web/configs/logback.xml
 
 **/temp/**
 !**/.gitkeep

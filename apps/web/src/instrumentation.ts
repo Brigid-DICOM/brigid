@@ -1,5 +1,9 @@
 export async function register() {
     if (process.env.NEXT_RUNTIME === "nodejs") {
+        console.log("current working directory", process.cwd());
+
+        const { default: env } = await import("@brigid/env");
+
         const { AppDataSource } = await import(
             "@brigid/database/src/dataSource"
         );
@@ -22,6 +26,12 @@ export async function register() {
             console.log("Dicom cleanup scheduler started");
         } catch (error) {
             console.error("Failed to start dicom cleanup scheduler", error);
+        }
+
+        const { DimseApp } = await import("@brigid/dimse");
+        if (env.DIMSE_HOSTNAME && env.DIMSE_PORT) {
+            const dimseApp = new DimseApp(env.DIMSE_HOSTNAME, env.DIMSE_PORT);
+            await dimseApp.start();
         }
 
         const handleShutdown = async (signal: string) => {

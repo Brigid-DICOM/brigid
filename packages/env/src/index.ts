@@ -54,6 +54,40 @@ const storageSchema = z.discriminatedUnion("STORAGE_PROVIDER", [
 
 // #endregion
 
+// #region DIMSE schema
+
+const dimseSchema = z.object({
+    // 綁定的主機名稱
+    DIMSE_HOSTNAME: z.string().default("0.0.0.0"),
+    // 綁定的埠號
+    DIMSE_PORT: z.coerce.number().int().min(1).max(65535).default(11112),
+    // PDU 長度設定
+    DIMSE_MAX_PDU_LEN_RCV: z.coerce.number().int().default(16378),
+    DIMSE_MAX_PDU_LEN_SND: z.coerce.number().int().default(16378),
+    // 非同步模式設定
+    DIMSE_NOT_ASYNC: booleanFromEnv.default(false),
+    DIMSE_MAX_OPS_INVOKED: z.coerce.number().int().default(0),
+    DIMSE_MAX_OPS_PERFORMED: z.coerce.number().int().default(0),
+    // PDV 打包
+    DIMSE_NOT_PACK_PDV: booleanFromEnv.default(false),
+    // 超時設定 (毫秒)
+    DIMSE_CONNECT_TIMEOUT: z.coerce.number().int().default(0),
+    DIMSE_REQUEST_TIMEOUT: z.coerce.number().int().default(0),
+    DIMSE_ACCEPT_TIMEOUT: z.coerce.number().int().default(0),
+    DIMSE_RELEASE_TIMEOUT: z.coerce.number().int().default(0),
+    DIMSE_SEND_TIMEOUT: z.coerce.number().int().default(0),
+    DIMSE_STORE_TIMEOUT: z.coerce.number().int().default(0),
+    DIMSE_RESPONSE_TIMEOUT: z.coerce.number().int().default(0),
+    DIMSE_IDLE_TIMEOUT: z.coerce.number().int().default(0),
+    // Socket 設定
+    DIMSE_SO_CLOSE_DELAY: z.coerce.number().int().default(50),
+    DIMSE_SO_SND_BUFFER: z.coerce.number().int().default(0),
+    DIMSE_SO_RCV_BUFFER: z.coerce.number().int().default(0),
+    DIMSE_TCP_NO_DELAY: booleanFromEnv.default(true)
+});
+
+// #endregion
+
 // #region base schema
 const baseSchema = z.object({
     // app
@@ -86,7 +120,7 @@ const baseSchema = z.object({
     QUERY_MAX_LIMIT: z.coerce.number().int().min(1).max(1000).default(100)
 });
 
-const envSchemaBase = z.intersection(z.intersection(baseSchema, storageSchema), authSchemaBase);
+const envSchemaBase = z.intersection(z.intersection(z.intersection(baseSchema, storageSchema), authSchemaBase), dimseSchema);
 
 const envSchema = envSchemaBase.superRefine((data, ctx) => {
     if (data.NEXT_PUBLIC_ENABLE_AUTH) {
@@ -101,7 +135,8 @@ const envSchema = envSchemaBase.superRefine((data, ctx) => {
 
 type EnvSchema = z.infer<typeof baseSchema> &
     z.infer<typeof storageSchema> &
-    Partial<z.infer<typeof authSchema>>;
+    Partial<z.infer<typeof authSchema>> &
+    Partial<z.infer<typeof dimseSchema>>;
 
 let env: EnvSchema;
 

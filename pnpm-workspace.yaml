@@ -1,6 +1,7 @@
 packages:
   - ./packages/*
   - ./apps/web/**
+  - ./apps/dimse/**
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - better-sqlite3
