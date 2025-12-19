@@ -70,7 +70,7 @@
         "next-themes": "^0.4.6",
         "nextjs-toploader": "^3.9.17",
         "pg": "^8.16.3",
-        "raccoon-dcm4che-bridge": "^0.7.1",
+        "raccoon-dcm4che-bridge": "^0.7.2",
         "react": "19.1.4",
         "react-day-picker": "^9.11.1",
         "react-dom": "19.1.4",
