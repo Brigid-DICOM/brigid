@@ -2,6 +2,7 @@ import { AppDataSource } from "@brigid/database";
 import { DimseAllowedIpEntity } from "@brigid/database/src/entities/dimseAllowedIp.entity";
 import { DimseAllowedRemoteEntity } from "@brigid/database/src/entities/dimseAllowedRemote.entity";
 import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
+import env from "@brigid/env";
 import type { EntityManager } from "typeorm";
 
 export class DimseConfigService {
@@ -26,10 +27,19 @@ export class DimseConfigService {
         aeTitle: string;
         enabled?: boolean;
     }) {
+        const { DimseApp } = await import("@/server/dimse");
+
         const config = new DimseConfigEntity();
         config.workspaceId = options.workspaceId;
         config.aeTitle = options.aeTitle;
         config.enabled = options.enabled ?? false;
+
+        if (config.enabled) {
+            await DimseApp.getInstance(env.DIMSE_HOSTNAME as string, env.DIMSE_PORT as number).addApplicationEntityToDevice({
+                aeTitle: options.aeTitle,
+                workspaceId: options.workspaceId,
+            });
+        }
 
         return await this.entityManager.save(DimseConfigEntity, config);
     }
@@ -39,6 +49,8 @@ export class DimseConfigService {
         aeTitle?: string;
         enabled?: boolean;
     }) {
+        const { DimseApp } = await import("@/server/dimse");
+
         const config = await this.entityManager.findOne(DimseConfigEntity, {
             where: { workspaceId: options.workspaceId },
         })
@@ -49,6 +61,15 @@ export class DimseConfigService {
         }
         if (options.enabled !== undefined) {
             config.enabled = options.enabled;
+        }
+
+        if (config.enabled) {
+            await DimseApp.getInstance(env.DIMSE_HOSTNAME as string, env.DIMSE_PORT as number).addApplicationEntityToDevice({
+                aeTitle: config.aeTitle,
+                workspaceId: config.workspaceId,
+            });
+        } else {
+            await DimseApp.getInstance(env.DIMSE_HOSTNAME as string, env.DIMSE_PORT as number).removeApplicationEntityFromDevice(config.aeTitle);
         }
 
         return await this.entityManager.save(DimseConfigEntity, config);

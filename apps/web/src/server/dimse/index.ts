@@ -3,7 +3,6 @@ import { AppDataSource } from "@brigid/database";
 import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
 import env from "@brigid/env";
 import fsE from "fs-extra";
-import { importClass } from "java-bridge";
 import type Class from "raccoon-dcm4che-bridge/src/wrapper/java/lang/Class";
 import { EnumSet } from "raccoon-dcm4che-bridge/src/wrapper/java/util/EnumSet";
 import { ApplicationEntity } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/ApplicationEntity";
@@ -17,44 +16,42 @@ import { TransferCapability$Role } from "raccoon-dcm4che-bridge/src/wrapper/org/
 import { Common } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/common/Common";
 import { NativeCFindScp } from "./cfindScp";
 import { getScpInstance } from "./cstoreScp";
+import { DeviceService } from "./deviceService";
 
 interface DimseConfigInfo {
     aeTitle: string;
     workspaceId: string;
 }
 
+const globalForDimse = globalThis as unknown as {
+    dimseApp: DimseApp | undefined;
+};
+
 export class DimseApp {
     private device: Device;
     private applicationEntities: Map<string, ApplicationEntity> = new Map();
     private connection = new Connection();
-    private static singletonDimseApp: DimseApp | null = null;
-
+    private deviceService: DeviceService | null = null;
     constructor(
         private hostname: string,
         private port: number,
     ) {
         this.device = new Device("brigid");
+        this.configureBindServer();
         this.device.addConnectionSync(this.connection);
     }
 
     async start() {
         this.configureLog();
-        this.configureConnection();
-        this.configureBindServer();
-
-        await this.loadApplicationEntitiesFromDatabase();
-
+        this.configureConnection(this.connection);
+        
         const dicomServiceRegistry = await this.createDicomServiceRegistry();
         this.device.setDimseRQHandlerSync(dicomServiceRegistry);
-
-        const Executors = importClass("java.util.concurrent.Executors");
-        const executorService = await Executors.newCachedThreadPool();
-        const scheduledExecutorService =
-            await Executors.newSingleThreadScheduledExecutor();
-
-        await this.device.setScheduledExecutor(scheduledExecutorService);
-        await this.device.setExecutor(executorService);
-        await this.device.bindConnections();
+            
+        this.deviceService = new DeviceService();
+        this.deviceService.init(this.device);
+        this.deviceService.start();
+        await this.loadApplicationEntitiesFromDatabase();
 
         console.log(
             `DIMSE SCP started on ${env.DIMSE_HOSTNAME}:${env.DIMSE_PORT}`,
@@ -70,14 +67,14 @@ export class DimseApp {
         );
 
         for (const config of enabledConfigs) {
-            this.addApplicationEntityToDevice({
+            await this.addApplicationEntityToDevice({
                 aeTitle: config.aeTitle,
                 workspaceId: config.workspaceId,
             });
         }
     }
 
-    addApplicationEntityToDevice(config: DimseConfigInfo): ApplicationEntity {
+    async addApplicationEntityToDevice(config: DimseConfigInfo): Promise<ApplicationEntity> {
         const { aeTitle, workspaceId } = config;
 
         if (this.applicationEntities.has(aeTitle)) {
@@ -93,31 +90,32 @@ export class DimseApp {
 
         this.configureTransferCapability(ae);
 
-        this.device.addApplicationEntitySync(ae);
         this.applicationEntities.set(aeTitle, ae);
 
+        await this.reconfigureDevice();
+        
         console.log(
             `Added Application Entity: ${aeTitle} for workspace: ${workspaceId}`,
         );
         return ae;
     }
 
-    addApplicationEntitiesToDevice(
+    async addApplicationEntitiesToDevice(
         configs: DimseConfigInfo[],
-    ): ApplicationEntity[] {
-        return configs.map((config) =>
+    ): Promise<ApplicationEntity[]> {
+        return Promise.all(configs.map((config) =>
             this.addApplicationEntityToDevice(config),
-        );
+        ));
     }
 
-    removeApplicationEntityFromDevice(aeTitle: string): boolean {
+    async removeApplicationEntityFromDevice(aeTitle: string): Promise<boolean> {
         const ae = this.applicationEntities.get(aeTitle);
         if (!ae) {
             return false;
         }
 
-        this.device.removeApplicationEntitySync(ae);
         this.applicationEntities.delete(aeTitle);
+        await this.reconfigureDevice();
         console.log(`Removed Application Entity: ${aeTitle}`);
         return true;
     }
@@ -161,55 +159,55 @@ export class DimseApp {
         ae.addTransferCapabilitySync(tc);
     }
 
-    private configureConnection() {
-        this.connection.setReceivePDULengthSync(
+    private configureConnection(conn: Connection = this.connection) {
+        conn.setReceivePDULengthSync(
             env.DIMSE_MAX_PDU_LEN_RCV as number,
         );
-        this.connection.setSendPDULengthSync(
+        conn.setSendPDULengthSync(
             env.DIMSE_MAX_PDU_LEN_SND as number,
         );
 
         if (env.DIMSE_NOT_ASYNC) {
-            this.connection.setMaxOpsInvokedSync(1);
-            this.connection.setMaxOpsPerformedSync(1);
+            conn.setMaxOpsInvokedSync(1);
+            conn.setMaxOpsPerformedSync(1);
         } else {
-            this.connection.setMaxOpsInvokedSync(
+            conn.setMaxOpsInvokedSync(
                 env.DIMSE_MAX_OPS_INVOKED as number,
             );
-            this.connection.setMaxOpsPerformedSync(
+            conn.setMaxOpsPerformedSync(
                 env.DIMSE_MAX_OPS_PERFORMED as number,
             );
         }
 
-        this.connection.setPackPDVSync(!env.DIMSE_NOT_PACK_PDV);
-        this.connection.setConnectTimeoutSync(
+        conn.setPackPDVSync(!env.DIMSE_NOT_PACK_PDV);
+        conn.setConnectTimeoutSync(
             env.DIMSE_CONNECT_TIMEOUT as number,
         );
-        this.connection.setRequestTimeoutSync(
+        conn.setRequestTimeoutSync(
             env.DIMSE_REQUEST_TIMEOUT as number,
         );
-        this.connection.setAcceptTimeoutSync(
+        conn.setAcceptTimeoutSync(
             env.DIMSE_ACCEPT_TIMEOUT as number,
         );
-        this.connection.setReleaseTimeoutSync(
+        conn.setReleaseTimeoutSync(
             env.DIMSE_RELEASE_TIMEOUT as number,
         );
-        this.connection.setSendTimeoutSync(env.DIMSE_SEND_TIMEOUT as number);
-        this.connection.setStoreTimeoutSync(env.DIMSE_STORE_TIMEOUT as number);
-        this.connection.setResponseTimeoutSync(
+        conn.setSendTimeoutSync(env.DIMSE_SEND_TIMEOUT as number);
+        conn.setStoreTimeoutSync(env.DIMSE_STORE_TIMEOUT as number);
+        conn.setResponseTimeoutSync(
             env.DIMSE_RESPONSE_TIMEOUT as number,
         );
-        this.connection.setIdleTimeoutSync(env.DIMSE_IDLE_TIMEOUT as number);
-        this.connection.setSocketCloseDelaySync(
+        conn.setIdleTimeoutSync(env.DIMSE_IDLE_TIMEOUT as number);
+        conn.setSocketCloseDelaySync(
             env.DIMSE_SO_CLOSE_DELAY as number,
         );
-        this.connection.setSendBufferSizeSync(
+        conn.setSendBufferSizeSync(
             env.DIMSE_SO_SND_BUFFER as number,
         );
-        this.connection.setReceiveBufferSizeSync(
+        conn.setReceiveBufferSizeSync(
             env.DIMSE_SO_RCV_BUFFER as number,
         );
-        this.connection.setTcpNoDelaySync(!!env.DIMSE_TCP_NO_DELAY);
+        conn.setTcpNoDelaySync(!!env.DIMSE_TCP_NO_DELAY);
     }
 
     private configureLog() {
@@ -253,9 +251,36 @@ export class DimseApp {
     }
 
     public static getInstance(hostname: string, port: number): DimseApp {
-        if (!DimseApp.singletonDimseApp) {
-            DimseApp.singletonDimseApp = new DimseApp(hostname, port);
+        if (!globalForDimse.dimseApp) {
+            console.log("Creating new DimseApp instance");
+            globalForDimse.dimseApp = new DimseApp(hostname, port);
         }
-        return DimseApp.singletonDimseApp;
+        return globalForDimse.dimseApp;
+    }
+
+    public async reconfigureDevice() {
+        const tempDevice = new Device("brigid");
+
+        const dicomConn = new Connection("dicom", this.hostname, this.port);
+
+        this.configureConnection(dicomConn);
+
+        tempDevice.addConnectionSync(dicomConn);
+
+        for (const [aeTitle, _] of this.applicationEntities) {
+            const ae = new ApplicationEntity(aeTitle);
+            await ae.setAssociationAcceptor(true);
+            await ae.addConnection(dicomConn);
+
+            this.configureTransferCapability(ae);
+            await tempDevice.addApplicationEntity(ae);
+        }
+
+        await this.device.reconfigure(tempDevice);
+
+        this.deviceService?.stop();
+        this.deviceService?.start();
+
+        console.log("Device configuration reconfigured successfully via template.");
     }
 }
