@@ -24,9 +24,9 @@ export class DicomSearchInstanceQueryBuilder extends BaseDicomSearchQueryBuilder
     ): SelectQueryBuilder<InstanceEntity> {
         const query = this.entityManager
             .createQueryBuilder(InstanceEntity, this.instanceTable)
-            .innerJoin("series", "series", "series.id = instance.localSeriesId")
-            .innerJoin("study", "study", "study.id = series.localStudyId")
-            .innerJoin("patient", "patient", "patient.id = study.patientId")
+            .innerJoinAndSelect("instance.series", "series")
+            .innerJoinAndSelect("series.study", "study")
+            .innerJoinAndSelect("study.patient", "patient")
             .innerJoin(
                 "person_name",
                 "patientName",

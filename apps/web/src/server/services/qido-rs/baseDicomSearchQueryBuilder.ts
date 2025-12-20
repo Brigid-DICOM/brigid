@@ -2,6 +2,7 @@ import { AppDataSource } from "@brigid/database";
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { EntityManager, ObjectLiteral, SelectQueryBuilder } from "typeorm";
 import type { InstanceFieldConfig } from "./dicomSearchInstanceQueryConfig";
+import type { PatientFieldConfig } from "./dicomSearchPatientQueryConfig";
 import type { SeriesFieldConfig } from "./dicomSearchSeriesQueryConfig";
 import type { FieldConfig } from "./dicomSearchStudyQueryConfig";
 import type { QueryDicomResult } from "./queryStrategy";
@@ -14,7 +15,8 @@ export abstract class BaseDicomSearchQueryBuilder<
     TFieldConfig extends
         | FieldConfig
         | SeriesFieldConfig
-        | InstanceFieldConfig = FieldConfig,
+        | InstanceFieldConfig
+        | PatientFieldConfig = FieldConfig,
 > {
     protected readonly entityManager: EntityManager;
 

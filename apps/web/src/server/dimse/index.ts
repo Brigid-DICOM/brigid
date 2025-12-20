@@ -15,6 +15,7 @@ import { DicomServiceRegistry } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm
 import { TransferCapability } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/TransferCapability";
 import { TransferCapability$Role } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/TransferCapability$Role";
 import { Common } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/common/Common";
+import { NativeCFindScp } from "./cfindScp";
 import { getScpInstance } from "./cstoreScp";
 
 interface DimseConfigInfo {
@@ -26,6 +27,7 @@ export class DimseApp {
     private device: Device;
     private applicationEntities: Map<string, ApplicationEntity> = new Map();
     private connection = new Connection();
+    private static singletonDimseApp: DimseApp | null = null;
 
     constructor(
         private hostname: string,
@@ -130,6 +132,16 @@ export class DimseApp {
 
         const nativeCStoreScp = getScpInstance();
         await dicomServiceRegistry.addDicomService(nativeCStoreScp);
+
+        // #region C-FIND SCP
+        const patientRootCFindScp = new NativeCFindScp().getPatientRootLevel();
+        const studyRootCFindScp = new NativeCFindScp().getStudyRootLevel();
+        const patientStudyOnlyCFindScp = new NativeCFindScp().getPatientStudyOnlyLevel();
+        await dicomServiceRegistry.addDicomService(patientRootCFindScp);
+        await dicomServiceRegistry.addDicomService(studyRootCFindScp);
+        await dicomServiceRegistry.addDicomService(patientStudyOnlyCFindScp);
+        // #endregion
+
         return dicomServiceRegistry;
     }
 
@@ -238,5 +250,12 @@ export class DimseApp {
             logBackXml,
             "utf-8",
         );
+    }
+
+    public static getInstance(hostname: string, port: number): DimseApp {
+        if (!DimseApp.singletonDimseApp) {
+            DimseApp.singletonDimseApp = new DimseApp(hostname, port);
+        }
+        return DimseApp.singletonDimseApp;
     }
 }

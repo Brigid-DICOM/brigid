@@ -28,8 +28,8 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
     ): SelectQueryBuilder<SeriesEntity> {
         const query = this.entityManager
             .createQueryBuilder(SeriesEntity, this.seriesTable)
-            .innerJoin("study", "study", "study.id = series.localStudyId")
-            .innerJoin("patient", "patient", "patient.id = study.patientId")
+            .innerJoinAndSelect("series.study", "study")
+            .innerJoinAndSelect("study.patient", "patient")
             .innerJoin(
                 "person_name",
                 "patientName",
