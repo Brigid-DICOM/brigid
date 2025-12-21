@@ -15,6 +15,7 @@ import { TransferCapability } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4c
 import { TransferCapability$Role } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/TransferCapability$Role";
 import { Common } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/common/Common";
 import { NativeCFindScp } from "./cfindScp";
+import { NativeCMoveScp } from "./cmoveScp";
 import { getScpInstance } from "./cstoreScp";
 import { DeviceService } from "./deviceService";
 
@@ -138,6 +139,15 @@ export class DimseApp {
         await dicomServiceRegistry.addDicomService(patientRootCFindScp);
         await dicomServiceRegistry.addDicomService(studyRootCFindScp);
         await dicomServiceRegistry.addDicomService(patientStudyOnlyCFindScp);
+        // #endregion
+
+        // #region C-MOVE SCP
+        const patientRootCMoveScp = new NativeCMoveScp().getPatientRootLevel();
+        const studyRootCMoveScp = new NativeCMoveScp().getStudyRootLevel();
+        const patientStudyOnlyCMoveScp = new NativeCMoveScp().getPatientStudyOnlyLevel();
+        await dicomServiceRegistry.addDicomService(patientRootCMoveScp);
+        await dicomServiceRegistry.addDicomService(studyRootCMoveScp);
+        await dicomServiceRegistry.addDicomService(patientStudyOnlyCMoveScp);
         // #endregion
 
         return dicomServiceRegistry;
