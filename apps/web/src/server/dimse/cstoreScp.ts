@@ -3,9 +3,6 @@ import { AppDataSource } from "@brigid/database";
 import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
 import fsE from "fs-extra";
 import { File } from "raccoon-dcm4che-bridge/src/wrapper/java/io/File";
-import type { Attributes } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Attributes";
-import { Tag } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag";
-import type { Association } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Association";
 import { createAssociationListenerProxy } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/AssociationListener";
 import { createCStoreSCPInjectProxy } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/CStoreSCPInject";
 import { SimpleCStoreSCP } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/SimpleCStoreSCP";
@@ -13,22 +10,13 @@ import tmp from "tmp";
 import { StowRsService } from "../services/stowRs.service";
 import type { MultipartFile } from "../types/file";
 import { appLogger } from "../utils/logger";
+import { getContextKey } from "./dimseUtils";
 
 const logger = appLogger.child({
     module: "NativeCStoreScp",
 });
 
 let scpInstance: SimpleCStoreSCP | undefined;
-
-async function getContextKey(
-    association: Association,
-    requestAttr: Attributes,
-) {
-    const serialNo = await association?.getSerialNo();
-    const messageId = await requestAttr?.getInt(Tag.MessageID, -1);
-
-    return `serialNo-${serialNo}:messageId-${messageId}`;
-}
 
 const cStoreScpInjectProxy = createCStoreSCPInjectProxy(
     {
