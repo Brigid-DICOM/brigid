@@ -1,7 +1,4 @@
-import { AppDataSource } from "@brigid/database";
-import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
 import type { Attributes } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Attributes";
-import Tag from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag";
 import { UID } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/UID";
 import type { Association } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Association";
 import { Commands } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Commands";
@@ -12,6 +9,7 @@ import { QueryRetrieveLevel2 } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4
 import { BasicModCFindSCP } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/BasicModCFindSCP";
 import { type CFindSCPInjectInterface, createCFindSCPInjectProxy } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/CFindSCPInject";
 import { appLogger } from "../utils/logger";
+import { getWorkspaceIdFromAssociation } from "./dimseUtils";
 import { PATIENT_ROOT_LEVELS, PATIENT_STUDY_ONLY_LEVELS, STUDY_ROOT_LEVELS } from "./queryRetrieveLevels";
 import { InstanceQueryTask } from "./queryTasks/instanceQueryTask";
 import { PatientQueryTask } from "./queryTasks/patientQueryTask";
@@ -78,19 +76,19 @@ export class NativeCFindScp {
                 try {
                     const level = await this.basicModCFindSCP?.getQrLevel(as, pc, rq, keys);
                     if (await level?.compareTo(QueryRetrieveLevel2.PATIENT) === 0) {
-                        const workspaceId = await this.getWorkspaceId(as);
+                        const workspaceId = await getWorkspaceIdFromAssociation(as);
                         const patientQueryTask = new PatientQueryTask(as, pc, rq, keys, workspaceId);
                         return await patientQueryTask.get();
                     } else if (await level?.compareTo(QueryRetrieveLevel2.STUDY) === 0) {
-                        const workspaceId = await this.getWorkspaceId(as);
+                        const workspaceId = await getWorkspaceIdFromAssociation(as);
                         const studyQueryTask = new StudyQueryTask(as, pc, rq, keys, workspaceId);
                         return await studyQueryTask.get();
                     } else if (await level?.compareTo(QueryRetrieveLevel2.SERIES) === 0) {
-                        const workspaceId = await this.getWorkspaceId(as);
+                        const workspaceId = await getWorkspaceIdFromAssociation(as);
                         const seriesQueryTask = new SeriesQueryTask(as, pc, rq, keys, workspaceId);
                         return await seriesQueryTask.get();
                     } else if (await level?.compareTo(QueryRetrieveLevel2.IMAGE) === 0) {
-                        const workspaceId = await this.getWorkspaceId(as);
+                        const workspaceId = await getWorkspaceIdFromAssociation(as);
                         const instanceQueryTask = new InstanceQueryTask(as, pc, rq, keys, workspaceId);
                         return await instanceQueryTask.get();
                     }
@@ -102,21 +100,6 @@ export class NativeCFindScp {
         } as unknown as CFindSCPInjectInterface;
 
         return proxyMethods;
-    }
-
-    async getWorkspaceId(as: Association) {
-        const aeTitle = await as.getCalledAET();
-
-        const workspace = await AppDataSource.manager.findOne(
-            DimseConfigEntity,
-            {
-                where: {
-                    aeTitle: aeTitle ?? "",
-                },  
-            },
-        );
-
-        return workspace?.workspaceId ?? "";
     }
 
     private getCFindScpInjectProxy() {
