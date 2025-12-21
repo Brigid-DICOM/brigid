@@ -7,10 +7,17 @@ import type { PresentationContext } from "raccoon-dcm4che-bridge/src/wrapper/org
 import { Status } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Status";
 import { QueryRetrieveLevel2 } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/service/QueryRetrieveLevel2";
 import { BasicModCFindSCP } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/BasicModCFindSCP";
-import { type CFindSCPInjectInterface, createCFindSCPInjectProxy } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/CFindSCPInject";
+import {
+    type CFindSCPInjectInterface,
+    createCFindSCPInjectProxy,
+} from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/CFindSCPInject";
 import { appLogger } from "../utils/logger";
 import { getWorkspaceIdFromAssociation } from "./dimseUtils";
-import { PATIENT_ROOT_LEVELS, PATIENT_STUDY_ONLY_LEVELS, STUDY_ROOT_LEVELS } from "./queryRetrieveLevels";
+import {
+    PATIENT_ROOT_LEVELS,
+    PATIENT_STUDY_ONLY_LEVELS,
+    STUDY_ROOT_LEVELS,
+} from "./queryRetrieveLevels";
 import { InstanceQueryTask } from "./queryTasks/instanceQueryTask";
 import { PatientQueryTask } from "./queryTasks/patientQueryTask";
 import { SeriesQueryTask } from "./queryTasks/seriesQueryTask";
@@ -29,7 +36,7 @@ export class NativeCFindScp {
         this.basicModCFindSCP = new BasicModCFindSCP(
             cFindScpInject,
             UID.PatientRootQueryRetrieveInformationModelFind,
-            PATIENT_ROOT_LEVELS
+            PATIENT_ROOT_LEVELS,
         );
 
         return this.basicModCFindSCP;
@@ -41,7 +48,7 @@ export class NativeCFindScp {
         this.basicModCFindSCP = new BasicModCFindSCP(
             cFindScpInject,
             UID.StudyRootQueryRetrieveInformationModelFind,
-            STUDY_ROOT_LEVELS
+            STUDY_ROOT_LEVELS,
         );
 
         return this.basicModCFindSCP;
@@ -53,7 +60,7 @@ export class NativeCFindScp {
         this.basicModCFindSCP = new BasicModCFindSCP(
             cFindScpInject,
             UID.PatientStudyOnlyQueryRetrieveInformationModelFind,
-            PATIENT_STUDY_ONLY_LEVELS
+            PATIENT_STUDY_ONLY_LEVELS,
         );
 
         return this.basicModCFindSCP;
@@ -61,54 +68,116 @@ export class NativeCFindScp {
 
     getCFindScpInjectProxyMethods() {
         const proxyMethods = {
-            onDimseRQ: async (as: Association, pc: PresentationContext, _dimse: Dimse, rq: Attributes, key: Attributes) => {
+            onDimseRQ: async (
+                as: Association,
+                pc: PresentationContext,
+                _dimse: Dimse,
+                rq: Attributes,
+                key: Attributes,
+            ) => {
                 try {
-                    const queryTask = await proxyMethods.calculateMatches(as, pc, rq, key);
+                    const queryTask = await proxyMethods.calculateMatches(
+                        as,
+                        pc,
+                        rq,
+                        key,
+                    );
                     const applicationEntity = await as.getApplicationEntity();
                     const device = await applicationEntity?.getDevice();
                     await device?.execute(queryTask);
                 } catch (error) {
                     logger.error("Failed to onDimseRQ", error);
-                    await as.writeDimseRSP(pc, await Commands.mkCFindRSP(rq, Status.ProcessingFailure), null);
+                    await as.writeDimseRSP(
+                        pc,
+                        await Commands.mkCFindRSP(rq, Status.ProcessingFailure),
+                        null,
+                    );
                 }
             },
-            calculateMatches: async (as: Association, pc: PresentationContext, rq: Attributes, keys: Attributes) => {
+            calculateMatches: async (
+                as: Association,
+                pc: PresentationContext,
+                rq: Attributes,
+                keys: Attributes,
+            ) => {
                 try {
-                    const level = await this.basicModCFindSCP?.getQrLevel(as, pc, rq, keys);
-                    if (await level?.compareTo(QueryRetrieveLevel2.PATIENT) === 0) {
-                        const workspaceId = await getWorkspaceIdFromAssociation(as);
-                        const patientQueryTask = new PatientQueryTask(as, pc, rq, keys, workspaceId);
+                    const level = await this.basicModCFindSCP?.getQrLevel(
+                        as,
+                        pc,
+                        rq,
+                        keys,
+                    );
+                    if (
+                        (await level?.compareTo(
+                            QueryRetrieveLevel2.PATIENT,
+                        )) === 0
+                    ) {
+                        const workspaceId =
+                            await getWorkspaceIdFromAssociation(as);
+                        const patientQueryTask = new PatientQueryTask(
+                            as,
+                            pc,
+                            rq,
+                            keys,
+                            workspaceId,
+                        );
                         return await patientQueryTask.get();
-                    } else if (await level?.compareTo(QueryRetrieveLevel2.STUDY) === 0) {
-                        const workspaceId = await getWorkspaceIdFromAssociation(as);
-                        const studyQueryTask = new StudyQueryTask(as, pc, rq, keys, workspaceId);
+                    } else if (
+                        (await level?.compareTo(QueryRetrieveLevel2.STUDY)) ===
+                        0
+                    ) {
+                        const workspaceId =
+                            await getWorkspaceIdFromAssociation(as);
+                        const studyQueryTask = new StudyQueryTask(
+                            as,
+                            pc,
+                            rq,
+                            keys,
+                            workspaceId,
+                        );
                         return await studyQueryTask.get();
-                    } else if (await level?.compareTo(QueryRetrieveLevel2.SERIES) === 0) {
-                        const workspaceId = await getWorkspaceIdFromAssociation(as);
-                        const seriesQueryTask = new SeriesQueryTask(as, pc, rq, keys, workspaceId);
+                    } else if (
+                        (await level?.compareTo(QueryRetrieveLevel2.SERIES)) ===
+                        0
+                    ) {
+                        const workspaceId =
+                            await getWorkspaceIdFromAssociation(as);
+                        const seriesQueryTask = new SeriesQueryTask(
+                            as,
+                            pc,
+                            rq,
+                            keys,
+                            workspaceId,
+                        );
                         return await seriesQueryTask.get();
-                    } else if (await level?.compareTo(QueryRetrieveLevel2.IMAGE) === 0) {
-                        const workspaceId = await getWorkspaceIdFromAssociation(as);
-                        const instanceQueryTask = new InstanceQueryTask(as, pc, rq, keys, workspaceId);
+                    } else if (
+                        (await level?.compareTo(QueryRetrieveLevel2.IMAGE)) ===
+                        0
+                    ) {
+                        const workspaceId =
+                            await getWorkspaceIdFromAssociation(as);
+                        const instanceQueryTask = new InstanceQueryTask(
+                            as,
+                            pc,
+                            rq,
+                            keys,
+                            workspaceId,
+                        );
                         return await instanceQueryTask.get();
                     }
                 } catch (error) {
                     logger.error("Failed to calculate matches", error);
                     throw error;
                 }
-            }
+            },
         } as unknown as CFindSCPInjectInterface;
 
         return proxyMethods;
     }
 
     private getCFindScpInjectProxy() {
-        return createCFindSCPInjectProxy(
-            this.getCFindScpInjectProxyMethods(),
-            {
-                keepAsDaemon: true
-            }
-        );
+        return createCFindSCPInjectProxy(this.getCFindScpInjectProxyMethods(), {
+            keepAsDaemon: true,
+        });
     }
 }
-

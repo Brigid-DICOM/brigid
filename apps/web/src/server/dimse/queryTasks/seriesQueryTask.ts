@@ -129,7 +129,7 @@ class SeriesQueryTaskInjectProxy {
                 this.seriesQueryTask.seriesJson = JSON.parse(series[0].json);
                 this.seriesQueryTask.seriesAttr =
                     await Common.getAttributesFromJsonString(series[0].json);
-                
+
                 if (series[0].study?.json) {
                     this.seriesQueryTask.studyAttr =
                         await Common.getAttributesFromJsonString(
@@ -138,7 +138,6 @@ class SeriesQueryTaskInjectProxy {
                 }
 
                 if (series[0].study?.patient?.json) {
-                    
                 }
             } else {
                 this.seriesQueryTask.seriesAttr = null;

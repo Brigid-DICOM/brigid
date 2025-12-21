@@ -1,6 +1,11 @@
 "use client";
 
-import { NetworkIcon, Settings2Icon, SettingsIcon, UsersIcon } from "lucide-react";
+import {
+    NetworkIcon,
+    Settings2Icon,
+    SettingsIcon,
+    UsersIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/app/_i18n/client";
 import {
@@ -143,16 +148,16 @@ export function WorkspaceSettingsDialog({
 
                                         <SidebarMenuItem>
                                             <SidebarMenuButton
-                                                isActive={
-                                                    activeTab === "dimse"
-                                                }
+                                                isActive={activeTab === "dimse"}
                                                 onClick={() =>
                                                     setActiveTab("dimse")
                                                 }
                                             >
                                                 <NetworkIcon className="mr-2 size-4" />
                                                 <span>
-                                                    {t("workspaceSettings.dimse")}
+                                                    {t(
+                                                        "workspaceSettings.dimse",
+                                                    )}
                                                 </span>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>

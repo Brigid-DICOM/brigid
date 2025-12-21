@@ -17,14 +17,11 @@ export async function getContextKey(
 export async function getWorkspaceIdFromAssociation(association: Association) {
     const aeTitle = await association.getCalledAET();
 
-    const workspace = await AppDataSource.manager.findOne(
-        DimseConfigEntity,
-        {
-            where: {
-                aeTitle: aeTitle ?? "",
-            },  
+    const workspace = await AppDataSource.manager.findOne(DimseConfigEntity, {
+        where: {
+            aeTitle: aeTitle ?? "",
         },
-    );
+    });
 
     return workspace?.workspaceId ?? "";
 }

@@ -36,8 +36,8 @@ export interface IPatientQueryTaskInjectProxy extends IProxy {
 }
 
 export class PatientQueryTask
-    implements IPatientTaskForIterator, IPatientTaskForInject {
-
+    implements IPatientTaskForIterator, IPatientTaskForInject
+{
     offset: number = 0;
     patientAttr: Attributes | null = null;
     patientJson: Record<string, unknown> | null = null;
@@ -45,11 +45,11 @@ export class PatientQueryTask
     queryTaskInjectProxy: IProxy | null = null;
 
     constructor(
-        protected as: Association | null, 
+        protected as: Association | null,
         protected pc: PresentationContext | null,
         protected rq: Attributes | null,
         protected keys: Attributes | null,
-        protected workspaceId: string
+        protected workspaceId: string,
     ) {}
 
     async reset() {
@@ -66,7 +66,7 @@ export class PatientQueryTask
             this.rq,
             this.keys,
             this.getQueryTaskInjectProxy(),
-            this.getPatientQueryTaskInjectProxy()
+            this.getPatientQueryTaskInjectProxy(),
         );
         await this.patientQueryTaskInjectProxy?.wrappedFindNextPatient();
 
@@ -80,12 +80,14 @@ export class PatientQueryTask
 
         const filtered = new Attributes(await match.size());
 
-        if (!await this.keys?.contains(Tag.SpecificCharacterSet)) {
+        if (!(await this.keys?.contains(Tag.SpecificCharacterSet))) {
             const ss = await match.getStrings(Tag.SpecificCharacterSet);
             if (ss && ss?.length > 0) {
                 await filtered.setString(Tag.SpecificCharacterSet, VR.CS, ss);
             } else {
-                await filtered.setString(Tag.SpecificCharacterSet, VR.CS, ["ISO_IR 192"]);
+                await filtered.setString(Tag.SpecificCharacterSet, VR.CS, [
+                    "ISO_IR 192",
+                ]);
             }
         }
 
@@ -104,34 +106,38 @@ export class PatientQueryTask
         await basicAdjusted.remove(Tag.DirectoryRecordType);
 
         if (await this.keys?.contains(Tag.SOPClassUID)) {
-            const referencedSopClassUID = await match?.getString(Tag.ReferencedSOPClassUIDInFile);
+            const referencedSopClassUID = await match?.getString(
+                Tag.ReferencedSOPClassUIDInFile,
+            );
             if (referencedSopClassUID) {
                 await basicAdjusted.setString(
                     Tag.SOPClassUID,
                     VR.UI,
-                    referencedSopClassUID
+                    referencedSopClassUID,
                 );
             }
         }
 
         if (await this.keys?.contains(Tag.SOPInstanceUID)) {
-            const referencedSopInstanceUID = await match?.getString(Tag.ReferencedSOPInstanceUIDInFile);
+            const referencedSopInstanceUID = await match?.getString(
+                Tag.ReferencedSOPInstanceUIDInFile,
+            );
             if (referencedSopInstanceUID) {
                 await basicAdjusted.setString(
                     Tag.SOPInstanceUID,
                     VR.UI,
-                    referencedSopInstanceUID
+                    referencedSopInstanceUID,
                 );
             }
         }
 
         const queryRetrieveLevel = await this.keys?.getString(
-            Tag.QueryRetrieveLevel
+            Tag.QueryRetrieveLevel,
         );
         await basicAdjusted.setString(
             Tag.QueryRetrieveLevel,
             VR.CS,
-            queryRetrieveLevel ?? null
+            queryRetrieveLevel ?? null,
         );
 
         return basicAdjusted;
@@ -151,7 +157,9 @@ export class PatientQueryTask
 
     getPatientQueryTaskInjectProxy() {
         if (!this.patientQueryTaskInjectProxy) {
-            this.patientQueryTaskInjectProxy = new PatientQueryTaskInjectProxy(this);
+            this.patientQueryTaskInjectProxy = new PatientQueryTaskInjectProxy(
+                this,
+            );
         }
 
         return this.patientQueryTaskInjectProxy.get();
@@ -167,19 +175,20 @@ export class PatientQueryTask
 }
 
 class PatientQueryTaskInjectProxy implements IPatientQueryTaskInjectProxy {
-    constructor(
-        private patientQueryTask: IPatientTaskForInject
-    ) {}
+    constructor(private patientQueryTask: IPatientTaskForInject) {}
 
     get() {
-        return createPatientQueryTaskInjectProxy({
-            wrappedFindNextPatient: this.wrappedFindNextPatient.bind(this),
-            // @ts-expect-error - java bridge 可以接受 Promise<boolean>
-            findNextPatient: this.findNextPatient.bind(this),
-            getPatient: this.getPatient.bind(this),
-        }, {
-            keepAsDaemon: true
-        })
+        return createPatientQueryTaskInjectProxy(
+            {
+                wrappedFindNextPatient: this.wrappedFindNextPatient.bind(this),
+                // @ts-expect-error - java bridge 可以接受 Promise<boolean>
+                findNextPatient: this.findNextPatient.bind(this),
+                getPatient: this.getPatient.bind(this),
+            },
+            {
+                keepAsDaemon: true,
+            },
+        );
     }
 
     async wrappedFindNextPatient() {
@@ -197,7 +206,7 @@ class PatientQueryTaskInjectProxy implements IPatientQueryTaskInjectProxy {
         if (queryAttr !== null) {
             const queryJson = await attributesToToJsonQuery(
                 "patient",
-                queryAttr
+                queryAttr,
             );
 
             const patientQueryBuilder = new DicomSearchPatientQueryBuilder();
@@ -205,19 +214,22 @@ class PatientQueryTaskInjectProxy implements IPatientQueryTaskInjectProxy {
                 workspaceId: this.patientQueryTask.getWorkspaceId(),
                 ...queryJson,
                 limit: 1,
-                offset: this.patientQueryTask.offset++
+                offset: this.patientQueryTask.offset++,
             });
 
             if (patients.length > 0) {
-                this.patientQueryTask.patientJson = JSON.parse(patients[0].json);
-                this.patientQueryTask.patientAttr = await Common.getAttributesFromJsonString(patients[0].json);
+                this.patientQueryTask.patientJson = JSON.parse(
+                    patients[0].json,
+                );
+                this.patientQueryTask.patientAttr =
+                    await Common.getAttributesFromJsonString(patients[0].json);
             } else {
                 this.patientQueryTask.patientAttr = null;
                 this.patientQueryTask.patientJson = null;
             }
         }
 
-        if (this.patientQueryTask.offset === (env.QUERY_MAX_LIMIT + 1)) {
+        if (this.patientQueryTask.offset === env.QUERY_MAX_LIMIT + 1) {
             this.patientQueryTask.patientAttr = null;
             this.patientQueryTask.patientJson = null;
         }
@@ -227,35 +239,36 @@ class PatientQueryTaskInjectProxy implements IPatientQueryTaskInjectProxy {
 class PatientMatchIteratorProxy {
     private patientQueryTask: IPatientTaskForIterator;
 
-    constructor(
-        patientQueryTask: IPatientTaskForIterator
-    ) {
+    constructor(patientQueryTask: IPatientTaskForIterator) {
         this.patientQueryTask = patientQueryTask;
     }
 
     get() {
-        return createQueryTaskInjectProxy({
-            hasMoreMatches: () => {
-                const hasMoreMatches = this.patientQueryTask.patientAttr;
+        return createQueryTaskInjectProxy(
+            {
+                hasMoreMatches: () => {
+                    const hasMoreMatches = this.patientQueryTask.patientAttr;
 
-                if (!hasMoreMatches) {
-                    this.patientQueryTask.reset();
-                }
+                    if (!hasMoreMatches) {
+                        this.patientQueryTask.reset();
+                    }
 
-                return !!hasMoreMatches;
+                    return !!hasMoreMatches;
+                },
+                // @ts-expect-error - java bridge 可以接受 Promise<Attributes>
+                nextMatch: async () => {
+                    const tempRecord = this.patientQueryTask.patientAttr;
+                    await this.patientQueryTask.patientQueryTaskInjectProxy?.wrappedFindNextPatient();
+                    return tempRecord;
+                },
+                // @ts-expect-error - java bridge 可以接受 Promise<Attributes>
+                adjust: async (match) => {
+                    return await this.patientQueryTask.patientAdjust(match);
+                },
             },
-            // @ts-expect-error - java bridge 可以接受 Promise<Attributes>
-            nextMatch: async () => {
-                const tempRecord = this.patientQueryTask.patientAttr;
-                await this.patientQueryTask.patientQueryTaskInjectProxy?.wrappedFindNextPatient();
-                return tempRecord;
+            {
+                keepAsDaemon: true,
             },
-            // @ts-expect-error - java bridge 可以接受 Promise<Attributes>
-            adjust: async (match) => {
-                return await this.patientQueryTask.patientAdjust(match);
-            }
-        }, {
-            keepAsDaemon: true
-        });
+        );
     }
 }

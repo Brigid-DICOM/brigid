@@ -3,7 +3,10 @@ import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
 import type { SelectQueryBuilder } from "typeorm";
 import type { SearchPatientsQueryParam } from "@/server/schemas/searchPatientSchema";
 import { BaseDicomSearchQueryBuilder } from "./baseDicomSearchQueryBuilder";
-import { PATIENT_SEARCH_FIELDS, type PatientFieldConfig } from "./dicomSearchPatientQueryConfig";
+import {
+    PATIENT_SEARCH_FIELDS,
+    type PatientFieldConfig,
+} from "./dicomSearchPatientQueryConfig";
 
 export class DicomSearchPatientQueryBuilder extends BaseDicomSearchQueryBuilder<
     PatientEntity,
@@ -19,7 +22,9 @@ export class DicomSearchPatientQueryBuilder extends BaseDicomSearchQueryBuilder<
     ): SelectQueryBuilder<PatientEntity> {
         const query = this.entityManager
             .createQueryBuilder(PatientEntity, this.patientTable)
-            .where(`${this.patientTable}.workspaceId = :workspaceId`, { workspaceId })
+            .where(`${this.patientTable}.workspaceId = :workspaceId`, {
+                workspaceId,
+            })
             .orderBy(`${this.patientTable}.createdAt`, "DESC");
 
         return query;

@@ -17,8 +17,8 @@ export class DimseConfigService {
             where: { workspaceId },
             relations: {
                 allowedIps: true,
-                allowedRemotes: true
-            }
+                allowedRemotes: true,
+            },
         });
     }
 
@@ -35,7 +35,10 @@ export class DimseConfigService {
         config.enabled = options.enabled ?? false;
 
         if (config.enabled) {
-            await DimseApp.getInstance(env.DIMSE_HOSTNAME as string, env.DIMSE_PORT as number).addApplicationEntityToDevice({
+            await DimseApp.getInstance(
+                env.DIMSE_HOSTNAME as string,
+                env.DIMSE_PORT as number,
+            ).addApplicationEntityToDevice({
                 aeTitle: options.aeTitle,
                 workspaceId: options.workspaceId,
             });
@@ -53,7 +56,7 @@ export class DimseConfigService {
 
         const config = await this.entityManager.findOne(DimseConfigEntity, {
             where: { workspaceId: options.workspaceId },
-        })
+        });
         if (!config) return null;
 
         if (options.aeTitle !== undefined) {
@@ -64,12 +67,18 @@ export class DimseConfigService {
         }
 
         if (config.enabled) {
-            await DimseApp.getInstance(env.DIMSE_HOSTNAME as string, env.DIMSE_PORT as number).addApplicationEntityToDevice({
+            await DimseApp.getInstance(
+                env.DIMSE_HOSTNAME as string,
+                env.DIMSE_PORT as number,
+            ).addApplicationEntityToDevice({
                 aeTitle: config.aeTitle,
                 workspaceId: config.workspaceId,
             });
         } else {
-            await DimseApp.getInstance(env.DIMSE_HOSTNAME as string, env.DIMSE_PORT as number).removeApplicationEntityFromDevice(config.aeTitle);
+            await DimseApp.getInstance(
+                env.DIMSE_HOSTNAME as string,
+                env.DIMSE_PORT as number,
+            ).removeApplicationEntityFromDevice(config.aeTitle);
         }
 
         return await this.entityManager.save(DimseConfigEntity, config);
@@ -105,16 +114,22 @@ export class DimseConfigService {
         return await this.entityManager.save(DimseAllowedIpEntity, allowedIp);
     }
 
-    async removeAllowedIp(options: { workspaceId: string; allowedIpId: string }) {
+    async removeAllowedIp(options: {
+        workspaceId: string;
+        allowedIpId: string;
+    }) {
         const config = await this.entityManager.findOne(DimseConfigEntity, {
             where: { workspaceId: options.workspaceId },
         });
 
         if (!config) return null;
 
-        const allowedIp = await this.entityManager.findOne(DimseAllowedIpEntity, {
-            where: { id: options.allowedIpId, dimseConfigId: config.id },
-        });
+        const allowedIp = await this.entityManager.findOne(
+            DimseAllowedIpEntity,
+            {
+                where: { id: options.allowedIpId, dimseConfigId: config.id },
+            },
+        );
 
         if (!allowedIp) return null;
 
@@ -162,34 +177,47 @@ export class DimseConfigService {
 
         if (!config) return null;
 
-        const remote = await this.entityManager.findOne(DimseAllowedRemoteEntity, {
-            where: { id: options.remoteId, dimseConfigId: config.id },
-        });
+        const remote = await this.entityManager.findOne(
+            DimseAllowedRemoteEntity,
+            {
+                where: { id: options.remoteId, dimseConfigId: config.id },
+            },
+        );
 
         if (!remote) return null;
 
         if (options.aeTitle !== undefined) remote.aeTitle = options.aeTitle;
         if (options.host !== undefined) remote.host = options.host;
         if (options.port !== undefined) remote.port = options.port;
-        if (options.description !== undefined) remote.description = options.description;
+        if (options.description !== undefined)
+            remote.description = options.description;
 
         return await this.entityManager.save(DimseAllowedRemoteEntity, remote);
     }
 
-    async removeAllowedRemote(options: { workspaceId: string; remoteId: string }) {
+    async removeAllowedRemote(options: {
+        workspaceId: string;
+        remoteId: string;
+    }) {
         const config = await this.entityManager.findOne(DimseConfigEntity, {
             where: { workspaceId: options.workspaceId },
         });
 
         if (!config) return null;
 
-        const remote = await this.entityManager.findOne(DimseAllowedRemoteEntity, {
-            where: { id: options.remoteId, dimseConfigId: config.id },
-        });
+        const remote = await this.entityManager.findOne(
+            DimseAllowedRemoteEntity,
+            {
+                where: { id: options.remoteId, dimseConfigId: config.id },
+            },
+        );
 
         if (!remote) return null;
 
-        return await this.entityManager.remove(DimseAllowedRemoteEntity, remote);
+        return await this.entityManager.remove(
+            DimseAllowedRemoteEntity,
+            remote,
+        );
     }
 
     // #endregion Allowed Remotes

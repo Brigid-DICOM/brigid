@@ -45,10 +45,10 @@ export class DimseApp {
     async start() {
         this.configureLog();
         this.configureConnection(this.connection);
-        
+
         const dicomServiceRegistry = await this.createDicomServiceRegistry();
         this.device.setDimseRQHandlerSync(dicomServiceRegistry);
-            
+
         this.deviceService = new DeviceService();
         this.deviceService.init(this.device);
         this.deviceService.start();
@@ -75,7 +75,9 @@ export class DimseApp {
         }
     }
 
-    async addApplicationEntityToDevice(config: DimseConfigInfo): Promise<ApplicationEntity> {
+    async addApplicationEntityToDevice(
+        config: DimseConfigInfo,
+    ): Promise<ApplicationEntity> {
         const { aeTitle, workspaceId } = config;
 
         if (this.applicationEntities.has(aeTitle)) {
@@ -94,7 +96,7 @@ export class DimseApp {
         this.applicationEntities.set(aeTitle, ae);
 
         await this.reconfigureDevice();
-        
+
         console.log(
             `Added Application Entity: ${aeTitle} for workspace: ${workspaceId}`,
         );
@@ -104,9 +106,9 @@ export class DimseApp {
     async addApplicationEntitiesToDevice(
         configs: DimseConfigInfo[],
     ): Promise<ApplicationEntity[]> {
-        return Promise.all(configs.map((config) =>
-            this.addApplicationEntityToDevice(config),
-        ));
+        return Promise.all(
+            configs.map((config) => this.addApplicationEntityToDevice(config)),
+        );
     }
 
     async removeApplicationEntityFromDevice(aeTitle: string): Promise<boolean> {
@@ -135,7 +137,8 @@ export class DimseApp {
         // #region C-FIND SCP
         const patientRootCFindScp = new NativeCFindScp().getPatientRootLevel();
         const studyRootCFindScp = new NativeCFindScp().getStudyRootLevel();
-        const patientStudyOnlyCFindScp = new NativeCFindScp().getPatientStudyOnlyLevel();
+        const patientStudyOnlyCFindScp =
+            new NativeCFindScp().getPatientStudyOnlyLevel();
         await dicomServiceRegistry.addDicomService(patientRootCFindScp);
         await dicomServiceRegistry.addDicomService(studyRootCFindScp);
         await dicomServiceRegistry.addDicomService(patientStudyOnlyCFindScp);
@@ -144,7 +147,8 @@ export class DimseApp {
         // #region C-MOVE SCP
         const patientRootCMoveScp = new NativeCMoveScp().getPatientRootLevel();
         const studyRootCMoveScp = new NativeCMoveScp().getStudyRootLevel();
-        const patientStudyOnlyCMoveScp = new NativeCMoveScp().getPatientStudyOnlyLevel();
+        const patientStudyOnlyCMoveScp =
+            new NativeCMoveScp().getPatientStudyOnlyLevel();
         await dicomServiceRegistry.addDicomService(patientRootCMoveScp);
         await dicomServiceRegistry.addDicomService(studyRootCMoveScp);
         await dicomServiceRegistry.addDicomService(patientStudyOnlyCMoveScp);
@@ -170,53 +174,29 @@ export class DimseApp {
     }
 
     private configureConnection(conn: Connection = this.connection) {
-        conn.setReceivePDULengthSync(
-            env.DIMSE_MAX_PDU_LEN_RCV as number,
-        );
-        conn.setSendPDULengthSync(
-            env.DIMSE_MAX_PDU_LEN_SND as number,
-        );
+        conn.setReceivePDULengthSync(env.DIMSE_MAX_PDU_LEN_RCV as number);
+        conn.setSendPDULengthSync(env.DIMSE_MAX_PDU_LEN_SND as number);
 
         if (env.DIMSE_NOT_ASYNC) {
             conn.setMaxOpsInvokedSync(1);
             conn.setMaxOpsPerformedSync(1);
         } else {
-            conn.setMaxOpsInvokedSync(
-                env.DIMSE_MAX_OPS_INVOKED as number,
-            );
-            conn.setMaxOpsPerformedSync(
-                env.DIMSE_MAX_OPS_PERFORMED as number,
-            );
+            conn.setMaxOpsInvokedSync(env.DIMSE_MAX_OPS_INVOKED as number);
+            conn.setMaxOpsPerformedSync(env.DIMSE_MAX_OPS_PERFORMED as number);
         }
 
         conn.setPackPDVSync(!env.DIMSE_NOT_PACK_PDV);
-        conn.setConnectTimeoutSync(
-            env.DIMSE_CONNECT_TIMEOUT as number,
-        );
-        conn.setRequestTimeoutSync(
-            env.DIMSE_REQUEST_TIMEOUT as number,
-        );
-        conn.setAcceptTimeoutSync(
-            env.DIMSE_ACCEPT_TIMEOUT as number,
-        );
-        conn.setReleaseTimeoutSync(
-            env.DIMSE_RELEASE_TIMEOUT as number,
-        );
+        conn.setConnectTimeoutSync(env.DIMSE_CONNECT_TIMEOUT as number);
+        conn.setRequestTimeoutSync(env.DIMSE_REQUEST_TIMEOUT as number);
+        conn.setAcceptTimeoutSync(env.DIMSE_ACCEPT_TIMEOUT as number);
+        conn.setReleaseTimeoutSync(env.DIMSE_RELEASE_TIMEOUT as number);
         conn.setSendTimeoutSync(env.DIMSE_SEND_TIMEOUT as number);
         conn.setStoreTimeoutSync(env.DIMSE_STORE_TIMEOUT as number);
-        conn.setResponseTimeoutSync(
-            env.DIMSE_RESPONSE_TIMEOUT as number,
-        );
+        conn.setResponseTimeoutSync(env.DIMSE_RESPONSE_TIMEOUT as number);
         conn.setIdleTimeoutSync(env.DIMSE_IDLE_TIMEOUT as number);
-        conn.setSocketCloseDelaySync(
-            env.DIMSE_SO_CLOSE_DELAY as number,
-        );
-        conn.setSendBufferSizeSync(
-            env.DIMSE_SO_SND_BUFFER as number,
-        );
-        conn.setReceiveBufferSizeSync(
-            env.DIMSE_SO_RCV_BUFFER as number,
-        );
+        conn.setSocketCloseDelaySync(env.DIMSE_SO_CLOSE_DELAY as number);
+        conn.setSendBufferSizeSync(env.DIMSE_SO_SND_BUFFER as number);
+        conn.setReceiveBufferSizeSync(env.DIMSE_SO_RCV_BUFFER as number);
         conn.setTcpNoDelaySync(!!env.DIMSE_TCP_NO_DELAY);
     }
 
@@ -291,6 +271,8 @@ export class DimseApp {
         this.deviceService?.stop();
         this.deviceService?.start();
 
-        console.log("Device configuration reconfigured successfully via template.");
+        console.log(
+            "Device configuration reconfigured successfully via template.",
+        );
     }
 }

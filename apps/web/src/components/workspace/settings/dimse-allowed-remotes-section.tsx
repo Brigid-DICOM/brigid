@@ -204,7 +204,9 @@ export function DimseAllowedRemotesSection({
                                 {t("dimseSettings.allowedRemotes.port")}
                             </TableHead>
                             <TableHead>
-                                {t("dimseSettings.allowedRemotes.descriptionField")}
+                                {t(
+                                    "dimseSettings.allowedRemotes.descriptionField",
+                                )}
                             </TableHead>
                             {!isReadOnly && <TableHead className="w-[50px]" />}
                         </TableRow>

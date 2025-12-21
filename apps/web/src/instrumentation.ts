@@ -30,7 +30,10 @@ export async function register() {
 
         const { DimseApp } = await import("./server/dimse/index");
         if (env.DIMSE_HOSTNAME && env.DIMSE_PORT) {
-            const dimseApp = DimseApp.getInstance(env.DIMSE_HOSTNAME, env.DIMSE_PORT);
+            const dimseApp = DimseApp.getInstance(
+                env.DIMSE_HOSTNAME,
+                env.DIMSE_PORT,
+            );
             await dimseApp.start();
         }
 

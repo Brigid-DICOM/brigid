@@ -16,7 +16,7 @@ declare global {
     function setTestDataSource(dataSource: DataSource): void;
 }
 
-describe('DIMSE Routes', () => { 
+describe("DIMSE Routes", () => {
     let testDb: TestDatabaseManager;
 
     beforeAll(async () => {
@@ -39,7 +39,7 @@ describe('DIMSE Routes', () => {
         it("should return null when no config exists", async () => {
             const response = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                { method: "GET" }
+                { method: "GET" },
             );
 
             expect(response.status).toBe(200);
@@ -50,19 +50,16 @@ describe('DIMSE Routes', () => {
 
         it("should return config with allowed IPs and remotes", async () => {
             // Arrange: Create config first
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                        enabled: true,
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                    enabled: true,
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -70,15 +67,15 @@ describe('DIMSE Routes', () => {
                 { method: "GET" },
             );
 
-             // Assert
-             expect(response.status).toBe(200);
-             const json = await response.json();
-             expect(json.ok).toBe(true);
-             expect(json.data).toBeDefined();
-             expect(json.data.aeTitle).toBe("BRIGID_TEST");
-             expect(json.data.enabled).toBe(true);
-             expect(json.data.allowedIps).toEqual([]);
-             expect(json.data.allowedRemotes).toEqual([]);
+            // Assert
+            expect(response.status).toBe(200);
+            const json = await response.json();
+            expect(json.ok).toBe(true);
+            expect(json.data).toBeDefined();
+            expect(json.data.aeTitle).toBe("BRIGID_TEST");
+            expect(json.data.enabled).toBe(true);
+            expect(json.data.allowedIps).toEqual([]);
+            expect(json.data.allowedRemotes).toEqual([]);
         });
     });
 
@@ -145,19 +142,16 @@ describe('DIMSE Routes', () => {
 
         it("should reject duplicate config for same workspace", async () => {
             // Arrange: Create first config
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                        enabled: false,
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                    enabled: false,
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act: Try to create another config
             const response = await app.request(
@@ -184,19 +178,16 @@ describe('DIMSE Routes', () => {
     describe("PATCH /workspace/:workspaceId/dimse - Update DIMSE Config", () => {
         it("should update AE Title successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "ORIGINAL",
-                        enabled: false,
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "ORIGINAL",
+                    enabled: false,
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -222,19 +213,16 @@ describe('DIMSE Routes', () => {
 
         it("should update enabled status successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                        enabled: false,
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                    enabled: false,
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -278,19 +266,16 @@ describe('DIMSE Routes', () => {
     describe("DELETE /workspaces/:workspaceId/dimse - Delete DIMSE Config", () => {
         it("should delete config successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                        enabled: false,
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                    enabled: false,
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -325,19 +310,16 @@ describe('DIMSE Routes', () => {
     describe("POST /workspaces/:workspaceId/dimse/allowed-ips - Add Allowed IP", () => {
         it("should add allowed IP successfully", async () => {
             // Arrange: Create config first
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                        enabled: false,
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                    enabled: false,
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -364,18 +346,15 @@ describe('DIMSE Routes', () => {
 
         it("should add single IP address successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -399,18 +378,15 @@ describe('DIMSE Routes', () => {
 
         it("should reject invalid IP format", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -451,18 +427,15 @@ describe('DIMSE Routes', () => {
     describe("DELETE /workspaces/:workspaceId/dimse/allowed-ips/:allowedIpId - Remove Allowed IP", () => {
         it("should remove allowed IP successfully", async () => {
             // Arrange: Create config and add IP
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             const addResponse = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/dimse/allowed-ips`,
@@ -493,18 +466,15 @@ describe('DIMSE Routes', () => {
 
         it("should return 404 when IP not found", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -520,18 +490,15 @@ describe('DIMSE Routes', () => {
     describe("POST /workspaces/:workspaceId/dimse/allowed-remotes - Add Allowed Remote", () => {
         it("should add allowed remote successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -562,18 +529,15 @@ describe('DIMSE Routes', () => {
 
         it("should reject invalid port number", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -597,18 +561,15 @@ describe('DIMSE Routes', () => {
 
         it("should reject invalid host format", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -653,18 +614,15 @@ describe('DIMSE Routes', () => {
     describe("PATCH /workspaces/:workspaceId/dimse/allowed-remotes/:remoteId - Update Allowed Remote", () => {
         it("should update remote AE Title successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             const addResponse = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/dimse/allowed-remotes`,
@@ -708,18 +666,15 @@ describe('DIMSE Routes', () => {
 
         it("should update multiple fields successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             const addResponse = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/dimse/allowed-remotes`,
@@ -764,18 +719,15 @@ describe('DIMSE Routes', () => {
 
         it("should return 404 when remote not found", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -799,18 +751,15 @@ describe('DIMSE Routes', () => {
     describe("DELETE /workspaces/:workspaceId/dimse/allowed-remotes/:remoteId - Remove Allowed Remote", () => {
         it("should remove remote successfully", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             const addResponse = await app.request(
                 `/api/workspaces/${WORKSPACE_ID}/dimse/allowed-remotes`,
@@ -843,18 +792,15 @@ describe('DIMSE Routes', () => {
 
         it("should return 404 when remote not found", async () => {
             // Arrange
-            await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/dimse`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        aeTitle: "BRIGID_TEST",
-                    }),
-                    headers: new Headers({
-                        "Content-Type": "application/json",
-                    }),
-                },
-            );
+            await app.request(`/api/workspaces/${WORKSPACE_ID}/dimse`, {
+                method: "POST",
+                body: JSON.stringify({
+                    aeTitle: "BRIGID_TEST",
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+            });
 
             // Act
             const response = await app.request(
@@ -938,7 +884,7 @@ describe('DIMSE Routes', () => {
             );
             expect(getResponse.status).toBe(200);
             const config = await getResponse.json();
-            
+
             expect(config.data.aeTitle).toBe("BRIGID_PACS");
             expect(config.data.enabled).toBe(true);
             expect(config.data.allowedIps).toHaveLength(2);

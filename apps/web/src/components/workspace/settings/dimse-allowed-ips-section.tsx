@@ -112,7 +112,10 @@ export function DimseAllowedIpsSection({
                             id="newIpDesc"
                             value={newIp.description}
                             onChange={(e) =>
-                                setNewIp({ ...newIp, description: e.target.value })
+                                setNewIp({
+                                    ...newIp,
+                                    description: e.target.value,
+                                })
                             }
                             placeholder={t("common.optional")}
                         />
@@ -156,7 +159,9 @@ export function DimseAllowedIpsSection({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => handleRemoveIp(ip.id)}
+                                            onClick={() =>
+                                                handleRemoveIp(ip.id)
+                                            }
                                             disabled={removeIp.isPending}
                                         >
                                             <TrashIcon className="size-4 text-destructive" />

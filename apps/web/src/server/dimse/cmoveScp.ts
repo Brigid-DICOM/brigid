@@ -11,7 +11,7 @@ import type { Attributes } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3
 import { Tag } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag";
 import { UID } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/UID";
 import type { Association } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Association";
-import {createAssociationListenerProxy} from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/AssociationListener";
+import { createAssociationListenerProxy } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/AssociationListener";
 import { Commands } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Commands";
 import { Connection } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Connection";
 import { Dimse } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Dimse";
@@ -21,14 +21,21 @@ import { Status } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/Stat
 import { InstanceLocator } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/service/InstanceLocator";
 import { createRetrieveAuditInjectProxy } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/dcmqrscp/RetrieveAuditInject";
 import { RetrieveTaskImpl } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/dcmqrscp/RetrieveTaskImpl";
-import { type CMoveSCPInjectInterface, createCMoveSCPInjectProxy } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/CMoveSCPInject";
+import {
+    type CMoveSCPInjectInterface,
+    createCMoveSCPInjectProxy,
+} from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/CMoveSCPInject";
 import { SimpleCMoveSCP } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/net/SimpleCMoveSCP";
 import tmp from "tmp";
 import { DicomSearchInstanceQueryBuilder } from "../services/qido-rs/dicomSearchInstanceQueryBuilder";
 import { appLogger } from "../utils/logger";
 import { getStorageProvider } from "../utils/storage/storageFactory";
 import { getContextKey, getWorkspaceIdFromAssociation } from "./dimseUtils";
-import { PATIENT_ROOT_LEVELS, PATIENT_STUDY_ONLY_LEVELS, STUDY_ROOT_LEVELS } from "./queryRetrieveLevels";
+import {
+    PATIENT_ROOT_LEVELS,
+    PATIENT_STUDY_ONLY_LEVELS,
+    STUDY_ROOT_LEVELS,
+} from "./queryRetrieveLevels";
 import { attributesToToJsonQuery } from "./queryTasks/queryUtils";
 
 const logger = appLogger.child({
@@ -36,12 +43,11 @@ const logger = appLogger.child({
 });
 
 export class NativeCMoveScp {
-
     getPatientRootLevel() {
         return new SimpleCMoveSCP(
             this.getCMoveScpInjectProxy(),
             UID.PatientRootQueryRetrieveInformationModelMove,
-            PATIENT_ROOT_LEVELS
+            PATIENT_ROOT_LEVELS,
         );
     }
 
@@ -49,7 +55,7 @@ export class NativeCMoveScp {
         return new SimpleCMoveSCP(
             this.getCMoveScpInjectProxy(),
             UID.StudyRootQueryRetrieveInformationModelMove,
-            STUDY_ROOT_LEVELS
+            STUDY_ROOT_LEVELS,
         );
     }
 
@@ -57,26 +63,28 @@ export class NativeCMoveScp {
         return new SimpleCMoveSCP(
             this.getCMoveScpInjectProxy(),
             UID.PatientRootQueryRetrieveInformationModelMove,
-            PATIENT_STUDY_ONLY_LEVELS
+            PATIENT_STUDY_ONLY_LEVELS,
         );
     }
 
     getCMoveScpInjectProxy() {
-        return createCMoveSCPInjectProxy(
-            this.getCMoveScpInjectProxyMethods(),
-            {
-                keepAsDaemon: true,
-            }
-        );
+        return createCMoveSCPInjectProxy(this.getCMoveScpInjectProxyMethods(), {
+            keepAsDaemon: true,
+        });
     }
 
     getCMoveScpInjectProxyMethods() {
         const proxyMethods: CMoveSCPInjectInterface = {
             // @ts-expect-error java bridge can handle it
-            calculateMatches: async (as: Association | null, pc: PresentationContext | null, rq: Attributes | null, keys: Attributes | null) => {
+            calculateMatches: async (
+                as: Association | null,
+                pc: PresentationContext | null,
+                rq: Attributes | null,
+                keys: Attributes | null,
+            ) => {
                 if (!as || !pc || !rq || !keys) {
                     throw new Error("Invalid arguments");
-                };
+                }
 
                 const aeTitle = await as.getCalledAET();
                 const moveDestAeTitle = await rq.getString(Tag.MoveDestination);
@@ -86,31 +94,36 @@ export class NativeCMoveScp {
                         pc,
                         await Commands.mkCMoveRSP(
                             rq,
-                            Status.MoveDestinationUnknown
-                        )
+                            Status.MoveDestinationUnknown,
+                        ),
                     );
                 }
-                
-                const allowedRemote = await AppDataSource.manager.findOne(DimseAllowedRemoteEntity, {
-                    where: {
-                        aeTitle: moveDestAeTitle,
-                        dimseConfig: {
-                            aeTitle: aeTitle ?? "",
-                        }
+
+                const allowedRemote = await AppDataSource.manager.findOne(
+                    DimseAllowedRemoteEntity,
+                    {
+                        where: {
+                            aeTitle: moveDestAeTitle,
+                            dimseConfig: {
+                                aeTitle: aeTitle ?? "",
+                            },
+                        },
+                        relations: {
+                            dimseConfig: true,
+                        },
                     },
-                    relations: {
-                        dimseConfig: true
-                    }
-                });
+                );
 
                 if (!allowedRemote) {
-                    logger.error(`No allowed remotes found for ${moveDestAeTitle}`);
+                    logger.error(
+                        `No allowed remotes found for ${moveDestAeTitle}`,
+                    );
                     return await as.tryWriteDimseRSP(
                         pc,
                         await Commands.mkCMoveRSP(
                             rq,
-                            Status.MoveDestinationUnknown
-                        )
+                            Status.MoveDestinationUnknown,
+                        ),
                     );
                 }
 
@@ -119,49 +132,68 @@ export class NativeCMoveScp {
                 const socket = await as.getSocket();
                 const sourcePort = await socket?.getPort();
 
-                logger.info(`C-MOVE request from ${sourceAET}@${sourceHost}:${sourcePort} to ${moveDestAeTitle}@${allowedRemote.host}:${allowedRemote.port}`, {
-                    op: "C-MOVE",
-                    contextKey: await getContextKey(as, rq),
-                });
+                logger.info(
+                    `C-MOVE request from ${sourceAET}@${sourceHost}:${sourcePort} to ${moveDestAeTitle}@${allowedRemote.host}:${allowedRemote.port}`,
+                    {
+                        op: "C-MOVE",
+                        contextKey: await getContextKey(as, rq),
+                    },
+                );
 
-                let asListener = createAssociationListenerProxy({
-                    onClose: async () => {
-                        logger.info(`Association (${sourceAET}@${sourceHost}:${sourcePort}) closed`, {
-                            op: "C-MOVE",
-                            contextKey: await getContextKey(as, rq), 
-                        });
-                        // @ts-expect-error 讓 asListener 被 GC
-                        asListener = undefined;
-                    }
-                }, {
-                    keepAsDaemon: true,
-                });
+                let asListener = createAssociationListenerProxy(
+                    {
+                        onClose: async () => {
+                            logger.info(
+                                `Association (${sourceAET}@${sourceHost}:${sourcePort}) closed`,
+                                {
+                                    op: "C-MOVE",
+                                    contextKey: await getContextKey(as, rq),
+                                },
+                            );
+                            // @ts-expect-error 讓 asListener 被 GC
+                            asListener = undefined;
+                        },
+                    },
+                    {
+                        keepAsDaemon: true,
+                    },
+                );
                 await as.addAssociationListener(asListener);
 
                 try {
-
                     const workspaceId = await getWorkspaceIdFromAssociation(as);
-                    const instanceLocators = await this.getJavaInstanceLocators(workspaceId, keys);
-    
+                    const instanceLocators = await this.getJavaInstanceLocators(
+                        workspaceId,
+                        keys,
+                    );
+
                     if (instanceLocators.length === 0) {
                         return await as.tryWriteDimseRSP(
                             pc,
                             await Commands.mkCMoveRSP(
                                 rq,
-                                Status.NoSuchObjectInstance
-                            )
+                                Status.NoSuchObjectInstance,
+                            ),
                         );
                     }
-    
-                    const aAssociateRQ = await this.makeAAssociateRQ(sourceAET ?? "", moveDestAeTitle, instanceLocators);
+
+                    const aAssociateRQ = await this.makeAAssociateRQ(
+                        sourceAET ?? "",
+                        moveDestAeTitle,
+                        instanceLocators,
+                    );
                     const remoteConn = new Connection();
                     await remoteConn.setHostname(allowedRemote.host);
                     await remoteConn.setPort(allowedRemote.port);
                     // TODO: TLS Cipher configuration
-    
-                    const storeAssociation = await this.openStoreAssociation(as, remoteConn, aAssociateRQ);
+
+                    const storeAssociation = await this.openStoreAssociation(
+                        as,
+                        remoteConn,
+                        aAssociateRQ,
+                    );
                     const auditInject = await this.getAuditInjectProxy();
-    
+
                     const retrieveTask = new RetrieveTaskImpl(
                         Dimse.C_MOVE_RQ,
                         as,
@@ -180,17 +212,17 @@ export class NativeCMoveScp {
                     logger.error("Failed to calculate matches", error);
                     throw error;
                 }
-            }
-        }
+            },
+        };
 
         return proxyMethods;
     }
 
-    private async getJavaInstanceLocators(workspaceId: string, keys: Attributes) {
-        const queryKey = await attributesToToJsonQuery(
-            "instance",
-            keys
-        );
+    private async getJavaInstanceLocators(
+        workspaceId: string,
+        keys: Attributes,
+    ) {
+        const queryKey = await attributesToToJsonQuery("instance", keys);
 
         const instanceQueryBuilder = new DicomSearchInstanceQueryBuilder();
         const instances = await instanceQueryBuilder.execQuery({
@@ -216,35 +248,49 @@ export class NativeCMoveScp {
             await pipeline(body, createWriteStream(destFile));
             const instanceJFile = new File(destFile);
             const fileUri = await instanceJFile.toURI();
-            
+
             const instanceLocator = new InstanceLocator(
                 instance.sopClassUid,
                 instance.sopInstanceUid,
                 instance.transferSyntaxUid,
-                fileUri?.toString() ?? null
+                fileUri?.toString() ?? null,
             );
-            
+
             await instanceLocators.add(instanceLocator);
         }
 
         return instanceLocators;
-        
     }
 
-    private async makeAAssociateRQ(callingAET: string, calledAET: string, matches: any) {
+    private async makeAAssociateRQ(
+        callingAET: string,
+        calledAET: string,
+        matches: any,
+    ) {
         const aAssociateRQ = new AAssociateRQ();
         await aAssociateRQ.setCallingAET(callingAET);
         await aAssociateRQ.setCalledAET(calledAET);
 
-        const matchesArray = await matches.toArray() as InstanceLocator[];
+        const matchesArray = (await matches.toArray()) as InstanceLocator[];
         for (const match of matchesArray) {
-            if (await aAssociateRQ.addPresentationContextFor(match.cuid, match.tsuid)) {
+            if (
+                await aAssociateRQ.addPresentationContextFor(
+                    match.cuid,
+                    match.tsuid,
+                )
+            ) {
                 if (UID.ExplicitVRLittleEndian !== match.tsuid) {
-                    await aAssociateRQ.addPresentationContextFor(match.cuid, UID.ExplicitVRLittleEndian);
+                    await aAssociateRQ.addPresentationContextFor(
+                        match.cuid,
+                        UID.ExplicitVRLittleEndian,
+                    );
                 }
 
                 if (UID.ImplicitVRLittleEndian !== match.tsuid) {
-                    await aAssociateRQ.addPresentationContextFor(match.cuid, UID.ImplicitVRLittleEndian);
+                    await aAssociateRQ.addPresentationContextFor(
+                        match.cuid,
+                        UID.ImplicitVRLittleEndian,
+                    );
                 }
             }
         }
@@ -252,7 +298,11 @@ export class NativeCMoveScp {
         return aAssociateRQ;
     }
 
-    private async openStoreAssociation(association: Association, remoteConn: Connection, aAssociateRQ: AAssociateRQ) {
+    private async openStoreAssociation(
+        association: Association,
+        remoteConn: Connection,
+        aAssociateRQ: AAssociateRQ,
+    ) {
         try {
             const applicationEntity = await association.getApplicationEntity();
 
@@ -261,7 +311,6 @@ export class NativeCMoveScp {
                 remoteConn,
                 aAssociateRQ,
             );
-
         } catch (error) {
             logger.error("Failed to open store association", error);
             throw new Error("Failed to open store association");
@@ -269,25 +318,34 @@ export class NativeCMoveScp {
     }
 
     private async getAuditInjectProxy() {
-        const dimseRetrieveAuditInject = createRetrieveAuditInjectProxy({
-            onBeginTransferringDICOMInstances: async (studyUID) => {
-                logger.info(`Begin transferring DICOM instances for study ${studyUID}`, {
-                    op: "C-MOVE",
-                })
+        const dimseRetrieveAuditInject = createRetrieveAuditInjectProxy(
+            {
+                onBeginTransferringDICOMInstances: async (studyUID) => {
+                    logger.info(
+                        `Begin transferring DICOM instances for study ${studyUID}`,
+                        {
+                            op: "C-MOVE",
+                        },
+                    );
+                },
+                onDicomInstancesTransferred: async (studyUID) => {
+                    logger.info(
+                        `DICOM instances transferred for study ${studyUID}`,
+                        {
+                            op: "C-MOVE",
+                        },
+                    );
+                },
+                setEventResult: async (eventResult) => {
+                    logger.info(`Event result: ${eventResult}`, {
+                        op: "C-MOVE",
+                    });
+                },
             },
-            onDicomInstancesTransferred: async (studyUID) => {
-                logger.info(`DICOM instances transferred for study ${studyUID}`, {
-                    op: "C-MOVE",
-                })
+            {
+                keepAsDaemon: true,
             },
-            setEventResult: async (eventResult) => {
-                logger.info(`Event result: ${eventResult}`, {
-                    op: "C-MOVE",
-                })
-            }
-        }, {
-            keepAsDaemon: true
-        });
+        );
 
         return dimseRetrieveAuditInject;
     }

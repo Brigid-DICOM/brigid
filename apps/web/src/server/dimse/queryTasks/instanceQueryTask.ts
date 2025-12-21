@@ -132,7 +132,7 @@ class InstanceQueryTaskInjectProxy {
                 );
                 this.instanceQueryTask.instanceAttr =
                     await Common.getAttributesFromJsonString(instances[0].json);
-                
+
                 if (instances[0].series?.json) {
                     this.instanceQueryTask.seriesAttr =
                         await Common.getAttributesFromJsonString(

@@ -3,12 +3,8 @@ import Tag from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/Tag";
 import { StringUtils } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/util/StringUtils";
 
 export const queryTagsOfEachLevel = {
-    "patient": [
-        Tag.PatientName,
-        Tag.PatientID,
-        Tag.PatientBirthDate
-    ],
-    "study": [
+    patient: [Tag.PatientName, Tag.PatientID, Tag.PatientBirthDate],
+    study: [
         Tag.PatientID,
         Tag.PatientName,
         Tag.StudyInstanceUID,
@@ -17,9 +13,9 @@ export const queryTagsOfEachLevel = {
         Tag.AccessionNumber,
         Tag.ModalitiesInStudy,
         Tag.StudyID,
-        Tag.ReferringPhysicianName
+        Tag.ReferringPhysicianName,
     ],
-    "series": [
+    series: [
         Tag.PatientID,
         Tag.PatientName,
         Tag.StudyInstanceUID,
@@ -34,7 +30,7 @@ export const queryTagsOfEachLevel = {
         Tag.SeriesDescription,
         Tag.SeriesDate,
     ],
-    "instance": [
+    instance: [
         Tag.PatientID,
         Tag.PatientName,
         Tag.StudyInstanceUID,
@@ -52,11 +48,14 @@ export const queryTagsOfEachLevel = {
         Tag.SOPClassUID,
         Tag.InstanceNumber,
         Tag.ContentDate,
-        Tag.ContentTime
+        Tag.ContentTime,
     ],
-}
+};
 
-export const attributesToToJsonQuery = async (level: keyof typeof queryTagsOfEachLevel, attributes: Attributes) => {
+export const attributesToToJsonQuery = async (
+    level: keyof typeof queryTagsOfEachLevel,
+    attributes: Attributes,
+) => {
     const query: Record<string, any> = {};
 
     const queryTags = queryTagsOfEachLevel[level];
@@ -75,7 +74,7 @@ export const attributesToToJsonQuery = async (level: keyof typeof queryTagsOfEac
     }
 
     return query;
-}
+};
 
 function intTagToString(tag: number) {
     return tag.toString(16).padStart(8, "0").toUpperCase();

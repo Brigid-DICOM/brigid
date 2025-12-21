@@ -5,7 +5,6 @@ import type { Device } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net
 
 const Executors = importClass("java.util.concurrent.Executors");
 
-
 export class DeviceService {
     protected device: Device | null = null;
     protected executor: ExecutorService | null = null;
@@ -64,7 +63,6 @@ export class DeviceService {
         this.executor = null;
         this.scheduledExecutor = null;
     }
-
 
     protected executorService() {
         return Executors.newCachedThreadPoolSync();

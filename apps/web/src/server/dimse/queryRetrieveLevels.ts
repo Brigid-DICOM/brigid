@@ -16,5 +16,5 @@ export const STUDY_ROOT_LEVELS = EnumSet.ofSync(
 
 export const PATIENT_STUDY_ONLY_LEVELS = EnumSet.ofSync(
     QueryRetrieveLevel2.PATIENT,
-    QueryRetrieveLevel2.STUDY
+    QueryRetrieveLevel2.STUDY,
 );

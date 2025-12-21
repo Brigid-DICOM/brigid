@@ -53,7 +53,7 @@ export class TestDatabaseManager {
                 ShareLinkRecipientEntity,
                 DimseConfigEntity,
                 DimseAllowedIpEntity,
-                DimseAllowedRemoteEntity
+                DimseAllowedRemoteEntity,
             ],
             synchronize: true,
             logging: false,

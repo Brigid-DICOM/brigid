@@ -172,7 +172,7 @@ export function DimseSettings({ workspace, onClose }: DimseSettingsProps) {
 
                     {/* Allowed IPs */}
                     {configExists && (
-                        <DimseAllowedIpsSection 
+                        <DimseAllowedIpsSection
                             workspaceId={workspace.id}
                             allowedIps={allowedIps}
                             isReadOnly={isReadOnly}
@@ -182,7 +182,7 @@ export function DimseSettings({ workspace, onClose }: DimseSettingsProps) {
 
                     {/* Allowed Remotes */}
                     {configExists && (
-                        <DimseAllowedRemotesSection 
+                        <DimseAllowedRemotesSection
                             workspaceId={workspace.id}
                             allowedRemotes={allowedRemotes}
                             isReadOnly={isReadOnly}
