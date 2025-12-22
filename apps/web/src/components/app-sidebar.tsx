@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { ComponentProps } from "react";
 import { getQueryClient } from "@/react-query/get-query-client";
 import { authSessionQuery } from "@/react-query/queries/session";
+import logo from "../../public/logo.png";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { NavWorkspace } from "./nav-workspace";
@@ -36,7 +37,7 @@ export async function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
                         >
                             <a href="/">
                                 <Image
-                                    src="/logo.png"
+                                    src={logo.src}
                                     alt="Brigid Logo"
                                     width={32}
                                     height={32}
