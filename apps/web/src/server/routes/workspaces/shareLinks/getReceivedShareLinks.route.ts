@@ -39,8 +39,6 @@ const getReceivedShareLinksRoute = new Hono().get(
             const authUser = c.get("authUser");
             const userId = authUser?.user?.id;
 
-            console.log("userId", userId);
-
             if (!userId) {
                 return c.json(
                     {
