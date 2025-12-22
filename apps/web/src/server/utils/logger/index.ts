@@ -1,5 +1,6 @@
 import path from "node:path";
 import { format, loggers, transports } from "winston";
+import { getWritableRoot } from "..";
 
 const { combine, label, json, timestamp, errors, colorize, printf } = format;
 
@@ -36,7 +37,7 @@ loggers.add("brigid", {
             ),
         }),
         new transports.File({
-            filename: path.join(process.cwd(), "logs", "brigid-node.log"),
+            filename: path.join(getWritableRoot(), "logs", "brigid-node.log"),
             maxFiles: 3,
             maxsize: 15 * 1024 * 1024,
             tailable: true,

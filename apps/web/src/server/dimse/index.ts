@@ -14,6 +14,7 @@ import { DicomServiceRegistry } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm
 import { TransferCapability } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/TransferCapability";
 import { TransferCapability$Role } from "raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/net/TransferCapability$Role";
 import { Common } from "raccoon-dcm4che-bridge/src/wrapper/org/github/chinlinlee/dcm777/common/Common";
+import { getWritableRoot } from "../utils";
 import { NativeCFindScp } from "./cfindScp";
 import { NativeCMoveScp } from "./cmoveScp";
 import { getScpInstance } from "./cstoreScp";
@@ -202,15 +203,24 @@ export class DimseApp {
 
     private configureLog() {
         this.generateLogBackFile();
+        const writableRoot = getWritableRoot();
+
         Common.LoadLogConfigSync(
-            path.join(process.cwd(), "configs/logback.xml"),
+            path.join(writableRoot, "configs/logback.xml"),
         );
     }
 
     private generateLogBackFile() {
+        const writableRoot = getWritableRoot();
+        const logDir = path.join(writableRoot, "logs");
+        const configDir = path.join(writableRoot, "configs");
+        fsE.ensureDirSync(logDir);
+        fsE.ensureDirSync(configDir);
+
         const logFilePath = path.normalize(
-            path.join(process.cwd(), "logs/dimse.log"),
+            path.join(logDir, "dimse.log"),
         );
+
         const logBackXml = `<?xml version="1.0" encoding="UTF-8"?>
         <configuration>
         
@@ -233,11 +243,8 @@ export class DimseApp {
             </root>
         </configuration>`;
 
-        fsE.writeFileSync(
-            path.normalize(path.join(process.cwd(), "configs/logback.xml")),
-            logBackXml,
-            "utf-8",
-        );
+        const logBackXmlPath = path.join(configDir, "logback.xml");
+        fsE.writeFileSync(logBackXmlPath, logBackXml, "utf-8");
     }
 
     public static getInstance(hostname: string, port: number): DimseApp {

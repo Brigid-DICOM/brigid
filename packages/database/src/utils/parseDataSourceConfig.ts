@@ -1,7 +1,15 @@
-import fs from "node:fs";
 import path from "node:path";
 import type { DataSourceOptions } from "typeorm";
 import { PGliteDriver } from "typeorm-pglite";
+
+function getWritableRoot() {
+    const cwd = process.cwd();
+
+    if (cwd.startsWith("/snapshot")) {
+        return path.dirname(process.execPath);
+    }
+    return cwd;
+}
 
 let pgliteDriver: PGliteDriver;
 
@@ -34,7 +42,7 @@ export function parseDataSourceConfig(
             if (!pgliteDriver) {
                 pgliteDriver = new PGliteDriver({
                     dataDir: path
-                        .resolve(process.cwd(), "bridge-local-db")
+                        .resolve(getWritableRoot(), "bridge-local-db")
                         .replace(/\\/g, "/")
                 });
             }
