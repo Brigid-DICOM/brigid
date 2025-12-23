@@ -46,40 +46,43 @@ export async function middleware(request: NextRequest) {
 
     // # region NextAuth
 
-    const url = request.nextUrl;
-    const nextAuthCookie = request.cookies.get("authjs.session-token");
+    if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "true") {
+        const url = request.nextUrl;
+        const nextAuthCookie = request.cookies.get("authjs.session-token");
 
-    if (url.pathname.startsWith(`/${lng}/auth/signin`)) {
-        if (nextAuthCookie) {
-            return NextResponse.redirect(new URL("/", request.url));
-        }
-        return NextResponse.next();
-    }
-
-    if (!url.pathname.includes(`/share`)) {
-        if (!nextAuthCookie) {
-            return NextResponse.redirect(
-                new URL(`/${lng}/auth/signin`, request.url),
-            );
+        if (url.pathname.startsWith(`/${lng}/auth/signin`)) {
+            if (nextAuthCookie) {
+                return NextResponse.redirect(new URL("/", request.url));
+            }
+            return NextResponse.next();
         }
 
-        const session = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`,
-            {
-                headers: {
-                    Cookie: request.cookies.toString(),
+        if (!url.pathname.includes(`/share`)) {
+            if (!nextAuthCookie) {
+                return NextResponse.redirect(
+                    new URL(`/${lng}/auth/signin`, request.url),
+                );
+            }
+
+            const session = await fetch(
+                `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`,
+                {
+                    headers: {
+                        Cookie: request.cookies.toString(),
+                    },
                 },
-            },
-        );
-
-        const sessionData = await session.json();
-
-        if (!sessionData || !sessionData.user) {
-            return NextResponse.redirect(
-                new URL(`/${lng}/auth/signin`, request.url),
             );
+
+            const sessionData = await session.json();
+
+            if (!sessionData || !sessionData.user) {
+                return NextResponse.redirect(
+                    new URL(`/${lng}/auth/signin`, request.url),
+                );
+            }
         }
     }
+
     // # endregion NextAuth
 
     const response = NextResponse.next({ headers });
