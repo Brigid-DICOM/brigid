@@ -67,7 +67,7 @@ export class PatientService {
                     })
                     .getQuery();
 
-                return `EXISTS (${subQuery})`;
+                return `EXISTS ${subQuery}`;
             });
 
         if (range) {
