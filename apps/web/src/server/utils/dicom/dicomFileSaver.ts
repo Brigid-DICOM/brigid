@@ -43,58 +43,67 @@ export class DicomFileSaver {
             this.workspaceId,
         );
 
+        // 先在 transaction 外計算 hash，不要鎖住資料庫
+        const instanceEntity = await toInstanceDbEntity(
+            this.dicomJsonUtils,
+            this.workspaceId,
+            "", // 先傳空字串，後續再填入
+            storedFilePath,
+        );
+
         const result = await AppDataSource.transaction(
             async (transactionalEntityManager) => {
-                const patientService = new PatientService(
-                    transactionalEntityManager,
-                );
-                const patient =
-                    await patientService.insertOrUpdatePatient(patientEntity);
+                try {
+                    const patientService = new PatientService(
+                        transactionalEntityManager,
+                    );
+                    const patient =
+                        await patientService.insertOrUpdatePatient(
+                            patientEntity,
+                        );
 
-                const studyEntity = toStudyDbEntity(
-                    this.dicomJsonUtils,
-                    this.workspaceId,
-                    patient.id,
-                );
-
-                const studyService = new StudyService(
-                    transactionalEntityManager,
-                );
-                const study =
-                    await studyService.insertOrUpdateStudy(studyEntity);
-
-                const seriesEntity = toSeriesDbEntity(
-                    this.dicomJsonUtils,
-                    this.workspaceId,
-                    study.id,
-                );
-                const seriesService = new SeriesService(
-                    transactionalEntityManager,
-                );
-                const series =
-                    await seriesService.insertOrUpdateSeries(seriesEntity);
-
-                const instanceEntity = await toInstanceDbEntity(
-                    this.dicomJsonUtils,
-                    this.workspaceId,
-                    series.id,
-                    storedFilePath,
-                );
-
-                const instanceService = new InstanceService(
-                    transactionalEntityManager,
-                );
-                const instance =
-                    await instanceService.insertOrUpdateInstance(
-                        instanceEntity,
+                    const studyEntity = toStudyDbEntity(
+                        this.dicomJsonUtils,
+                        this.workspaceId,
+                        patient.id,
                     );
 
-                return {
-                    patient,
-                    study,
-                    series,
-                    instance,
-                };
+                    const studyService = new StudyService(
+                        transactionalEntityManager,
+                    );
+                    const study =
+                        await studyService.insertOrUpdateStudy(studyEntity);
+
+                    const seriesEntity = toSeriesDbEntity(
+                        this.dicomJsonUtils,
+                        this.workspaceId,
+                        study.id,
+                    );
+                    const seriesService = new SeriesService(
+                        transactionalEntityManager,
+                    );
+                    const series =
+                        await seriesService.insertOrUpdateSeries(seriesEntity);
+
+                    instanceEntity.localSeriesId = series.id;
+                    const instanceService = new InstanceService(
+                        transactionalEntityManager,
+                    );
+                    const instance =
+                        await instanceService.insertOrUpdateInstance(
+                            instanceEntity,
+                        );
+
+                    return {
+                        patient,
+                        study,
+                        series,
+                        instance,
+                    };
+                } catch (error) {
+                    console.error("CRITICAL ERROR INSIDE TRANSACTION:", error);
+                    throw error;
+                }
             },
         );
 
