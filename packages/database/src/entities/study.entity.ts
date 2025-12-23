@@ -34,7 +34,7 @@ export class StudyEntity {
     @Column({ type: "decimal", precision: 12, scale: 6, comment: "0008,0030", nullable: true })
     studyTime?: string | null;
 
-    @Column({ type: "varchar", length: 255, comment: "0008,0050" })
+    @Column({ type: "varchar", length: 255, comment: "0008,0050", nullable: true })
     accessionNumber?: string | null;
 
     @Column({ type: "varchar", length: 255, comment: "0008,0051", nullable: true })
