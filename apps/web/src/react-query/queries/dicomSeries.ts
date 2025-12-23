@@ -8,6 +8,7 @@ export interface DicomSeriesQueryParams {
     offset?: number;
     limit?: number;
     deleteStatus?: number;
+    instanceDeleteStatus?: number;
     cookie?: string;
 }
 
@@ -17,6 +18,7 @@ export const getDicomSeriesQuery = ({
     offset = 0,
     limit = 10,
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+    instanceDeleteStatus = DICOM_DELETE_STATUS.ACTIVE,
     cookie,
     ...searchConditions
 }: DicomSeriesQueryParams) =>
@@ -28,12 +30,30 @@ export const getDicomSeriesQuery = ({
             offset,
             limit,
             deleteStatus,
+            instanceDeleteStatus,
             ...Object.keys(searchConditions),
         ],
         queryFn: async () => {
             const headers: HeadersInit = {};
             if (typeof window === "undefined" && typeof cookie === "string") {
                 headers.cookie = cookie;
+            }
+
+            const queryParams = {
+                offset: offset.toString(),
+                limit: limit.toString(),
+                deleteStatus: deleteStatus.toString(),
+                instanceDeleteStatus: instanceDeleteStatus.toString(),
+                ...Object.fromEntries(
+                    Object.entries(searchConditions).filter(
+                        ([_, value]) => value !== undefined && value !== null && value !== "",
+                    ),
+                ),
+            };
+
+            if (instanceDeleteStatus !== DICOM_DELETE_STATUS.ACTIVE) {
+                // @ts-expect-error - deleteStatus is optional
+                delete queryParams.deleteStatus;
             }
 
             const response = await apiClient.api.workspaces[
@@ -44,19 +64,7 @@ export const getDicomSeriesQuery = ({
                         workspaceId,
                         studyInstanceUid,
                     },
-                    query: {
-                        offset: offset.toString(),
-                        limit: limit.toString(),
-                        deleteStatus: deleteStatus.toString(),
-                        ...Object.fromEntries(
-                            Object.entries(searchConditions).filter(
-                                ([_, value]) =>
-                                    value !== undefined &&
-                                    value !== null &&
-                                    value !== "",
-                            ),
-                        ),
-                    },
+                    query: queryParams,
                 },
                 {
                     headers: headers,

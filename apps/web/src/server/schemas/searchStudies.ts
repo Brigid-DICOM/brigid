@@ -12,8 +12,7 @@ export const searchStudiesQueryParamSchema = z.object({
         .number()
         .min(0)
         .max(2)
-        .optional()
-        .default(DICOM_DELETE_STATUS.ACTIVE),
+        .optional(),
     instanceDeleteStatus: z.coerce.number().min(0).max(2).optional(),
     tagName: z.string().optional(),
     StudyInstanceUID: z.string().optional(),

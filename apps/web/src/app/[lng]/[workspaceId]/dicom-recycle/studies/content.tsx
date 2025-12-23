@@ -111,7 +111,8 @@ export default function DicomRecycleStudiesContent({
             workspaceId,
             offset: currentPage * ITEM_PER_PAGE,
             limit: ITEM_PER_PAGE,
-            deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
+            deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
+            instanceDeleteStatus: DICOM_DELETE_STATUS.RECYCLED,
             ...searchConditions,
         }),
     );

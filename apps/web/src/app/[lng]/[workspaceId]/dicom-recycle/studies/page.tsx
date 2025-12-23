@@ -22,7 +22,8 @@ export default async function DicomRecycleStudiesPage({
             workspaceId: workspaceId,
             offset: 0,
             limit: 10,
-            deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
+            deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
+            instanceDeleteStatus: DICOM_DELETE_STATUS.RECYCLED,
             cookie: cookieStore.toString(),
         }),
     );

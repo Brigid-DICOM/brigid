@@ -22,7 +22,8 @@ export default async function DicomRecycleSeriesPage({
         getDicomSeriesQuery({
             workspaceId: workspaceId,
             studyInstanceUid: studyInstanceUid,
-            deleteStatus: DICOM_DELETE_STATUS.RECYCLED,
+            deleteStatus: DICOM_DELETE_STATUS.ACTIVE,
+            instanceDeleteStatus: DICOM_DELETE_STATUS.RECYCLED,
             cookie: cookieStore.toString(),
         }),
     );

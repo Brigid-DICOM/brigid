@@ -7,6 +7,7 @@ export interface DicomStudyQueryParams {
     offset?: number;
     limit?: number;
     deleteStatus?: number;
+    instanceDeleteStatus?: number;
     cookie?: string;
 }
 
@@ -15,6 +16,7 @@ export const getDicomStudyQuery = ({
     offset = 0,
     limit = 10,
     deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+    instanceDeleteStatus = DICOM_DELETE_STATUS.ACTIVE,
     cookie,
     ...searchParams
 }: DicomStudyQueryParams) =>
@@ -25,12 +27,33 @@ export const getDicomStudyQuery = ({
             offset,
             limit,
             deleteStatus,
+            instanceDeleteStatus,
             ...Object.keys(searchParams),
         ],
         queryFn: async () => {
             const headers: HeadersInit = {};
             if (typeof window === "undefined" && typeof cookie === "string") {
                 headers.cookie = cookie;
+            }
+
+            const queryParams = {
+                offset: offset.toString(),
+                limit: limit.toString(),
+                deleteStatus: deleteStatus.toString(),
+                instanceDeleteStatus: instanceDeleteStatus.toString(),
+                ...Object.fromEntries(
+                    Object.entries(searchParams).filter(
+                        ([_, value]) =>
+                            value !== undefined &&
+                            value !== null &&
+                            value !== "",
+                    ),
+                ),
+            };
+
+            if (instanceDeleteStatus !== DICOM_DELETE_STATUS.ACTIVE) {
+                // @ts-expect-error - deleteStatus is optional
+                delete queryParams.deleteStatus;
             }
 
             const response = await apiClient.api.workspaces[
@@ -44,6 +67,7 @@ export const getDicomStudyQuery = ({
                         offset: offset.toString(),
                         limit: limit.toString(),
                         deleteStatus: deleteStatus.toString(),
+                        instanceDeleteStatus: instanceDeleteStatus.toString(),
                         ...Object.fromEntries(
                             Object.entries(searchParams).filter(
                                 ([_, value]) =>

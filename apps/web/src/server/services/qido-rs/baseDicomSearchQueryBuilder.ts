@@ -1,5 +1,4 @@
 import { AppDataSource } from "@brigid/database";
-import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { EntityManager, ObjectLiteral, SelectQueryBuilder } from "typeorm";
 import type { InstanceFieldConfig } from "./dicomSearchInstanceQueryConfig";
 import type { PatientFieldConfig } from "./dicomSearchPatientQueryConfig";
@@ -28,7 +27,7 @@ export abstract class BaseDicomSearchQueryBuilder<
         workspaceId,
         limit = 100,
         offset = 0,
-        deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+        deleteStatus,
         instanceDeleteStatus,
         tagName,
         ...queryParams

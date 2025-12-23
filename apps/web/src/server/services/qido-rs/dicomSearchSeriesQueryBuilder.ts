@@ -23,7 +23,7 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
 
     protected buildBaseQuery(
         workspaceId: string,
-        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
+        deleteStatus?: number | undefined,
         tagName?: string,
     ): SelectQueryBuilder<SeriesEntity> {
         const query = this.entityManager
@@ -39,7 +39,10 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
         this.applyTagJoin(query, "series", tagName);
         query
             .where("series.workspaceId = :workspaceId", { workspaceId })
-            .andWhere("series.deleteStatus = :deleteStatus", { deleteStatus });
+
+        if (deleteStatus !== undefined) {
+            query.andWhere("series.deleteStatus = :deleteStatus", { deleteStatus });
+        }
 
         this.applyTagFilter(query, tagName);
 
@@ -50,7 +53,7 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
         workspaceId,
         limit = 100,
         offset = 0,
-        deleteStatus = DICOM_DELETE_STATUS.ACTIVE,
+        deleteStatus,
         instanceDeleteStatus,
         ...queryParams
     }: {
@@ -67,13 +70,7 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
             deleteStatus,
             instanceDeleteStatus,
             ...queryParams,
-        } as {
-            workspaceId: string;
-            limit: number;
-            offset: number;
-            deleteStatus: number;
-            instanceDeleteStatus?: number;
-        } & SearchStudySeriesQueryParam);
+        });
 
         const seriesInstances = series.map((s) => s.seriesInstanceUid);
 
@@ -92,7 +89,7 @@ export class DicomSearchSeriesQueryBuilder extends BaseDicomSearchQueryBuilder<
                 InstanceEntity,
                 "i",
                 "i.seriesInstanceUid = series.seriesInstanceUid AND i.deleteStatus = :deleteStatus AND i.workspaceId = series.workspaceId",
-                { deleteStatus, workspaceId },
+                { deleteStatus: instanceDeleteStatus ?? DICOM_DELETE_STATUS.ACTIVE, workspaceId },
             )
             .where("series.seriesInstanceUid IN (:...seriesInstances)", {
                 seriesInstances,
