@@ -45,6 +45,10 @@ export function parseDataSourceConfig(
             config.options.enableArithAbort = true;
         }
 
+        if (config.type === "sqlite" || config.type === "better-sqlite3") {
+            config.poolSize = 1;
+        }
+
         if (parsedUrl.search) {
             parsedUrl.search
                 .replace(/^\?/, "")
