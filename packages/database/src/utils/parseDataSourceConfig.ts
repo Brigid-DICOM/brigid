@@ -1,17 +1,4 @@
-import path from "node:path";
 import type { DataSourceOptions } from "typeorm";
-import { PGliteDriver } from "typeorm-pglite";
-
-function getWritableRoot() {
-    const cwd = process.cwd();
-
-    if (cwd.startsWith("/snapshot")) {
-        return path.dirname(process.execPath);
-    }
-    return cwd;
-}
-
-let pgliteDriver: PGliteDriver;
 
 /**
  * from {@link https://github.com/nextauthjs/next-auth/blob/main/packages/adapter-typeorm/src/utils.ts | authjs/typeorm-adapter}
@@ -37,16 +24,6 @@ export function parseDataSourceConfig(
             config.type = "mongodb";
             config.url = configOrString.replace(/\?(.*)$/, "");
             config.useNewUrlParser = true;
-        } else if (parsedUrl.protocol.startsWith("pglite")) {
-            config.type = "postgres";
-            if (!pgliteDriver) {
-                pgliteDriver = new PGliteDriver({
-                    dataDir: path
-                        .resolve(getWritableRoot(), "bridge-local-db")
-                        .replace(/\\/g, "/")
-                });
-            }
-            config.driver = pgliteDriver.driver;
         } else {
             config.type = parsedUrl.protocol.replace(/:$/, "");
             config.host = parsedUrl.hostname;
