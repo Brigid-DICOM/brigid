@@ -125,12 +125,12 @@ export function UploadTaskListInLine() {
                     )}
                     {validCount > 0 && (
                         <span className="text-green-600">
-                            {t("upload.valid")} {validCount}
+                            {t("upload.valid", { count: validCount })}
                         </span>
                     )}
                     {invalidCount > 0 && (
                         <span className="text-destructive">
-                            {t("upload.invalid")} {invalidCount}
+                            {t("upload.invalid", { count: invalidCount })}
                         </span>
                     )}
                 </div>

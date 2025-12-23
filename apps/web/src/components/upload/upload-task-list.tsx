@@ -187,7 +187,7 @@ export function UploadTaskList() {
 
                     {hasActiveTasks && (
                         <div className="text-xs text-muted-foreground">
-                            {t("upload.uploading")} {activeTasksCount}{" "}
+                            {t("upload.uploading", { count: activeTasksCount })}
                             {t("upload.files")}
                         </div>
                     )}
