@@ -4,12 +4,10 @@ export async function register() {
 
         const { default: env } = await import("@brigid/env");
 
-        const { AppDataSource } = await import(
+        const { AppDataSource, initializeDb } = await import(
             "@brigid/database/src/dataSource"
         );
-        if (!AppDataSource.isInitialized) {
-            await AppDataSource.initialize();
-        }
+        await initializeDb()
         const raccoonDcm4cheBridge = await import("raccoon-dcm4che-bridge");
         raccoonDcm4cheBridge.raccoonDcm4cheJavaLoader({
             isPackagedElectron: true,

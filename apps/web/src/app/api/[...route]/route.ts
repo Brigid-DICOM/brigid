@@ -1,4 +1,4 @@
-import { AppDataSource } from "@brigid/database/src/dataSource";
+import { AppDataSource, initializeDb } from "@brigid/database/src/dataSource";
 import { AccountEntity } from "@brigid/database/src/entities/account.entity";
 import { SessionEntity } from "@brigid/database/src/entities/session.entity";
 import { UserEntity } from "@brigid/database/src/entities/user.entity";
@@ -33,9 +33,7 @@ function getAuthProvider() {
 export const app = new Hono()
     .basePath("/api")
     .use(async (_, next) => {
-        if (!AppDataSource.isInitialized) {
-            await AppDataSource.initialize();
-        }
+        await initializeDb();
 
         await next();
     })

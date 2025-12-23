@@ -58,5 +58,19 @@ export const AppDataSource = new DataSource({
     migrations: migrations,
     migrationsRun: !env.IS_LOCAL_APP,
     migrationsTableName: "typeorm_migrations",
-    migrationsTransactionMode: "all"
+    migrationsTransactionMode: "all",
 });
+
+export async function initializeDb() {
+    if (!AppDataSource.isInitialized) {
+        await AppDataSource.initialize();
+        const type = AppDataSource.options.type;
+        if (type === "sqlite" || type === "better-sqlite3") {
+            // 這裡必須套用，因為 SQLite 預設的鎖定機制太嚴格
+            await AppDataSource.query("PRAGMA journal_mode = WAL;");
+            await AppDataSource.query("PRAGMA busy_timeout = 30000;");
+            console.log("SQLite Optimized in initializeDb");
+        }
+    }
+    return AppDataSource;
+}
