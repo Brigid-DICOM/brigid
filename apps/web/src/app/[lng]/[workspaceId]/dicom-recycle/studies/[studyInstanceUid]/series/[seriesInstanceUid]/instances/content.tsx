@@ -154,6 +154,14 @@ export default function DicomRecycleInstancesContent({
         onSuccess: (_, __, ___, context) => {
             toast.success(t("dicom.messages.restoreSuccess", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "dicom-instance",
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                ],
+            });
         },
         onError: (_, __, ___, context) => {
             toast.error(t("dicom.messages.restoreError", { level: "instances" }));
@@ -177,6 +185,14 @@ export default function DicomRecycleInstancesContent({
         onSuccess: (_, __, ___, context) => {
             toast.success(t("dicom.messages.deleteSuccess", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "dicom-instance",
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                ],
+            });
         },
         onError: (_, __, ___, context) => {
             toast.error(t("dicom.messages.deleteError", { level: "instances" }));
