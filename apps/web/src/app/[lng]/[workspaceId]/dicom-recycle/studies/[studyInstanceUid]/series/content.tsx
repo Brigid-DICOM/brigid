@@ -2,12 +2,10 @@
 
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomSeriesData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
-import { nanoid } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
@@ -17,14 +15,13 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomSeriesCard } from "@/components/dicom/dicom-series-card";
 import { DicomRecycleSelectionControlBar } from "@/components/dicom/recycle/dicom-recycle-selection-control-bar";
 import { Button } from "@/components/ui/button";
+import { useSeriesRecycleActions } from "@/hooks/dicom-recycle/use-series-recycle-actions";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
-    deleteDicomSeriesMutation,
     getDicomSeriesQuery,
-    restoreDicomSeriesMutation,
 } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
@@ -141,58 +138,9 @@ export default function DicomRecycleSeriesContent({
         [currentPageSeriesUids, selectedSeriesIds],
     );
 
-    const { mutate: restoreSeries } = useMutation({
-        ...restoreDicomSeriesMutation({
-            workspaceId: workspaceId,
-            seriesIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading("Restoring DICOM series...", {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId, studyInstanceUid],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.restoreError", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
-    });
-
-    const { mutate: deleteSeries } = useMutation({
-        ...deleteDicomSeriesMutation({
-            workspaceId: workspaceId,
-            seriesIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading("Deleting DICOM series...", {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId, studyInstanceUid],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.deleteError", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { restoreSeries, deleteSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+        workspaceId,
+        studyInstanceUid,
     });
 
     useClearSelectionOnBlankClick({
@@ -225,14 +173,16 @@ export default function DicomRecycleSeriesContent({
     const handleRestore = useCallback(() => {
         if (selectedCount === 0) return;
 
+        setRecycleSeriesIds(selectedIds)
         restoreSeries();
-    }, [selectedCount, restoreSeries]);
+    }, [selectedCount, restoreSeries, setRecycleSeriesIds, selectedIds]);
 
     const handleDelete = useCallback(() => {
         if (selectedCount === 0) return;
 
+        setRecycleSeriesIds(selectedIds)
         deleteSeries();
-    }, [selectedCount, deleteSeries]);
+    }, [selectedCount, deleteSeries, setRecycleSeriesIds, selectedIds]);
 
     if (error) {
         return (

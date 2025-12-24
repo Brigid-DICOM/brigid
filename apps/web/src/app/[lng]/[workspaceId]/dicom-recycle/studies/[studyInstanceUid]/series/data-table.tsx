@@ -1,7 +1,6 @@
 "use client";
 
 import type { DicomSeriesData } from "@brigid/types";
-import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -12,7 +11,6 @@ import { MoreHorizontalIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
 import { createSeriesColumns } from "@/components/dicom/data-tables/table-series-columns";
@@ -36,12 +34,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useSeriesRecycleActions } from "@/hooks/dicom-recycle/use-series-recycle-actions";
 import { cn } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    deleteDicomSeriesMutation,
-    restoreDicomSeriesMutation,
-} from "@/react-query/queries/dicomSeries";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
@@ -64,7 +58,6 @@ function ActionsCell({
     const { lng } = useParams<{ lng: string }>();
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
-    const queryClient = getQueryClient();
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
@@ -79,58 +72,11 @@ function ActionsCell({
         WORKSPACE_PERMISSIONS.DELETE,
     );
 
-    const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
+    const { clearSelection } = useDicomSeriesSelectionStore();
 
-    const { mutate: restoreDicomSeries } = useMutation({
-        ...restoreDicomSeriesMutation({
-            workspaceId,
-            seriesIds: [seriesInstanceUid],
-        }),
-        onMutate: () => {
-            toast.loading(t("dicom.messages.restoring", { level: "series" }), {
-                id: `restore-${seriesInstanceUid}`,
-            });
-        },
-        onSuccess: () => {
-            toast.success(
-                t("dicom.messages.restoreSuccess", { level: "series" }),
-            );
-            toast.dismiss(`restore-${seriesInstanceUid}`);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId],
-            });
-            deselectSeries(seriesInstanceUid);
-        },
-        onError: () => {
-            toast.error(t("dicom.messages.restoreError", { level: "series" }));
-            toast.dismiss(`restore-${seriesInstanceUid}`);
-        },
-    });
-
-    const { mutate: deleteDicomSeries } = useMutation({
-        ...deleteDicomSeriesMutation({
-            workspaceId,
-            seriesIds: [seriesInstanceUid],
-        }),
-        onMutate: () => {
-            toast.loading(t("dicom.messages.deleting", { level: "series" }), {
-                id: `delete-${seriesInstanceUid}`,
-            });
-        },
-        onSuccess: () => {
-            toast.success(
-                t("dicom.messages.deleteSuccess", { level: "series" }),
-            );
-            toast.dismiss(`delete-${seriesInstanceUid}`);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId],
-            });
-            deselectSeries(seriesInstanceUid);
-        },
-        onError: () => {
-            toast.error(t("dicom.messages.deleteError", { level: "series" }));
-            toast.dismiss(`delete-${seriesInstanceUid}`);
-        },
+    const { restoreSeries, deleteSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+        workspaceId,
+        studyInstanceUid,
     });
 
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -150,7 +96,8 @@ function ActionsCell({
 
     const handleRestoreSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
-        restoreDicomSeries();
+        setRecycleSeriesIds([seriesInstanceUid]);
+        restoreSeries();
     };
 
     const handleDeleteSeries = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -159,7 +106,8 @@ function ActionsCell({
     };
 
     const handleConfirmDelete = () => {
-        deleteDicomSeries();
+        setRecycleSeriesIds([seriesInstanceUid]);
+        deleteSeries();
     };
 
     return (

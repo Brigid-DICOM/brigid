@@ -1,7 +1,6 @@
 "use client";
 
 import type { DicomSeriesData } from "@brigid/types";
-import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -37,10 +36,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useSeriesRecycleActions } from "@/hooks/dicom-recycle/use-series-recycle-actions";
 import { downloadSeries } from "@/lib/clientDownload";
 import { closeDropdownMenu, cn } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
@@ -65,7 +63,6 @@ function ActionsCell({
 }) {
     const { t } = useT("translation");
     const { lng } = useParams<{ lng: string }>();
-    const queryClient = getQueryClient();
     const router = useRouter();
     const studyInstanceUid = series["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = series["0020000E"]?.Value?.[0] || "N/A";
@@ -102,32 +99,11 @@ function ActionsCell({
             WORKSPACE_PERMISSIONS.MANAGE,
         );
 
-    const { clearSelection, deselectSeries } = useDicomSeriesSelectionStore();
+    const { clearSelection } = useDicomSeriesSelectionStore();
 
-    const { mutate: recycleDicomSeries } = useMutation({
-        ...recycleDicomSeriesMutation({
-            workspaceId,
-            seriesIds: [seriesInstanceUid],
-        }),
-        onMutate: () => {
-            toast.loading(t("dicom.messages.recycling", { level: "series" }), {
-                id: `recycle-${seriesInstanceUid}`,
-            });
-        },
-        onSuccess: () => {
-            toast.success(
-                t("dicom.messages.recycleSuccess", { level: "series" }),
-            );
-            toast.dismiss(`recycle-${seriesInstanceUid}`);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId, studyInstanceUid],
-            });
-            deselectSeries(seriesInstanceUid);
-        },
-        onError: () => {
-            toast.error(t("dicom.messages.recycleError", { level: "series" }));
-            toast.dismiss(`recycle-${seriesInstanceUid}`);
-        },
+    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+        workspaceId,
+        studyInstanceUid,
     });
 
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -174,7 +150,8 @@ function ActionsCell({
             return;
         }
 
-        recycleDicomSeries();
+        setRecycleSeriesIds([seriesInstanceUid]);
+        recycleSeries();
     };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {

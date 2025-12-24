@@ -1,6 +1,5 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import {
     CopyIcon,
     CornerDownLeftIcon,
@@ -9,7 +8,6 @@ import {
     Share2Icon,
     Trash2Icon,
 } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
@@ -24,10 +22,9 @@ import {
     ContextMenuSeparator,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useSeriesRecycleActions } from "@/hooks/dicom-recycle/use-series-recycle-actions";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import { recycleDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
@@ -59,9 +56,8 @@ export function DicomSeriesContextMenu({
     const { openDialog: openDicomRecycleConfirmDialog } =
         useDicomRecycleConfirmDialogStore();
     const { open } = useBlueLightViewerStore();
-    const queryClient = getQueryClient();
     const router = useRouter();
-    const { getSelectedSeriesIds, clearSelection } =
+    const { getSelectedSeriesIds } =
         useDicomSeriesSelectionStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
@@ -92,33 +88,9 @@ export function DicomSeriesContextMenu({
             WORKSPACE_PERMISSIONS.READ,
         );
 
-    const { mutate: recycleDicomSeries } = useMutation({
-        ...recycleDicomSeriesMutation({
-            workspaceId,
-            seriesIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.recycling", { level: "series" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(
-                t("dicom.messages.recycleSuccess", { level: "series" }),
-            );
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId, studyInstanceUid],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.recycleError", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+        workspaceId,
+        studyInstanceUid,
     });
 
     const handleEnterInstances = async (
@@ -225,7 +197,8 @@ export function DicomSeriesContextMenu({
             return;
         }
 
-        recycleDicomSeries();
+        setRecycleSeriesIds(selectedIds);
+        recycleSeries();
     };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {

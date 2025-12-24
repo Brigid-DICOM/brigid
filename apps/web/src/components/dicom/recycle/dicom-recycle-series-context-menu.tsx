@@ -1,13 +1,11 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CornerDownLeftIcon, Trash2Icon, UndoIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
@@ -16,12 +14,8 @@ import {
     ContextMenuLabel,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useSeriesRecycleActions } from "@/hooks/dicom-recycle/use-series-recycle-actions";
 import { closeContextMenu } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    deleteDicomSeriesMutation,
-    restoreDicomSeriesMutation,
-} from "@/react-query/queries/dicomSeries";
 import { getWorkspaceByIdQuery } from "@/react-query/queries/workspace";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
@@ -44,7 +38,7 @@ export function DicomRecycleSeriesContextMenu({
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
     const router = useRouter();
-    const queryClient = getQueryClient();
+    
     const { getSelectedSeriesIds, clearSelection } =
         useDicomSeriesSelectionStore();
     const selectedIds = getSelectedSeriesIds();
@@ -61,58 +55,9 @@ export function DicomRecycleSeriesContextMenu({
         WORKSPACE_PERMISSIONS.DELETE,
     );
 
-    const { mutate: restoreDicomSeries } = useMutation({
-        ...restoreDicomSeriesMutation({
-            workspaceId,
-            seriesIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.restoring", { level: "series" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.restoreError", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
-    });
-
-    const { mutate: deleteDicomSeries } = useMutation({
-        ...deleteDicomSeriesMutation({
-            workspaceId,
-            seriesIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.deleting", { level: "series" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-series", workspaceId, studyInstanceUid],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.deleteError", { level: "series" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { restoreSeries, deleteSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+        workspaceId,
+        studyInstanceUid,
     });
 
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -127,7 +72,9 @@ export function DicomRecycleSeriesContextMenu({
     const handleRestoreSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        restoreDicomSeries();
+        
+        setRecycleSeriesIds(selectedIds);
+        restoreSeries();
     };
 
     const handleDeleteSeries = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -138,7 +85,9 @@ export function DicomRecycleSeriesContextMenu({
 
     const handleConfirmDelete = () => {
         if (selectedIds.length === 0) return;
-        deleteDicomSeries();
+
+        setRecycleSeriesIds(selectedIds);
+        deleteSeries();
     };
 
     return (
