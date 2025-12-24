@@ -63,20 +63,7 @@ export const getDicomStudyQuery = ({
                     param: {
                         workspaceId,
                     },
-                    query: {
-                        offset: offset.toString(),
-                        limit: limit.toString(),
-                        deleteStatus: deleteStatus.toString(),
-                        instanceDeleteStatus: instanceDeleteStatus.toString(),
-                        ...Object.fromEntries(
-                            Object.entries(searchParams).filter(
-                                ([_, value]) =>
-                                    value !== undefined &&
-                                    value !== null &&
-                                    value !== "",
-                            ),
-                        ),
-                    },
+                    query: queryParams,
                 },
                 {
                     headers: headers,
