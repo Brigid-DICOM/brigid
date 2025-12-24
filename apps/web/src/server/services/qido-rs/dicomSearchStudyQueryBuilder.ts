@@ -24,7 +24,7 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
 
     protected buildBaseQuery(
         workspaceId: string,
-        deleteStatus: number = DICOM_DELETE_STATUS.ACTIVE,
+        deleteStatus?: number,
         tagName?: string,
     ): SelectQueryBuilder<StudyEntity> {
         const query = this.entityManager
