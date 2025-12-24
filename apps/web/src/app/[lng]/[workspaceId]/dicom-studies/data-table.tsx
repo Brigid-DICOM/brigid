@@ -1,7 +1,6 @@
 "use client";
 
 import type { DicomStudyData } from "@brigid/types";
-import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -37,10 +36,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useStudyRecycleActions } from "@/hooks/dicom-recycle/use-study-recycle-actions";
 import { downloadStudy } from "@/lib/clientDownload";
 import { closeDropdownMenu, cn } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
@@ -65,9 +63,8 @@ function ActionsCell({
 }) {
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
-    const queryClient = getQueryClient();
     const router = useRouter();
-    const { clearSelection, deselectStudy } = useDicomStudySelectionStore();
+    const { clearSelection } = useDicomStudySelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { openDialog: openShareManagementDialog } =
         useShareManagementDialogStore();
@@ -102,30 +99,8 @@ function ActionsCell({
             WORKSPACE_PERMISSIONS.MANAGE,
         );
 
-    const { mutate: recycleDicomStudy } = useMutation({
-        ...recycleDicomStudyMutation({
-            workspaceId,
-            studyIds: [studyInstanceUid],
-        }),
-        onMutate: () => {
-            toast.loading(t("dicom.messages.recycling", { level: "study" }), {
-                id: `recycle-${studyInstanceUid}`,
-            });
-        },
-        onSuccess: () => {
-            toast.success(
-                t("dicom.messages.recycleSuccess", { level: "study" }),
-            );
-            toast.dismiss(`recycle-${studyInstanceUid}`);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
-            });
-            deselectStudy(studyInstanceUid);
-        },
-        onError: () => {
-            toast.error(t("dicom.messages.recycleError", { level: "study" }));
-            toast.dismiss(`recycle-${studyInstanceUid}`);
-        },
+    const { recycleStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
+        workspaceId
     });
 
     const handleEnterSeries = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -170,7 +145,8 @@ function ActionsCell({
             return;
         }
 
-        recycleDicomStudy();
+        setRecycleStudyIds([studyInstanceUid]);
+        recycleStudies();
     };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {

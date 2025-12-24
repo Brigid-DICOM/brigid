@@ -1,13 +1,11 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CornerDownLeftIcon, Trash2Icon, UndoIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
@@ -16,12 +14,8 @@ import {
     ContextMenuLabel,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useStudyRecycleActions } from "@/hooks/dicom-recycle/use-study-recycle-actions";
 import { closeContextMenu } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    deleteDicomStudyMutation,
-    restoreDicomStudyMutation,
-} from "@/react-query/queries/dicomStudy";
 import { getWorkspaceByIdQuery } from "@/react-query/queries/workspace";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
@@ -42,7 +36,6 @@ export function DicomRecycleStudyContextMenu({
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
     const router = useRouter();
-    const queryClient = getQueryClient();
     const { getSelectedStudyIds, clearSelection } =
         useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
@@ -59,58 +52,8 @@ export function DicomRecycleStudyContextMenu({
         WORKSPACE_PERMISSIONS.DELETE,
     );
 
-    const { mutate: restoreStudies } = useMutation({
-        ...restoreDicomStudyMutation({
-            workspaceId,
-            studyIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.restoring", { level: "studies" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.restoreError", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
-    });
-
-    const { mutate: deleteStudies } = useMutation({
-        ...deleteDicomStudyMutation({
-            workspaceId,
-            studyIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.deleting", { level: "studies" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.deleteError", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { restoreStudies, deleteStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
+        workspaceId,
     });
 
     const handleEnterSeries = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -125,12 +68,14 @@ export function DicomRecycleStudyContextMenu({
     const handleRestoreStudies = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
+        setRecycleStudyIds(selectedIds);
         restoreStudies();
     };
 
     const handleDeleteStudies = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
+        setRecycleStudyIds(selectedIds);
         setShowDeleteConfirmDialog(true);
     };
 

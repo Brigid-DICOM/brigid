@@ -2,10 +2,8 @@
 
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomStudyData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { nanoid } from "nanoid";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
@@ -14,14 +12,13 @@ import { LoadingGrid } from "@/components/common/loading-grid";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { DicomRecycleSelectionControlBar } from "@/components/dicom/recycle/dicom-recycle-selection-control-bar";
+import { useStudyRecycleActions } from "@/hooks/dicom-recycle/use-study-recycle-actions";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
-    deleteDicomStudyMutation,
     getDicomStudyQuery,
-    restoreDicomStudyMutation,
 } from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
@@ -137,59 +134,8 @@ export default function DicomRecycleStudiesContent({
         [currentPageStudyIds, selectedStudyIds],
     );
 
-    const { mutate: restoreStudies } = useMutation({
-        ...restoreDicomStudyMutation({
-            workspaceId,
-            studyIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.restoring", { level: "studies" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.restoreError", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-            clearSelection();
-        },
-    });
-
-    const { mutate: deleteStudies } = useMutation({
-        ...deleteDicomStudyMutation({
-            workspaceId,
-            studyIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.deleting", { level: "studies" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.deleteError", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { restoreStudies, deleteStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
+        workspaceId,
     });
 
     useClearSelectionOnBlankClick({
@@ -222,13 +168,13 @@ export default function DicomRecycleStudiesContent({
 
     const handleRestore = () => {
         if (selectedCount === 0) return;
-
+        setRecycleStudyIds(selectedIds);
         restoreStudies();
     };
 
     const handleDelete = () => {
         if (selectedCount === 0) return;
-
+        setRecycleStudyIds(selectedIds);
         deleteStudies();
     };
 

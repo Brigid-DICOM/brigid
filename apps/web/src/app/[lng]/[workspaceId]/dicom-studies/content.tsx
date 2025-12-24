@@ -2,11 +2,10 @@
 
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomStudyData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { nanoid } from "nanoid";
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -16,6 +15,7 @@ import { DicomStudyCard } from "@/components/dicom/dicom-study-card";
 import { SelectionControlBar } from "@/components/dicom/selection-control-bar";
 import { CreateTagDialogProvider } from "@/components/dicom/tag/create-tag-dialog-provider";
 import { ShareManagementDialogProvider } from "@/components/share/share-management-dialog-provider";
+import { useStudyRecycleActions } from "@/hooks/dicom-recycle/use-study-recycle-actions";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import { usePagination } from "@/hooks/use-pagination";
@@ -24,7 +24,6 @@ import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
     getDicomStudyQuery,
-    recycleDicomStudyMutation,
 } from "@/react-query/queries/dicomStudy";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
@@ -39,6 +38,7 @@ interface DicomStudiesContentProps {
 export default function DicomStudiesContent({
     workspaceId,
 }: DicomStudiesContentProps) {
+    const { t } = useT("translation");
     const isFirstRun = useRef(true);
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
@@ -146,32 +146,8 @@ export default function DicomStudiesContent({
             selectedStudyIds.has(studyId as string),
         );
 
-    const { mutate: recycleStudies } = useMutation({
-        ...recycleDicomStudyMutation({
-            workspaceId,
-            studyIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading("Recycling DICOM studies...", {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM studies recycled successfully");
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error("Failed to recycle DICOM studies");
-            toast.dismiss(context.meta?.toastId as string);
-            clearSelection();
-        },
+    const { recycleStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
+        workspaceId,
     });
 
     useClearSelectionOnBlankClick({
@@ -199,20 +175,20 @@ export default function DicomStudiesContent({
         downloadSingle: (id: string) => downloadStudy(workspaceId, id),
         downloadMultiple: (ids: string[]) =>
             downloadMultipleStudies(workspaceId, ids),
-        errorMessage: "Failed to download selected studies",
+        errorMessage: t("dicom.messages.downloadError", { level: "studies" }),
     });
 
     const handleRecycle = () => {
         if (selectedCount === 0) return;
-
+        setRecycleStudyIds(selectedIds);
         recycleStudies();
     };
 
     if (error) {
         return (
             <EmptyState
-                title="載入失敗"
-                description="無法載入 DICOM Studies 資料"
+                title={t("common.loadFailed")}
+                description={t("dicom.messages.loadDataFailed", { level: "studies" })}
             />
         );
     }
@@ -282,9 +258,11 @@ export default function DicomStudiesContent({
                     <div className="flex items-center justify-center min-h-[400px]">
                         <div className="text-center">
                             <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                                No data
+                                {t("dicom.messages.noData", { level: "studies" })}
                             </h2>
-                            <p className="text-gray-600">No data to display</p>
+                            <p className="text-gray-600">
+                                {t("dicom.messages.noDataToDisplay", { level: "studies" })}
+                            </p>
                         </div>
                     </div>
                 )}

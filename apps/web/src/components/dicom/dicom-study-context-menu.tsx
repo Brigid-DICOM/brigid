@@ -1,6 +1,5 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import {
     CopyIcon,
     CornerDownLeftIcon,
@@ -9,7 +8,6 @@ import {
     Share2Icon,
     Trash2Icon,
 } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import type React from "react";
@@ -24,10 +22,9 @@ import {
     ContextMenuSeparator,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useStudyRecycleActions } from "@/hooks/dicom-recycle/use-study-recycle-actions";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import { recycleDicomStudyMutation } from "@/react-query/queries/dicomStudy";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
@@ -52,7 +49,6 @@ export function DicomStudyContextMenu({
     const router = useRouter();
     const { lng } = useParams<{ lng: string }>();
     const { t } = useT("translation");
-    const queryClient = getQueryClient();
     const { openDialog: openDicomRecycleConfirmDialog } =
         useDicomRecycleConfirmDialogStore();
     const { openDialog: openCreateTagDialog } = useCreateTagDialogStore();
@@ -86,37 +82,12 @@ export function DicomStudyContextMenu({
             WORKSPACE_PERMISSIONS.MANAGE,
         );
 
-    const { getSelectedStudyIds, clearSelection } =
+    const { getSelectedStudyIds } =
         useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
 
-    const { mutate: recycleSelectedStudies } = useMutation({
-        ...recycleDicomStudyMutation({
-            workspaceId,
-            studyIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.recycling", { level: "studies" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(
-                t("dicom.messages.recycleSuccess", { level: "studies" }),
-            );
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: ["dicom-study", workspaceId],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.recycleError", { level: "studies" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { recycleStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
+        workspaceId
     });
 
     const handleEnterSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
@@ -209,7 +180,8 @@ export function DicomStudyContextMenu({
             return;
         }
 
-        recycleSelectedStudies();
+        setRecycleStudyIds(selectedIds);
+        recycleStudies();
     };
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
