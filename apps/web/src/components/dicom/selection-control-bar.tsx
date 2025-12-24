@@ -57,8 +57,14 @@ export function SelectionControlBar({
 
     const handleRecycle = () => {
         if (selectedCount === 0) return;
+
         setShowRecycleConfirmDialog(true);
     };
+
+    const handleConfirmRecycle = () => {
+        if (selectedCount === 0) return;
+        onRecycle?.();
+    }
 
     return (
         <>
@@ -178,7 +184,7 @@ export function SelectionControlBar({
                 onOpenChange={setShowRecycleConfirmDialog}
                 dicomLevel={dicomLevel}
                 selectedCount={selectedCount}
-                onConfirm={handleRecycle}
+                onConfirm={handleConfirmRecycle}
             />
         </>
     );
