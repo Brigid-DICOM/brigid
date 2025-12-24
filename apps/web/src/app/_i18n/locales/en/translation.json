@@ -259,7 +259,8 @@
             "noDataToDisplay": "No {{level}} to display",
             "failedToRemoveTagAssignment": "Failed to remove tag assignment",
             "failedToAssignTag": "Failed to assign tag",
-            "loadRecycleFailed": "Failed to load recycle {{level}} data"
+            "loadRecycleFailed": "Failed to load recycle {{level}} data",
+            "loadDataFailed": "Failed to load {{level}} data"
         },
         "columns": {
             "study": {

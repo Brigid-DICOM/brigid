@@ -9,6 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { nanoid } from "zod";
+import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -44,6 +45,7 @@ export default function DicomSeriesContent({
     workspaceId,
     studyInstanceUid,
 }: DicomSeriesContentProps) {
+    const { t } = useT("translation");
     const isFirstRun = useRef(true);
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
@@ -163,12 +165,12 @@ export default function DicomSeriesContent({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Recycling DICOM series...", {
+            toast.loading(t("dicom.messages.recycling", { level: "series" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM series recycled successfully");
+            toast.success(t("dicom.messages.recycleSuccess", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId],
@@ -176,7 +178,7 @@ export default function DicomSeriesContent({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to recycle DICOM series");
+            toast.error(t("dicom.messages.recycleError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -213,14 +215,14 @@ export default function DicomSeriesContent({
             downloadSeries(workspaceId, studyInstanceUid, id),
         downloadMultiple: (ids: string[]) =>
             downloadMultipleSeries(workspaceId, studyInstanceUid, ids),
-        errorMessage: "Failed to download selected series",
+        errorMessage: t("dicom.messages.downloadError", { level: "series" }),
     });
 
     if (error) {
         return (
             <EmptyState
-                title="載入失敗"
-                description="無法載入 DICOM series 資料"
+                title={t("common.loadFailed")}
+                description={t("dicom.messages.loadDataFailed", { level: "series" })}
             />
         );
     }
@@ -309,10 +311,10 @@ export default function DicomSeriesContent({
                     <div className="flex items-center justify-center min-h-[400px]">
                         <div className="text-center">
                             <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                                沒有資料
+                                {t("dicom.messages.noData", { level: "series" })}
                             </h2>
                             <p className="text-gray-600">
-                                目前沒有可顯示的 Series
+                                {t("dicom.messages.noDataToDisplay", { level: "series" })}
                             </p>
                         </div>
                     </div>
