@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -40,6 +41,7 @@ export default function DicomRecycleInstancesContent({
     studyInstanceUid,
     seriesInstanceUid,
 }: DicomRecycleInstancesContentProps) {
+    const { t } = useT("translation");
     const isFirstRun = useRef(true);
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
@@ -150,11 +152,11 @@ export default function DicomRecycleInstancesContent({
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM instances restored successfully");
+            toast.success(t("dicom.messages.restoreSuccess", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to restore DICOM instances");
+            toast.error(t("dicom.messages.restoreError", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -173,11 +175,11 @@ export default function DicomRecycleInstancesContent({
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM instances deleted successfully");
+            toast.success(t("dicom.messages.deleteSuccess", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to delete DICOM instances");
+            toast.error(t("dicom.messages.deleteError", { level: "instances" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -225,8 +227,8 @@ export default function DicomRecycleInstancesContent({
     if (error) {
         return (
             <EmptyState
-                title="載入失敗"
-                description="無法載入回收桶 DICOM instances 資料"
+                title={t("common.loadFailed")}
+                description={t("dicom.messages.loadRecycleFailed", { level: "instances" })}
             />
         );
     }
@@ -319,8 +321,8 @@ export default function DicomRecycleInstancesContent({
                 </>
             ) : (
                 <EmptyState
-                    title="沒有資料"
-                    description="目前沒有可顯示的 Instances"
+                    title={t("dicom.messages.noData", { level: "instances" })}
+                    description={t("dicom.messages.noDataToDisplay", { level: "instances" })}
                 />
             )}
         </div>

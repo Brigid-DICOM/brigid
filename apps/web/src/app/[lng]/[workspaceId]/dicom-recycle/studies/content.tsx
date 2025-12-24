@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -34,6 +35,7 @@ interface DicomRecycleStudiesContentProps {
 export default function DicomRecycleStudiesContent({
     workspaceId,
 }: DicomRecycleStudiesContentProps) {
+    const { t } = useT("translation");
     const isFirstRun = useRef(true);
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
@@ -144,12 +146,12 @@ export default function DicomRecycleStudiesContent({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Restoring DICOM studies...", {
+            toast.loading(t("dicom.messages.restoring", { level: "studies" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM studies restored successfully");
+            toast.success(t("dicom.messages.restoreSuccess", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-study", workspaceId],
@@ -157,7 +159,7 @@ export default function DicomRecycleStudiesContent({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to restore DICOM studies");
+            toast.error(t("dicom.messages.restoreError", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
             clearSelection();
         },
@@ -172,12 +174,12 @@ export default function DicomRecycleStudiesContent({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Deleting DICOM studies...", {
+            toast.loading(t("dicom.messages.deleting", { level: "studies" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM studies deleted successfully");
+            toast.success(t("dicom.messages.deleteSuccess", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-study", workspaceId],
@@ -185,7 +187,7 @@ export default function DicomRecycleStudiesContent({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to delete DICOM studies");
+            toast.error(t("dicom.messages.deleteError", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -233,8 +235,8 @@ export default function DicomRecycleStudiesContent({
     if (error) {
         return (
             <EmptyState
-                title="載入失敗"
-                description="無法載入 DICOM 回收桶資料"
+                title={t("common.loadFailed")}
+                description={t("dicom.messages.loadRecycleFailed", { level: "studies" })}
             />
         );
     }
@@ -304,8 +306,8 @@ export default function DicomRecycleStudiesContent({
             ) : (
                 <div className="flex items-center justify-center min-h-[400px]">
                     <EmptyState
-                        title="No data"
-                        description="No DICOM studies in recycle bin"
+                        title={t("dicom.messages.noData", { level: "studies" })}
+                        description={t("dicom.messages.noDataToDisplay", { level: "studies" })}
                     />
                 </div>
             )}

@@ -9,6 +9,7 @@
         "forbiddenDesc": "You are not authorized to access this page.",
         "goBackHome": "Go Back Home",
         "loading": "Loading...",
+        "loadFailed": "Load Failed",
         "cancel": "Cancel",
         "confirm": "Confirm",
         "delete": "Delete",
@@ -255,8 +256,10 @@
             "noPermissionRestore": "You do not have permission to restore DICOM {{level}}",
             "noPermissionDelete": "You do not have permission to delete DICOM {{level}}",
             "noData": "No {{level}} found",
+            "noDataToDisplay": "No {{level}} to display",
             "failedToRemoveTagAssignment": "Failed to remove tag assignment",
-            "failedToAssignTag": "Failed to assign tag"
+            "failedToAssignTag": "Failed to assign tag",
+            "loadRecycleFailed": "Failed to load recycle {{level}} data"
         },
         "columns": {
             "study": {

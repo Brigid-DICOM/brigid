@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { nanoid } from "zod";
 import { useShallow } from "zustand/react/shallow";
+import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { LoadingGrid } from "@/components/common/loading-grid";
@@ -39,6 +40,7 @@ export default function DicomRecycleSeriesContent({
     workspaceId,
     studyInstanceUid,
 }: DicomRecycleSeriesContentProps) {
+    const { t } = useT("translation");
     const isFirstRun = useRef(true);
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
@@ -153,7 +155,7 @@ export default function DicomRecycleSeriesContent({
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM series restored successfully");
+            toast.success(t("dicom.messages.restoreSuccess", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId, studyInstanceUid],
@@ -161,7 +163,7 @@ export default function DicomRecycleSeriesContent({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to restore DICOM series");
+            toast.error(t("dicom.messages.restoreError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -180,7 +182,7 @@ export default function DicomRecycleSeriesContent({
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM series deleted successfully");
+            toast.success(t("dicom.messages.deleteSuccess", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId, studyInstanceUid],
@@ -188,7 +190,7 @@ export default function DicomRecycleSeriesContent({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to delete DICOM series");
+            toast.error(t("dicom.messages.deleteError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -235,8 +237,8 @@ export default function DicomRecycleSeriesContent({
     if (error) {
         return (
             <EmptyState
-                title="載入失敗"
-                description="無法載入 DICOM series 資料"
+                title={t("common.loadFailed")}
+                description={t("dicom.messages.loadRecycleFailed", { level: "series" })}
             />
         );
     }
@@ -322,12 +324,10 @@ export default function DicomRecycleSeriesContent({
                 </>
             ) : (
                 <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="text-center">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                            沒有資料
-                        </h2>
-                        <p className="text-gray-600">目前沒有可顯示的 Series</p>
-                    </div>
+                    <EmptyState
+                        title={t("dicom.messages.noData", { level: "series" })}
+                        description={t("dicom.messages.noDataToDisplay", { level: "series" })}
+                    />
                 </div>
             )}
         </div>

@@ -9,6 +9,7 @@
         "forbiddenDesc": "您沒有權限訪問此頁面",
         "goBackHome": "返回首頁",
         "loading": "載入中...",
+        "loadFailed": "載入失敗",
         "cancel": "取消",
         "confirm": "確認",
         "delete": "刪除",
@@ -255,8 +256,10 @@
             "noPermissionRestore": "您沒有權限還原 DICOM {{level}}",
             "noPermissionDelete": "您沒有權限刪除 DICOM {{level}}",
             "noData": "未找到 {{level}}",
+            "noDataToDisplay": "目前沒有可顯示的 {{level}}",
             "failedToRemoveTagAssignment": "移除物件標籤失敗",
-            "failedToAssignTag": "建立物件標籤失敗"
+            "failedToAssignTag": "建立物件標籤失敗",
+            "loadRecycleFailed": "載入回收桶 {{level}} 資料失敗"
         },
         "columns": {
             "study": {

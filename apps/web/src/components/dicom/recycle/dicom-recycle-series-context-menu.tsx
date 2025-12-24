@@ -70,12 +70,12 @@ export function DicomRecycleSeriesContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Restoring DICOM series...", {
+            toast.loading(t("dicom.messages.restoring", { level: "series" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM series restored successfully");
+            toast.success(t("dicom.messages.restoreSuccess", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId],
@@ -83,7 +83,7 @@ export function DicomRecycleSeriesContextMenu({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to restore DICOM series");
+            toast.error(t("dicom.messages.restoreError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -97,12 +97,12 @@ export function DicomRecycleSeriesContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Deleting DICOM series...", {
+            toast.loading(t("dicom.messages.deleting", { level: "series" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM series deleted successfully");
+            toast.success(t("dicom.messages.deleteSuccess", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-series", workspaceId, studyInstanceUid],
@@ -110,7 +110,7 @@ export function DicomRecycleSeriesContextMenu({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to delete DICOM series");
+            toast.error(t("dicom.messages.deleteError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });

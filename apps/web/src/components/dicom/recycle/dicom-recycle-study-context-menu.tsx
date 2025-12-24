@@ -68,12 +68,12 @@ export function DicomRecycleStudyContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Restoring DICOM studies...", {
+            toast.loading(t("dicom.messages.restoring", { level: "studies" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM studies restored successfully");
+            toast.success(t("dicom.messages.restoreSuccess", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-study", workspaceId],
@@ -81,7 +81,7 @@ export function DicomRecycleStudyContextMenu({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to restore DICOM studies");
+            toast.error(t("dicom.messages.restoreError", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -95,12 +95,12 @@ export function DicomRecycleStudyContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Deleting DICOM studies...", {
+            toast.loading(t("dicom.messages.deleting", { level: "studies" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM studies deleted successfully");
+            toast.success(t("dicom.messages.deleteSuccess", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: ["dicom-study", workspaceId],
@@ -108,7 +108,7 @@ export function DicomRecycleStudyContextMenu({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to delete DICOM studies");
+            toast.error(t("dicom.messages.deleteError", { level: "studies" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });

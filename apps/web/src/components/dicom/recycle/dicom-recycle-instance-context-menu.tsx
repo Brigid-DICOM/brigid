@@ -68,12 +68,12 @@ export function DicomRecycleInstanceContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Restoring DICOM instance...", {
+            toast.loading(t("dicom.message.restoring", { level: "instance" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM instance restored successfully");
+            toast.success(t("dicom.messages.restoreSuccess", { level: "instance" }));
             toast.dismiss(context.meta?.toastId as string);
             queryClient.invalidateQueries({
                 queryKey: [
@@ -86,7 +86,7 @@ export function DicomRecycleInstanceContextMenu({
             clearSelection();
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to restore DICOM instance");
+            toast.error(t("dicom.messages.restoreError", { level: "instance" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
@@ -100,16 +100,16 @@ export function DicomRecycleInstanceContextMenu({
             toastId: nanoid(),
         },
         onMutate: (_, context) => {
-            toast.loading("Deleting DICOM instance...", {
+            toast.loading(t("dicom.messages.deleting", { level: "instance" }), {
                 id: context.meta?.toastId as string,
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success("DICOM instance deleted successfully");
+            toast.success(t("dicom.messages.deleteSuccess", { level: "instance" }));
             toast.dismiss(context.meta?.toastId as string);
         },
         onError: (_, __, ___, context) => {
-            toast.error("Failed to delete DICOM instance");
+            toast.error(t("dicom.messages.deleteError", { level: "instance" }));
             toast.dismiss(context.meta?.toastId as string);
         },
     });
