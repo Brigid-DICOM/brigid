@@ -82,7 +82,7 @@ const verifyPasswordRoute = new Hono().post(
 
             setCookie(c, `share-auth-${token}`, jwt, {
                 httpOnly: true,
-                secure: env.IS_LOCAL_APP
+                secure: !env.NEXT_PUBLIC_ENABLE_AUTH
                     ? false
                     : process.env.NODE_ENV === "production",
                 sameSite: "Lax",

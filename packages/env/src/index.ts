@@ -93,7 +93,6 @@ const baseSchema = z.object({
     // app
     NEXT_PUBLIC_ENABLE_AUTH: booleanFromEnv.default(false),
     NEXT_PUBLIC_APP_URL: z.string().default("http://localhost:3119"),
-    IS_LOCAL_APP: booleanFromEnv.default(false),
     JWT_SECRET: z.string().min(32).max(255),
     // auth
     NEXTAUTH_SECRET: z.string().min(32).max(255),

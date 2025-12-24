@@ -54,9 +54,8 @@ export const AppDataSource = new DataSource({
     subscribers: [
         SeriesSubscriber,
     ],
-    synchronize: env.IS_LOCAL_APP,
     migrations: migrations,
-    migrationsRun: !env.IS_LOCAL_APP,
+    migrationsRun: true,
     migrationsTableName: "typeorm_migrations",
     migrationsTransactionMode: "all",
 });

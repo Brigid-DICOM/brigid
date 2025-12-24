@@ -36,7 +36,6 @@ vi.mock("@brigid/database", () => ({
 vi.mock("@brigid/env", () => ({
     default: {
         NEXT_PUBLIC_ENABLE_AUTH: false,
-        IS_LOCAL_APP: true,
         TYPEORM_CONNECTION: "sqlite://:memory:",
         LOG_LEVEL: "error",
         STORAGE_PROVIDER: "local",
