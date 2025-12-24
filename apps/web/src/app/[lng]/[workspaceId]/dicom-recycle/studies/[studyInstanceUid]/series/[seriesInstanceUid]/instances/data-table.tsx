@@ -1,7 +1,6 @@
 "use client";
 
 import type { DicomInstanceData } from "@brigid/types";
-import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -34,12 +33,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useInstanceRecycleActions } from "@/hooks/dicom-recycle/use-instance-recycle-actions";
 import { cn } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    deleteDicomInstanceMutation,
-    restoreDicomInstanceMutation,
-} from "@/react-query/queries/dicomInstance";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
@@ -61,7 +56,6 @@ function ActionsCell({
     const { t } = useT("translation");
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
-    const queryClient = getQueryClient();
     const studyInstanceUid = instance["0020000D"]?.Value?.[0] || "N/A";
     const seriesInstanceUid = instance["0020000E"]?.Value?.[0] || "N/A";
     const sopInstanceUid = instance["00080018"]?.Value?.[0] || "N/A";
@@ -82,69 +76,10 @@ function ActionsCell({
         navigator.clipboard.writeText(sopInstanceUid);
     };
 
-    const { mutate: restoreDicomInstance } = useMutation({
-        ...restoreDicomInstanceMutation({
-            workspaceId,
-            instanceIds: [sopInstanceUid],
-        }),
-        onMutate: () => {
-            toast.loading(
-                t("dicom.messages.restoring", { level: "instance" }),
-                {
-                    id: `restore-${sopInstanceUid}`,
-                },
-            );
-        },
-        onSuccess: () => {
-            toast.success(
-                t("dicom.messages.restoreSuccess", { level: "instance" }),
-            );
-            toast.dismiss(`restore-${sopInstanceUid}`);
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-        },
-        onError: () => {
-            toast.error(
-                t("dicom.messages.restoreError", { level: "instance" }),
-            );
-            toast.dismiss(`restore-${sopInstanceUid}`);
-        },
-    });
-
-    const { mutate: deleteDicomInstance } = useMutation({
-        ...deleteDicomInstanceMutation({
-            workspaceId,
-            instanceIds: [sopInstanceUid],
-        }),
-        onMutate: () => {
-            toast.loading(t("dicom.messages.deleting", { level: "instance" }), {
-                id: `delete-${sopInstanceUid}`,
-            });
-        },
-        onSuccess: () => {
-            toast.success(
-                t("dicom.messages.deleteSuccess", { level: "instance" }),
-            );
-            toast.dismiss(`delete-${sopInstanceUid}`);
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-        },
-        onError: () => {
-            toast.error(t("dicom.messages.deleteError", { level: "instance" }));
-            toast.dismiss(`delete-${sopInstanceUid}`);
-        },
+    const { restoreInstance, deleteInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+        workspaceId,
+        studyInstanceUid,
+        seriesInstanceUid,
     });
 
     const handleRestoreInstance = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -156,7 +91,8 @@ function ActionsCell({
         }
 
         e.preventDefault();
-        restoreDicomInstance();
+        setRecycleInstanceIds([sopInstanceUid]);
+        restoreInstance();
     };
 
     const handleDeleteInstance = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -179,7 +115,8 @@ function ActionsCell({
             return;
         }
 
-        deleteDicomInstance();
+        setRecycleInstanceIds([sopInstanceUid]);
+        deleteInstance();
     };
 
     return (

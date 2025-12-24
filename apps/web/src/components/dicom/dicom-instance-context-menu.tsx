@@ -1,6 +1,5 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import {
     CopyIcon,
     DownloadIcon,
@@ -8,7 +7,6 @@ import {
     Share2Icon,
     Trash2Icon,
 } from "lucide-react";
-import { nanoid } from "nanoid";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -25,6 +23,7 @@ import {
     ContextMenuSubTrigger,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useInstanceRecycleActions } from "@/hooks/dicom-recycle/use-instance-recycle-actions";
 import { useDownloadHandler } from "@/hooks/use-download-handler";
 import {
     downloadInstance,
@@ -35,8 +34,6 @@ import {
     downloadMultipleInstancesAsPng,
 } from "@/lib/clientDownload";
 import { closeContextMenu } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
@@ -100,8 +97,7 @@ export function DicomInstanceContextMenu({
 }: DicomInstanceContextMenuProps) {
     const { t } = useT("translation");
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
-    const queryClient = getQueryClient();
-    const { getSelectedInstanceIds, clearSelection } =
+    const { getSelectedInstanceIds } =
         useDicomInstanceSelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { openDialog: openShareManagementDialog } =
@@ -195,43 +191,10 @@ export function DicomInstanceContextMenu({
         }),
     });
 
-    const { mutate: recycleDicomInstance } = useMutation({
-        ...recycleDicomInstanceMutation({
-            workspaceId,
-            instanceIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(
-                t("dicom.messages.recycling", { level: "instances" }),
-                {
-                    id: context.meta?.toastId as string,
-                },
-            );
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(
-                t("dicom.messages.recycleSuccess", { level: "instances" }),
-            );
-            toast.dismiss(context.meta?.toastId as string);
-            clearSelection();
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(
-                t("dicom.messages.recycleError", { level: "instances" }),
-            );
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+        workspaceId,
+        studyInstanceUid,
+        seriesInstanceUid,
     });
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -269,7 +232,8 @@ export function DicomInstanceContextMenu({
             return;
         }
 
-        recycleDicomInstance();
+        setRecycleInstanceIds(selectedIds);
+        recycleInstance();
     };
 
     const handleCopySopInstanceUid = (e: React.MouseEvent<HTMLDivElement>) => {

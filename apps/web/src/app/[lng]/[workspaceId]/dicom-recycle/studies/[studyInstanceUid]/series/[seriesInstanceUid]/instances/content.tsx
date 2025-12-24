@@ -2,12 +2,10 @@
 
 import { DICOM_DELETE_STATUS } from "@brigid/database/src/const/dicom";
 import type { DicomInstanceData } from "@brigid/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
@@ -16,14 +14,13 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { DicomInstanceCard } from "@/components/dicom/dicom-instance-card";
 import { DicomRecycleSelectionControlBar } from "@/components/dicom/recycle/dicom-recycle-selection-control-bar";
 import { Button } from "@/components/ui/button";
+import { useInstanceRecycleActions } from "@/hooks/dicom-recycle/use-instance-recycle-actions";
 import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-blank-click";
 import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { getQueryClient } from "@/react-query/get-query-client";
 import {
-    deleteDicomInstanceMutation,
     getDicomInstanceQuery,
-    restoreDicomInstanceMutation,
 } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
@@ -138,66 +135,10 @@ export default function DicomRecycleInstancesContent({
         [currentPageInstanceUids, selectedInstanceIds],
     );
 
-    const { mutate: restoreDicomInstances } = useMutation({
-        ...restoreDicomInstanceMutation({
-            workspaceId,
-            instanceIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading("Restoring DICOM instances...", {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "instances" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.restoreError", { level: "instances" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
-    });
-
-    const { mutate: deleteDicomInstances } = useMutation({
-        ...deleteDicomInstanceMutation({
-            workspaceId,
-            instanceIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading("Deleting DICOM instances...", {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "instances" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.deleteError", { level: "instances" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { restoreInstance, deleteInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+        workspaceId,
+        studyInstanceUid,
+        seriesInstanceUid,
     });
 
     useClearSelectionOnBlankClick({
@@ -231,13 +172,15 @@ export default function DicomRecycleInstancesContent({
     const handleRestore = () => {
         if (selectedCount === 0) return;
 
-        restoreDicomInstances();
+        setRecycleInstanceIds(selectedIds);
+        restoreInstance();
     };
 
     const handleDelete = () => {
         if (selectedCount === 0) return;
 
-        deleteDicomInstances();
+        setRecycleInstanceIds(selectedIds);
+        deleteInstance();
     };
 
     if (error) {

@@ -1,7 +1,6 @@
 "use client";
 
 import type { DicomInstanceData } from "@brigid/types";
-import { useMutation } from "@tanstack/react-query";
 import {
     type ColumnDef,
     flexRender,
@@ -35,10 +34,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useInstanceRecycleActions } from "@/hooks/dicom-recycle/use-instance-recycle-actions";
 import { downloadInstance } from "@/lib/clientDownload";
 import { closeDropdownMenu, cn } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import { recycleDicomInstanceMutation } from "@/react-query/queries/dicomInstance";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
@@ -62,7 +60,6 @@ function ActionsCell({
     workspaceId: string;
 }) {
     const { t } = useT("translation");
-    const queryClient = getQueryClient();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { openDialog: openShareManagementDialog } =
         useShareManagementDialogStore();
@@ -100,41 +97,10 @@ function ActionsCell({
             WORKSPACE_PERMISSIONS.MANAGE,
         );
 
-    const { mutate: recycleDicomInstance } = useMutation({
-        ...recycleDicomInstanceMutation({
-            workspaceId,
-            instanceIds: [sopInstanceUid],
-        }),
-        onMutate: () => {
-            toast.loading(
-                t("dicom.messages.recyclingInstance", { level: "instance" }),
-                {
-                    id: `recycle-${sopInstanceUid}`,
-                },
-            );
-        },
-        onSuccess: () => {
-            toast.success(
-                t("dicom.messages.instanceRecycled", { level: "instance" }),
-            );
-            toast.dismiss(`recycle-${sopInstanceUid}`);
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-        },
-        onError: () => {
-            toast.error(
-                t("dicom.messages.failedToRecycleInstance", {
-                    level: "instance",
-                }),
-            );
-            toast.dismiss(`recycle-${sopInstanceUid}`);
-        },
+    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+        workspaceId,
+        studyInstanceUid,
+        seriesInstanceUid,
     });
 
     const handleDownloadInstance = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -185,7 +151,8 @@ function ActionsCell({
             return;
         }
 
-        recycleDicomInstance();
+        setRecycleInstanceIds([sopInstanceUid]);
+        recycleInstance();
     };
 
     return (

@@ -1,11 +1,9 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Trash2Icon, UndoIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 import type React from "react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import {
     ContextMenu,
@@ -14,12 +12,8 @@ import {
     ContextMenuLabel,
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useInstanceRecycleActions } from "@/hooks/dicom-recycle/use-instance-recycle-actions";
 import { closeContextMenu } from "@/lib/utils";
-import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    deleteDicomInstanceMutation,
-    restoreDicomInstanceMutation,
-} from "@/react-query/queries/dicomInstance";
 import { getWorkspaceByIdQuery } from "@/react-query/queries/workspace";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { hasPermission } from "@/server/utils/workspacePermissions";
@@ -42,8 +36,7 @@ export function DicomRecycleInstanceContextMenu({
     const { t } = useT("translation");
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
-    const queryClient = getQueryClient();
-    const { getSelectedInstanceIds, clearSelection } =
+    const { getSelectedInstanceIds } =
         useDicomInstanceSelectionStore();
     const selectedIds = getSelectedInstanceIds();
 
@@ -59,73 +52,18 @@ export function DicomRecycleInstanceContextMenu({
         WORKSPACE_PERMISSIONS.DELETE,
     );
 
-    const { mutate: restoreDicomInstance } = useMutation({
-        ...restoreDicomInstanceMutation({
-            workspaceId,
-            instanceIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.message.restoring", { level: "instance" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "instance" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-            clearSelection();
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.restoreError", { level: "instance" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
-    });
-
-    const { mutate: deleteDicomInstance } = useMutation({
-        ...deleteDicomInstanceMutation({
-            workspaceId,
-            instanceIds: selectedIds,
-        }),
-        meta: {
-            toastId: nanoid(),
-        },
-        onMutate: (_, context) => {
-            toast.loading(t("dicom.messages.deleting", { level: "instance" }), {
-                id: context.meta?.toastId as string,
-            });
-        },
-        onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "instance" }));
-            toast.dismiss(context.meta?.toastId as string);
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "dicom-instance",
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                ],
-            });
-        },
-        onError: (_, __, ___, context) => {
-            toast.error(t("dicom.messages.deleteError", { level: "instance" }));
-            toast.dismiss(context.meta?.toastId as string);
-        },
+    const { restoreInstance, deleteInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+        workspaceId,
+        studyInstanceUid,
+        seriesInstanceUid,
     });
 
     const handleRestore = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        restoreDicomInstance();
+
+        setRecycleInstanceIds(selectedIds);
+        restoreInstance();
     };
 
     const handleDelete = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -136,7 +74,9 @@ export function DicomRecycleInstanceContextMenu({
 
     const handleConfirmDelete = () => {
         if (selectedIds.length === 0) return;
-        deleteDicomInstance();
+
+        setRecycleInstanceIds(selectedIds);
+        deleteInstance();
     };
 
     return (
