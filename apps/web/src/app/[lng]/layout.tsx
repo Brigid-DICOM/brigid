@@ -1,12 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import NextTopLoader from "nextjs-toploader";
-import { Suspense } from "react";
-import Loading from "@/components/loading";
+import { getT } from "@/app/_i18n";
+import { languages } from "@/app/_i18n/settings";
+import Providers from "@/app/providers";
 import { Toaster } from "@/components/ui/sonner";
-import { getT } from "./_i18n";
-import { languages } from "./_i18n/settings";
-import Providers from "./providers";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -31,23 +29,29 @@ export async function generateMetadata() {
     };
 }
 
-export default function RootLayout({
+export default async function LanguageLayout({
     children,
+    params,
 }: Readonly<{
     children: React.ReactNode;
+    params: Promise<{
+        lng: string;
+    }>;
 }>) {
+    const { lng } = await params;
+
     return (
-        <html lang="en">
+        <html lang={lng}>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <Suspense fallback={<Loading />}>
-                    <NextTopLoader color="var(--primary)" showSpinner={false} />
+                <NextTopLoader color="var(--primary)" showSpinner={false} />
 
-                    <Providers>{children}</Providers>
+                <Providers>
+                    {children}
+                </Providers>
 
-                    <Toaster richColors />
-                </Suspense>
+                <Toaster richColors />
             </body>
         </html>
     );
