@@ -1,13 +1,19 @@
 export async function register() {
     if (process.env.NEXT_RUNTIME === "nodejs") {
+
+        if ((global as any)._shutdownHandlersRegistered) return;
+        (global as any)._shutdownHandlersRegistered = true;
+
         console.log("current working directory", process.cwd());
 
         const { default: env } = await import("@brigid/env");
-
+        const { logApplicationActivityMessage } = await import("@/server/services/dicom/dicomAuditFactory");
         const { AppDataSource, initializeDb } = await import(
             "@brigid/database/src/dataSource"
         );
-        await initializeDb()
+
+        await initializeDb();
+        
         const raccoonDcm4cheBridge = await import("raccoon-dcm4che-bridge");
         raccoonDcm4cheBridge.raccoonDcm4cheJavaLoader({
             isPackagedElectron: true,
@@ -36,7 +42,7 @@ export async function register() {
         }
 
         const handleShutdown = async (signal: string) => {
-            console.log(`Received ${signal}, shutting down...`);
+            console.log(`[Shutdown] Received ${signal}, shutting down...`);
 
             if (cleanupScheduler) {
                 await cleanupScheduler.stop();
@@ -48,10 +54,22 @@ export async function register() {
                 console.log("Database connection closed");
             }
 
+            logApplicationActivityMessage({ isStart: false });
             process.exit(0);
         };
 
-        process.on("SIGINT", () => handleShutdown("SIGINT"));
-        process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+        process.prependListener("SIGINT", () => handleShutdown("SIGINT"));
+        process.prependListener("SIGTERM", () => handleShutdown("SIGTERM"));
+        process.prependListener("SIGQUIT", () => handleShutdown("SIGQUIT"));
+
+        if (process.platform === "win32") {
+            const readline = await import("readline");
+            readline.createInterface({
+                input: process.stdin,
+                output: process.stdout,
+            }).on("SIGINT", () => handleShutdown("SIGINT"));
+        }
+
+        logApplicationActivityMessage({ isStart: true });
     }
 }
