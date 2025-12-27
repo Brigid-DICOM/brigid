@@ -326,3 +326,70 @@ export const logDicomInstancesAccessedMessage = ({
 
     logger.info("dicom audit", { auditMessage: message });
 }
+
+export const logQueryMessage = async ({
+    name = "Query",
+    source,
+    destination,
+    sopClassUid,
+    queryPayload,
+    outcome = EventOutcomeIndicator.Success,
+    requestor
+}: {
+    name?: string;
+    source: TransferParticipant;
+    destination: TransferParticipant;
+    sopClassUid: string;
+    queryPayload: string | Buffer;
+    outcome: EventOutcomeIndicator;
+    requestor?: { userId: string; ip: string };
+}) => {
+    const builder = new AuditMessageBuilder(
+        DICOM_AUDIT_CONSTANTS.EventID.Query,
+        EventActionCode.Execute, 
+        outcome,
+        name
+    );
+
+    builder.addActiveParticipant(
+        source.userId,
+        false, 
+        DICOM_AUDIT_CONSTANTS.RoleID.Source,
+        source.ip,
+        NetworkAccessPointType.IPAddress,
+        source.aeTitle ? `${source.aeTitle}` : undefined
+    );
+    
+    builder.addActiveParticipant(
+        destination.userId,
+        false,
+        DICOM_AUDIT_CONSTANTS.RoleID.Destination,
+        destination.ip,
+        NetworkAccessPointType.IPAddress,
+        destination.aeTitle ? `${destination.aeTitle}` : undefined
+    );
+
+    if (requestor) {
+        builder.addActiveParticipant(
+            requestor.userId,
+            true, // Is Requestor = true
+            undefined, 
+            requestor.ip,
+            NetworkAccessPointType.IPAddress
+        );
+    }
+
+    builder.addParticipantObject(
+        sopClassUid,                                              // ObjectID
+        ParticipantObjectType.System,                             // Type: 2
+        ParticipantObjectRole.Report,                             // Role: 3
+        DICOM_AUDIT_CONSTANTS.ParticipantObjectIDType.SOPClassUID,      // ID Type: 110181
+        undefined,                                                // Name (Not specialized)
+        undefined,                                                // Description (Not specialized) 
+        undefined,                                                // Details (Not specialized)
+        queryPayload                                              // Query: Base64 content
+    );
+
+    const message = builder.build().toJSON();
+    logger.info("dicom audit", { auditMessage: message });
+}

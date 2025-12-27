@@ -122,6 +122,7 @@ export interface ParticipantObject {
     role: ParticipantObjectRole;
     idType: CodedValue;
     name?: string;
+    query?: string | Buffer;
     description?: ParticipantObjectDescription;
     details?: Record<string, string>;
 }
@@ -318,6 +319,7 @@ export class AuditMessageBuilder {
         name?: string,
         description?: ParticipantObjectDescription,
         details?: Record<string, string>,
+        query?: string | Buffer,
     ): this {
         const idTypeVal: CodedValue =
             typeof idTypeCode === "string"
@@ -332,6 +334,7 @@ export class AuditMessageBuilder {
             name: name,
             description: description,
             details: details,
+            query: query ? Buffer.from(query).toString("base64") : undefined,
         });
         return this;
     }
@@ -433,6 +436,10 @@ export class DicomAuditLog {
                         value: Buffer.from(String(value)).toString("base64"),
                     });
                 });
+            }
+
+            if (obj.query) {
+                node.ele("ParticipantObjectQuery").txt(Buffer.from(obj.query).toString("base64"));
             }
         });
 

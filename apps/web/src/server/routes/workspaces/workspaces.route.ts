@@ -21,11 +21,7 @@ import restoreSeriesRoute from "./dicom/delete/restoreSeries.route";
 import restoreStudyRoute from "./dicom/delete/restoreStudy.route";
 import getStatsRoute from "./dicom/getStats.route";
 import dimseRoute from "./dimse/dimse.route";
-import searchInstancesRoute from "./qido-rs/searchInstances.route";
-import searchSeriesRoute from "./qido-rs/searchSeries.route";
-import searchStudiesRoute from "./qido-rs/searchStudies.route";
-import searchStudySeriesRoute from "./qido-rs/searchStudySeries.route";
-import searchStudySeriesInstancesRoute from "./qido-rs/searchStudySeriesInstances.route";
+import qidoRsRoute from "./qido-rs";
 import shareLinkRoute from "./shareLinks/shareLink.route";
 import stowRsRoute from "./stow-rs/stowRs.route";
 import tagRoute from "./tags/tag.route";
@@ -36,11 +32,7 @@ import workspaceMemberRoute from "./workspaceMember.route";
 const workspacesRoute = new Hono()
     .route("/", stowRsRoute)
     .route("/", uriRetrieveInstanceRoute)
-    .route("/", searchStudiesRoute)
-    .route("/", searchStudySeriesRoute)
-    .route("/", searchStudySeriesInstancesRoute)
-    .route("/", searchSeriesRoute)
-    .route("/", searchInstancesRoute)
+    .route("/", qidoRsRoute)
     .route("/", wadoRsRoute)
     .route("/", getStatsRoute)
     .route("/", recycleInstancesRoute)
