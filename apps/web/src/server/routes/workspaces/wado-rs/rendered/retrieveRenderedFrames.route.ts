@@ -14,9 +14,15 @@ import {
     wadoRsRenderedFramesHeaderSchema,
     wadoRsSingleFrameHeaderSchema,
 } from "@/server/schemas/wadoRs";
+import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { InstanceService } from "@/server/services/instance.service";
+import { appLogger } from "@/server/utils/logger";
 import { MultipartHandler } from "../handlers/multipartHandler";
 import { SingleFrameHandler } from "../handlers/singleFrameHandler";
+
+const logger = appLogger.child({
+    module: "RetrieveRenderedFramesRoute",
+});
 
 const retrieveRenderedFramesRoute = new Hono().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/frames/:frameNumbers/rendered",
@@ -103,6 +109,18 @@ const retrieveRenderedFramesRoute = new Hono().get(
                 406,
             );
         }
+
+        const auditService = new DicomAuditService();
+        auditService.logTransferBegin(c, {
+            workspaceId,
+            studyInstanceUid,
+            instances: [instance],
+            name: "RetrieveRenderedFrames",
+        }).then(() => {
+            console.info("Transfer begin audit logged");
+        }).catch((error) => {
+            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, frameNumbers: ${frameNumbers}`, error);
+        });
 
         return handler.handle(c, { instances: [instance], accept: accept });
     },

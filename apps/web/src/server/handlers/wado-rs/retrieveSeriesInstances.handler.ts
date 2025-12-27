@@ -3,6 +3,7 @@ import env from "@brigid/env";
 import type { Context } from "hono";
 import { MultipartHandler } from "@/server/routes/workspaces/wado-rs/handlers/multipartHandler";
 import { ZipHandler } from "@/server/routes/workspaces/wado-rs/handlers/zipHandler";
+import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { SeriesService } from "@/server/services/series.service";
 import { appLogger } from "@/server/utils/logger";
 
@@ -98,6 +99,18 @@ export const retrieveSeriesInstancesHandler = async (
                 406,
             );
         }
+
+        const auditService= new DicomAuditService();
+        auditService.logTransferBegin(c, {
+            workspaceId,
+            studyInstanceUid,
+            instances,
+            name: "RetrieveSeriesInstances",
+        }).then(() => {
+            console.info("Transfer begin audit logged");
+        }).catch((error) => {
+            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}`, error);
+        });
 
         return handler.handle(c, { instances, accept: accept });
     } catch (error) {

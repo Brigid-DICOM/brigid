@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import { MultipartHandler } from "@/server/routes/workspaces/wado-rs/handlers/multipartHandler";
 import { ZipHandler } from "@/server/routes/workspaces/wado-rs/handlers/zipHandler";
+import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { InstanceService } from "@/server/services/instance.service";
 import { appLogger } from "@/server/utils/logger";
 
@@ -60,6 +61,18 @@ export const retrieveInstanceHandler = async (
                 406,
             );
         }
+
+        const auditService = new DicomAuditService();
+        auditService.logTransferBegin(c, {
+            workspaceId,
+            studyInstanceUid,
+            instances: [instance],
+            name: "RetrieveInstance",
+        }).then(() => {
+            console.info("Transfer begin audit logged");
+        }).catch((error) => {
+            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, sopInstanceUid: ${sopInstanceUid}`, error);
+        });
 
         return handler.handle(c, { instances: [instance], accept: accept });
     } catch (error) {

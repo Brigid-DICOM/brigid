@@ -11,6 +11,7 @@ import {
     verifyWorkspaceExists,
     verifyWorkspacePermission,
 } from "@/server/middlewares/workspace.middleware";
+import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { InstanceService } from "@/server/services/instance.service";
 import { DicomJsonBinaryDataUtils } from "@/server/utils/dicom/dicomJsonBinaryDataUtils";
@@ -64,6 +65,18 @@ const retrieveInstanceMetadataRoute = new Hono().get(
                 404,
             );
         }
+
+        const auditService = new DicomAuditService();
+        auditService.logTransferBegin(c, {
+            workspaceId,
+            studyInstanceUid,
+            instances: [instance],
+            name: "RetrieveInstanceMetadata",
+        }).then(() => {
+            console.info("Transfer begin audit logged");
+        }).catch((error) => {
+            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}`, error);
+        });
 
         const storage = getStorageProvider();
         const { body } = await storage.downloadFile(instance.instancePath);

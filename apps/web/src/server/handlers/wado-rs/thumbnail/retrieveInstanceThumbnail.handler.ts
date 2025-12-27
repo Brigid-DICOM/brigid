@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import { ThumbnailHandler } from "@/server/routes/workspaces/wado-rs/handlers/thumbnailHandler";
+import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { InstanceService } from "@/server/services/instance.service";
 import { appLogger } from "@/server/utils/logger";
 
@@ -51,6 +52,18 @@ export const retrieveInstanceThumbnailHandler = async (
                 406,
             );
         }
+
+        const auditService = new DicomAuditService();
+        auditService.logTransferBegin(c, {
+            workspaceId: options.workspaceId,
+            studyInstanceUid: options.studyInstanceUid,
+            instances: [instance],
+            name: "RetrieveInstanceThumbnail",
+        }).then(() => {
+            console.info("Transfer begin audit logged");
+        }).catch((error) => {
+            logger.error(`Error logging transfer begin audit, workspaceId: ${options.workspaceId}, studyInstanceUid: ${options.studyInstanceUid}, seriesInstanceUid: ${options.seriesInstanceUid}, sopInstanceUid: ${options.sopInstanceUid}`, error);
+        });
 
         return handler.handle(c, {
             instances: [instance],

@@ -13,6 +13,7 @@ import {
     verifyWorkspaceExists,
     verifyWorkspacePermission,
 } from "@/server/middlewares/workspace.middleware";
+import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { SeriesService } from "@/server/services/series.service";
 import { DicomJsonBinaryDataUtils } from "@/server/utils/dicom/dicomJsonBinaryDataUtils";
@@ -96,6 +97,18 @@ const retrieveSeriesMetadataRoute = new Hono().get(
                 404,
             );
         }
+
+        const auditService = new DicomAuditService();
+        auditService.logTransferBegin(c, {
+            workspaceId,
+            studyInstanceUid,
+            instances: seriesInstances,
+            name: "RetrieveSeriesMetadata",
+        }).then(() => {
+            console.info("Transfer begin audit logged");
+        }).catch((error) => {
+            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}`, error);
+        });
 
         const metadata = [];
         for (const instance of seriesInstances) {

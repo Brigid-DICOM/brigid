@@ -68,6 +68,11 @@ export class StudyService {
                 workspaceId: options.workspaceId,
                 studyInstanceUid: options.studyInstanceUid,
             },
+            relations: {
+                patient: {
+                    patientName: true,
+                }
+            }
         });
     }
 

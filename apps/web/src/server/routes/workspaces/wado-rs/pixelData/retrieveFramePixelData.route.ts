@@ -10,12 +10,18 @@ import {
     verifyWorkspacePermission,
 } from "@/server/middlewares/workspace.middleware";
 import { numberQuerySchema } from "@/server/schemas/numberQuerySchema";
+import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { InstanceService } from "@/server/services/instance.service";
 import type { DicomSource } from "@/server/types/dicom/convert";
 import { getDicomToImageConverter } from "@/server/utils/dicom/converter/converterFactory";
 import { toConvertOptions } from "@/server/utils/dicom/converter/convertOptions";
+import { appLogger } from "@/server/utils/logger";
 import multipartMessage from "@/server/utils/multipartMessage";
 import { getStorageProvider } from "@/server/utils/storage/storageFactory";
+
+const logger = appLogger.child({
+    module: "RetrieveFramePixelDataRoute",
+});
 
 const retrieveFramePixelDataRoute = new Hono().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/frames/:frameNumbers",
@@ -73,6 +79,18 @@ const retrieveFramePixelDataRoute = new Hono().get(
                 404,
             );
         }
+
+        const auditService = new DicomAuditService();
+        auditService.logTransferBegin(c, {
+            workspaceId,
+            studyInstanceUid,
+            instances: [instance],
+            name: "RetrieveFramePixelData",
+        }).then(() => {
+            console.info("Transfer begin audit logged");
+        }).catch((error) => {
+            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, frameNumbers: ${frameNumbers}`, error);
+        });
 
         const storage = getStorageProvider();
         const { body } = await storage.downloadFile(instance.instancePath);

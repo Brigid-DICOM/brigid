@@ -29,41 +29,19 @@ import searchStudySeriesInstancesRoute from "./qido-rs/searchStudySeriesInstance
 import shareLinkRoute from "./shareLinks/shareLink.route";
 import stowRsRoute from "./stow-rs/stowRs.route";
 import tagRoute from "./tags/tag.route";
-import retrieveInstanceMetadataRoute from "./wado-rs/metadata/retrieveInstanceMetadata.route";
-import retrieveSeriesMetadataRoute from "./wado-rs/metadata/retrieveSeriesMetadata.route";
-import retrieveStudyMetadataRoute from "./wado-rs/metadata/retrieveStudyMetadata.route";
-import retrieveFramePixelDataRoute from "./wado-rs/pixelData/retrieveFramePixelData.route";
-import retrieveRenderedFramesRoute from "./wado-rs/rendered/retrieveRenderedFrames.route";
-import retrieveRenderedInstancesRoute from "./wado-rs/rendered/retrieveRenderedInstances.route";
-import retrieveInstanceRoute from "./wado-rs/retrieveInstance.route";
-import retrieveSeriesInstancesRoute from "./wado-rs/retrieveSeriesInstances.route";
-import retrieveStudyInstancesRoute from "./wado-rs/retrieveStudyInstances.route";
-import retrieveInstanceThumbnailRoute from "./wado-rs/thumbnail/retrieveInstanceThumbnail.route";
-import retrieveSeriesThumbnailRoute from "./wado-rs/thumbnail/retrieveSeriesThumbnail.route";
-import retrieveStudyThumbnailRoute from "./wado-rs/thumbnail/retrieveStudyThumbnail.route";
+import wadoRsRoute from "./wado-rs";
 import uriRetrieveInstanceRoute from "./wado-uri/uriRetrieveInstance.route";
 import workspaceMemberRoute from "./workspaceMember.route";
 
 const workspacesRoute = new Hono()
     .route("/", stowRsRoute)
-    .route("/", retrieveStudyInstancesRoute)
-    .route("/", retrieveInstanceRoute)
-    .route("/", retrieveSeriesInstancesRoute)
     .route("/", uriRetrieveInstanceRoute)
     .route("/", searchStudiesRoute)
     .route("/", searchStudySeriesRoute)
     .route("/", searchStudySeriesInstancesRoute)
     .route("/", searchSeriesRoute)
     .route("/", searchInstancesRoute)
-    .route("/", retrieveFramePixelDataRoute)
-    .route("/", retrieveRenderedFramesRoute)
-    .route("/", retrieveRenderedInstancesRoute)
-    .route("/", retrieveInstanceMetadataRoute)
-    .route("/", retrieveSeriesMetadataRoute)
-    .route("/", retrieveStudyMetadataRoute)
-    .route("/", retrieveInstanceThumbnailRoute)
-    .route("/", retrieveSeriesThumbnailRoute)
-    .route("/", retrieveStudyThumbnailRoute)
+    .route("/", wadoRsRoute)
     .route("/", getStatsRoute)
     .route("/", recycleInstancesRoute)
     .route("/", recycleSeriesRoute)
