@@ -10,8 +10,11 @@ import {
 } from "@/server/middlewares/workspace.middleware";
 import { searchStudySeriesQueryParamSchema } from "@/server/schemas/searchStudySeriesSchema";
 import { DicomSearchSeriesQueryBuilder } from "@/server/services/qido-rs/dicomSearchSeriesQueryBuilder";
+import { eventLogger } from "@/server/utils/logger";
 
-const searchStudySeriesRoute = new Hono().get(
+const searchStudySeriesRoute = new Hono<{
+    Variables: { rqId: string }
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series",
     describeRoute({
         description:
@@ -29,33 +32,65 @@ const searchStudySeriesRoute = new Hono().get(
         }),
     ),
     zValidator("query", searchStudySeriesQueryParamSchema),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "SearchStudySeries",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "SearchStudySeries",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const workspaceId = c.req.param("workspaceId");
         const queryParams = c.req.valid("query");
         const queryBuilder = new DicomSearchSeriesQueryBuilder();
 
-        const series = await queryBuilder.getSeriesWithRelatedCounts({
-            workspaceId,
-            StudyInstanceUID: c.req.param("studyInstanceUid"),
-            ...queryParams,
-        });
+        try {
+            const series = await queryBuilder.getSeriesWithRelatedCounts({
+                workspaceId,
+                StudyInstanceUID: c.req.param("studyInstanceUid"),
+                ...queryParams,
+            });
+    
+            if (series.length === 0) {
+                return c.body(null, 204);
+            }
+    
+            return c.json(
+                series.map((series) => {
+                    const seriesData = JSON.parse(series.json) as DicomTag;
+                    return {
+                        ...seriesData,
+                        "00201209": {
+                            vr: "IS",
+                            Value: [series.numberOfSeriesRelatedInstances || 0],
+                        },
+                    } as DicomTag;
+                }),
+            );
 
-        if (series.length === 0) {
-            return c.body(null, 204);
+        } catch (error) {
+            eventLogger.error("Error searching for study series", {
+                name: "SearchStudySeries",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
+
+            return c.json({
+                error: "Internal server error",
+            }, 500);
         }
-
-        return c.json(
-            series.map((series) => {
-                const seriesData = JSON.parse(series.json) as DicomTag;
-                return {
-                    ...seriesData,
-                    "00201209": {
-                        vr: "IS",
-                        Value: [series.numberOfSeriesRelatedInstances || 0],
-                    },
-                } as DicomTag;
-            }),
-        );
     },
 );
 

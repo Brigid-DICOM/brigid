@@ -5,8 +5,11 @@ import { z } from "zod";
 import { verifyWorkspaceExists } from "@/server/middlewares/workspace.middleware";
 import { searchStudySeriesInstancesQueryParamSchema } from "@/server/schemas/searchStudySeriesInstancesSchema";
 import { DicomSearchInstanceQueryBuilder } from "@/server/services/qido-rs/dicomSearchInstanceQueryBuilder";
+import { eventLogger } from "@/server/utils/logger";
 
-const searchInstancesRoute = new Hono().get(
+const searchInstancesRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/instances",
     describeRoute({
         description:
@@ -21,22 +24,54 @@ const searchInstancesRoute = new Hono().get(
         }),
     ),
     zValidator("query", searchStudySeriesInstancesQueryParamSchema),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "SearchInstances",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "SearchInstances",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const workspaceId = c.req.param("workspaceId");
         const queryParams = c.req.valid("query");
         const queryBuilder = new DicomSearchInstanceQueryBuilder();
-        const instances = await queryBuilder.execQuery({
-            workspaceId,
-            ...queryParams,
-        });
 
-        if (instances.length === 0) {
-            return c.body(null, 204);
+        try {
+            const instances = await queryBuilder.execQuery({
+                workspaceId,
+                ...queryParams,
+            });
+    
+            if (instances.length === 0) {
+                return c.body(null, 204);
+            }
+    
+            return c.json(
+                instances.map((instance) => JSON.parse(instance.json) as DicomTag),
+            );
+        } catch (error) {
+            eventLogger.error("Error searching for instances", {
+                name: "SearchInstances",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
+
+            return c.json({
+                error: "Internal server error",
+            }, 500);
         }
-
-        return c.json(
-            instances.map((instance) => JSON.parse(instance.json) as DicomTag),
-        );
     },
 );
 

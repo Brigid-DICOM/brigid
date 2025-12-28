@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { nanoid } from "nanoid";
 import { EventOutcomeIndicator } from "@/server/services/dicom/dicomAudit";
 import { logQueryMessage } from "@/server/services/dicom/dicomAuditFactory";
 import searchInstancesRoute from "./searchInstances.route";
@@ -7,7 +8,9 @@ import searchStudiesRoute from "./searchStudies.route";
 import searchStudySeriesRoute from "./searchStudySeries.route";
 import searchStudySeriesInstancesRoute from "./searchStudySeriesInstances.route";
 
-const qidoRsRoute = new Hono()
+const qidoRsRoute = new Hono<{
+    Variables: { rqId: string };
+}>()
 .use(async (c, next) => {
     const { UID } = await import("raccoon-dcm4che-bridge/src/wrapper/org/dcm4che3/data/UID");
     const ip = c.req.header("X-Forwarded-For") || c.req.header("cf-connecting-ip") || c.req.header("x-real-ip") || "";
@@ -31,6 +34,12 @@ const qidoRsRoute = new Hono()
         },
     });
     
+    await next();
+})
+.use(async (c, next) => {
+    const rqId = nanoid();
+    c.set("rqId", rqId);
+
     await next();
 })
 .route("/", searchStudiesRoute)

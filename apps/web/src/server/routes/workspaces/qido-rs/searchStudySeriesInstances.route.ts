@@ -10,8 +10,11 @@ import {
 } from "@/server/middlewares/workspace.middleware";
 import { searchStudySeriesInstancesQueryParamSchema } from "@/server/schemas/searchStudySeriesInstancesSchema";
 import { DicomSearchInstanceQueryBuilder } from "@/server/services/qido-rs/dicomSearchInstanceQueryBuilder";
+import { eventLogger } from "@/server/utils/logger";
 
-const searchStudySeriesInstancesRoute = new Hono().get(
+const searchStudySeriesInstancesRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances",
     describeRoute({
         description:
@@ -30,25 +33,61 @@ const searchStudySeriesInstancesRoute = new Hono().get(
         }),
     ),
     zValidator("query", searchStudySeriesInstancesQueryParamSchema),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "SearchStudySeriesInstances",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "SearchStudySeriesInstances",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const workspaceId = c.req.param("workspaceId");
         const queryParams = c.req.valid("query");
 
         const queryBuilder = new DicomSearchInstanceQueryBuilder();
-        const instances = await queryBuilder.execQuery({
-            workspaceId,
-            ...queryParams,
-            StudyInstanceUID: c.req.param("studyInstanceUid"),
-            SeriesInstanceUID: c.req.param("seriesInstanceUid"),
-        });
+        try {
+            const instances = await queryBuilder.execQuery({
+                workspaceId,
+                ...queryParams,
+                StudyInstanceUID: c.req.param("studyInstanceUid"),
+                SeriesInstanceUID: c.req.param("seriesInstanceUid"),
+            });
 
-        if (instances.length === 0) {
-            return c.body(null, 204);
+            if (instances.length === 0) {
+                return c.body(null, 204);
+            }
+
+            return c.json(
+                instances.map(
+                    (instance) => JSON.parse(instance.json) as DicomTag,
+                ),
+            );
+        } catch (error) {
+            eventLogger.error("Error searching for study series instances", {
+                name: "SearchStudySeriesInstances",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
+
+            return c.json(
+                {
+                    error: "Internal server error",
+                },
+                500,
+            );
         }
-
-        return c.json(
-            instances.map((instance) => JSON.parse(instance.json) as DicomTag),
-        );
     },
 );
 
