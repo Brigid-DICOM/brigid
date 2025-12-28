@@ -15,13 +15,14 @@ export class DbTransport extends Transport {
         }
 
         try {
-            const { level, message, name, stack, requestId, elapsedTime } = info;
+            const { level, message, name, stack, requestId, elapsedTime, workspaceId } = info;
 
             const eventLog = new EventLogEntity();
             eventLog.id = uuidV7();
             eventLog.level = level;
             eventLog.name = name;
             eventLog.requestId = requestId || undefined;
+            eventLog.workspaceId = workspaceId || undefined;
             eventLog.elapsedTime = Math.round(elapsedTime) || undefined;
 
             // 如果遇到 error，將 stack 放到 message 中

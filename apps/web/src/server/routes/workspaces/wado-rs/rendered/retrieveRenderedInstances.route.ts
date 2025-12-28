@@ -45,11 +45,13 @@ const retrieveRenderedInstancesRoute = new Hono<{
     zValidator("query", wadoRsQueryParamSchema),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "retrieveRenderedInstance",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -59,6 +61,7 @@ const retrieveRenderedInstancesRoute = new Hono<{
             name: "retrieveRenderedInstance",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -121,6 +124,7 @@ const retrieveRenderedInstancesRoute = new Hono<{
             eventLogger.error("Error retrieving rendered instance", {
                 name: "retrieveRenderedInstance",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             return c.json(

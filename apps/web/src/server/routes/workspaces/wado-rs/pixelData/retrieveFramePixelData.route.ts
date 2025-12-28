@@ -58,11 +58,13 @@ const retrieveFramePixelDataRoute = new Hono<{
     ),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "retrieveFramePixelData",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -72,6 +74,7 @@ const retrieveFramePixelDataRoute = new Hono<{
             name: "retrieveFramePixelData",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -162,6 +165,7 @@ const retrieveFramePixelDataRoute = new Hono<{
             eventLogger.error("Error retrieving frame pixel data", {
                 name: "retrieveFramePixelData",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             return c.json(

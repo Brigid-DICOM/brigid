@@ -44,10 +44,12 @@ const retrieveStudyThumbnailRoute = new Hono<{
     ),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
         eventLogger.info("request received", {
             name: "retrieveStudyThumbnail",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -56,6 +58,7 @@ const retrieveStudyThumbnailRoute = new Hono<{
             name: "retrieveStudyThumbnail",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -73,6 +76,7 @@ const retrieveStudyThumbnailRoute = new Hono<{
             eventLogger.error("Error retrieving study thumbnail", {
                 name: "retrieveStudyThumbnail",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             return c.json(

@@ -37,11 +37,13 @@ const retrieveInstanceRoute = new Hono<{
         ),
         async (c, next) => {
             const rqId = c.get("rqId");
+            const workspaceId = c.req.param("workspaceId");
             const startTime = performance.now();
 
             eventLogger.info("request received", {
                 name: "retrieveInstance",
                 requestId: rqId,
+                workspaceId,
             });
 
             await next();
@@ -51,6 +53,7 @@ const retrieveInstanceRoute = new Hono<{
                 name: "retrieveInstance",
                 requestId: rqId,
                 elapsedTime,
+                workspaceId,
             });
         },
         async (c) => {
@@ -73,6 +76,7 @@ const retrieveInstanceRoute = new Hono<{
                 eventLogger.error("Error retrieving instance", {
                     name: "retrieveInstance",
                     requestId: rqId,
+                    workspaceId,
                     error:
                         error instanceof Error ? error.message : String(error),
                 });

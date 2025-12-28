@@ -52,11 +52,13 @@ const retrieveRenderedFramesRoute = new Hono<{
     zValidator("query", wadoRsQueryParamSchema),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "retrieveRenderedFrames",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -66,6 +68,7 @@ const retrieveRenderedFramesRoute = new Hono<{
             name: "retrieveRenderedFrames",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -157,6 +160,7 @@ const retrieveRenderedFramesRoute = new Hono<{
             eventLogger.error("Error retrieving rendered frames", {
                 name: "retrieveRenderedFrames",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             return c.json(

@@ -36,16 +36,17 @@ const retrieveStudyInstancesRoute = new Hono<{
             z.object({
                 workspaceId: z.string().describe("The ID of the workspace"),
                 studyInstanceUid: z.string().describe("The study instance UID"),
-                aaa: z.string().optional(),
             }),
         ),
         async (c, next) => {
             const rqId = c.get("rqId");
+            const workspaceId = c.req.param("workspaceId");
             const startTime = performance.now();
 
             eventLogger.info("request received", {
                 name: "retrieveStudy",
                 requestId: rqId,
+                workspaceId,
             });
 
             await next();
@@ -54,6 +55,7 @@ const retrieveStudyInstancesRoute = new Hono<{
             eventLogger.info("request completed", {
                 name: "retrieveStudy",
                 requestId: rqId,
+                workspaceId,
                 elapsedTime,
             });
         },
@@ -72,6 +74,7 @@ const retrieveStudyInstancesRoute = new Hono<{
                 eventLogger.error("Error retrieving study", {
                     name: "retrieveStudy",
                     requestId: rqId,
+                    workspaceId,
                     error:
                         error instanceof Error ? error.message : String(error),
                 });

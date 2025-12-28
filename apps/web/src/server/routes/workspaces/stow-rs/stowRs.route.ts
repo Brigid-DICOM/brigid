@@ -71,6 +71,7 @@ const stowRsRoute = new Hono<{
     ),
     async (c, next) => {
         const rqId = nanoid();
+        const workspaceId = c.req.param("workspaceId");
         c.set("rqId", rqId);
 
         const startTime = performance.now();
@@ -78,6 +79,7 @@ const stowRsRoute = new Hono<{
         eventLogger.info("request received", {
             name: "storeInstance",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -87,6 +89,7 @@ const stowRsRoute = new Hono<{
             name: "storeInstance",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -120,6 +123,7 @@ const stowRsRoute = new Hono<{
             eventLogger.error("Failed to store DICOM file", {
                 name: "storeInstance",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             logger.error("Failed to store DICOM file", error);

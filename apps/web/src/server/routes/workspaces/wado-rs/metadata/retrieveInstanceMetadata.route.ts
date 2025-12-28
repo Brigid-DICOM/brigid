@@ -45,11 +45,13 @@ const retrieveInstanceMetadataRoute = new Hono<{
     ),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "retrieveInstanceMetadata",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -59,6 +61,7 @@ const retrieveInstanceMetadataRoute = new Hono<{
             name: "retrieveInstanceMetadata",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -132,6 +135,7 @@ const retrieveInstanceMetadataRoute = new Hono<{
             eventLogger.error("Error retrieving instance metadata", {
                 name: "retrieveInstanceMetadata",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             return c.json(

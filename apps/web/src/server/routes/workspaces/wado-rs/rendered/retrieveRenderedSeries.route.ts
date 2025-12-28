@@ -46,11 +46,13 @@ const retrieveRenderedSeriesRoute = new Hono<{
     zValidator("query", wadoRsQueryParamSchema),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "retrieveRenderedSeries",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -60,6 +62,7 @@ const retrieveRenderedSeriesRoute = new Hono<{
             name: "retrieveRenderedSeries",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -139,6 +142,7 @@ const retrieveRenderedSeriesRoute = new Hono<{
             eventLogger.error("Error retrieving rendered series", {
                 name: "retrieveRenderedSeries",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             return c.json(

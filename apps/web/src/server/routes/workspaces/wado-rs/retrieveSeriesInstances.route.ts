@@ -43,11 +43,13 @@ const retrieveSeriesInstancesRoute = new Hono<{
         ),
         async (c, next) => {
             const rqId = c.get("rqId");
+            const workspaceId = c.req.param("workspaceId");
             const startTime = performance.now();
 
             eventLogger.info("request received", {
                 name: "retrieveSeries",
                 requestId: rqId,
+                workspaceId,
             });
 
             await next();
@@ -57,6 +59,7 @@ const retrieveSeriesInstancesRoute = new Hono<{
                 name: "retrieveSeries",
                 requestId: rqId,
                 elapsedTime,
+                workspaceId,
             });
         },
         async (c) => {
@@ -77,6 +80,7 @@ const retrieveSeriesInstancesRoute = new Hono<{
                 eventLogger.error("Error retrieving series", {
                     name: "retrieveSeries",
                     requestId: rqId,
+                    workspaceId,
                     error:
                         error instanceof Error ? error.message : String(error),
                 });

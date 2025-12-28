@@ -26,11 +26,13 @@ const searchInstancesRoute = new Hono<{
     zValidator("query", searchStudySeriesInstancesQueryParamSchema),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "SearchInstances",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -40,6 +42,7 @@ const searchInstancesRoute = new Hono<{
             name: "SearchInstances",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -65,6 +68,7 @@ const searchInstancesRoute = new Hono<{
             eventLogger.error("Error searching for instances", {
                 name: "SearchInstances",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
 

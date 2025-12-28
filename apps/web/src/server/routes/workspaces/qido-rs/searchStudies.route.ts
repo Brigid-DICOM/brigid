@@ -33,11 +33,13 @@ const searchStudiesRoute = new Hono<{
     zValidator("query", searchStudiesQueryParamSchema),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "SearchStudies",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -46,6 +48,7 @@ const searchStudiesRoute = new Hono<{
         eventLogger.info("request completed", {
             name: "SearchStudies",
             requestId: rqId,
+            workspaceId,
             elapsedTime,
         });
     },
@@ -85,6 +88,7 @@ const searchStudiesRoute = new Hono<{
             eventLogger.error("Error searching for studies", {
                 name: "SearchStudies",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
 

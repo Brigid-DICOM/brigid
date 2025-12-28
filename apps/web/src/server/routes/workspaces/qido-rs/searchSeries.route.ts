@@ -33,11 +33,13 @@ const searchSeriesRoute = new Hono<{
     zValidator("query", searchStudySeriesQueryParamSchema),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "SearchSeries",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -47,6 +49,7 @@ const searchSeriesRoute = new Hono<{
             name: "SearchSeries",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -82,6 +85,7 @@ const searchSeriesRoute = new Hono<{
             eventLogger.error("Error searching for series", {
                 name: "SearchSeries",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
 

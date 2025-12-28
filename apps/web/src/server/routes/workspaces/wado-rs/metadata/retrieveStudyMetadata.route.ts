@@ -45,11 +45,13 @@ const retrieveStudyMetadataRoute = new Hono<{
     ),
     async (c, next) => {
         const rqId = c.get("rqId");
+        const workspaceId = c.req.param("workspaceId");
         const startTime = performance.now();
 
         eventLogger.info("request received", {
             name: "retrieveStudyMetadata",
             requestId: rqId,
+            workspaceId,
         });
 
         await next();
@@ -59,6 +61,7 @@ const retrieveStudyMetadataRoute = new Hono<{
             name: "retrieveStudyMetadata",
             requestId: rqId,
             elapsedTime,
+            workspaceId,
         });
     },
     async (c) => {
@@ -157,6 +160,7 @@ const retrieveStudyMetadataRoute = new Hono<{
             eventLogger.error("Error retrieving study metadata", {
                 name: "retrieveStudyMetadata",
                 requestId: rqId,
+                workspaceId,
                 error: error instanceof Error ? error.message : String(error),
             });
             return c.json(
