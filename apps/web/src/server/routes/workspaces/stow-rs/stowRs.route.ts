@@ -3,6 +3,7 @@ import { parseMultipartRequest } from "@remix-run/multipart-parser";
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { describeRoute, resolver, validator as zValidator } from "hono-openapi";
+import { nanoid } from "nanoid";
 import { z } from "zod";
 import { WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
@@ -13,13 +14,15 @@ import {
 import { StowRsService } from "@/server/services/stowRs.service";
 import { StowRsResponseMessageSchema } from "@/server/types/dicom";
 import type { MultipartFile } from "@/server/types/file";
-import { appLogger } from "@/server/utils/logger";
+import { appLogger, eventLogger } from "@/server/utils/logger";
 
 const logger = appLogger.child({
     module: "StowRsRoute",
 });
 
-const stowRsRoute = new Hono().post(
+const stowRsRoute = new Hono<{
+    Variables: { rqId: string };
+}>().post(
     "/workspaces/:workspaceId/studies",
     describeRoute({
         description: `Store DICOM instance (STOW-RS), ref: [Store Transaction](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_10.5)}`,
@@ -66,7 +69,28 @@ const stowRsRoute = new Hono().post(
             workspaceId: z.string().describe("The ID of the workspace"),
         }),
     ),
+    async (c, next) => {
+        const rqId = nanoid();
+        c.set("rqId", rqId);
+
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "storeInstance",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "storeInstance",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const workspaceId = c.req.param("workspaceId");
 
         const files: MultipartFile[] = [];
@@ -93,6 +117,11 @@ const stowRsRoute = new Hono().post(
                 await stowRsService.storeDicomFiles(files);
             return c.json(message, httpStatusCode as ContentfulStatusCode);
         } catch (error) {
+            eventLogger.error("Failed to store DICOM file", {
+                name: "storeInstance",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
             logger.error("Failed to store DICOM file", error);
             return c.json(
                 {
