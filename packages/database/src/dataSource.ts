@@ -6,6 +6,7 @@ import { DicomCodeSequenceEntity } from "./entities/dicomCodeSequence.entity";
 import { DimseAllowedIpEntity } from "./entities/dimseAllowedIp.entity";
 import { DimseAllowedRemoteEntity } from "./entities/dimseAllowedRemote.entity";
 import { DimseConfigEntity } from "./entities/dimseConfig.entity";
+import { EventLogEntity } from "./entities/eventLog.entity";
 import { InstanceEntity } from "./entities/instance.entity";
 import { PatientEntity } from "./entities/patient.entity";
 import { PersonNameEntity } from "./entities/personName.entity";
@@ -49,7 +50,8 @@ export const AppDataSource = new DataSource({
         ShareLinkTargetEntity,
         DimseConfigEntity,
         DimseAllowedIpEntity,
-        DimseAllowedRemoteEntity
+        DimseAllowedRemoteEntity,
+        EventLogEntity
     ],
     subscribers: [
         SeriesSubscriber,

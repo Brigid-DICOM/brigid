@@ -1,6 +1,7 @@
 import path from "node:path";
 import { format, loggers, transports } from "winston";
 import { getWritableRoot } from "..";
+import { DbTransport } from "./dbTransport";
 
 const { combine, label, json, timestamp, errors, colorize, printf } = format;
 
@@ -51,4 +52,22 @@ loggers.add("brigid", {
     ],
 });
 
+loggers.add("event", {
+    level: "info",
+    transports: [
+        new transports.Console({
+            format: combine(
+                errors({ stack: true }),
+                label({ label: "brigid-node" }),
+                timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+                customConsoleFormat,
+                colorize({ all: true }),
+            ),
+        }),
+        new DbTransport(),
+    ],
+})
+
 export const appLogger = loggers.get("brigid");
+
+export const eventLogger = loggers.get("event");
