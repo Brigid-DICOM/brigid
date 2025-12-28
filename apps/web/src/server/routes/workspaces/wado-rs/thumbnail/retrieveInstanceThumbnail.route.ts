@@ -9,8 +9,11 @@ import {
     verifyWorkspacePermission,
 } from "@/server/middlewares/workspace.middleware";
 import { wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
+import { eventLogger } from "@/server/utils/logger";
 
-const retrieveInstanceThumbnailRoute = new Hono().get(
+const retrieveInstanceThumbnailRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/thumbnail",
     describeRoute({
         description:
@@ -41,7 +44,26 @@ const retrieveInstanceThumbnailRoute = new Hono().get(
             sopInstanceUid: z.string().describe("The sop instance UID"),
         }),
     ),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "retrieveInstanceThumbnail",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "retrieveInstanceThumbnail",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const {
             workspaceId,
             studyInstanceUid,
@@ -51,13 +73,29 @@ const retrieveInstanceThumbnailRoute = new Hono().get(
 
         const accept = c.req.valid("header").accept;
 
-        return await retrieveInstanceThumbnailHandler(c, {
-            workspaceId,
-            studyInstanceUid,
-            seriesInstanceUid,
-            sopInstanceUid,
-            accept,
-        });
+        try {
+            return await retrieveInstanceThumbnailHandler(c, {
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                sopInstanceUid,
+                accept,
+            });
+        } catch (error) {
+            eventLogger.error("Error retrieving instance thumbnail", {
+                name: "retrieveInstanceThumbnail",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
+            return c.json(
+                {
+                    ok: false,
+                    data: null,
+                    error: "Internal server error",
+                },
+                500,
+            );
+        }
     },
 );
 

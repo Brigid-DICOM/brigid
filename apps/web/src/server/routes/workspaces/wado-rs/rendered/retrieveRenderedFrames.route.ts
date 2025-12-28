@@ -16,7 +16,7 @@ import {
 } from "@/server/schemas/wadoRs";
 import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { InstanceService } from "@/server/services/instance.service";
-import { appLogger } from "@/server/utils/logger";
+import { appLogger, eventLogger } from "@/server/utils/logger";
 import { MultipartHandler } from "../handlers/multipartHandler";
 import { SingleFrameHandler } from "../handlers/singleFrameHandler";
 
@@ -24,7 +24,9 @@ const logger = appLogger.child({
     module: "RetrieveRenderedFramesRoute",
 });
 
-const retrieveRenderedFramesRoute = new Hono().get(
+const retrieveRenderedFramesRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/frames/:frameNumbers/rendered",
     describeRoute({
         description:
@@ -48,7 +50,26 @@ const retrieveRenderedFramesRoute = new Hono().get(
         }),
     ),
     zValidator("query", wadoRsQueryParamSchema),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "retrieveRenderedFrames",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "retrieveRenderedFrames",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const {
             workspaceId,
             studyInstanceUid,
@@ -78,51 +99,75 @@ const retrieveRenderedFramesRoute = new Hono().get(
             );
         }
 
-        const instanceService = new InstanceService();
-        const instance = await instanceService.getInstanceByUid({
-            workspaceId,
-            studyInstanceUid,
-            seriesInstanceUid,
-            sopInstanceUid,
-        });
+        try {
+            const instanceService = new InstanceService();
+            const instance = await instanceService.getInstanceByUid({
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                sopInstanceUid,
+            });
 
-        if (!instance) {
+            if (!instance) {
+                return c.json(
+                    {
+                        message: "Instance not found",
+                    },
+                    404,
+                );
+            }
+
+            const handlers =
+                frameCount === 1
+                    ? [new SingleFrameHandler()]
+                    : [new MultipartHandler()];
+
+            const handler = handlers.find((handler) =>
+                handler.canHandle(accept),
+            );
+            if (!handler) {
+                return c.json(
+                    {
+                        message: "No handler found for the given accept header",
+                    },
+                    406,
+                );
+            }
+
+            const auditService = new DicomAuditService();
+            auditService
+                .logTransferBegin(c, {
+                    workspaceId,
+                    studyInstanceUid,
+                    instances: [instance],
+                    name: "RetrieveRenderedFrames",
+                })
+                .then(() => {
+                    console.info("Transfer begin audit logged");
+                })
+                .catch((error) => {
+                    logger.error(
+                        `Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, frameNumbers: ${frameNumbers}`,
+                        error,
+                    );
+                });
+
+            return handler.handle(c, { instances: [instance], accept: accept });
+        } catch (error) {
+            eventLogger.error("Error retrieving rendered frames", {
+                name: "retrieveRenderedFrames",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
             return c.json(
                 {
-                    message: "Instance not found",
+                    ok: false,
+                    data: null,
+                    error: "Internal server error",
                 },
-                404,
+                500,
             );
         }
-
-        const handlers =
-            frameCount === 1
-                ? [new SingleFrameHandler()]
-                : [new MultipartHandler()];
-
-        const handler = handlers.find((handler) => handler.canHandle(accept));
-        if (!handler) {
-            return c.json(
-                {
-                    message: "No handler found for the given accept header",
-                },
-                406,
-            );
-        }
-
-        const auditService = new DicomAuditService();
-        auditService.logTransferBegin(c, {
-            workspaceId,
-            studyInstanceUid,
-            instances: [instance],
-            name: "RetrieveRenderedFrames",
-        }).then(() => {
-            console.info("Transfer begin audit logged");
-        }).catch((error) => {
-            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, frameNumbers: ${frameNumbers}`, error);
-        });
-
-        return handler.handle(c, { instances: [instance], accept: accept });
     },
 );
 

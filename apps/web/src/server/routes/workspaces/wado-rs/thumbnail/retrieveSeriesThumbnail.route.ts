@@ -9,8 +9,11 @@ import {
     verifyWorkspacePermission,
 } from "@/server/middlewares/workspace.middleware";
 import { wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
+import { eventLogger } from "@/server/utils/logger";
 
-const retrieveSeriesThumbnailRoute = new Hono().get(
+const retrieveSeriesThumbnailRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/thumbnail",
     describeRoute({
         description:
@@ -40,18 +43,51 @@ const retrieveSeriesThumbnailRoute = new Hono().get(
             seriesInstanceUid: z.string().describe("The series instance UID"),
         }),
     ),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+        eventLogger.info("request received", {
+            name: "retrieveSeriesThumbnail",
+            requestId: rqId,
+        });
+
+        await next();
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "retrieveSeriesThumbnail",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const { workspaceId, studyInstanceUid, seriesInstanceUid } =
             c.req.valid("param");
 
         const accept = c.req.valid("header").accept;
 
-        return await retrieveSeriesThumbnailHandler(c, {
-            workspaceId,
-            studyInstanceUid,
-            seriesInstanceUid,
-            accept,
-        });
+        try {
+            return await retrieveSeriesThumbnailHandler(c, {
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                accept,
+            });
+        } catch (error) {
+            eventLogger.error("Error retrieving series thumbnail", {
+                name: "retrieveSeriesThumbnail",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
+            return c.json(
+                {
+                    ok: false,
+                    data: null,
+                    error: "Internal server error",
+                },
+                500,
+            );
+        }
     },
 );
 

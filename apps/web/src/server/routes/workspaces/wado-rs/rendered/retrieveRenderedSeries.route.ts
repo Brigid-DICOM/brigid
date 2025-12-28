@@ -15,14 +15,16 @@ import {
 } from "@/server/schemas/wadoRs";
 import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { SeriesService } from "@/server/services/series.service";
-import { appLogger } from "@/server/utils/logger";
+import { appLogger, eventLogger } from "@/server/utils/logger";
 import { MultipartHandler } from "../handlers/multipartHandler";
 
 const logger = appLogger.child({
     module: "RetrieveRenderedSeriesRoute",
 });
 
-const retrieveRenderedSeriesRoute = new Hono().get(
+const retrieveRenderedSeriesRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/rendered",
     describeRoute({
         description:
@@ -42,72 +44,112 @@ const retrieveRenderedSeriesRoute = new Hono().get(
         }),
     ),
     zValidator("query", wadoRsQueryParamSchema),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "retrieveRenderedSeries",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "retrieveRenderedSeries",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const { workspaceId, studyInstanceUid, seriesInstanceUid } =
             c.req.valid("param");
         const accept = c.req.valid("header").accept;
 
         const seriesService = new SeriesService();
         const seriesInstances: InstanceEntity[] = [];
+        try {
+            let offset = 0;
+            const { instances, hasNextPage } =
+                await seriesService.getSeriesInstances({
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                    limit: env.QUERY_MAX_LIMIT,
+                    offset: 0,
+                });
+            seriesInstances.push(...instances);
 
-        let offset = 0;
-        const { instances, hasNextPage } =
-            await seriesService.getSeriesInstances({
-                workspaceId,
-                studyInstanceUid,
-                seriesInstanceUid,
-                limit: env.QUERY_MAX_LIMIT,
-                offset: 0,
+            while (hasNextPage) {
+                offset += env.QUERY_MAX_LIMIT;
+                const result = await seriesService.getSeriesInstances({
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                    limit: env.QUERY_MAX_LIMIT,
+                    offset,
+                });
+                seriesInstances.push(...result.instances);
+            }
+
+            if (seriesInstances.length === 0) {
+                return c.json(
+                    {
+                        message: `Series instances not found, series instance UID: ${seriesInstanceUid}`,
+                    },
+                    404,
+                );
+            }
+
+            const handler = new MultipartHandler();
+            if (!handler.canHandle(accept)) {
+                return c.json(
+                    {
+                        message: "No handler found for the given accept header",
+                    },
+                    406,
+                );
+            }
+
+            const auditService = new DicomAuditService();
+            auditService
+                .logTransferBegin(c, {
+                    workspaceId,
+                    studyInstanceUid,
+                    instances: seriesInstances,
+                    name: "RetrieveRenderedSeries",
+                })
+                .then(() => {
+                    console.info("Transfer begin audit logged");
+                })
+                .catch((error) => {
+                    logger.error(
+                        `Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}`,
+                        error,
+                    );
+                });
+
+            return handler.handle(c, {
+                instances: seriesInstances,
+                accept: accept,
             });
-        seriesInstances.push(...instances);
-
-        while (hasNextPage) {
-            offset += env.QUERY_MAX_LIMIT;
-            const result = await seriesService.getSeriesInstances({
-                workspaceId,
-                studyInstanceUid,
-                seriesInstanceUid,
-                limit: env.QUERY_MAX_LIMIT,
-                offset,
+        } catch (error) {
+            eventLogger.error("Error retrieving rendered series", {
+                name: "retrieveRenderedSeries",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
             });
-            seriesInstances.push(...result.instances);
-        }
-
-        if (seriesInstances.length === 0) {
             return c.json(
                 {
-                    message: `Series instances not found, series instance UID: ${seriesInstanceUid}`,
+                    ok: false,
+                    data: null,
+                    error: "Internal server error",
                 },
-                404,
+                500,
             );
         }
-
-        const handler = new MultipartHandler();
-        if (!handler.canHandle(accept)) {
-            return c.json(
-                {
-                    message: "No handler found for the given accept header",
-                },
-                406,
-            );
-        }
-
-        const auditService = new DicomAuditService();
-        auditService.logTransferBegin(c, {
-            workspaceId,
-            studyInstanceUid,
-            instances: seriesInstances,
-            name: "RetrieveRenderedSeries",
-        }).then(() => {
-            console.info("Transfer begin audit logged");
-        }).catch((error) => {
-            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}`, error);
-        });
-
-        return handler.handle(c, {
-            instances: seriesInstances,
-            accept: accept,
-        });
     },
 );
 

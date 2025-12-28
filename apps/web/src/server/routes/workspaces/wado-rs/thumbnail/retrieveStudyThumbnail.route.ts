@@ -9,8 +9,11 @@ import {
     verifyWorkspacePermission,
 } from "@/server/middlewares/workspace.middleware";
 import { wadoRsQueryParamSchema } from "@/server/schemas/wadoRs";
+import { eventLogger } from "@/server/utils/logger";
 
-const retrieveStudyThumbnailRoute = new Hono().get(
+const retrieveStudyThumbnailRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/thumbnail",
     describeRoute({
         description:
@@ -39,15 +42,48 @@ const retrieveStudyThumbnailRoute = new Hono().get(
             studyInstanceUid: z.string().describe("The study instance UID"),
         }),
     ),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+        eventLogger.info("request received", {
+            name: "retrieveStudyThumbnail",
+            requestId: rqId,
+        });
+
+        await next();
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "retrieveStudyThumbnail",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const { workspaceId, studyInstanceUid } = c.req.valid("param");
         const { accept } = c.req.valid("header");
 
-        return await retrieveStudyThumbnailHandler(c, {
-            workspaceId,
-            studyInstanceUid,
-            accept,
-        });
+        try {
+            return await retrieveStudyThumbnailHandler(c, {
+                workspaceId,
+                studyInstanceUid,
+                accept,
+            });
+        } catch (error) {
+            eventLogger.error("Error retrieving study thumbnail", {
+                name: "retrieveStudyThumbnail",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
+            return c.json(
+                {
+                    ok: false,
+                    data: null,
+                    error: "Internal server error",
+                },
+                500,
+            );
+        }
     },
 );
 

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { nanoid } from "nanoid";
 import { auditDicomInstancesTransferredMiddleware } from "@/server/middlewares/audit.middleware";
 import type { TransferAudit } from "@/server/services/dicom/dicomAuditFactory";
 import retrieveInstanceMetadataRoute from "./metadata/retrieveInstanceMetadata.route";
@@ -16,9 +17,15 @@ import retrieveSeriesThumbnailRoute from "./thumbnail/retrieveSeriesThumbnail.ro
 import retrieveStudyThumbnailRoute from "./thumbnail/retrieveStudyThumbnail.route";
 
 const wadoRsRoute = new Hono<{
-    Variables: { transferBeginAudit: TransferAudit };
+    Variables: { transferBeginAudit: TransferAudit; rqId: string };
 }>()
     .use(auditDicomInstancesTransferredMiddleware)
+    .use(async (c, next) => {
+        const rqId = nanoid();
+        c.set("rqId", rqId);
+
+        await next();
+    })
     .route("/", retrieveStudyInstancesRoute)
     .route("/", retrieveInstanceRoute)
     .route("/", retrieveSeriesInstancesRoute)

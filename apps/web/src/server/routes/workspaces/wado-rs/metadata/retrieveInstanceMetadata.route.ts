@@ -15,14 +15,16 @@ import { DicomAuditService } from "@/server/services/dicom/dicomAudit.service";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { InstanceService } from "@/server/services/instance.service";
 import { DicomJsonBinaryDataUtils } from "@/server/utils/dicom/dicomJsonBinaryDataUtils";
-import { appLogger } from "@/server/utils/logger";
+import { appLogger, eventLogger } from "@/server/utils/logger";
 import { getStorageProvider } from "@/server/utils/storage/storageFactory";
 
 const logger = appLogger.child({
     module: "RetrieveInstanceMetadataRoute",
 });
 
-const retrieveInstanceMetadataRoute = new Hono().get(
+const retrieveInstanceMetadataRoute = new Hono<{
+    Variables: { rqId: string };
+}>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series/:seriesInstanceUid/instances/:sopInstanceUid/metadata",
     describeRoute({
         description:
@@ -41,7 +43,26 @@ const retrieveInstanceMetadataRoute = new Hono().get(
             sopInstanceUid: z.string().describe("The sop instance UID"),
         }),
     ),
+    async (c, next) => {
+        const rqId = c.get("rqId");
+        const startTime = performance.now();
+
+        eventLogger.info("request received", {
+            name: "retrieveInstanceMetadata",
+            requestId: rqId,
+        });
+
+        await next();
+
+        const elapsedTime = performance.now() - startTime;
+        eventLogger.info("request completed", {
+            name: "retrieveInstanceMetadata",
+            requestId: rqId,
+            elapsedTime,
+        });
+    },
     async (c) => {
+        const rqId = c.get("rqId");
         const {
             workspaceId,
             studyInstanceUid,
@@ -50,54 +71,78 @@ const retrieveInstanceMetadataRoute = new Hono().get(
         } = c.req.valid("param");
 
         const instanceService = new InstanceService();
-        const instance = await instanceService.getInstanceByUid({
-            workspaceId,
-            studyInstanceUid,
-            seriesInstanceUid,
-            sopInstanceUid,
-        });
+        try {
+            const instance = await instanceService.getInstanceByUid({
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                sopInstanceUid,
+            });
 
-        if (!instance) {
+            if (!instance) {
+                return c.json(
+                    {
+                        message: "Instance not found",
+                    },
+                    404,
+                );
+            }
+
+            const auditService = new DicomAuditService();
+            auditService
+                .logTransferBegin(c, {
+                    workspaceId,
+                    studyInstanceUid,
+                    instances: [instance],
+                    name: "RetrieveInstanceMetadata",
+                })
+                .then(() => {
+                    console.info("Transfer begin audit logged");
+                })
+                .catch((error) => {
+                    logger.error(
+                        `Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}`,
+                        error,
+                    );
+                });
+
+            const storage = getStorageProvider();
+            const { body } = await storage.downloadFile(instance.instancePath);
+
+            const tempFile = tmp.fileSync();
+            await pipeline(body, createWriteStream(tempFile.name));
+
+            const dicomJson = await parseFromFilename(tempFile.name);
+
+            const dicomJsonBinaryDataUtils = new DicomJsonBinaryDataUtils(
+                dicomJson,
+                workspaceId,
+            );
+            dicomJsonBinaryDataUtils.replaceBinaryPropsToUriProp();
+
+            fsE.remove(tempFile.name)
+                .then(() => {
+                    logger.info(
+                        `Deleted temp file successfully: ${tempFile.name}`,
+                    );
+                })
+                .catch();
+            return c.json(dicomJson);
+        } catch (error) {
+            eventLogger.error("Error retrieving instance metadata", {
+                name: "retrieveInstanceMetadata",
+                requestId: rqId,
+                error: error instanceof Error ? error.message : String(error),
+            });
             return c.json(
                 {
-                    message: "Instance not found",
+                    ok: false,
+                    data: null,
+                    error: "Internal server error",
                 },
-                404,
+                500,
             );
         }
-
-        const auditService = new DicomAuditService();
-        auditService.logTransferBegin(c, {
-            workspaceId,
-            studyInstanceUid,
-            instances: [instance],
-            name: "RetrieveInstanceMetadata",
-        }).then(() => {
-            console.info("Transfer begin audit logged");
-        }).catch((error) => {
-            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}`, error);
-        });
-
-        const storage = getStorageProvider();
-        const { body } = await storage.downloadFile(instance.instancePath);
-
-        const tempFile = tmp.fileSync();
-        await pipeline(body, createWriteStream(tempFile.name));
-
-        const dicomJson = await parseFromFilename(tempFile.name);
-
-        const dicomJsonBinaryDataUtils = new DicomJsonBinaryDataUtils(
-            dicomJson,
-            workspaceId,
-        );
-        dicomJsonBinaryDataUtils.replaceBinaryPropsToUriProp();
-
-        fsE.remove(tempFile.name)
-            .then(() => {
-                logger.info(`Deleted temp file successfully: ${tempFile.name}`);
-            })
-            .catch();
-        return c.json(dicomJson);
     },
 );
 
