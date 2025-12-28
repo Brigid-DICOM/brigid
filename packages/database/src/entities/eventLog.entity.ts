@@ -22,6 +22,9 @@ export class EventLogEntity {
     @Column({ type: "int", nullable: true, comment: "Elapsed time in milliseconds" })
     elapsedTime?: number | null;
 
+    @Column({ type: "varchar", length: 255, nullable: true })
+    workspaceId?: string | null;
+
     @CreateDateColumn({ type: getDateTimeType() })
     createdAt!: Date;
 
