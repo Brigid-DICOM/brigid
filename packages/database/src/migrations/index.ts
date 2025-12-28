@@ -21,3 +21,4 @@ export { AddNameColumnToShareLink1764653977927 } from "./1764653977927-addNameCo
 export { AddDeletedAtToWorkspace1764837781160 } from "./1764837781160-addDeletedAtToWorkspace";
 export { CreateDimseTables1765948809824 } from "./1765948809824-createDimseTables";
 export { CreateEventLogTable1766905546307 } from "./1766905546307-createEventLogTable";
+export { AddTimeIndexToEventLog1766935045857 } from "./1766935045857-addTimeIndexToEventLog";
