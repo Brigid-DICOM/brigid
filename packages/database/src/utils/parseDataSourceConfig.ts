@@ -15,6 +15,13 @@ export function parseDataSourceConfig(
         };
     }
 
+    if (configOrString === "sqlite://:memory:") {
+        return {
+            type: "sqlite",
+            database: ":memory:",
+        }
+    }
+
     try {
         const parsedUrl = new URL(configOrString);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
