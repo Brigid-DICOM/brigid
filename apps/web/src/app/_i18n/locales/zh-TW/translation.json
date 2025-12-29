@@ -51,7 +51,8 @@
         "dicomRecycle": "DICOM 回收桶",
         "uploadDicom": "上傳 DICOM 影像",
         "myShares": "我的分享",
-        "shareWithMe": "與我分享"
+        "shareWithMe": "與我分享",
+        "eventLogs": "事件日誌"
     },
     "navWorkspace": {
         "settings": "設定",
@@ -500,5 +501,15 @@
             "remoteRemoved": "已移除允許的遠端 AE",
             "remoteRemoveError": "移除遠端 AE 失敗"
         }
+    },
+    "eventLogs": {
+        "title": "事件日誌",
+        "noData": "尚無事件日誌。",
+        "refresh": "重新整理",
+        "level": {
+            "all": "全部"
+        },
+        "hide": "隱藏",
+        "showMore": "顯示更多"
     }
 }

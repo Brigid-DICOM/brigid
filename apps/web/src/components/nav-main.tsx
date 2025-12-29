@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
     DatabaseIcon,
     GaugeIcon,
+    ScrollTextIcon,
     Share2Icon,
     Trash2Icon,
     UploadIcon,
@@ -45,6 +46,10 @@ export function NavMain() {
     const canUpdate = hasPermission(
         workspaceData?.workspace?.membership?.permissions ?? 0,
         WORKSPACE_PERMISSIONS.UPDATE,
+    );
+    const canManage = hasPermission(
+        workspaceData?.workspace?.membership?.permissions ?? 0,
+        WORKSPACE_PERMISSIONS.MANAGE,
     );
 
     return (
@@ -141,6 +146,20 @@ export function NavMain() {
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+                    
+                    {canManage && (
+                        <SidebarMenuItem key="event logs">
+                            <SidebarMenuButton tooltip={t("sidebar.eventLogs")}>
+                                <ScrollTextIcon className="size-4" />
+                                <Link
+                                    href={`/${lng}/${workspaceId}/event-logs`}
+                                    className="w-full"
+                                >
+                                    {t("sidebar.eventLogs")}
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
                 </SidebarMenu>
             </SidebarGroupContent>
         </SidebarGroup>

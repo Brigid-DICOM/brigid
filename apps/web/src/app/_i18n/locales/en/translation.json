@@ -51,7 +51,8 @@
         "dicomRecycle": "DICOM Recycle",
         "uploadDicom": "Upload DICOM",
         "myShares": "My Shares",
-        "shareWithMe": "Share With Me"
+        "shareWithMe": "Share With Me",
+        "eventLogs": "Event Logs"
     },
     "navWorkspace": {
         "settings": "Settings",
@@ -493,5 +494,15 @@
             "ipAdded": "IP address added successfully",
             "ipAddError": "Failed to add IP address"
         }
+    },
+    "eventLogs": {
+        "title": "Event Logs",
+        "noData": "No event logs yet.",
+        "refresh": "Refresh",
+        "level": {
+            "all": "All Levels"
+        },
+        "hide": "Hide",
+        "showMore": "Show More"
     }
 }
