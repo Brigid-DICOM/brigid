@@ -21,6 +21,7 @@ import restoreSeriesRoute from "./dicom/delete/restoreSeries.route";
 import restoreStudyRoute from "./dicom/delete/restoreStudy.route";
 import getStatsRoute from "./dicom/getStats.route";
 import dimseRoute from "./dimse/dimse.route";
+import getEventLogsRoute from "./getEventLogs.route";
 import qidoRsRoute from "./qido-rs";
 import shareLinkRoute from "./shareLinks/shareLink.route";
 import stowRsRoute from "./stow-rs/stowRs.route";
@@ -379,6 +380,7 @@ const workspacesRoute = new Hono()
         },
     )
     .route("/", workspaceMemberRoute)
-    .route("/", dimseRoute);
+    .route("/", dimseRoute)
+    .route("/", getEventLogsRoute);
 
 export default workspacesRoute;

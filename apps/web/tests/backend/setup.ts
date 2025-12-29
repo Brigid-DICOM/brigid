@@ -30,6 +30,11 @@ vi.mock("@brigid/database", () => ({
         destroy: vi.fn(),
         isInitialized: true,
     },
+    initializeDb: vi.fn(async () => {
+        // 在測試環境中，資料庫初始化由 TestDatabaseManager 處理
+        // 這裡只需確保它回傳一個 Promise 即可，或者回傳當前的 testDataSource
+        return testDataSource;
+    }),
 }));
 
 // Mock environment variables

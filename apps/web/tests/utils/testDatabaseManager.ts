@@ -4,6 +4,7 @@ import { DicomCodeSequenceEntity } from "@brigid/database/src/entities/dicomCode
 import { DimseAllowedIpEntity } from "@brigid/database/src/entities/dimseAllowedIp.entity";
 import { DimseAllowedRemoteEntity } from "@brigid/database/src/entities/dimseAllowedRemote.entity";
 import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
+import { EventLogEntity } from "@brigid/database/src/entities/eventLog.entity";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
 import { PersonNameEntity } from "@brigid/database/src/entities/personName.entity";
@@ -54,6 +55,7 @@ export class TestDatabaseManager {
                 DimseConfigEntity,
                 DimseAllowedIpEntity,
                 DimseAllowedRemoteEntity,
+                EventLogEntity
             ],
             synchronize: true,
             logging: false,
