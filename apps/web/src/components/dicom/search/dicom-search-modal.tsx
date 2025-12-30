@@ -224,7 +224,7 @@ export function DicomSearchModal({
                                 onClick={handleClearAll}
                                 className="text-xs"
                             >
-                                {t("search.clearAll")}
+                                {t("dicom.search.clearAll")}
                             </Button>
                         )}
                     </div>
