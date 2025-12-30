@@ -331,6 +331,14 @@
                 "select": "選擇 {{label}}",
                 "enter": "輸入 {{label}}",
                 "enterValue": "輸入搜尋值"
+            },
+            "dateRangePicker": {
+                "exact": "精確日期",
+                "from": "從日期開始",
+                "to": "到日期結束",
+                "range": "日期範圍",
+                "startDate": "開始日期",
+                "endDate": "結束日期"
             }
         },
         "deleteConfirmDialog": {

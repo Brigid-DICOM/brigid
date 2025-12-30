@@ -3,6 +3,7 @@
 "use client";
 
 import * as React from "react";
+import { useT } from "@/app/_i18n/client";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
     Select,
@@ -26,6 +27,7 @@ export function DateRangePicker({
     onChange,
     className,
 }: DateRangePickerProps) {
+    const { t } = useT("translation");
     // 解析當前值來決定類型和日期
     const parseValue = (
         val: string,
@@ -100,10 +102,10 @@ export function DateRangePicker({
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="exact">精確日期</SelectItem>
-                    <SelectItem value="from">從日期開始</SelectItem>
-                    <SelectItem value="to">到日期結束</SelectItem>
-                    <SelectItem value="range">日期範圍</SelectItem>
+                    <SelectItem value="exact">{t("dicom.search.dateRangePicker.exact")}</SelectItem>
+                    <SelectItem value="from">{t("dicom.search.dateRangePicker.from")}</SelectItem>
+                    <SelectItem value="to">{t("dicom.search.dateRangePicker.to")}</SelectItem>
+                    <SelectItem value="range">{t("dicom.search.dateRangePicker.range")}</SelectItem>
                 </SelectContent>
             </Select>
 
@@ -114,7 +116,7 @@ export function DateRangePicker({
                     <DatePicker
                         value={fromValue}
                         onChange={handleFromChange}
-                        placeholder="開始日期"
+                        placeholder={t("dicom.search.dateRangePicker.startDate")}
                     />
                 )}
 
@@ -126,7 +128,7 @@ export function DateRangePicker({
                     <DatePicker
                         value={toValue}
                         onChange={handleToChange}
-                        placeholder="結束日期"
+                        placeholder={t("dicom.search.dateRangePicker.endDate")}
                     />
                 )}
             </div>

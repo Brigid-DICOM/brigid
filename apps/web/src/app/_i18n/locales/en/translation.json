@@ -332,6 +332,14 @@
                 "select": "Select {{label}}",
                 "enter": "Enter {{label}}",
                 "enterValue": "Enter value"
+            },
+            "dateRangePicker": {
+                "exact": "Exact Date",
+                "from": "From Date",
+                "to": "To Date",
+                "range": "Date Range",
+                "startDate": "Start Date",
+                "endDate": "End Date"
             }
         },
         "deleteConfirmDialog": {
