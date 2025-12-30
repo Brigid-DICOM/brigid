@@ -88,17 +88,17 @@ export function CreateShareTab({
             queryClient.invalidateQueries({
                 queryKey: [
                     "share-links",
+                    workspaceId,
                     targetType,
                     targetIds.join(","),
-                    workspaceId,
                 ],
             });
             queryClient.invalidateQueries({
                 queryKey: [
                     "share-link-count",
+                    workspaceId,
                     targetType,
                     targetIds.join(","),
-                    workspaceId,
                 ],
             });
 

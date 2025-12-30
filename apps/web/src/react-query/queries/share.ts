@@ -61,9 +61,9 @@ export const getTargetShareLinkCountQuery = ({
     return queryOptions({
         queryKey: [
             "share-link-count",
+            workspaceId,
             targetType,
             targetIds.join(","),
-            workspaceId,
         ],
         queryFn: async () => {
             const response = await apiClient.api.workspaces[":workspaceId"][
