@@ -85,3 +85,7 @@ apps/web/configs/logback.xml
 
 **/temp/**
 !**/.gitkeep
+
+# Single Executable Application
+**/seaTmp/**
+**/brigid-local-db/**
