@@ -83,38 +83,53 @@ const retrieveStudyMetadataRoute = new Hono<{
                 );
             }
     
-            let offset = 0;
             const limit = env.QUERY_MAX_LIMIT;
-    
             const instances: InstanceEntity[] = [];
-            let { instances: studyInstances, hasNextPage } =
-                await studyService.getStudyInstances({
-                    workspaceId,
-                    studyInstanceUid,
-                    limit,
-                    offset,
-                });
-            instances.push(...studyInstances);
-    
-            while (hasNextPage) {
-                offset += limit;
-                const result = await studyService.getStudyInstances({
-                    workspaceId,
-                    studyInstanceUid,
-                    limit,
-                    offset,
-                });
-                instances.push(...result.instances);
-                hasNextPage = result.hasNextPage;
-            }
-    
-            if (instances.length === 0) {
+            let batch: InstanceEntity[] = [];
+            let lastUpdatedAt: Date | undefined;
+            let lastId: string | undefined;
+            let keepPaging = true;
+
+            batch = await studyService.getStudyInstancesByCursor({
+                workspaceId,
+                studyInstanceUid,
+                limit,
+                lastUpdatedAt,
+                lastId,
+            });
+
+            if (batch.length === 0) {
                 return c.json(
                     {
                         message: `Study instances not found, study instance UID: ${studyInstanceUid}`,
                     },
                     404,
-                );
+                )
+            }
+
+            instances.push(...batch);
+
+            while(keepPaging) {
+                const nextBatch = await studyService.getStudyInstancesByCursor({
+                    workspaceId,
+                    studyInstanceUid,
+                    limit,
+                    lastUpdatedAt,
+                    lastId,
+                });
+
+                if (nextBatch.length < limit) {
+                    keepPaging = false;
+                }
+
+                if (nextBatch.length > 0) {
+                    instances.push(...nextBatch);
+                    const lastInstance = nextBatch[nextBatch.length - 1];
+                    lastUpdatedAt = lastInstance.updatedAt;
+                    lastId = lastInstance.id;
+                } else {
+                    keepPaging = false;
+                }
             }
     
             const auditService = new DicomAuditService();

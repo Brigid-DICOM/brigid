@@ -61,18 +61,21 @@ const retrieveShareStudyInstancesRoute = new Hono().get(
             }
 
             const limit = env.QUERY_MAX_LIMIT;
-            let offset = 0;
             const instances: InstanceEntity[] = [];
-            let { instances: studyInstances, hasNextPage } =
-                await studyService.getStudyInstances({
-                    workspaceId,
-                    studyInstanceUid,
-                    limit,
-                    offset,
-                });
-            instances.push(...studyInstances);
+            let batch: InstanceEntity[] = [];
+            let lastUpdatedAt: Date | undefined;
+            let lastId: string | undefined;
+            let keepPaging = true;
 
-            if (instances.length === 0) {
+            batch = await studyService.getStudyInstancesByCursor({
+                workspaceId,
+                studyInstanceUid,
+                limit,
+                lastUpdatedAt,
+                lastId,
+            });
+
+            if (batch.length === 0) {
                 return c.json(
                     {
                         message: `Instances not found, study instance UID: ${studyInstanceUid}`,
@@ -81,16 +84,29 @@ const retrieveShareStudyInstancesRoute = new Hono().get(
                 );
             }
 
-            while (hasNextPage) {
-                offset += limit;
-                const result = await studyService.getStudyInstances({
+            instances.push(...batch);
+
+            while(keepPaging) {
+                const nextBatch = await studyService.getStudyInstancesByCursor({
                     workspaceId,
                     studyInstanceUid,
                     limit,
-                    offset,
+                    lastUpdatedAt,
+                    lastId,
                 });
-                instances.push(...result.instances);
-                hasNextPage = result.hasNextPage;
+
+                if (nextBatch.length < limit) {
+                    keepPaging = false;
+                }
+
+                if (nextBatch.length > 0) {
+                    instances.push(...nextBatch);
+                    const lastInstance = nextBatch[nextBatch.length - 1];
+                    lastUpdatedAt = lastInstance.updatedAt;
+                    lastId = lastInstance.id;
+                } else {
+                    keepPaging = false;
+                }
             }
 
             const handlers = [new ZipHandler(), new MultipartHandler()];

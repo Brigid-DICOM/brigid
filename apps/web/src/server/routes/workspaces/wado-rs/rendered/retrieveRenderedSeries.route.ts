@@ -74,36 +74,55 @@ const retrieveRenderedSeriesRoute = new Hono<{
         const seriesService = new SeriesService();
         const seriesInstances: InstanceEntity[] = [];
         try {
-            let offset = 0;
-            const { instances, hasNextPage } =
-                await seriesService.getSeriesInstances({
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                    limit: env.QUERY_MAX_LIMIT,
-                    offset: 0,
-                });
-            seriesInstances.push(...instances);
 
-            while (hasNextPage) {
-                offset += env.QUERY_MAX_LIMIT;
-                const result = await seriesService.getSeriesInstances({
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                    limit: env.QUERY_MAX_LIMIT,
-                    offset,
-                });
-                seriesInstances.push(...result.instances);
-            }
+            let lastUpdatedAt: Date | undefined;
+            let lastId: string | undefined;
+            let keepPaging = true;
+            const limit = env.QUERY_MAX_LIMIT;
 
-            if (seriesInstances.length === 0) {
+            let batch: InstanceEntity[] = [];
+            batch = await seriesService.getSeriesInstancesByCursor({
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                limit,
+                lastUpdatedAt,
+                lastId,
+            });
+
+            if (batch.length === 0) {
                 return c.json(
                     {
                         message: `Series instances not found, series instance UID: ${seriesInstanceUid}`,
                     },
                     404,
-                );
+                )
+            }
+
+            seriesInstances.push(...batch);
+
+            while(keepPaging) {
+                const nextBatch = await seriesService.getSeriesInstancesByCursor({
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                    limit,
+                    lastUpdatedAt,
+                    lastId,
+                });
+
+                if (nextBatch.length < limit) {
+                    keepPaging = false;
+                }
+
+                if (nextBatch.length > 0) {
+                    seriesInstances.push(...nextBatch);
+                    const lastInstance = nextBatch[nextBatch.length - 1];
+                    lastUpdatedAt = lastInstance.updatedAt;
+                    lastId = lastInstance.id;
+                } else {
+                    keepPaging = false;
+                }
             }
 
             const handler = new MultipartHandler();

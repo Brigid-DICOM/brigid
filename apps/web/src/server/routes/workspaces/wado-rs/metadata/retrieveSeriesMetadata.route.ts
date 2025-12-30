@@ -86,40 +86,63 @@ const retrieveSeriesMetadataRoute = new Hono<{
                 );
             }
 
-            let offset = 0;
+            let lastUpdatedAt: Date | undefined;
+            let lastId: string | undefined;
+            let keepPaging = true;
             const limit = env.QUERY_MAX_LIMIT;
 
             const seriesInstances: InstanceEntity[] = [];
-            let { instances, hasNextPage } =
-                await seriesService.getSeriesInstances({
+            let batch: InstanceEntity[] = [];
+            batch = await seriesService.getSeriesInstancesByCursor({
                     workspaceId,
                     studyInstanceUid,
                     seriesInstanceUid,
                     limit,
-                    offset,
+                    lastUpdatedAt,
+                    lastId,
                 });
-            seriesInstances.push(...instances);
 
-            while (hasNextPage) {
-                offset += limit;
-                const result = await seriesService.getSeriesInstances({
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                    limit,
-                    offset,
-                });
-                seriesInstances.push(...result.instances);
-                hasNextPage = result.hasNextPage;
-            }
-
-            if (seriesInstances.length === 0) {
+            if (batch.length === 0) {
                 return c.json(
                     {
                         message: `Series instances not found, series instance UID: ${seriesInstanceUid}`,
                     },
                     404,
                 );
+            }
+
+            seriesInstances.push(...batch);
+
+            if (batch.length === limit) {
+                const lastInstance = batch[batch.length - 1];
+                lastUpdatedAt = lastInstance.updatedAt;
+                lastId = lastInstance.id;
+            } else {
+                keepPaging =false;
+            }
+
+            while (keepPaging) {
+                const nextBatch = await seriesService.getSeriesInstancesByCursor({
+                    workspaceId,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                    limit,
+                    lastUpdatedAt,
+                    lastId,
+                });
+
+                if (nextBatch.length < limit) {
+                    keepPaging = false;
+                }
+
+                if (nextBatch.length > 0) {
+                    seriesInstances.push(...nextBatch);
+                    const lastInstance = nextBatch[nextBatch.length - 1];
+                    lastUpdatedAt = lastInstance.updatedAt;
+                    lastId = lastInstance.id;
+                } else {
+                    keepPaging = false;
+                }
             }
 
             const auditService = new DicomAuditService();
