@@ -66,7 +66,7 @@ loggers.add("event", {
         }),
         new DbTransport(),
     ],
-})
+});
 
 export const appLogger = loggers.get("brigid");
 

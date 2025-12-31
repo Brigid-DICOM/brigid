@@ -17,9 +17,7 @@ import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-bl
 import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    getDicomStudyQuery,
-} from "@/react-query/queries/dicomStudy";
+import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -134,7 +132,11 @@ export default function DicomRecycleStudiesContent({
         [currentPageStudyIds, selectedStudyIds],
     );
 
-    const { restoreStudies, deleteStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
+    const {
+        restoreStudies,
+        deleteStudies,
+        setStudyIds: setRecycleStudyIds,
+    } = useStudyRecycleActions({
         workspaceId,
     });
 
@@ -182,7 +184,9 @@ export default function DicomRecycleStudiesContent({
         return (
             <EmptyState
                 title={t("common.loadFailed")}
-                description={t("dicom.messages.loadRecycleFailed", { level: "studies" })}
+                description={t("dicom.messages.loadRecycleFailed", {
+                    level: "studies",
+                })}
             />
         );
     }
@@ -253,7 +257,9 @@ export default function DicomRecycleStudiesContent({
                 <div className="flex items-center justify-center min-h-[400px]">
                     <EmptyState
                         title={t("dicom.messages.noData", { level: "studies" })}
-                        description={t("dicom.messages.noDataToDisplay", { level: "studies" })}
+                        description={t("dicom.messages.noDataToDisplay", {
+                            level: "studies",
+                        })}
                     />
                 </div>
             )}

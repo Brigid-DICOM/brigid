@@ -1,6 +1,6 @@
 import { AppDataSource } from "@brigid/database";
 import { EventLogEntity } from "@brigid/database/src/entities/eventLog.entity";
-import { v7 as uuidV7} from "uuid";
+import { v7 as uuidV7 } from "uuid";
 import Transport from "winston-transport";
 
 export class DbTransport extends Transport {
@@ -15,7 +15,15 @@ export class DbTransport extends Transport {
         }
 
         try {
-            const { level, message, name, stack, requestId, elapsedTime, workspaceId } = info;
+            const {
+                level,
+                message,
+                name,
+                stack,
+                requestId,
+                elapsedTime,
+                workspaceId,
+            } = info;
 
             const eventLog = new EventLogEntity();
             eventLog.id = uuidV7();
@@ -30,7 +38,7 @@ export class DbTransport extends Transport {
             eventLog.message = stack ? `${message}\n${stack}` : message;
 
             await AppDataSource.getRepository(EventLogEntity).insert(eventLog);
-        } catch(err) {
+        } catch (err) {
             console.error("Failed to log event to database", err);
         }
 

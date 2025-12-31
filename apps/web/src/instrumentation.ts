@@ -1,5 +1,9 @@
+/** biome-ignore-all lint/style/useNodejsImportProtocol: 這 instrumentation 不使用 node 開頭，因為會導致 build 產出的檔案有冒號檔名(非法檔名)出現 */
 export async function register() {
     if (process.env.NEXT_RUNTIME === "nodejs") {
+        const path = await import("path");
+        const fs = await import("fs");
+        const { getWritableRoot } = await import("@/server/utils");
 
         if ((global as any)._shutdownHandlersRegistered) return;
         (global as any)._shutdownHandlersRegistered = true;
@@ -7,16 +11,37 @@ export async function register() {
         console.log("current working directory", process.cwd());
 
         const { default: env } = await import("@brigid/env");
-        const { logApplicationActivityMessage } = await import("@/server/services/dicom/dicomAuditFactory");
+        const { logApplicationActivityMessage } = await import(
+            "@/server/services/dicom/dicomAuditFactory"
+        );
         const { AppDataSource, initializeDb } = await import(
             "@brigid/database/src/dataSource"
         );
 
         await initializeDb();
-        
+
+        const jrePath = path.join(getWritableRoot(), "jre");
+        console.log("jrePath", jrePath);
+        let libPath: string | undefined;
+
+        if (fs.existsSync(jrePath)) {
+            if (process.platform === "win32") {
+                // Windows: bin/server/java.dll
+                libPath = path.join(jrePath, "bin", "server", "jvm.dll");
+            } else if (process.platform === "darwin") {
+                // macOS: lib/server/libjvm.dylib
+                libPath = path.join(jrePath, "lib", "server", "libjvm.dylib");
+            } else {
+                // Linux: lib/server/libjvm.so
+                libPath = path.join(jrePath, "lib", "server", "libjvm.so");
+            }
+            console.log(`Using bundled JRE: ${libPath}`);
+        }
+
         const raccoonDcm4cheBridge = await import("raccoon-dcm4che-bridge");
         raccoonDcm4cheBridge.raccoonDcm4cheJavaLoader({
             isPackagedElectron: true,
+            libPath,
         });
         console.log("Raccoon DCM4CHE Java loader registered");
 
@@ -64,10 +89,12 @@ export async function register() {
 
         if (process.platform === "win32") {
             const readline = await import("readline");
-            readline.createInterface({
-                input: process.stdin,
-                output: process.stdout,
-            }).on("SIGINT", () => handleShutdown("SIGINT"));
+            readline
+                .createInterface({
+                    input: process.stdin,
+                    output: process.stdout,
+                })
+                .on("SIGINT", () => handleShutdown("SIGINT"));
         }
 
         logApplicationActivityMessage({ isStart: true });

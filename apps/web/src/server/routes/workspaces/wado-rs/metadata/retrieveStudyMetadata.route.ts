@@ -82,7 +82,7 @@ const retrieveStudyMetadataRoute = new Hono<{
                     404,
                 );
             }
-    
+
             const limit = env.QUERY_MAX_LIMIT;
             const instances: InstanceEntity[] = [];
             let batch: InstanceEntity[] = [];
@@ -104,12 +104,12 @@ const retrieveStudyMetadataRoute = new Hono<{
                         message: `Study instances not found, study instance UID: ${studyInstanceUid}`,
                     },
                     404,
-                )
+                );
             }
 
             instances.push(...batch);
 
-            while(keepPaging) {
+            while (keepPaging) {
                 const nextBatch = await studyService.getStudyInstancesByCursor({
                     workspaceId,
                     studyInstanceUid,
@@ -131,35 +131,43 @@ const retrieveStudyMetadataRoute = new Hono<{
                     keepPaging = false;
                 }
             }
-    
+
             const auditService = new DicomAuditService();
-            auditService.logTransferBegin(c, {
-                workspaceId,
-                studyInstanceUid,
-                instances,
-                name: "RetrieveStudyMetadata",
-            }).then(() => {
-                console.info("Transfer begin audit logged");
-            }).catch((error) => {
-                logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}`, error);
-            });
-    
+            auditService
+                .logTransferBegin(c, {
+                    workspaceId,
+                    studyInstanceUid,
+                    instances,
+                    name: "RetrieveStudyMetadata",
+                })
+                .then(() => {
+                    console.info("Transfer begin audit logged");
+                })
+                .catch((error) => {
+                    logger.error(
+                        `Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}`,
+                        error,
+                    );
+                });
+
             const metadata = [];
             for (const instance of instances) {
                 const storage = getStorageProvider();
-                const { body } = await storage.downloadFile(instance.instancePath);
-    
+                const { body } = await storage.downloadFile(
+                    instance.instancePath,
+                );
+
                 const tempFile = tmp.fileSync();
                 await pipeline(body, createWriteStream(tempFile.name));
-    
+
                 const dicomJson = await parseFromFilename(tempFile.name);
-    
+
                 const dicomJsonBinaryDataUtils = new DicomJsonBinaryDataUtils(
                     dicomJson,
                     workspaceId,
                 );
                 dicomJsonBinaryDataUtils.replaceBinaryPropsToUriProp();
-    
+
                 metadata.push(dicomJson);
                 fsE.remove(tempFile.name)
                     .then(() => {
@@ -169,7 +177,7 @@ const retrieveStudyMetadataRoute = new Hono<{
                     })
                     .catch();
             }
-    
+
             return c.json(metadata);
         } catch (error) {
             eventLogger.error("Error retrieving study metadata", {

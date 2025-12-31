@@ -102,10 +102,18 @@ export function DateRangePicker({
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="exact">{t("dicom.search.dateRangePicker.exact")}</SelectItem>
-                    <SelectItem value="from">{t("dicom.search.dateRangePicker.from")}</SelectItem>
-                    <SelectItem value="to">{t("dicom.search.dateRangePicker.to")}</SelectItem>
-                    <SelectItem value="range">{t("dicom.search.dateRangePicker.range")}</SelectItem>
+                    <SelectItem value="exact">
+                        {t("dicom.search.dateRangePicker.exact")}
+                    </SelectItem>
+                    <SelectItem value="from">
+                        {t("dicom.search.dateRangePicker.from")}
+                    </SelectItem>
+                    <SelectItem value="to">
+                        {t("dicom.search.dateRangePicker.to")}
+                    </SelectItem>
+                    <SelectItem value="range">
+                        {t("dicom.search.dateRangePicker.range")}
+                    </SelectItem>
                 </SelectContent>
             </Select>
 
@@ -116,7 +124,9 @@ export function DateRangePicker({
                     <DatePicker
                         value={fromValue}
                         onChange={handleFromChange}
-                        placeholder={t("dicom.search.dateRangePicker.startDate")}
+                        placeholder={t(
+                            "dicom.search.dateRangePicker.startDate",
+                        )}
                     />
                 )}
 

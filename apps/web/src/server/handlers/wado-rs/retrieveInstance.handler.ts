@@ -63,16 +63,22 @@ export const retrieveInstanceHandler = async (
         }
 
         const auditService = new DicomAuditService();
-        auditService.logTransferBegin(c, {
-            workspaceId,
-            studyInstanceUid,
-            instances: [instance],
-            name: "RetrieveInstance",
-        }).then(() => {
-            console.info("Transfer begin audit logged");
-        }).catch((error) => {
-            logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, sopInstanceUid: ${sopInstanceUid}`, error);
-        });
+        auditService
+            .logTransferBegin(c, {
+                workspaceId,
+                studyInstanceUid,
+                instances: [instance],
+                name: "RetrieveInstance",
+            })
+            .then(() => {
+                console.info("Transfer begin audit logged");
+            })
+            .catch((error) => {
+                logger.error(
+                    `Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, sopInstanceUid: ${sopInstanceUid}`,
+                    error,
+                );
+            });
 
         return handler.handle(c, { instances: [instance], accept: accept });
     } catch (error) {

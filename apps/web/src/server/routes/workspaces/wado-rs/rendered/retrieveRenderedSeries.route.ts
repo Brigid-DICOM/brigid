@@ -74,7 +74,6 @@ const retrieveRenderedSeriesRoute = new Hono<{
         const seriesService = new SeriesService();
         const seriesInstances: InstanceEntity[] = [];
         try {
-
             let lastUpdatedAt: Date | undefined;
             let lastId: string | undefined;
             let keepPaging = true;
@@ -96,20 +95,21 @@ const retrieveRenderedSeriesRoute = new Hono<{
                         message: `Series instances not found, series instance UID: ${seriesInstanceUid}`,
                     },
                     404,
-                )
+                );
             }
 
             seriesInstances.push(...batch);
 
-            while(keepPaging) {
-                const nextBatch = await seriesService.getSeriesInstancesByCursor({
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                    limit,
-                    lastUpdatedAt,
-                    lastId,
-                });
+            while (keepPaging) {
+                const nextBatch =
+                    await seriesService.getSeriesInstancesByCursor({
+                        workspaceId,
+                        studyInstanceUid,
+                        seriesInstanceUid,
+                        limit,
+                        lastUpdatedAt,
+                        lastId,
+                    });
 
                 if (nextBatch.length < limit) {
                     keepPaging = false;

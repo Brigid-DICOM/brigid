@@ -56,13 +56,15 @@ const searchInstancesRoute = new Hono<{
                 workspaceId,
                 ...queryParams,
             });
-    
+
             if (instances.length === 0) {
                 return c.body(null, 204);
             }
-    
+
             return c.json(
-                instances.map((instance) => JSON.parse(instance.json) as DicomTag),
+                instances.map(
+                    (instance) => JSON.parse(instance.json) as DicomTag,
+                ),
             );
         } catch (error) {
             eventLogger.error("Error searching for instances", {
@@ -72,9 +74,12 @@ const searchInstancesRoute = new Hono<{
                 error: error instanceof Error ? error.message : String(error),
             });
 
-            return c.json({
-                error: "Internal server error",
-            }, 500);
+            return c.json(
+                {
+                    error: "Internal server error",
+                },
+                500,
+            );
         }
     },
 );

@@ -22,9 +22,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { downloadMultipleStudies, downloadStudy } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    getDicomStudyQuery,
-} from "@/react-query/queries/dicomStudy";
+import { getDicomStudyQuery } from "@/react-query/queries/dicomStudy";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
@@ -146,9 +144,10 @@ export default function DicomStudiesContent({
             selectedStudyIds.has(studyId as string),
         );
 
-    const { recycleStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
-        workspaceId,
-    });
+    const { recycleStudies, setStudyIds: setRecycleStudyIds } =
+        useStudyRecycleActions({
+            workspaceId,
+        });
 
     useClearSelectionOnBlankClick({
         clearSelection,
@@ -188,7 +187,9 @@ export default function DicomStudiesContent({
         return (
             <EmptyState
                 title={t("common.loadFailed")}
-                description={t("dicom.messages.loadDataFailed", { level: "studies" })}
+                description={t("dicom.messages.loadDataFailed", {
+                    level: "studies",
+                })}
             />
         );
     }
@@ -258,10 +259,14 @@ export default function DicomStudiesContent({
                     <div className="flex items-center justify-center min-h-[400px]">
                         <div className="text-center">
                             <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                                {t("dicom.messages.noData", { level: "studies" })}
+                                {t("dicom.messages.noData", {
+                                    level: "studies",
+                                })}
                             </h2>
                             <p className="text-gray-600">
-                                {t("dicom.messages.noDataToDisplay", { level: "studies" })}
+                                {t("dicom.messages.noDataToDisplay", {
+                                    level: "studies",
+                                })}
                             </p>
                         </div>
                     </div>

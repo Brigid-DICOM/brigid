@@ -13,7 +13,7 @@ import { DicomSearchSeriesQueryBuilder } from "@/server/services/qido-rs/dicomSe
 import { eventLogger } from "@/server/utils/logger";
 
 const searchStudySeriesRoute = new Hono<{
-    Variables: { rqId: string }
+    Variables: { rqId: string };
 }>().get(
     "/workspaces/:workspaceId/studies/:studyInstanceUid/series",
     describeRoute({
@@ -65,11 +65,11 @@ const searchStudySeriesRoute = new Hono<{
                 StudyInstanceUID: c.req.param("studyInstanceUid"),
                 ...queryParams,
             });
-    
+
             if (series.length === 0) {
                 return c.body(null, 204);
             }
-    
+
             return c.json(
                 series.map((series) => {
                     const seriesData = JSON.parse(series.json) as DicomTag;
@@ -82,7 +82,6 @@ const searchStudySeriesRoute = new Hono<{
                     } as DicomTag;
                 }),
             );
-
         } catch (error) {
             eventLogger.error("Error searching for study series", {
                 name: "SearchStudySeries",
@@ -91,9 +90,12 @@ const searchStudySeriesRoute = new Hono<{
                 error: error instanceof Error ? error.message : String(error),
             });
 
-            return c.json({
-                error: "Internal server error",
-            }, 500);
+            return c.json(
+                {
+                    error: "Internal server error",
+                },
+                500,
+            );
         }
     },
 );

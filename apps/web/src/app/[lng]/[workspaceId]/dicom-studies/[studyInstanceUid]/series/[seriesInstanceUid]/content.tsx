@@ -31,9 +31,7 @@ import {
     downloadMultipleInstancesAsPng,
 } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    getDicomInstanceQuery,
-} from "@/react-query/queries/dicomInstance";
+import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -147,11 +145,12 @@ export default function DicomInstancesContent({
             selectedInstanceIds.has(instanceId as string),
         );
 
-    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
-        workspaceId,
-        studyInstanceUid,
-        seriesInstanceUid,
-    });
+    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } =
+        useInstanceRecycleActions({
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+        });
 
     useClearSelectionOnBlankClick({
         clearSelection,
@@ -255,13 +254,15 @@ export default function DicomInstancesContent({
 
         setRecycleInstanceIds(selectedIds);
         recycleInstance();
-    }
+    };
 
     if (error) {
         return (
             <EmptyState
                 title={t("common.loadFailed")}
-                description={t("dicom.messages.loadDataFailed", { level: "instance" })}
+                description={t("dicom.messages.loadDataFailed", {
+                    level: "instance",
+                })}
             />
         );
     }
@@ -355,8 +356,12 @@ export default function DicomInstancesContent({
                     </>
                 ) : (
                     <EmptyState
-                        title={t("dicom.messages.noData", { level: "instances" })}
-                        description={t("dicom.messages.noDataToDisplay", { level: "instances" })}
+                        title={t("dicom.messages.noData", {
+                            level: "instances",
+                        })}
+                        description={t("dicom.messages.noDataToDisplay", {
+                            level: "instances",
+                        })}
                     />
                 )}
             </div>

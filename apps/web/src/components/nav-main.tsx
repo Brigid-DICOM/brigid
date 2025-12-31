@@ -146,7 +146,7 @@ export function NavMain() {
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                    
+
                     {canManage && (
                         <SidebarMenuItem key="event logs">
                             <SidebarMenuButton tooltip={t("sidebar.eventLogs")}>

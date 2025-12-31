@@ -13,7 +13,9 @@ export function EventLogMessageCell({ message }: { message: string }) {
     return (
         <div className="max-w-[500px] break-all">
             <p className="text-sm">
-            {isExpanded ? message : `${message.substring(0, maxLength)}${shouldTruncate ? "..." : ""}`}
+                {isExpanded
+                    ? message
+                    : `${message.substring(0, maxLength)}${shouldTruncate ? "..." : ""}`}
             </p>
             {shouldTruncate && (
                 <Button
@@ -26,5 +28,5 @@ export function EventLogMessageCell({ message }: { message: string }) {
                 </Button>
             )}
         </div>
-    )
+    );
 }

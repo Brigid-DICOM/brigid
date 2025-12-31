@@ -46,7 +46,10 @@ export const getDicomSeriesQuery = ({
                 instanceDeleteStatus: instanceDeleteStatus.toString(),
                 ...Object.fromEntries(
                     Object.entries(searchConditions).filter(
-                        ([_, value]) => value !== undefined && value !== null && value !== "",
+                        ([_, value]) =>
+                            value !== undefined &&
+                            value !== null &&
+                            value !== "",
                     ),
                 ),
             };

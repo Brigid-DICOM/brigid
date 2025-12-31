@@ -95,7 +95,7 @@ const retrieveFramePixelDataRoute = new Hono<{
                 seriesInstanceUid,
                 sopInstanceUid,
             });
-    
+
             if (!instance) {
                 return c.json(
                     {
@@ -104,22 +104,28 @@ const retrieveFramePixelDataRoute = new Hono<{
                     404,
                 );
             }
-    
+
             const auditService = new DicomAuditService();
-            auditService.logTransferBegin(c, {
-                workspaceId,
-                studyInstanceUid,
-                instances: [instance],
-                name: "RetrieveFramePixelData",
-            }).then(() => {
-                console.info("Transfer begin audit logged");
-            }).catch((error) => {
-                logger.error(`Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, frameNumbers: ${frameNumbers}`, error);
-            });
-    
+            auditService
+                .logTransferBegin(c, {
+                    workspaceId,
+                    studyInstanceUid,
+                    instances: [instance],
+                    name: "RetrieveFramePixelData",
+                })
+                .then(() => {
+                    console.info("Transfer begin audit logged");
+                })
+                .catch((error) => {
+                    logger.error(
+                        `Error logging transfer begin audit, workspaceId: ${workspaceId}, studyInstanceUid: ${studyInstanceUid}, seriesInstanceUid: ${seriesInstanceUid}, sopInstanceUid: ${sopInstanceUid}, frameNumbers: ${frameNumbers}`,
+                        error,
+                    );
+                });
+
             const storage = getStorageProvider();
             const { body } = await storage.downloadFile(instance.instancePath);
-    
+
             const converter = getDicomToImageConverter("raw");
             const results: {
                 stream: ReadStream;
@@ -127,14 +133,14 @@ const retrieveFramePixelDataRoute = new Hono<{
                 contentLocation?: string;
             }[] = [];
             const frames = frameNumbers.split(",").map(Number);
-    
+
             for (const frame of frames) {
                 const convertOptions = toConvertOptions({
                     ...c.req.query(),
                 });
-    
+
                 convertOptions.frameNumber = frame;
-    
+
                 const source: DicomSource = { kind: "stream", stream: body };
                 const result = await converter.convert(source, convertOptions);
                 results.push({
@@ -148,13 +154,13 @@ const retrieveFramePixelDataRoute = new Hono<{
                         `/frames/${frame}`,
                 });
             }
-    
+
             const multipart = multipartMessage.multipartEncodeByStream(
                 results,
                 undefined, // default to use guid boundary
                 "application/octet-stream",
             );
-    
+
             // @ts-expect-error
             return new Response(multipart.data, {
                 headers: {

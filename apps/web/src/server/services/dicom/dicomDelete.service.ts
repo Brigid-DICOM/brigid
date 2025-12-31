@@ -1233,10 +1233,9 @@ export class DicomDeleteService {
         );
 
         const parentIds = config.parentIdField
-            ? 
-              [
+            ? [
                   ...new Set(
-                    // @ts-expect-error - parentIdField is guaranteed to be a valid field on the entity
+                      // @ts-expect-error - parentIdField is guaranteed to be a valid field on the entity
                       items.map((item) => (item as any)[config.parentIdField]),
                   ),
               ]

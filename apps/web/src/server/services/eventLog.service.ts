@@ -1,6 +1,11 @@
 import { AppDataSource } from "@brigid/database";
 import { EventLogEntity } from "@brigid/database/src/entities/eventLog.entity";
-import { Between, type FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
+import {
+    Between,
+    type FindOptionsWhere,
+    LessThanOrEqual,
+    MoreThanOrEqual,
+} from "typeorm";
 import type { GetEventLogQuery } from "../schemas/eventLogSchema";
 
 export class EventLogService {
@@ -32,13 +37,13 @@ export class EventLogService {
             where,
             order: { createdAt: "DESC" },
             take: limit,
-            skip: offset
+            skip: offset,
         });
 
         return {
             items,
             total,
             hasNextPage: items.length + offset < total,
-        }
+        };
     }
 }

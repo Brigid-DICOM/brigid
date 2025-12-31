@@ -25,9 +25,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { downloadMultipleSeries, downloadSeries } from "@/lib/clientDownload";
 import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    getDicomSeriesQuery,
-} from "@/react-query/queries/dicomSeries";
+import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useBlueLightViewerStore } from "@/stores/bluelight-viewer-store";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
@@ -154,10 +152,11 @@ export default function DicomSeriesContent({
             selectedSeriesIds.has(seriesId as string),
         );
 
-    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
-        workspaceId,
-        studyInstanceUid,
-    });
+    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } =
+        useSeriesRecycleActions({
+            workspaceId,
+            studyInstanceUid,
+        });
 
     useClearSelectionOnBlankClick({
         clearSelection,
@@ -199,13 +198,15 @@ export default function DicomSeriesContent({
 
         setRecycleSeriesIds(selectedIds);
         recycleSeries();
-    }
+    };
 
     if (error) {
         return (
             <EmptyState
                 title={t("common.loadFailed")}
-                description={t("dicom.messages.loadDataFailed", { level: "series" })}
+                description={t("dicom.messages.loadDataFailed", {
+                    level: "series",
+                })}
             />
         );
     }
@@ -294,10 +295,14 @@ export default function DicomSeriesContent({
                     <div className="flex items-center justify-center min-h-[400px]">
                         <div className="text-center">
                             <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                                {t("dicom.messages.noData", { level: "series" })}
+                                {t("dicom.messages.noData", {
+                                    level: "series",
+                                })}
                             </h2>
                             <p className="text-gray-600">
-                                {t("dicom.messages.noDataToDisplay", { level: "series" })}
+                                {t("dicom.messages.noDataToDisplay", {
+                                    level: "series",
+                                })}
                             </p>
                         </div>
                     </div>

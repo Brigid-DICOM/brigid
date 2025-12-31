@@ -217,9 +217,7 @@ export class DimseApp {
         fsE.ensureDirSync(logDir);
         fsE.ensureDirSync(configDir);
 
-        const logFilePath = path.normalize(
-            path.join(logDir, "dimse.log"),
-        );
+        const logFilePath = path.normalize(path.join(logDir, "dimse.log"));
 
         const logBackXml = `<?xml version="1.0" encoding="UTF-8"?>
         <configuration>

@@ -94,13 +94,13 @@ const retrieveSeriesMetadataRoute = new Hono<{
             const seriesInstances: InstanceEntity[] = [];
             let batch: InstanceEntity[] = [];
             batch = await seriesService.getSeriesInstancesByCursor({
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                    limit,
-                    lastUpdatedAt,
-                    lastId,
-                });
+                workspaceId,
+                studyInstanceUid,
+                seriesInstanceUid,
+                limit,
+                lastUpdatedAt,
+                lastId,
+            });
 
             if (batch.length === 0) {
                 return c.json(
@@ -118,18 +118,19 @@ const retrieveSeriesMetadataRoute = new Hono<{
                 lastUpdatedAt = lastInstance.updatedAt;
                 lastId = lastInstance.id;
             } else {
-                keepPaging =false;
+                keepPaging = false;
             }
 
             while (keepPaging) {
-                const nextBatch = await seriesService.getSeriesInstancesByCursor({
-                    workspaceId,
-                    studyInstanceUid,
-                    seriesInstanceUid,
-                    limit,
-                    lastUpdatedAt,
-                    lastId,
-                });
+                const nextBatch =
+                    await seriesService.getSeriesInstancesByCursor({
+                        workspaceId,
+                        studyInstanceUid,
+                        seriesInstanceUid,
+                        limit,
+                        lastUpdatedAt,
+                        lastId,
+                    });
 
                 if (nextBatch.length < limit) {
                     keepPaging = false;

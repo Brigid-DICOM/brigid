@@ -108,7 +108,9 @@ export class RawConverter implements DicomToImageConverter {
                     });
                 }
             } else {
-                const inputFrameNumber = Array.isArray(options.frameNumber) ? options.frameNumber[0] : options.frameNumber || 1;
+                const inputFrameNumber = Array.isArray(options.frameNumber)
+                    ? options.frameNumber[0]
+                    : options.frameNumber || 1;
                 const destFile = `${tmpFile.name}.${inputFrameNumber}.raw`;
                 writeFileSync(destFile, "");
 

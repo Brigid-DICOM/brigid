@@ -71,8 +71,8 @@ export class StudyService {
             relations: {
                 patient: {
                     patientName: true,
-                }
-            }
+                },
+            },
         });
     }
 

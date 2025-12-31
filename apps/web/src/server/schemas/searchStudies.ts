@@ -7,11 +7,7 @@ export const searchStudiesQueryParamSchema = z.object({
     limit: z.coerce.number().int().min(1).max(1000).optional(),
     offset: z.coerce.number().int().min(0).optional(),
     fuzzymatching: z.boolean().optional(),
-    deleteStatus: z.coerce
-        .number()
-        .min(0)
-        .max(2)
-        .optional(),
+    deleteStatus: z.coerce.number().min(0).max(2).optional(),
     instanceDeleteStatus: z.coerce.number().min(0).max(2).optional(),
     tagName: z.string().optional(),
     StudyInstanceUID: z.string().optional(),

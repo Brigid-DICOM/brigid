@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
         "/api/**/*": [
             "../../node_modules/java-bridge/**",
             "../../node_modules/raccoon-dcm4che-bridge/**",
-            "../../node_modules/@imagemagick/magick-wasm/**"
+            "../../node_modules/@imagemagick/magick-wasm/**",
         ],
         "*": ["public/**/*", ".next/static/**/*"],
     },

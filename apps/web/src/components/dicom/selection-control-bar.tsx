@@ -64,7 +64,7 @@ export function SelectionControlBar({
     const handleConfirmRecycle = () => {
         if (selectedCount === 0) return;
         onRecycle?.();
-    }
+    };
 
     return (
         <>

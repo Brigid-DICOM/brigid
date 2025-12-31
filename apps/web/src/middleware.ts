@@ -34,7 +34,11 @@ export async function middleware(request: NextRequest) {
     headers.set(cookieName, lngInPath ?? lng);
 
     // if the language is not in the path, redirect to include it
-    if (!lngInPath && !request.nextUrl.pathname.startsWith(`/_next`) && !request.nextUrl.pathname.startsWith(`/html`)) {
+    if (
+        !lngInPath &&
+        !request.nextUrl.pathname.startsWith(`/_next`) &&
+        !request.nextUrl.pathname.startsWith(`/html`)
+    ) {
         return NextResponse.redirect(
             new URL(
                 `/${lng}${request.nextUrl.pathname}${request.nextUrl.search}`,

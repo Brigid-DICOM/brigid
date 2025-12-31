@@ -38,7 +38,7 @@ export function DicomRecycleSeriesContextMenu({
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
     const router = useRouter();
-    
+
     const { getSelectedSeriesIds, clearSelection } =
         useDicomSeriesSelectionStore();
     const selectedIds = getSelectedSeriesIds();
@@ -55,7 +55,11 @@ export function DicomRecycleSeriesContextMenu({
         WORKSPACE_PERMISSIONS.DELETE,
     );
 
-    const { restoreSeries, deleteSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+    const {
+        restoreSeries,
+        deleteSeries,
+        setSeriesIds: setRecycleSeriesIds,
+    } = useSeriesRecycleActions({
         workspaceId,
         studyInstanceUid,
     });
@@ -72,7 +76,7 @@ export function DicomRecycleSeriesContextMenu({
     const handleRestoreSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         closeContextMenu();
-        
+
         setRecycleSeriesIds(selectedIds);
         restoreSeries();
     };

@@ -19,9 +19,7 @@ import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-bl
 import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    getDicomInstanceQuery,
-} from "@/react-query/queries/dicomInstance";
+import { getDicomInstanceQuery } from "@/react-query/queries/dicomInstance";
 import { useDicomInstanceSelectionStore } from "@/stores/dicom-instance-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -135,7 +133,11 @@ export default function DicomRecycleInstancesContent({
         [currentPageInstanceUids, selectedInstanceIds],
     );
 
-    const { restoreInstance, deleteInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+    const {
+        restoreInstance,
+        deleteInstance,
+        setInstanceIds: setRecycleInstanceIds,
+    } = useInstanceRecycleActions({
         workspaceId,
         studyInstanceUid,
         seriesInstanceUid,
@@ -187,7 +189,9 @@ export default function DicomRecycleInstancesContent({
         return (
             <EmptyState
                 title={t("common.loadFailed")}
-                description={t("dicom.messages.loadRecycleFailed", { level: "instances" })}
+                description={t("dicom.messages.loadRecycleFailed", {
+                    level: "instances",
+                })}
             />
         );
     }
@@ -281,7 +285,9 @@ export default function DicomRecycleInstancesContent({
             ) : (
                 <EmptyState
                     title={t("dicom.messages.noData", { level: "instances" })}
-                    description={t("dicom.messages.noDataToDisplay", { level: "instances" })}
+                    description={t("dicom.messages.noDataToDisplay", {
+                        level: "instances",
+                    })}
                 />
             )}
         </div>

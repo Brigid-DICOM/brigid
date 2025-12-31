@@ -2,7 +2,10 @@ import env from "@brigid/env";
 import { Hono } from "hono";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
-import { ROLE_PERMISSION_TEMPLATES, WORKSPACE_PERMISSIONS } from "@/server/const/workspace.const";
+import {
+    ROLE_PERMISSION_TEMPLATES,
+    WORKSPACE_PERMISSIONS,
+} from "@/server/const/workspace.const";
 import { verifyAuthMiddleware } from "@/server/middlewares/verifyAuth.middleware";
 import {
     verifyWorkspaceExists,
@@ -89,7 +92,8 @@ const workspacesRoute = new Hono()
         async (c) => {
             if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
                 const workspaceService = new WorkspaceService();
-                const defaultWorkspace = await workspaceService.getWorkspaceForGuestAccess();
+                const defaultWorkspace =
+                    await workspaceService.getWorkspaceForGuestAccess();
 
                 return c.json({
                     workspace: {

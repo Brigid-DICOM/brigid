@@ -55,7 +55,7 @@ export class TestDatabaseManager {
                 DimseConfigEntity,
                 DimseAllowedIpEntity,
                 DimseAllowedRemoteEntity,
-                EventLogEntity
+                EventLogEntity,
             ],
             synchronize: true,
             logging: false,

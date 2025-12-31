@@ -36,8 +36,7 @@ export function DicomRecycleInstanceContextMenu({
     const { t } = useT("translation");
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] =
         useState(false);
-    const { getSelectedInstanceIds } =
-        useDicomInstanceSelectionStore();
+    const { getSelectedInstanceIds } = useDicomInstanceSelectionStore();
     const selectedIds = getSelectedInstanceIds();
 
     const { data: workspaceData } = useQuery(
@@ -52,7 +51,11 @@ export function DicomRecycleInstanceContextMenu({
         WORKSPACE_PERMISSIONS.DELETE,
     );
 
-    const { restoreInstance, deleteInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+    const {
+        restoreInstance,
+        deleteInstance,
+        setInstanceIds: setRecycleInstanceIds,
+    } = useInstanceRecycleActions({
         workspaceId,
         studyInstanceUid,
         seriesInstanceUid,

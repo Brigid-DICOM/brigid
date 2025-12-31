@@ -30,10 +30,13 @@ export function EventLogDateRangePicker({
 }: EventLogDateRangePickerProps) {
     const lng = useParams()?.lng;
     const locale = lng === "zh-TW" ? zhTW : enUS;
-    const range: DateRange | undefined = React.useMemo(() => ({
-        from,
-        to,
-    }), [from, to]);
+    const range: DateRange | undefined = React.useMemo(
+        () => ({
+            from,
+            to,
+        }),
+        [from, to],
+    );
 
     const handleSelect = (selectedRange: DateRange | undefined) => {
         onRangeChange(selectedRange?.from, selectedRange?.to);
@@ -48,7 +51,7 @@ export function EventLogDateRangePicker({
                         variant={"outline"}
                         className={cn(
                             "w-[300px] justify-start text-left font-normal",
-                            !from && "text-muted-foreground"
+                            !from && "text-muted-foreground",
                         )}
                     >
                         <CalendarIcon className="mr-2 h-4 w-4" />

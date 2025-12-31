@@ -4,16 +4,26 @@ import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/app/_i18n/client";
 import { Button } from "@/components/ui/button";
-import { 
-    Command, 
+import {
+    Command,
     CommandEmpty,
     CommandGroup,
     CommandInput,
     CommandItem,
-    CommandList
- } from "@/components/ui/command";
- import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+    CommandList,
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { EventLogFilters } from "./content";
 import { EventLogDateRangePicker } from "./date-range-picker";
@@ -26,9 +36,7 @@ interface EventLogSearchBarProps {
 const NAME_GROUPS = [
     {
         label: "Store",
-        options: [
-            "storeInstance"
-        ]
+        options: ["storeInstance"],
     },
     {
         label: "Query",
@@ -38,7 +46,7 @@ const NAME_GROUPS = [
             "searchStudySeriesInstances",
             "searchSeries",
             "searchInstances",
-        ]
+        ],
     },
     {
         label: "Retrieve",
@@ -58,9 +66,12 @@ const NAME_GROUPS = [
             "retrieveFramePixelData",
         ],
     },
-]
+];
 
-export function EventLogSearchBar({ filters, setFilters }: EventLogSearchBarProps) {
+export function EventLogSearchBar({
+    filters,
+    setFilters,
+}: EventLogSearchBarProps) {
     const { t } = useT("translation");
     const [open, setOpen] = useState(false);
 
@@ -68,12 +79,22 @@ export function EventLogSearchBar({ filters, setFilters }: EventLogSearchBarProp
         <div className="flex flex-wrap gap-4 mb-6 items-end">
             <div className="space-y-2">
                 <span className="text-sm font-medium block">Level</span>
-                <Select value={filters.level || "all"} onValueChange={(v) => setFilters({ ...filters, level: v === "all" ? undefined : v })}>
+                <Select
+                    value={filters.level || "all"}
+                    onValueChange={(v) =>
+                        setFilters({
+                            ...filters,
+                            level: v === "all" ? undefined : v,
+                        })
+                    }
+                >
                     <SelectTrigger className="w-[150px]">
                         <SelectValue placeholder={t("eventLogs.level.all")} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">{t("eventLogs.level.all")}</SelectItem>
+                        <SelectItem value="all">
+                            {t("eventLogs.level.all")}
+                        </SelectItem>
                         <SelectItem value="info">Info</SelectItem>
                         <SelectItem value="warning">Warning</SelectItem>
                         <SelectItem value="error">Error</SelectItem>
@@ -92,10 +113,7 @@ export function EventLogSearchBar({ filters, setFilters }: EventLogSearchBarProp
                             aria-expanded={open}
                             className="w-[250px] justify-between"
                         >
-                            {filters.name ?
-                                filters.name :
-                                "Select name..."
-                            }
+                            {filters.name ? filters.name : "Select name..."}
                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </PopoverTrigger>
@@ -105,7 +123,10 @@ export function EventLogSearchBar({ filters, setFilters }: EventLogSearchBarProp
                             <CommandList>
                                 <CommandEmpty>No name found.</CommandEmpty>
                                 {NAME_GROUPS.map((group) => (
-                                    <CommandGroup key={group.label} heading={group.label}>
+                                    <CommandGroup
+                                        key={group.label}
+                                        heading={group.label}
+                                    >
                                         {group.options.map((option) => (
                                             <CommandItem
                                                 key={option}
@@ -113,7 +134,11 @@ export function EventLogSearchBar({ filters, setFilters }: EventLogSearchBarProp
                                                 onSelect={(currentValue) => {
                                                     setFilters({
                                                         ...filters,
-                                                        name: currentValue === filters.name ? undefined : currentValue
+                                                        name:
+                                                            currentValue ===
+                                                            filters.name
+                                                                ? undefined
+                                                                : currentValue,
                                                     });
                                                     setOpen(false);
                                                 }}
@@ -121,7 +146,9 @@ export function EventLogSearchBar({ filters, setFilters }: EventLogSearchBarProp
                                                 <CheckIcon
                                                     className={cn(
                                                         "mr-2 h-4 w-4",
-                                                        filters.name === option ? "opacity-100" : "opacity-0"
+                                                        filters.name === option
+                                                            ? "opacity-100"
+                                                            : "opacity-0",
                                                     )}
                                                 />
                                                 {option}
@@ -150,7 +177,12 @@ export function EventLogSearchBar({ filters, setFilters }: EventLogSearchBarProp
                 />
             </div>
 
-            <Button variant="ghost" size="sm" onClick={() => setFilters({})} className="h-10">
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters({})}
+                className="h-10"
+            >
                 <XIcon className="mr-2 h-4 w-4" /> Reset
             </Button>
         </div>

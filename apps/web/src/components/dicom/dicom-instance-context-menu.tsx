@@ -97,8 +97,7 @@ export function DicomInstanceContextMenu({
 }: DicomInstanceContextMenuProps) {
     const { t } = useT("translation");
     const [openCreateTagDialog, setOpenCreateTagDialog] = useState(false);
-    const { getSelectedInstanceIds } =
-        useDicomInstanceSelectionStore();
+    const { getSelectedInstanceIds } = useDicomInstanceSelectionStore();
     const { open: openBlueLightViewer } = useBlueLightViewerStore();
     const { openDialog: openShareManagementDialog } =
         useShareManagementDialogStore();
@@ -191,11 +190,12 @@ export function DicomInstanceContextMenu({
         }),
     });
 
-    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
-        workspaceId,
-        studyInstanceUid,
-        seriesInstanceUid,
-    });
+    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } =
+        useInstanceRecycleActions({
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+        });
 
     const handleOpenBlueLightViewer = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();

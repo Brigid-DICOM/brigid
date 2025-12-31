@@ -37,13 +37,14 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
             );
 
         this.applyTagJoin(query, "study", tagName);
-        query
-            .where("study.workspaceId = :workspaceId", { workspaceId })
+        query.where("study.workspaceId = :workspaceId", { workspaceId });
 
         if (deleteStatus !== undefined) {
-            query.andWhere("study.deleteStatus = :deleteStatus", { deleteStatus });
+            query.andWhere("study.deleteStatus = :deleteStatus", {
+                deleteStatus,
+            });
         }
-        
+
         this.applyTagFilter(query, tagName);
 
         return query;
@@ -103,7 +104,11 @@ export class DicomSearchStudyQueryBuilder extends BaseDicomSearchQueryBuilder<
                 InstanceEntity,
                 "i",
                 "i.studyInstanceUid = study.studyInstanceUid AND i.deleteStatus = :deleteStatus AND i.workspaceId = study.workspaceId",
-                { deleteStatus: instanceDeleteStatus ?? DICOM_DELETE_STATUS.ACTIVE, workspaceId },
+                {
+                    deleteStatus:
+                        instanceDeleteStatus ?? DICOM_DELETE_STATUS.ACTIVE,
+                    workspaceId,
+                },
             )
             .where("study.studyInstanceUid IN (:...studyInstances)", {
                 studyInstances,

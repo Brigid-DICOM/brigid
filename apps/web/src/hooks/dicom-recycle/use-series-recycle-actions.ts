@@ -4,7 +4,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { deleteDicomSeriesMutation, recycleDicomSeriesMutation, restoreDicomSeriesMutation } from "@/react-query/queries/dicomSeries";
+import {
+    deleteDicomSeriesMutation,
+    recycleDicomSeriesMutation,
+    restoreDicomSeriesMutation,
+} from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 
 interface UseSeriesRecycleActionsProps {
@@ -12,7 +16,10 @@ interface UseSeriesRecycleActionsProps {
     studyInstanceUid: string;
 }
 
-export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSeriesRecycleActionsProps) {
+export function useSeriesRecycleActions({
+    workspaceId,
+    studyInstanceUid,
+}: UseSeriesRecycleActionsProps) {
     const { t } = useT("translation");
     const queryClient = getQueryClient();
     const { clearSelection } = useDicomSeriesSelectionStore();
@@ -23,12 +30,12 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
         queryClient.invalidateQueries({
             queryKey: ["dicom-series", workspaceId, studyInstanceUid],
         });
-    }
+    };
 
     const recycleMutation = useMutation({
         ...recycleDicomSeriesMutation({
             workspaceId,
-            seriesIds
+            seriesIds,
         }),
         meta: {
             toastId: nanoid(),
@@ -39,7 +46,9 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.recycleSuccess", { level: "series" }));
+            toast.success(
+                t("dicom.messages.recycleSuccess", { level: "series" }),
+            );
             toast.dismiss(context.meta?.toastId as string);
             invalidate();
             clearSelection();
@@ -48,13 +57,13 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
             toast.error(t("dicom.messages.recycleError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
             clearSelection();
-        }
+        },
     });
 
     const restoreMutation = useMutation({
         ...restoreDicomSeriesMutation({
             workspaceId,
-            seriesIds
+            seriesIds,
         }),
         meta: {
             toastId: nanoid(),
@@ -65,7 +74,9 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.restoreSuccess", { level: "series" }));
+            toast.success(
+                t("dicom.messages.restoreSuccess", { level: "series" }),
+            );
             console.log("restoreSuccess", context.meta?.toastId);
             toast.dismiss(context.meta?.toastId as string);
             invalidate();
@@ -74,13 +85,13 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
         onError: (_, __, ___, context) => {
             toast.error(t("dicom.messages.restoreError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
-        }
+        },
     });
 
     const deleteMutation = useMutation({
         ...deleteDicomSeriesMutation({
             workspaceId,
-            seriesIds
+            seriesIds,
         }),
         meta: {
             toastId: nanoid(),
@@ -91,7 +102,9 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
             });
         },
         onSuccess: (_, __, ___, context) => {
-            toast.success(t("dicom.messages.deleteSuccess", { level: "series" }));
+            toast.success(
+                t("dicom.messages.deleteSuccess", { level: "series" }),
+            );
             toast.dismiss(context.meta?.toastId as string);
             invalidate();
             clearSelection();
@@ -99,7 +112,7 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
         onError: (_, __, ___, context) => {
             toast.error(t("dicom.messages.deleteError", { level: "series" }));
             toast.dismiss(context.meta?.toastId as string);
-        }
+        },
     });
 
     return {
@@ -114,5 +127,5 @@ export function useSeriesRecycleActions({ workspaceId, studyInstanceUid }: UseSe
 
         deleteSeries: deleteMutation.mutate,
         isDeleting: deleteMutation.isPending,
-    }
+    };
 }

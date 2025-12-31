@@ -74,7 +74,11 @@ function ActionsCell({
 
     const { clearSelection } = useDicomSeriesSelectionStore();
 
-    const { restoreSeries, deleteSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+    const {
+        restoreSeries,
+        deleteSeries,
+        setSeriesIds: setRecycleSeriesIds,
+    } = useSeriesRecycleActions({
         workspaceId,
         studyInstanceUid,
     });

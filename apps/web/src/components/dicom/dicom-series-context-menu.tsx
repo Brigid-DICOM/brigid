@@ -57,8 +57,7 @@ export function DicomSeriesContextMenu({
         useDicomRecycleConfirmDialogStore();
     const { open } = useBlueLightViewerStore();
     const router = useRouter();
-    const { getSelectedSeriesIds } =
-        useDicomSeriesSelectionStore();
+    const { getSelectedSeriesIds } = useDicomSeriesSelectionStore();
     const workspace = useWorkspaceStore(useShallow((state) => state.workspace));
 
     const selectedIds = getSelectedSeriesIds();
@@ -88,10 +87,11 @@ export function DicomSeriesContextMenu({
             WORKSPACE_PERMISSIONS.READ,
         );
 
-    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
-        workspaceId,
-        studyInstanceUid,
-    });
+    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } =
+        useSeriesRecycleActions({
+            workspaceId,
+            studyInstanceUid,
+        });
 
     const handleEnterInstances = async (
         e: React.MouseEvent<HTMLDivElement>,

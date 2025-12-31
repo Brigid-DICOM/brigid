@@ -50,16 +50,22 @@ export const retrieveStudyThumbnailHandler = async (
         }
 
         const auditService = new DicomAuditService();
-        auditService.logTransferBegin(c, {
-            workspaceId: options.workspaceId,
-            studyInstanceUid: options.studyInstanceUid,
-            instances: medianInstance,
-            name: "RetrieveStudyThumbnail",
-        }).then(() => {
-            console.info("Transfer begin audit logged");
-        }).catch((error) => {
-            logger.error(`Error logging transfer begin audit, workspaceId: ${options.workspaceId}, studyInstanceUid: ${options.studyInstanceUid}`, error);
-        });
+        auditService
+            .logTransferBegin(c, {
+                workspaceId: options.workspaceId,
+                studyInstanceUid: options.studyInstanceUid,
+                instances: medianInstance,
+                name: "RetrieveStudyThumbnail",
+            })
+            .then(() => {
+                console.info("Transfer begin audit logged");
+            })
+            .catch((error) => {
+                logger.error(
+                    `Error logging transfer begin audit, workspaceId: ${options.workspaceId}, studyInstanceUid: ${options.studyInstanceUid}`,
+                    error,
+                );
+            });
 
         return handler.handle(c, {
             instances: medianInstance,

@@ -18,8 +18,8 @@ export interface TransferParticipant {
 
 export interface StudyInfo {
     uid: string;
-    // Begin Transferring 訊息通常需要記錄包含的 SOP Classes 
-    sopClasses?: SOPClassDetail[]; 
+    // Begin Transferring 訊息通常需要記錄包含的 SOP Classes
+    sopClasses?: SOPClassDetail[];
 }
 
 export interface PatientInfo {
@@ -81,7 +81,7 @@ export const logApplicationActivityMessage = ({
     logger.info("dicom audit", { auditMessage: auditMessage.toJSON() });
 };
 
-export interface LogBeginTransferringDicomInstancesParams  {
+export interface LogBeginTransferringDicomInstancesParams {
     name?: string;
     source: TransferParticipant;
     destination: TransferParticipant;
@@ -100,36 +100,35 @@ export const logBeginTransferringDicomInstancesMessage = ({
     outcome = EventOutcomeIndicator.Success,
     requestor, // 選填：如果是某人發起的操作
 }: LogBeginTransferringDicomInstancesParams) => {
-    
     // 1. 初始化 Builder
-    // Action Code 必須為 'E' (Execute) 
+    // Action Code 必須為 'E' (Execute)
     const builder = new AuditMessageBuilder(
         DICOM_AUDIT_CONSTANTS.EventID.BeginTransferring,
-        EventActionCode.Execute, 
+        EventActionCode.Execute,
         outcome,
-        name
+        name,
     );
 
     // 2. 加入主動參與者：傳送端 (Source)
-    // Role: Source Role ID (110153) 
+    // Role: Source Role ID (110153)
     builder.addActiveParticipant(
         source.userId,
         false, // 通常機器傳輸不是 Requestor (除非它是自動觸發)
         DICOM_AUDIT_CONSTANTS.RoleID.Source,
         source.ip,
         NetworkAccessPointType.IPAddress,
-        source.aeTitle ? `${source.aeTitle}` : undefined
+        source.aeTitle ? `${source.aeTitle}` : undefined,
     );
 
     // 3. 加入主動參與者：接收端 (Destination)
-    // Role: Destination Role ID (110152) 
+    // Role: Destination Role ID (110152)
     builder.addActiveParticipant(
         destination.userId,
         false,
         DICOM_AUDIT_CONSTANTS.RoleID.Destination,
         destination.ip,
         NetworkAccessPointType.IPAddress,
-        destination.aeTitle ? `${destination.aeTitle}` : undefined
+        destination.aeTitle ? `${destination.aeTitle}` : undefined,
     );
 
     // 4. 加入發起者 Requestor
@@ -139,13 +138,13 @@ export const logBeginTransferringDicomInstancesMessage = ({
             true, // Is Requestor
             undefined, // 若無特定 Role 可留空，或填 User
             requestor.ip,
-            NetworkAccessPointType.IPAddress
+            NetworkAccessPointType.IPAddress,
         );
     }
 
     // 5. 加入參與物件：Study (可多個)
-    // Type: System(2), Role: Report(3), ID Type: StudyInstanceUID(110180) 
-    studies.forEach(study => {
+    // Type: System(2), Role: Report(3), ID Type: StudyInstanceUID(110180)
+    studies.forEach((study) => {
         builder.addParticipantObject(
             study.uid,
             ParticipantObjectType.System,
@@ -155,24 +154,24 @@ export const logBeginTransferringDicomInstancesMessage = ({
             {
                 // 將 SOP Class 資訊放入 Description
                 sopClasses: study.sopClasses,
-            }
+            },
         );
     });
 
     // 6. 加入參與物件：Patient (單一)
-    // Type: Person(1), Role: Patient(1), ID Type: PatientNumber(2) 
+    // Type: Person(1), Role: Patient(1), ID Type: PatientNumber(2)
     builder.addParticipantObject(
         patient.id,
         ParticipantObjectType.Person,
         ParticipantObjectRole.Patient,
         DICOM_AUDIT_CONSTANTS.ParticipantObjectIDType.PatientNumber,
-        patient.name
+        patient.name,
     );
 
     const message = builder.build().toJSON();
 
     logger.info("dicom audit", { auditMessage: message });
-}
+};
 
 export const logDicomInstancesTransferred = ({
     name = "DICOM Instances Transferred",
@@ -182,7 +181,7 @@ export const logDicomInstancesTransferred = ({
     patient,
     outcome = EventOutcomeIndicator.Success,
     actionCode = EventActionCode.Create, // 預設為 Create (C)
-    requestor
+    requestor,
 }: {
     name?: string;
     source: TransferParticipant;
@@ -193,77 +192,76 @@ export const logDicomInstancesTransferred = ({
     actionCode: EventActionCode;
     requestor?: { userId: string; ip: string };
 }) => {
-
     // 1. 初始化 Builder
-    // Event ID: 110104 (DICOM Instances Transferred) 
+    // Event ID: 110104 (DICOM Instances Transferred)
     const builder = new AuditMessageBuilder(
         DICOM_AUDIT_CONSTANTS.EventID.InstancesTransferred,
-        actionCode, 
+        actionCode,
         outcome,
-        name
+        name,
     );
 
     // 2. 加入 Source (Process that sent the data)
-    // Role: 110153 (Source Role ID) 
+    // Role: 110153 (Source Role ID)
     builder.addActiveParticipant(
         source.userId,
-        false, 
+        false,
         DICOM_AUDIT_CONSTANTS.RoleID.Source,
         source.ip,
         NetworkAccessPointType.IPAddress,
-        source.aeTitle ? `AETITLE=${source.aeTitle}` : undefined
+        source.aeTitle ? `AETITLE=${source.aeTitle}` : undefined,
     );
 
     // 3. 加入 Destination (The process that received the data)
-    // Role: 110152 (Destination Role ID) 
+    // Role: 110152 (Destination Role ID)
     builder.addActiveParticipant(
         destination.userId,
         false,
         DICOM_AUDIT_CONSTANTS.RoleID.Destination,
         destination.ip,
         NetworkAccessPointType.IPAddress,
-        destination.aeTitle ? `AETITLE=${destination.aeTitle}` : undefined
+        destination.aeTitle ? `AETITLE=${destination.aeTitle}` : undefined,
     );
 
-    // 4. (選填) Requestor (Third parties that requested the query/move) 
+    // 4. (選填) Requestor (Third parties that requested the query/move)
     if (requestor) {
         builder.addActiveParticipant(
             requestor.userId,
             true, // Is Requestor = true
             undefined, // 若無特定 Role 可不填
             requestor.ip,
-            NetworkAccessPointType.IPAddress
+            NetworkAccessPointType.IPAddress,
         );
     }
 
-    // 5. 加入 Study Objects (Studies being transferred) 
-    studies.forEach(study => {
+    // 5. 加入 Study Objects (Studies being transferred)
+    studies.forEach((study) => {
         builder.addParticipantObject(
             study.uid,
             ParticipantObjectType.System, // Type: 2
             ParticipantObjectRole.Report, // Role: 3
             DICOM_AUDIT_CONSTANTS.ParticipantObjectIDType.StudyInstanceUID, // ID Type: 110180
-            undefined, 
+            undefined,
             {
                 // Description: 包含 SOP Class UID 和實例數量
                 sopClasses: study.sopClasses,
-            }
+            },
         );
     });
 
-    // 6. 加入 Patient Object (Patient) 
+    // 6. 加入 Patient Object (Patient)
     builder.addParticipantObject(
         patient.id,
-        ParticipantObjectType.Person,  // Type: 1
+        ParticipantObjectType.Person, // Type: 1
         ParticipantObjectRole.Patient, // Role: 1
         DICOM_AUDIT_CONSTANTS.ParticipantObjectIDType.PatientNumber, // ID Type: 2
-        patient.name
+        patient.name,
     );
 
     const message = builder.build().toJSON();
 
     logger.info("dicom audit", { auditMessage: message });
-}
+};
 
 export const logDicomInstancesAccessedMessage = ({
     accessors,
@@ -282,25 +280,25 @@ export const logDicomInstancesAccessedMessage = ({
     // Event ID: 110103 (DICOM Instances Accessed)
     const builder = new AuditMessageBuilder(
         DICOM_AUDIT_CONSTANTS.EventID.InstancesAccessed,
-        actionCode, 
-        outcome
+        actionCode,
+        outcome,
     );
 
     // 2. 加入 Active Participants (Person and/or Process manipulating the data)
-    accessors.forEach(acc => {
+    accessors.forEach((acc) => {
         builder.addActiveParticipant(
             acc.userId,
             acc.isRequestor,
             acc.roleCode, // 若未提供則為 undefined
-            acc.ip || '127.0.0.1',
+            acc.ip || "127.0.0.1",
             acc.networkType || NetworkAccessPointType.IPAddress,
             acc.altUserId,
-            acc.userName
+            acc.userName,
         );
     });
 
     // 3. 加入 Study Objects (Studies being accessed)
-    studies.forEach(study => {
+    studies.forEach((study) => {
         builder.addParticipantObject(
             study.uid,
             ParticipantObjectType.System,
@@ -309,7 +307,7 @@ export const logDicomInstancesAccessedMessage = ({
             undefined,
             {
                 sopClasses: study.sopClasses,
-            }
+            },
         );
     });
 
@@ -319,13 +317,13 @@ export const logDicomInstancesAccessedMessage = ({
         ParticipantObjectType.Person,
         ParticipantObjectRole.Patient,
         DICOM_AUDIT_CONSTANTS.ParticipantObjectIDType.PatientNumber,
-        patient.name
+        patient.name,
     );
 
     const message = builder.build().toJSON();
 
     logger.info("dicom audit", { auditMessage: message });
-}
+};
 
 export const logQueryMessage = async ({
     name = "Query",
@@ -334,7 +332,7 @@ export const logQueryMessage = async ({
     sopClassUid,
     queryPayload,
     outcome = EventOutcomeIndicator.Success,
-    requestor
+    requestor,
 }: {
     name?: string;
     source: TransferParticipant;
@@ -346,50 +344,50 @@ export const logQueryMessage = async ({
 }) => {
     const builder = new AuditMessageBuilder(
         DICOM_AUDIT_CONSTANTS.EventID.Query,
-        EventActionCode.Execute, 
+        EventActionCode.Execute,
         outcome,
-        name
+        name,
     );
 
     builder.addActiveParticipant(
         source.userId,
-        false, 
+        false,
         DICOM_AUDIT_CONSTANTS.RoleID.Source,
         source.ip,
         NetworkAccessPointType.IPAddress,
-        source.aeTitle ? `${source.aeTitle}` : undefined
+        source.aeTitle ? `${source.aeTitle}` : undefined,
     );
-    
+
     builder.addActiveParticipant(
         destination.userId,
         false,
         DICOM_AUDIT_CONSTANTS.RoleID.Destination,
         destination.ip,
         NetworkAccessPointType.IPAddress,
-        destination.aeTitle ? `${destination.aeTitle}` : undefined
+        destination.aeTitle ? `${destination.aeTitle}` : undefined,
     );
 
     if (requestor) {
         builder.addActiveParticipant(
             requestor.userId,
             true, // Is Requestor = true
-            undefined, 
+            undefined,
             requestor.ip,
-            NetworkAccessPointType.IPAddress
+            NetworkAccessPointType.IPAddress,
         );
     }
 
     builder.addParticipantObject(
-        sopClassUid,                                              // ObjectID
-        ParticipantObjectType.System,                             // Type: 2
-        ParticipantObjectRole.Report,                             // Role: 3
-        DICOM_AUDIT_CONSTANTS.ParticipantObjectIDType.SOPClassUID,      // ID Type: 110181
-        undefined,                                                // Name (Not specialized)
-        undefined,                                                // Description (Not specialized) 
-        undefined,                                                // Details (Not specialized)
-        queryPayload                                              // Query: Base64 content
+        sopClassUid, // ObjectID
+        ParticipantObjectType.System, // Type: 2
+        ParticipantObjectRole.Report, // Role: 3
+        DICOM_AUDIT_CONSTANTS.ParticipantObjectIDType.SOPClassUID, // ID Type: 110181
+        undefined, // Name (Not specialized)
+        undefined, // Description (Not specialized)
+        undefined, // Details (Not specialized)
+        queryPayload, // Query: Base64 content
     );
 
     const message = builder.build().toJSON();
     logger.info("dicom audit", { auditMessage: message });
-}
+};

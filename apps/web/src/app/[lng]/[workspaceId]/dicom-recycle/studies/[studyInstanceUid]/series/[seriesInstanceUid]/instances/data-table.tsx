@@ -76,7 +76,11 @@ function ActionsCell({
         navigator.clipboard.writeText(sopInstanceUid);
     };
 
-    const { restoreInstance, deleteInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
+    const {
+        restoreInstance,
+        deleteInstance,
+        setInstanceIds: setRecycleInstanceIds,
+    } = useInstanceRecycleActions({
         workspaceId,
         studyInstanceUid,
         seriesInstanceUid,

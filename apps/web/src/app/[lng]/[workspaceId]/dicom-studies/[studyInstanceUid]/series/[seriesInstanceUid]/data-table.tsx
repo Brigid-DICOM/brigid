@@ -97,11 +97,12 @@ function ActionsCell({
             WORKSPACE_PERMISSIONS.MANAGE,
         );
 
-    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } = useInstanceRecycleActions({
-        workspaceId,
-        studyInstanceUid,
-        seriesInstanceUid,
-    });
+    const { recycleInstance, setInstanceIds: setRecycleInstanceIds } =
+        useInstanceRecycleActions({
+            workspaceId,
+            studyInstanceUid,
+            seriesInstanceUid,
+        });
 
     const handleDownloadInstance = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();

@@ -20,9 +20,7 @@ import { useClearSelectionOnBlankClick } from "@/hooks/use-clear-selection-on-bl
 import { usePagination } from "@/hooks/use-pagination";
 import { useUrlSearchParams } from "@/hooks/use-url-search-params";
 import { getQueryClient } from "@/react-query/get-query-client";
-import {
-    getDicomSeriesQuery,
-} from "@/react-query/queries/dicomSeries";
+import { getDicomSeriesQuery } from "@/react-query/queries/dicomSeries";
 import { useDicomSeriesSelectionStore } from "@/stores/dicom-series-selection-store";
 import { useGlobalSearchStore } from "@/stores/global-search-store";
 import { useLayoutStore } from "@/stores/layout-store";
@@ -138,7 +136,11 @@ export default function DicomRecycleSeriesContent({
         [currentPageSeriesUids, selectedSeriesIds],
     );
 
-    const { restoreSeries, deleteSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
+    const {
+        restoreSeries,
+        deleteSeries,
+        setSeriesIds: setRecycleSeriesIds,
+    } = useSeriesRecycleActions({
         workspaceId,
         studyInstanceUid,
     });
@@ -173,14 +175,14 @@ export default function DicomRecycleSeriesContent({
     const handleRestore = useCallback(() => {
         if (selectedCount === 0) return;
 
-        setRecycleSeriesIds(selectedIds)
+        setRecycleSeriesIds(selectedIds);
         restoreSeries();
     }, [selectedCount, restoreSeries, setRecycleSeriesIds, selectedIds]);
 
     const handleDelete = useCallback(() => {
         if (selectedCount === 0) return;
 
-        setRecycleSeriesIds(selectedIds)
+        setRecycleSeriesIds(selectedIds);
         deleteSeries();
     }, [selectedCount, deleteSeries, setRecycleSeriesIds, selectedIds]);
 
@@ -188,7 +190,9 @@ export default function DicomRecycleSeriesContent({
         return (
             <EmptyState
                 title={t("common.loadFailed")}
-                description={t("dicom.messages.loadRecycleFailed", { level: "series" })}
+                description={t("dicom.messages.loadRecycleFailed", {
+                    level: "series",
+                })}
             />
         );
     }
@@ -276,7 +280,9 @@ export default function DicomRecycleSeriesContent({
                 <div className="flex items-center justify-center min-h-[400px]">
                     <EmptyState
                         title={t("dicom.messages.noData", { level: "series" })}
-                        description={t("dicom.messages.noDataToDisplay", { level: "series" })}
+                        description={t("dicom.messages.noDataToDisplay", {
+                            level: "series",
+                        })}
                     />
                 </div>
             )}

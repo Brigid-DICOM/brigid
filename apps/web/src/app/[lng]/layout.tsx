@@ -47,9 +47,7 @@ export default async function LanguageLayout({
             >
                 <NextTopLoader color="var(--primary)" showSpinner={false} />
 
-                <Providers>
-                    {children}
-                </Providers>
+                <Providers>{children}</Providers>
 
                 <Toaster richColors />
             </body>

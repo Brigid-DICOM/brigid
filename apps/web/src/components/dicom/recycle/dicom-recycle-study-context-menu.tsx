@@ -52,7 +52,11 @@ export function DicomRecycleStudyContextMenu({
         WORKSPACE_PERMISSIONS.DELETE,
     );
 
-    const { restoreStudies, deleteStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
+    const {
+        restoreStudies,
+        deleteStudies,
+        setStudyIds: setRecycleStudyIds,
+    } = useStudyRecycleActions({
         workspaceId,
     });
 

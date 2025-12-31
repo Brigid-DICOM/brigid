@@ -7,7 +7,7 @@ import {
     describe,
     expect,
     it,
-    vi
+    vi,
 } from "vitest";
 import { app } from "@/app/api/[...route]/route";
 import { TestDatabaseManager } from "../utils/testDatabaseManager";
@@ -72,7 +72,7 @@ describe("Event Logs API", () => {
                 message: "Log from another workspace",
                 workspaceId: "other-workspace-id",
                 createdAt: now,
-            }
+            },
         ]);
         await repo.save(logs);
     }
@@ -82,7 +82,7 @@ describe("Event Logs API", () => {
 
         const response = await app.request(
             `/api/workspaces/${WORKSPACE_ID}/event-logs`,
-            { method: "GET" }
+            { method: "GET" },
         );
 
         expect(response.status).toBe(200);
@@ -96,7 +96,7 @@ describe("Event Logs API", () => {
 
         const response = await app.request(
             `/api/workspaces/${WORKSPACE_ID}/event-logs?level=error`,
-            { method: "GET" }
+            { method: "GET" },
         );
 
         expect(response.status).toBe(200);
@@ -111,9 +111,9 @@ describe("Event Logs API", () => {
 
         const response = await app.request(
             `/api/workspaces/${WORKSPACE_ID}/event-logs?name=API_END`,
-            { method: "GET" }
+            { method: "GET" },
         );
-        
+
         expect(response.status).toBe(200);
         const json = await response.json();
         expect(json.ok).toBe(true);
@@ -125,11 +125,11 @@ describe("Event Logs API", () => {
         await seedLogs();
 
         const now = new Date();
-        const startDate = (new Date(now.getTime() - 2000)).toISOString();
+        const startDate = new Date(now.getTime() - 2000).toISOString();
 
         const response = await app.request(
             `/api/workspaces/${WORKSPACE_ID}/event-logs?startDate=${startDate}`,
-            { method: "GET" }
+            { method: "GET" },
         );
 
         const json = await response.json();
@@ -141,7 +141,7 @@ describe("Event Logs API", () => {
 
         const response = await app.request(
             `/api/workspaces/${WORKSPACE_ID}/event-logs?limit=1&offset=1`,
-            { method: "GET" }
+            { method: "GET" },
         );
 
         expect(response.status).toBe(200);
@@ -156,7 +156,7 @@ describe("Event Logs API", () => {
 
         const response = await app.request(
             `/api/workspaces/${nonExistentWorkspaceId}/event-logs`,
-            { method: "GET" }
+            { method: "GET" },
         );
 
         expect(response.status).toBe(404);

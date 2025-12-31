@@ -59,16 +59,15 @@ const searchSeriesRoute = new Hono<{
         const queryBuilder = new DicomSearchSeriesQueryBuilder();
 
         try {
-
             const series = await queryBuilder.getSeriesWithRelatedCounts({
                 workspaceId,
                 ...queryParams,
             });
-    
+
             if (series.length === 0) {
                 return c.body(null, 204);
             }
-    
+
             return c.json(
                 series.map((series) => {
                     const seriesData = JSON.parse(series.json) as DicomTag;
@@ -89,11 +88,14 @@ const searchSeriesRoute = new Hono<{
                 error: error instanceof Error ? error.message : String(error),
             });
 
-            return c.json({
-                error: "Internal server error",
-            }, 500);
+            return c.json(
+                {
+                    error: "Internal server error",
+                },
+                500,
+            );
         }
-    }
+    },
 );
 
 export default searchSeriesRoute;

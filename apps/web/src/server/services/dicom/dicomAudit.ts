@@ -241,7 +241,11 @@ export class AuditMessageBuilder {
 
         const eventTypeCodeVal: CodedValue | undefined =
             typeof eventTypeCode === "string"
-                ? { code: eventTypeCode, system: "DCM", display: "Event Type Code" }
+                ? {
+                      code: eventTypeCode,
+                      system: "DCM",
+                      display: "Event Type Code",
+                  }
                 : eventTypeCode || undefined;
 
         this.data = {
@@ -439,7 +443,9 @@ export class DicomAuditLog {
             }
 
             if (obj.query) {
-                node.ele("ParticipantObjectQuery").txt(Buffer.from(obj.query).toString("base64"));
+                node.ele("ParticipantObjectQuery").txt(
+                    Buffer.from(obj.query).toString("base64"),
+                );
             }
         });
 

@@ -101,10 +101,11 @@ function ActionsCell({
 
     const { clearSelection } = useDicomSeriesSelectionStore();
 
-    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } = useSeriesRecycleActions({
-        workspaceId,
-        studyInstanceUid,
-    });
+    const { recycleSeries, setSeriesIds: setRecycleSeriesIds } =
+        useSeriesRecycleActions({
+            workspaceId,
+            studyInstanceUid,
+        });
 
     const handleEnterInstances = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();

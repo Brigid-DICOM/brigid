@@ -99,9 +99,10 @@ function ActionsCell({
             WORKSPACE_PERMISSIONS.MANAGE,
         );
 
-    const { recycleStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
-        workspaceId
-    });
+    const { recycleStudies, setStudyIds: setRecycleStudyIds } =
+        useStudyRecycleActions({
+            workspaceId,
+        });
 
     const handleEnterSeries = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();

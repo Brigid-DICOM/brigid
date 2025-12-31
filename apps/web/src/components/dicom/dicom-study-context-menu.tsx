@@ -82,13 +82,13 @@ export function DicomStudyContextMenu({
             WORKSPACE_PERMISSIONS.MANAGE,
         );
 
-    const { getSelectedStudyIds } =
-        useDicomStudySelectionStore();
+    const { getSelectedStudyIds } = useDicomStudySelectionStore();
     const selectedIds = getSelectedStudyIds();
 
-    const { recycleStudies, setStudyIds: setRecycleStudyIds } = useStudyRecycleActions({
-        workspaceId
-    });
+    const { recycleStudies, setStudyIds: setRecycleStudyIds } =
+        useStudyRecycleActions({
+            workspaceId,
+        });
 
     const handleEnterSeries = async (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();

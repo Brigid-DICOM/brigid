@@ -63,11 +63,11 @@ const searchStudiesRoute = new Hono<{
                 workspaceId,
                 ...queryParams,
             });
-    
+
             if (studies.length === 0) {
                 return c.body(null, 204);
             }
-    
+
             return c.json(
                 studies.map((study) => {
                     const studyData = JSON.parse(study.json) as DicomTag;
@@ -92,9 +92,12 @@ const searchStudiesRoute = new Hono<{
                 error: error instanceof Error ? error.message : String(error),
             });
 
-            return c.json({
-                error: "Internal server error",
-            }, 500);
+            return c.json(
+                {
+                    error: "Internal server error",
+                },
+                500,
+            );
         }
     },
 );

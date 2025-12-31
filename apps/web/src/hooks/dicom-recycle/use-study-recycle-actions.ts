@@ -4,14 +4,20 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
 import { getQueryClient } from "@/react-query/get-query-client";
-import { deleteDicomStudyMutation, recycleDicomStudyMutation, restoreDicomStudyMutation } from "@/react-query/queries/dicomStudy";
+import {
+    deleteDicomStudyMutation,
+    recycleDicomStudyMutation,
+    restoreDicomStudyMutation,
+} from "@/react-query/queries/dicomStudy";
 import { useDicomStudySelectionStore } from "@/stores/dicom-study-selection-store";
 
 interface UseStudyRecycleActionsProps {
     workspaceId: string;
 }
 
-export function useStudyRecycleActions({ workspaceId }: UseStudyRecycleActionsProps) {
+export function useStudyRecycleActions({
+    workspaceId,
+}: UseStudyRecycleActionsProps) {
     const { t } = useT("translation");
     const queryClient = getQueryClient();
     const { deselectStudy, clearSelection } = useDicomStudySelectionStore();
@@ -26,12 +32,12 @@ export function useStudyRecycleActions({ workspaceId }: UseStudyRecycleActionsPr
         queryClient.invalidateQueries({
             queryKey: ["dicom-study", workspaceId],
         });
-    }
+    };
 
     const recycleMutation = useMutation({
         ...recycleDicomStudyMutation({
             workspaceId,
-            studyIds
+            studyIds,
         }),
         meta: {
             toastId: nanoid(),

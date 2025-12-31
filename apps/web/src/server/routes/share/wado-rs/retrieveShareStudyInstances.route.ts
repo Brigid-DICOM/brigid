@@ -86,7 +86,7 @@ const retrieveShareStudyInstancesRoute = new Hono().get(
 
             instances.push(...batch);
 
-            while(keepPaging) {
+            while (keepPaging) {
                 const nextBatch = await studyService.getStudyInstancesByCursor({
                     workspaceId,
                     studyInstanceUid,
