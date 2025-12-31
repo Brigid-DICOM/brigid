@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:web": "pnpm --filter @brigid/web build",
     "copy-files:web": "cpy \"public/**\" \".next/standalone/apps/web/public\" --cwd=apps/web && cpy \".next/static/**\" \".next/standalone/apps/web/.next/static\" --cwd=apps/web",
-    "build:sea": "pnpm copy-files:web && tsx scripts/seaWorkflow/buildSea.ts"
+    "build:sea": "pnpm copy-files:web && tsx scripts/seaWorkflow/buildSea.ts",
+    "build:sea-with-jre": "pnpm copy-files:web && tsx scripts/seaWorkflow/buildSea.ts --with-jre"
   },
   "keywords": [],
   "author": "Li70",

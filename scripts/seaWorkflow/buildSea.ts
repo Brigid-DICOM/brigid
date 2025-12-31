@@ -1,9 +1,13 @@
-import { spawn } from "node:child_process";
-import { cp, mkdir, rm } from "node:fs/promises";
+import { exec, spawn } from "node:child_process";
+import { createWriteStream, existsSync } from "node:fs";
+import { cp, mkdir, readdir, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
+const execAsync = promisify(exec);
 // 取得目前檔案路徑與專案根目錄
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "../../");
@@ -80,7 +84,71 @@ async function runCommand(command: string, args: string[], cwd: string) {
     });
 }
 
-async function buildSea() {
+/**
+ * 取得 Temurin JRE 21 的下載連結
+ */
+function getJreDownloadUrl() {
+    const arch = process.arch === "x64" ? "x64" : "aarch64";
+    const platform = process.platform === "win32" ? "windows" : 
+                    process.platform === "darwin" ? "mac" : "linux";
+    
+    // 使用 Adoptium API 取得最新 JRE 21 GA 版本
+    return `https://api.adoptium.net/v3/binary/latest/21/ga/${platform}/${arch}/jre/hotspot/normal/eclipse?project=jdk`;
+}
+
+async function ensureJre(targetDir: string) {
+    const url = getJreDownloadUrl();
+    const isWin = process.platform === "win32";
+    const archiveName = isWin ? "jre.zip" : "jre.tar.gz";
+    const archivePath = path.join(targetDir, archiveName);
+    const jreExtractDir = path.join(targetDir, "jre_temp");
+    const finalJreDir = path.join(targetDir, "jre");
+
+    console.log(`--- Downloading JRE from ${url} ---`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to download JRE: ${response.statusText}`);
+
+    await pipeline(response.body as any, createWriteStream(archivePath));
+    
+    console.log(`--- Extracting JRE ---`);
+    await mkdir(jreExtractDir, { recursive: true });
+
+    if (isWin) {
+        await execAsync(`powershell -Command "Expand-Archive -Path '${archivePath}' -DestinationPath '${jreExtractDir}'"`);
+    } else {
+        await execAsync(`tar -xzf "${archivePath}" -C "${jreExtractDir}"`);
+    }
+
+    // Adoptium 的壓縮檔通常包含一個子目錄 (如 jdk-21.0.x+11-jre)
+    // 我們需要將其內容移動到 targetDir/jre
+    const subDirs = await readdir(jreExtractDir);
+    const actualJreDir = path.join(jreExtractDir, subDirs[0]);
+    await cp(actualJreDir, finalJreDir, { recursive: true });
+
+    if (!isWin) {
+        console.log(`--- Setting executable permissions for JRE binaries ---`);
+        try {
+            const jreBinDir = path.join(finalJreDir, "bin");
+            await execAsync(`chmod -R +x "${jreBinDir}"`);
+
+            if (process.platform === "darwin") {
+                const jliPath = path.join(finalJreDir, "lib", "jli", "libjli.dylib");
+                if (existsSync(jliPath)) {
+                    await execAsync(`chmod +x "${jliPath}"`);
+                }
+            }
+            console.log("✅ JRE permissions set successfully.");
+        } catch (error) {
+            console.warn("⚠️ Warning: Failed to set JRE permissions. This might cause issues on Linux/macOS.", error);
+        }
+    }
+
+    // 清理臨時檔案
+    await rm(archivePath);
+    await rm(jreExtractDir, { recursive: true });
+}
+
+async function buildSea(withJre: boolean = false) {
     const currentPlatform = os.platform();
     const config = PLATFORM_CONFIGS[currentPlatform];
 
@@ -138,9 +206,18 @@ async function buildSea() {
         const envExampleDest = path.join(seaTmpDir, ".env");
         await cp(envExampleSrc, envExampleDest);
 
+        // 5.5 處理 JRE
+        const filesToArchive = [config.executableName, "node_modules", ".env"];
+        if (withJre) {
+            console.log("--- Step 5.5: Including JRE ---");
+            await ensureJre(seaTmpDir);
+            filesToArchive.push("jre");
+        }
+
         // 6. 打包成 ZIP
         console.log("--- Step 6: Packaging into zip ---");
-        const zipName = `brigid-server-${currentPlatform}.zip`;
+        const suffix = withJre ? "-with-jre" : "";
+        const zipName = `brigid-server-${currentPlatform}${suffix}.zip`;
         const zipDest = path.join(outputDir, zipName);
         // 移除現有的 zip 檔案
         await rm(zipDest, { force: true });
@@ -148,7 +225,7 @@ async function buildSea() {
         // 呼叫平台特定的壓縮函數，打包執行檔與 node_modules
         await config.archiveAction(
             zipDest,
-            [config.executableName, "node_modules", ".env"],
+            filesToArchive,
             seaTmpDir,
         );
 
@@ -162,4 +239,8 @@ async function buildSea() {
     }
 }
 
-buildSea();
+if (process.argv.includes("--with-jre")) {
+    buildSea(true);
+} else {
+    buildSea(false);
+}
