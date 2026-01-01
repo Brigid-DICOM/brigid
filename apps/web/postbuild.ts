@@ -19,8 +19,11 @@ try {
     // 讀取現有的 server.js
     const originalContent = fs.readFileSync(serverJsPath, "utf-8");
 
-    // 在最上頭加入 dotenv 設置
-    const dotenvSetup = `// Load environment variables from .env file
+    // 在最上頭加入 sea 的 require 和 dotenv 設置
+    const dotenvSetup = `
+const { createRequire } = require('node:module');
+require = createRequire(__filename);
+// Load environment variables from .env file
 require('dotenv').config();
 
 `;

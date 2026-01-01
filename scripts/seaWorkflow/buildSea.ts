@@ -1,6 +1,6 @@
 import { exec, spawn } from "node:child_process";
 import { createWriteStream, existsSync } from "node:fs";
-import { cp, mkdir, readdir, rm } from "node:fs/promises";
+import { cp, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
@@ -23,6 +23,7 @@ interface PlatformConfig {
         files: string[],
         cwd: string,
     ) => Promise<void>;
+    removeSignature: (exePath: string) => Promise<void>;
 }
 
 const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
@@ -39,6 +40,21 @@ const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
             const powerShellCmd = `Compress-Archive -Path ${fileString} -DestinationPath "${zipPath}" -Force`;
             await runCommand("powershell", ["-Command", powerShellCmd], cwd);
         },
+        removeSignature: async (exePath: string) => {
+            const defaultSingTool = "signtool";
+            const specificSigntool = `C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\x64\\`;
+
+            try {
+                await runCommand(defaultSingTool, ["remove", "/s", `"${exePath}"`], process.cwd());
+            } catch (error) {
+                console.warn("⚠️ Warning: Failed to remove signature. Trying specific signtool path.", error);
+                if (existsSync(specificSigntool)) {
+                    await runCommand("signtool.exe", ["remove", "/s", `"${exePath}"`], specificSigntool);
+                } else {
+                    console.warn("⚠️ Warning: signtool not found. Skipping signature removal.");
+                }
+            }
+        }
     },
     linux: {
         target: "linux",
@@ -51,6 +67,7 @@ const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
             // linux 下使用 zip (請確保系統有安裝 zip)
             await runCommand("zip", ["-r", zipPath, ...files], cwd);
         },
+        removeSignature: async () => { /* Linux 下不需要移除簽名 */ }
     },
     darwin: {
         target: "macos",
@@ -63,6 +80,13 @@ const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
             // macos 同樣使用 zip
             await runCommand("zip", ["-r", zipPath, ...files], cwd);
         },
+        removeSignature: async (exePath: string) => {
+            try {
+                await runCommand("codesign", ["--remove-signature", `"${exePath}"`], process.cwd());
+            } catch (error) {
+                console.warn("⚠️ Warning: codesign failed. Skipping signature removal.", error);
+            }
+        }
     },
 };
 
@@ -164,57 +188,63 @@ async function buildSea(withJre: boolean = false) {
         await rm(seaTmpDir, { recursive: true, force: true });
         await mkdir(seaTmpDir, { recursive: true });
         // 1. 複製 standalone 資料
-        console.log("--- Step 1: Copying standalone output ---");
+        console.log("--- Step 1: Copying and flattening standalone output ---");
         const standaloneDir = path.join(appsWebDir, ".next/standalone");
-        await cp(standaloneDir, seaTmpDir, { recursive: true });
+        const standaloneAppDir = path.join(standaloneDir, "apps/web");
+        // 複製 server.js 作為 SEA 進入點
+        await cp(path.join(standaloneAppDir, "server.js"), path.join(seaTmpDir, "server.js"));
+        // 依照要求複製 node_modules, .next, public
+        await cp(path.join(standaloneDir, "node_modules"), path.join(seaTmpDir, "node_modules"), { recursive: true });
+        await cp(path.join(standaloneAppDir, ".next"), path.join(seaTmpDir, ".next"), { recursive: true });
+        await cp(path.join(standaloneAppDir, "public"), path.join(seaTmpDir, "public"), { recursive: true });
+        // 複製並更名 .env
+        await cp(path.join(appsWebDir, "env.example"), path.join(seaTmpDir, ".env"));
 
-        // 2. 複製 favicon.ico
-        console.log("--- Step 2: Copying favicon.ico ---");
-        const iconSrc = path.join(appsWebDir, "src/app/favicon.ico");
-        const iconDest = path.join(seaTmpDir, "apps/web/favicon.ico");
-        await cp(iconSrc, iconDest);
+        // 2. 建立 SEA 設定檔
+        console.log("--- Step 2: Generating sea-config.json ---");
+        const seaConfig = {
+            main: "./server.js",
+            output: "sea-prep.blob"
+        };
+        await writeFile(path.join(seaTmpDir, "sea-config.json"), JSON.stringify(seaConfig, null, 2));
 
-        // 3. 執行 nexe
-        console.log(`--- Step 3: Running nexe for ${currentPlatform} ---`);
-        const nexeCwd = path.join(seaTmpDir, "apps/web");
-        const nexeArgs = [
-            "server.js",
-            "-r",
-            '"./public/**/*"',
-            "-r",
-            '"./.next/**/*"',
-            "-o",
-            "brigid-server",
-            "--build",
-            "-t",
-            config.target,
-        ];
-        if (currentPlatform === "win32") {
-            nexeArgs.push("--ico", "favicon.ico");
-        }
-        await runCommand("npx", ["nexe", ...nexeArgs], nexeCwd);
-
-        // 4. 移動執行檔至 seaTmp 根目錄準備打包
-        console.log("--- Step 4: Moving executable to seaTmp root ---");
-        const generatedExePath = path.join(nexeCwd, config.executableName);
+        // 3. 執行 Node.js 官方 SEA 流程
+        console.log("--- Step 3: Running Node.js SEA workflow ---");
         const finalExePath = path.join(seaTmpDir, config.executableName);
-        await cp(generatedExePath, finalExePath);
 
-        // 5. 複製 .env.example
-        console.log("--- Step 5: Copying .env.example ---");
-        const envExampleSrc = path.join(appsWebDir, "env.example");
-        const envExampleDest = path.join(seaTmpDir, ".env");
-        await cp(envExampleSrc, envExampleDest);
+        // 3.1 產生 blob
+        await runCommand("node", ["--experimental-sea-config", "sea-config.json"], seaTmpDir);
 
-        // 5.5 處理 JRE
-        const filesToArchive = [config.executableName, "node_modules", ".env"];
+        // 3.2 複製 node 執行檔
+        const copyCmd = currentPlatform === "win32" 
+            ? `node -e "require('fs').copyFileSync(process.execPath, '${config.executableName}')"`
+            : `cp $(command -v node) ${config.executableName}`;
+        await runCommand(copyCmd, [], seaTmpDir);
+
+        // 3.3 移除簽名
+        console.log("--- Step 3.3: Removing signature ---");
+        await config.removeSignature(finalExePath);
+
+        // 3.4 注入 blob (postject)
+        console.log("--- Step 3.4: Injecting blob with postject ---");
+        await runCommand("npx", [
+            "postject",
+            config.executableName,
+            "NODE_SEA_BLOB",
+            "sea-prep.blob",
+            "--sentinel-fuse",
+            "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
+        ], seaTmpDir);
+
+        // 4. 處理 JRE
+        const filesToArchive = [config.executableName, "node_modules", ".next", "public", ".env"];
         if (withJre) {
             console.log("--- Step 5.5: Including JRE ---");
             await ensureJre(seaTmpDir);
             filesToArchive.push("jre");
         }
 
-        // 6. 打包成 ZIP
+        // 5. 打包成 ZIP
         console.log("--- Step 6: Packaging into zip ---");
         const suffix = withJre ? "-with-jre" : "";
         const zipName = `brigid-server-${currentPlatform}${suffix}.zip`;
