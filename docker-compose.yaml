@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: brigid-db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-brigid}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - brigid-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-brigid}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  brigid-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: brigid-web
+    restart: always
+    ports:
+      - "3119:3119"
+    environment:
+      - NODE_ENV=production
+      # 在此加入你的環境變數，或使用 env_file
+      - TYPEORM_CONNECTION=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-brigid}
+    depends_on:
+      - db
+    volumes:
+      - ./logs:/app/apps/web/logs
+    networks:
+      - brigid-network
+
+networks:
+  brigid-network:
+    driver: bridge
+
+volumes:
+  pgdata:
