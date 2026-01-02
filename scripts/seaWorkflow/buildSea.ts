@@ -123,6 +123,7 @@ function getJreDownloadUrl() {
 async function ensureJre(targetDir: string) {
     const url = getJreDownloadUrl();
     const isWin = process.platform === "win32";
+    const isMac = process.platform === "darwin";
     const archiveName = isWin ? "jre.zip" : "jre.tar.gz";
     const archivePath = path.join(targetDir, archiveName);
     const jreExtractDir = path.join(targetDir, "jre_temp");
@@ -152,11 +153,11 @@ async function ensureJre(targetDir: string) {
     if (!isWin) {
         console.log(`--- Setting executable permissions for JRE binaries ---`);
         try {
-            const jreBinDir = path.join(finalJreDir, "bin");
+            const jreBinDir = isMac ? path.join(finalJreDir, "Contents", "Home", "bin") : path.join(finalJreDir, "bin");
             await execAsync(`chmod -R +x "${jreBinDir}"`);
 
             if (process.platform === "darwin") {
-                const jliPath = path.join(finalJreDir, "lib", "jli", "libjli.dylib");
+                const jliPath = path.join(finalJreDir, "Contents", "Home", "lib", "jli", "libjli.dylib");
                 if (existsSync(jliPath)) {
                     await execAsync(`chmod +x "${jliPath}"`);
                 }
@@ -227,14 +228,18 @@ async function buildSea(withJre: boolean = false) {
 
         // 3.4 注入 blob (postject)
         console.log("--- Step 3.4: Injecting blob with postject ---");
-        await runCommand("npx", [
+        const postjectCmd = [
             "postject",
             config.executableName,
             "NODE_SEA_BLOB",
             "sea-prep.blob",
             "--sentinel-fuse",
             "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
-        ], seaTmpDir);
+        ];
+        if (currentPlatform === "darwin") {
+            postjectCmd.push("--macho-segment-name", "NODE_SEA");
+        }
+        await runCommand("npx", postjectCmd, seaTmpDir);
 
         // 4. 處理 JRE
         const filesToArchive = [config.executableName, "node_modules", ".next", "public", ".env"];
