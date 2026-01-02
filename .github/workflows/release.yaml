@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
             platform: linux
@@ -23,6 +23,9 @@ jobs:
           - os: windows-latest
             platform: win32
             suffix: ".exe"
+          - os: macos-latest
+            platform: darwin
+            suffix: ""
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
