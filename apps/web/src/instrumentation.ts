@@ -30,7 +30,7 @@ export async function register() {
                 libPath = path.join(jrePath, "bin", "server", "jvm.dll");
             } else if (process.platform === "darwin") {
                 // macOS: lib/server/libjvm.dylib
-                libPath = path.join(jrePath, "lib", "server", "libjvm.dylib");
+                libPath = path.join(jrePath, "Contents", "Home", "lib", "server", "libjvm.dylib");
             } else {
                 // Linux: lib/server/libjvm.so
                 libPath = path.join(jrePath, "lib", "server", "libjvm.so");
