@@ -1,0 +1,87 @@
+name: release
+
+on:
+  push:
+    tags:
+     - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            suffix: ""
+          - os: windows-latest
+            platform: win32
+            suffix: ".exe"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.7.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build Web application
+        run: pnpm build:web
+      - name: Build SEA application
+        run: pnpm build:sea
+      - name: Build SEA application with JRE
+        run: pnpm build:sea-with-jre
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: build/*.zip
+  
+  create-release:
+    name: Create Github Release
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      
+      - name: Extract Changelog Section
+        id: changelog
+        shell: bash
+        run: |
+          # 取得最新的一個版本區塊 (從第一個 ## 開始到下一個 ## 之前)
+          VERSION_LOG=$(sed -n '/^## /{:a;p;n;/^## /q;ba}' CHANGELOG.md | sed '1d;$d')
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$VERSION_LOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          pattern: release-*
+          merge-multiple: true
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.changelog.outputs.content }}
+          files: ./artifacts/*.zip
+          draft: false
+          prerelease: false
+      
