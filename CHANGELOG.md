@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.1](https://github.com/Brigid-DICOM/brigid/compare/v1.1.0...v1.1.1) (2026-01-03)
+
+
+### Bug Fixes
+
+* **build:** correct macOS OpenCV library path in buildSea script ([d74f44a](https://github.com/Brigid-DICOM/brigid/commit/d74f44ae4cd7c6f888a346a2124551befe952664))
+
 ## [1.1.0](https://github.com/Brigid-DICOM/brigid/compare/v1.0.0...v1.1.0) (2026-01-03)
 
 
