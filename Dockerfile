@@ -58,6 +58,9 @@ ENV NODE_ENV=production
 # Java 橋接通常需要明確的 JAVA_HOME
 ENV JAVA_HOME=/opt/java/openjdk
 
+# Move opencv libs to jdk's lib dir
+COPY --from=builder /app/data/dcm4che/lib/linux-x86-64/*.so $JAVA_HOME/lib
+
 # 建立非 root 使用者
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

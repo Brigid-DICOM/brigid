@@ -89,3 +89,6 @@ apps/web/configs/logback.xml
 # Single Executable Application
 **/seaTmp/**
 **/brigid-local-db/**
+
+data/**/*.dll
+data/**/*.dylib

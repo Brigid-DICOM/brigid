@@ -168,6 +168,28 @@ async function ensureJre(targetDir: string) {
         }
     }
 
+    // 複製 opencv libs to jdk's lib dir
+    if (isWin) {
+        await cp(
+            path.join(rootDir, "data", "dcm4che", "lib", "windows-x86-64", "opencv_java.dll"), 
+            path.join(finalJreDir, "bin", "opencv_java.dll"),
+        );
+    } else if (isMac) {
+        await cp(
+            path.join(rootDir, "data", "dcm4che", "lib", "macosx-x86-64", "*libopencv_java.dylib"), 
+            path.join(finalJreDir, "lib", "*libopencv_java.dylib"),
+        );
+    } else {
+        await cp(
+            path.join(rootDir, "data", "dcm4che", "lib", "linux-x86-64", "libclib_jiio.so"), 
+            path.join(finalJreDir, "lib", "libclib_jiio.so"),
+        );
+        await cp(
+            path.join(rootDir, "data", "dcm4che", "lib", "linux-x86-64", "libopencv_java.so"), 
+            path.join(finalJreDir, "lib", "libopencv_java.so"),
+        );
+    }
+
     // 清理臨時檔案
     await rm(archivePath);
     await rm(jreExtractDir, { recursive: true });
