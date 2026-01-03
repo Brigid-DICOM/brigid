@@ -176,8 +176,8 @@ async function ensureJre(targetDir: string) {
         );
     } else if (isMac) {
         await cp(
-            path.join(rootDir, "data", "dcm4che", "lib", "macosx-x86-64", "*libopencv_java.dylib"), 
-            path.join(finalJreDir, "lib", "*libopencv_java.dylib"),
+            path.join(rootDir, "data", "dcm4che", "lib", "macosx-x86-64", "libopencv_java.dylib"), 
+            path.join(finalJreDir, "lib", "libopencv_java.dylib"),
         );
     } else {
         await cp(
