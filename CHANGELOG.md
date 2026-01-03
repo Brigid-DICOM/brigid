@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.0](https://github.com/Brigid-DICOM/brigid/compare/v1.0.0...v1.1.0) (2026-01-03)
+
+
+### Features
+
+* **build:** add macOS to release github action ([a99eca5](https://github.com/Brigid-DICOM/brigid/commit/a99eca5c886711033a67eec5c69aaf8ab6d24048))
+* **build:** add OpenCV libraries for multiple platforms ([acc1573](https://github.com/Brigid-DICOM/brigid/commit/acc157376d90a212088b8f56a7818b68d7732cef))
+
+
+### Bug Fixes
+
+* **build:** fix JRE handling and postject cmd for macOS in buildSea ([e4c12e5](https://github.com/Brigid-DICOM/brigid/commit/e4c12e52168cd95a73edc56fbf64c25a6bafad09))
+* **instrumentation:** update macOS JRE library path ([4afbc8d](https://github.com/Brigid-DICOM/brigid/commit/4afbc8d2be43db451045f301b4cb3fbbd3518430))
+
 ## 1.0.0 (2026-01-02)
 
 
