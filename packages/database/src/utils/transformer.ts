@@ -8,12 +8,11 @@ export const transformer: Record<"date" | "bigint" | "textJson" | "DT", ValueTra
     },
     bigint: {
         from: (value: string | null) => value && parseInt(value, 10),
-        to: (value: number) => value.toString()
+        to: (value: number) => value ? value.toString() : null
     },
     textJson: {
         from: (value: string | null) => value && JSON.parse(value),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        to: (value: any) => JSON.stringify(value)
+        to: (value: any) => value ? JSON.stringify(value) : null
     },
     DT: {
         from: (value: string | null) => value && new Date(parseInt(value, 10)),
