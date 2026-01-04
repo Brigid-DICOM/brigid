@@ -91,7 +91,7 @@ export function NavUser({
                         {process.env.NEXT_PUBLIC_ENABLE_AUTH && (
                             <DropdownMenuItem>
                                 <LogOutIcon className="mr-2 size-4" />
-                                <Link href="/api/auth/signout">
+                                <Link href="/api/auth/signout" className="w-full">
                                     {t("auth.signOut")}
                                 </Link>
                             </DropdownMenuItem>
