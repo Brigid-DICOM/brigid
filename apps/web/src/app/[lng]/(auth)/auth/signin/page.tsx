@@ -1,16 +1,20 @@
 "use client";
 
-import { signIn } from "@hono/auth-js/react";
+import { getProviders, signIn } from "@hono/auth-js/react";
 import Image from "next/image";
-
-const providerMap = [
-    {
-        id: "casdoor",
-        name: "Casdoor",
-    },
-];
+import { useEffect, useState } from "react";
+import logoBackground from "../../../../../../public/login-background.png";
 
 export default function SignInPage() {
+
+    const [providers, setProviders] = useState<Awaited<ReturnType<typeof getProviders>> | null>(null);
+
+    useEffect(() => {
+        getProviders().then((providers) => {
+            setProviders(providers);
+        });
+    }, []);
+
     return (
         <div className="flex w-full h-dvh">
             {/* 左側：黑色背景 + 登入卡片 / Left: black background + login card */}
@@ -35,7 +39,7 @@ export default function SignInPage() {
                         </span>
                     </h2>
                     <div className="flex flex-col gap-2 p-6 m-8 w-full bg-white rounded shadow-lg">
-                        {Object.values(providerMap).map((provider) => (
+                        {Object.values(providers ?? {}).map((provider) => (
                             <form
                                 className="[&>div]:last-of-type:hidden"
                                 key={provider.id}
@@ -74,7 +78,7 @@ export default function SignInPage() {
             {/* 右側：背景圖片 / Right: background image */}
             <div className="relative hidden md:block flex-1">
                 <Image
-                    src="/login-background.png"
+                    src={logoBackground}
                     alt="Login Background"
                     fill
                     className="object-cover object-right"

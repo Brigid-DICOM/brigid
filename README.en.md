@@ -111,7 +111,6 @@ NEXT_PUBLIC_ENABLE_AUTH=true
 NEXTAUTH_SECRET=your-secret-key
 AUTH_TRUST_HOST=true
 
-AUTH_PROVIDER=casdoor
 AUTH_CASDOOR_ID=casdoor_id
 AUTH_CASDOOR_SECRET=casdoor_secret
 AUTH_CASDOOR_ISSUER=https://casdoor.example.com

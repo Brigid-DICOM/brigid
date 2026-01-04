@@ -1,3 +1,5 @@
+import GitHubProvider from "@auth/core/providers/github";
+import GoogleProvider from "@auth/core/providers/google";
 import { AppDataSource, initializeDb } from "@brigid/database/src/dataSource";
 import { AccountEntity } from "@brigid/database/src/entities/account.entity";
 import { SessionEntity } from "@brigid/database/src/entities/session.entity";
@@ -18,16 +20,33 @@ import userRoute from "@/server/routes/user.route";
 import workspacesRoute from "@/server/routes/workspaces/workspaces.route";
 import { WorkspaceService } from "@/server/services/workspace.service";
 
-function getAuthProvider() {
-    if (env.AUTH_PROVIDER === "casdoor") {
-        return CasdoorProvider({
+function getAuthProviders() {
+
+    const providers = [];
+
+    if (env.AUTH_CASDOOR_ID && env.AUTH_CASDOOR_SECRET && env.AUTH_CASDOOR_ISSUER) {
+        providers.push(CasdoorProvider({
             clientId: env.AUTH_CASDOOR_ID,
             clientSecret: env.AUTH_CASDOOR_SECRET,
             issuer: env.AUTH_CASDOOR_ISSUER,
-        });
+        }));
     }
 
-    throw new Error("Invalid auth provider");
+    if (env.AUTH_GITHUB_ID && env.AUTH_GITHUB_SECRET) {
+        providers.push(GitHubProvider({
+            clientId: env.AUTH_GITHUB_ID,
+            clientSecret: env.AUTH_GITHUB_SECRET,
+        }));
+    }
+
+    if (env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET) {
+        providers.push(GoogleProvider({
+            clientId: env.AUTH_GOOGLE_ID,
+            clientSecret: env.AUTH_GOOGLE_SECRET,
+        }));
+    }
+
+    return providers;
 }
 
 export const app = new Hono()
@@ -45,7 +64,7 @@ export const app = new Hono()
                     signIn: "/auth/signin",
                 },
                 secret: env.NEXTAUTH_SECRET,
-                providers: [getAuthProvider()],
+                providers: getAuthProviders(),
                 adapter: TypeORMAdapter(AppDataSource.options, {
                     entities: {
                         ...AppDataSource.options.entities,

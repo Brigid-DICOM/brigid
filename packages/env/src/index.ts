@@ -14,21 +14,17 @@ const booleanFromEnv = z.preprocess((val) => {
 
 // #region Auth Schema
 
-const authSchemaBase = z.object({
-    AUTH_PROVIDER: z.enum(["casdoor"]).optional(),
+const authSchema = z.object({
     AUTH_CASDOOR_ID: z.string().optional(),
     AUTH_CASDOOR_SECRET: z.string().optional(),
-    AUTH_CASDOOR_ISSUER: z.string().optional()
+    AUTH_CASDOOR_ISSUER: z.string().optional(),
+    // GitHub 配置
+    AUTH_GITHUB_ID: z.string().optional(),
+    AUTH_GITHUB_SECRET: z.string().optional(),
+    // Google 配置
+    AUTH_GOOGLE_ID: z.string().optional(),
+    AUTH_GOOGLE_SECRET: z.string().optional(),
 });
-
-const authCasdoorSchema = z.object({
-    AUTH_PROVIDER: z.literal("casdoor"),
-    AUTH_CASDOOR_ID: z.string(),
-    AUTH_CASDOOR_SECRET: z.string(),
-    AUTH_CASDOOR_ISSUER: z.string()
-});
-
-const authSchema = z.discriminatedUnion("AUTH_PROVIDER", [authCasdoorSchema]);
 
 // #endregion
 
@@ -119,7 +115,7 @@ const baseSchema = z.object({
     QUERY_MAX_LIMIT: z.coerce.number().int().min(1).max(1000).default(100)
 });
 
-const envSchemaBase = z.intersection(z.intersection(z.intersection(baseSchema, storageSchema), authSchemaBase), dimseSchema);
+const envSchemaBase = z.intersection(z.intersection(z.intersection(baseSchema, storageSchema), authSchema), dimseSchema);
 
 const envSchema = envSchemaBase.superRefine((data, ctx) => {
     if (data.NEXT_PUBLIC_ENABLE_AUTH) {

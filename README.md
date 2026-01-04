@@ -100,6 +100,8 @@ Brigid 預設不啟用授權系統，若需要啟用，請在 `.env` 檔案中�
 
 - 以下是目前支援的授權系統 
   - Casdoor
+  - GitHub
+  - Google
 
 ### Casdoor
 
@@ -109,10 +111,33 @@ NEXT_PUBLIC_ENABLE_AUTH=true
 NEXTAUTH_SECRET=your-secret-key
 AUTH_TRUST_HOST=true
 
-AUTH_PROVIDER=casdoor
 AUTH_CASDOOR_ID=casdoor_id
 AUTH_CASDOOR_SECRET=casdoor_secret
 AUTH_CASDOOR_ISSUER=https://casdoor.example.com
+```
+
+### GitHub
+
+```toml
+# AUTH
+NEXT_PUBLIC_ENABLE_AUTH=true
+NEXTAUTH_SECRET=your-secret-key
+AUTH_TRUST_HOST=true
+
+AUTH_GITHUB_ID=github_id
+AUTH_GITHUB_SECRET=github_secret
+```
+
+### Google
+
+```toml
+# AUTH
+NEXT_PUBLIC_ENABLE_AUTH=true
+NEXTAUTH_SECRET=your-secret-key
+AUTH_TRUST_HOST=true
+
+AUTH_GOOGLE_ID=google_id
+AUTH_GOOGLE_SECRET=google_secret
 ```
 
 ## 專案動機與設計取捨
