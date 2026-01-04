@@ -35,7 +35,11 @@
         "title": "Brigid - 登入",
         "description": "Brigid PACS 登入",
         "signIn": "登入",
-        "signOut": "登出"
+        "signOut": "登出",
+        "errorMessages": {
+            "OAuthAccountNotLinked": "此電子郵件已被其他登入方式連結，請使用原本的方式登入",
+            "Unknown": "發生未知錯誤"
+        }
     },
     "dashboard": {
         "title": "Brigid PACS | 儀表板",

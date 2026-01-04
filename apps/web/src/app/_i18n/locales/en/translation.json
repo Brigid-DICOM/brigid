@@ -35,7 +35,11 @@
         "title": "Brigid - Sign In",
         "description": "Brigid PACS Sign In",
         "signIn": "Sign In",
-        "signOut": "Sign Out"
+        "signOut": "Sign Out",
+        "errorMessages": {
+            "OAuthAccountNotLinked": "This email is already linked with another login method, please use the original method to login",
+            "Unknown": "An unknown error occurred"
+        }
     },
     "dashboard": {
         "title": "Brigid PACS | Dashboard",

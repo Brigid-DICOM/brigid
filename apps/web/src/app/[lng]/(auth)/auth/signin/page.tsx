@@ -3,16 +3,36 @@
 import { getProviders, signIn } from "@hono/auth-js/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useT } from "@/app/_i18n/client";
 import logoBackground from "../../../../../../public/login-background.png";
 
 export default function SignInPage() {
+    const { t } = useT("translation");
 
     const [providers, setProviders] = useState<Awaited<ReturnType<typeof getProviders>> | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    useEffect(() => {
+    const getErrorMessage = (error: string) => {
+        if (!error) return null;
+
+        switch (error) {
+            case "OAuthAccountNotLinked":
+                return t("auth.errorMessages.OAuthAccountNotLinked");
+            default:
+                return t("auth.errorMessages.Unknown");
+        }
+    }
+
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
+        useEffect(() => {
         getProviders().then((providers) => {
             setProviders(providers);
         });
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get("error");
+        if (error) {
+            setErrorMessage(getErrorMessage(error));
+        }
     }, []);
 
     return (
@@ -39,6 +59,11 @@ export default function SignInPage() {
                         </span>
                     </h2>
                     <div className="flex flex-col gap-2 p-6 m-8 w-full bg-white rounded shadow-lg">
+                        {errorMessage && (
+                            <div className="p-3 mb-4 text-sm text-red-600 border border-red-200 rounded bg-red-50">
+                                {errorMessage}
+                            </div>
+                        )}
                         {Object.values(providers ?? {}).map((provider) => (
                             <form
                                 className="[&>div]:last-of-type:hidden"
