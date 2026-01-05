@@ -33,7 +33,7 @@ export class UserService {
                 name: "Guest User",
                 email: "guest@brigid.local",
                 emailVerified: new Date().toISOString(),
-                image: "/guest-avatar.jpg",
+                image: "/images/guest-avatar.jpg",
             });
         }
 

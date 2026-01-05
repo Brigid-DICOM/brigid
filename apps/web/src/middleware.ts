@@ -106,6 +106,6 @@ export const config = {
         "/:lng/:workspaceId/dicom-studies/:path*",
         "/auth/signin",
         // Avoid matching for static files, API routes, etc.
-        "/((?!api|_next/static|_next/image|assets|favicon.ico|sw.js|site.webmanifest).*)",
+        "/((?!api|_next/static|_next/image|images|assets|favicon.ico|sw.js|site.webmanifest).*)",
     ],
 };
