@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.0](https://github.com/Brigid-DICOM/brigid/compare/v1.1.1...v1.2.0) (2026-01-05)
+
+
+### Features
+
+* **auth:** add GitHub and Google authentication providers ([1129375](https://github.com/Brigid-DICOM/brigid/commit/1129375d6511c5f40f6990ec62be9b277bc29d57))
+* **auth:** enhance sign-in page with error handling ([38bb149](https://github.com/Brigid-DICOM/brigid/commit/38bb1499aa208895fc97ba30564bb47e37bc98e0))
+
+
+### Bug Fixes
+
+* **database:** handle null values in bigint and textJson transformations ([1ab0ef0](https://github.com/Brigid-DICOM/brigid/commit/1ab0ef01afe1665bf2e07c9c10b200ecaeb11488))
+* **nav-user:** add full width class to sign out link in dropdown menu ([f060034](https://github.com/Brigid-DICOM/brigid/commit/f0600344c3c3323e0a9ae86c574a2aaa0da827ab))
+
+
+### Documentation
+
+* **readme:** first version of readme ([b576567](https://github.com/Brigid-DICOM/brigid/commit/b57656717803af5ffe5bb8889372b3489c86b1e0))
+* update readme ([5957778](https://github.com/Brigid-DICOM/brigid/commit/59577786417420eb14ad72288aa1ee12bb42e1b2))
+
+
+### Refactor
+
+* **images:** move guest avatar image into `images` folder ([bc4f5d5](https://github.com/Brigid-DICOM/brigid/commit/bc4f5d5449626ddbb54a82c0b42242e600e07e8a))
+
 ## [1.1.1](https://github.com/Brigid-DICOM/brigid/compare/v1.1.0...v1.1.1) (2026-01-03)
 
 
