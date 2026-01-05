@@ -94,6 +94,53 @@ docker compose up -d
 3. **存取服務**：
   預設情況下，可以透過 `http://localhost:3119` 進入系統
 
+## 環境變數 (Environment Variables)
+
+Brigid 使用 `.env` 檔案進行配置。以下是可用的環境變數說明：
+
+### 基礎設定
+
+| 變數名稱 | 說明 | 預設值 |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_APP_URL` | 應用程式的 URL| `http://localhost:3119` |
+| `JWT_SECRET` | 用於 JWT 簽名的金鑰 (至少 32 字元) | - |
+| `QUERY_MAX_LIMIT` | 查詢結果的最大限制 (預設 100) | 100 |
+
+### 資料庫與儲存
+
+| 變數名稱 | 說明 | 預設值 |
+| :--- | :--- | :--- |
+| `TYPEORM_CONNECTION` | 資料庫連線字串 | - |
+| `STORAGE_PROVIDER` | 儲存類型，可選擇 `local` 或 `s3` | - |
+| `STORE_LOCAL_DIR` | 當儲存類型為 `local` 時的檔案存放路徑 | - |
+| `S3_ENDPOINT` | S3 服務網址 (僅 S3) | - |
+| `S3_BUCKET` | S3 Bucket 名稱 (僅 S3) | - |
+| `S3_ACCESS_KEY` | S3 Access Key (僅 S3) | - |
+| `S3_SECRET_KEY` | S3 Secret Key (僅 S3) | - |
+
+### 身分驗證 (Authentication)
+
+| 變數名稱 | 說明 | 預設值 |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_ENABLE_AUTH` | 是否啟用身分驗證功能 | `false` |
+| `NEXTAUTH_SECRET` | NextAuth (Auth.js) 使用的金鑰 (至少 32 字元) | - |
+| `NEXTAUTH_URL` | NextAuth (Auth.js) 使用的 URL | `http://localhost:3119` |
+| `AUTH_TRUST_HOST` | 是否信任主機 (僅 NextAuth)，用於應用部屬在 reverse proxy 的環境 | `true` |
+
+> 關於不同 Provider (GitHub, Google, Casdoor) 的詳細設定，請參考 [授權系統整合](#授權系統整合) 章節
+
+### DICOM 與 DIMSE 設定
+
+| 變數名稱 | 說明 | 預設值 |
+| :--- | :--- | :--- |
+| `DICOM_STORAGE_FILEPATH` | DICOM 檔案儲存路徑，可使用參數 `workspaceId`, `0020000D`, `0020000E`, `00080018` 以及補上 `hash` 參數 (如： `{0020000D,hash}`) | `/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm` |
+| `DICOM_RECYCLE_BIN_RETENTION_DAYS` | 回收桶檔案保留天數 | `90` |
+| `DICOM_CLEANUP_RETENTION_DAYS` | 永久刪除檔案保留天數 | `30` |
+| `DICOM_CLEANUP_INTERVAL_HOURS` | 清理任務執行間隔 (小時) | `24` |
+| `DIMSE_HOSTNAME` | DIMSE 服務綁定主機 | `0.0.0.0` |
+| `DIMSE_PORT` | DIMSE 服務埠號 | `11112` |
+
+
 ## 授權系統整合
 
 Brigid 預設不啟用授權系統，若需要啟用，請在 `.env` 檔案中設定 `NEXT_PUBLIC_ENABLE_AUTH=true`，並設定相應的授權系統配置

@@ -103,6 +103,52 @@ By default, Brigid does not enable an authorization system. To enable it, set NE
 - Currently, Brigid supported authorization systems:
   - Casdoor
 
+## Environment Variables
+
+The project uses a `.env` file for configuration. Below are the available environment variables:
+
+### Base Settings
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_APP_URL` | The URL of the application | `http://localhost:3119` |
+| `JWT_SECRET` | The secret key for JWT signing (at least 32 characters) | - |
+| `QUERY_MAX_LIMIT` | The maximum limit for query results (default: 100) | `100` |
+
+### Database & Storage
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `TYPEORM_CONNECTION` | The connection string for the database | - |
+| `STORAGE_PROVIDER` | The storage provider, can be `local` or `s3` | - |
+| `STORAGE_LOCAL_DIR` | The directory for storing local files (when STORAGE_PROVIDER is `local`) | - |
+| `S3_ENDPOINT` | The endpoint for the S3 service (when STORAGE_PROVIDER is `s3`) | - |
+| `S3_BUCKET` | The name of the S3 bucket (when STORAGE_PROVIDER is `s3`) | - |
+| `S3_ACCESS_KEY` | The access key for the S3 service (when STORAGE_PROVIDER is `s3`) | - |
+| `S3_SECRET_KEY` | The secret key for the S3 service (when STORAGE_PROVIDER is `s3`) | - |
+
+### Authentication
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_ENABLE_AUTH` | Whether to enable the authentication system | `false` |
+| `NEXTAUTH_SECRET` | The secret key for NextAuth (Auth.js) | - |
+| `NEXTAUTH_URL` | The URL for NextAuth (Auth.js) | `http://localhost:3119` |
+| `AUTH_TRUST_HOST` | Whether to trust the host (only for NextAuth), used for deployment in reverse proxy environment | `true` |
+
+> For detailed configuration of different Providers (GitHub, Google, Casdoor), please refer to the [Authorization System Integration](#authorization-system-integration) section
+
+### DICOM & DIMSE Settings
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `DICOM_STORAGE_FILEPATH` | The path for storing DICOM files, can use parameters `workspaceId`, `0020000D`, `0020000E`, `00080018` and append `hash` parameter (e.g. `{0020000D,hash}`) | `/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm` |
+| `DICOM_RECYCLE_BIN_RETENTION_DAYS` | The retention period for files in the recycle bin (in days) | `90` |
+| `DICOM_CLEANUP_RETENTION_DAYS` | The retention period for files to be permanently deleted (in days) | `30` |
+| `DICOM_CLEANUP_INTERVAL_HOURS` | The interval for executing cleanup tasks (in hours) | `24` |
+| `DIMSE_HOSTNAME` | The hostname for binding the DIMSE service | `0.0.0.0` |
+| `DIMSE_PORT` | The port for binding the DIMSE service | `11112` |
+
 ### Casdoor
 
 ```toml
