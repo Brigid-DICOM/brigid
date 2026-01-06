@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.2](https://github.com/Brigid-DICOM/brigid/compare/v1.2.1...v1.2.2) (2026-01-06)
+
+
+### Bug Fixes
+
+* **env:** update environment variable access in layout component ([468c46c](https://github.com/Brigid-DICOM/brigid/commit/468c46cb1bae7c61edf759611fab82e620652093))
+
 ## [1.2.1](https://github.com/Brigid-DICOM/brigid/compare/v1.2.0...v1.2.1) (2026-01-06)
 
 
