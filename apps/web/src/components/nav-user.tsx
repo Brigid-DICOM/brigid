@@ -88,14 +88,12 @@ export function NavUser({
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
 
-                        {process.env.NEXT_PUBLIC_ENABLE_AUTH && (
-                            <DropdownMenuItem>
-                                <LogOutIcon className="mr-2 size-4" />
-                                <Link href="/api/auth/signout" className="w-full">
-                                    {t("auth.signOut")}
-                                </Link>
-                            </DropdownMenuItem>
-                        )}
+                        {typeof window !== "undefined" && (window as any).ENV?.NEXT_PUBLIC_ENABLE_AUTH && <DropdownMenuItem>
+                            <LogOutIcon className="mr-2 size-4" />
+                            <Link href="/api/auth/signout" className="w-full">
+                                {t("auth.signOut")}
+                            </Link>
+                        </DropdownMenuItem>}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
