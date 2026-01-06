@@ -92,3 +92,5 @@ apps/web/configs/logback.xml
 
 data/**/*.dll
 data/**/*.dylib
+
+apps/web/.env*
