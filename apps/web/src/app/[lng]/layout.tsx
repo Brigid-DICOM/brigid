@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
+import env from "@brigid/env";
 import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import { getT } from "@/app/_i18n";
@@ -16,6 +17,8 @@ const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
     subsets: ["latin"],
 });
+
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
     return languages.map((lng) => ({ lng }));
@@ -40,8 +43,8 @@ export default async function LanguageLayout({
     }>;
 }>) {
     const { lng } = await params;
-    const runtimeUrl = process.env.NEXT_PUBLIC_APP_URL;
-    const authEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTH === "true";
+    const runtimeUrl = env.NEXT_PUBLIC_APP_URL;
+    const authEnabled = env.NEXT_PUBLIC_ENABLE_AUTH;
 
     return (
         <html lang={lng}>
