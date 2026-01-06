@@ -102,6 +102,45 @@ By default, Brigid does not enable an authorization system. To enable it, set NE
 
 - Currently, Brigid supported authorization systems:
   - Casdoor
+  - GitHub
+  - Google
+
+### Casdoor
+
+```toml
+# AUTH
+NEXT_PUBLIC_ENABLE_AUTH=true
+NEXTAUTH_SECRET=your-secret-key
+AUTH_TRUST_HOST=true
+
+AUTH_CASDOOR_ID=casdoor_id
+AUTH_CASDOOR_SECRET=casdoor_secret
+AUTH_CASDOOR_ISSUER=https://casdoor.example.com
+```
+
+### GitHub
+
+```toml
+# AUTH
+NEXT_PUBLIC_ENABLE_AUTH=true
+NEXTAUTH_SECRET=your-secret-key
+AUTH_TRUST_HOST=true
+
+AUTH_GITHUB_ID=github_id
+AUTH_GITHUB_SECRET=github_secret
+```
+
+### Google
+
+```toml
+# AUTH
+NEXT_PUBLIC_ENABLE_AUTH=true
+NEXTAUTH_SECRET=your-secret-key
+AUTH_TRUST_HOST=true
+
+AUTH_GOOGLE_ID=google_id
+AUTH_GOOGLE_SECRET=google_secret
+```
 
 ## Environment Variables
 
@@ -148,19 +187,6 @@ The project uses a `.env` file for configuration. Below are the available enviro
 | `DICOM_CLEANUP_INTERVAL_HOURS` | The interval for executing cleanup tasks (in hours) | `24` |
 | `DIMSE_HOSTNAME` | The hostname for binding the DIMSE service | `0.0.0.0` |
 | `DIMSE_PORT` | The port for binding the DIMSE service | `11112` |
-
-### Casdoor
-
-```toml
-# AUTH
-NEXT_PUBLIC_ENABLE_AUTH=true
-NEXTAUTH_SECRET=your-secret-key
-AUTH_TRUST_HOST=true
-
-AUTH_CASDOOR_ID=casdoor_id
-AUTH_CASDOOR_SECRET=casdoor_secret
-AUTH_CASDOOR_ISSUER=https://casdoor.example.com
-```
 
 ## Project Motivation and Design Trade-offs
 
