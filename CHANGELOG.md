@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.1](https://github.com/Brigid-DICOM/brigid/compare/v1.2.0...v1.2.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* **env:** integrate environment variables into the application ([ffb0c24](https://github.com/Brigid-DICOM/brigid/commit/ffb0c24cbc60dc92a200d5ed706e8d7b9cb4fa1a))
+
+
+### Others
+
+* **docker:** update ignore file to include `.env` files ([3973f66](https://github.com/Brigid-DICOM/brigid/commit/3973f66dd0df848076aad2baa11b4d8ad4b2da7c))
+
+
+### Documentation
+
+* **readme:** update authentication system integration section of en version ([8949a04](https://github.com/Brigid-DICOM/brigid/commit/8949a04d0d4a6dd27559b5855ec90a2ace52813d))
+
 ## [1.2.0](https://github.com/Brigid-DICOM/brigid/compare/v1.1.1...v1.2.0) (2026-01-05)
 
 
