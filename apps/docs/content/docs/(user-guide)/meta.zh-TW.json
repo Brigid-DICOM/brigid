@@ -1,0 +1,11 @@
+{
+    "title": "使用者指南",
+    "description": "Brigid 使用者指南",
+    "icon": "Book",
+    "root": true,
+    "pages": [
+        "---開始入門---",
+        "index",
+        "core-features"
+    ]
+}

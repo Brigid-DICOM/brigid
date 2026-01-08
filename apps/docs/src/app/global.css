@@ -1,0 +1,92 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+@layer base {
+    :root {
+        /* --- Light Mode: 淺米色/奶油白 --- */
+        --fd-background: oklch(0.99 0.005 60);
+        --fd-foreground: oklch(0.15 0.015 60); /* 深棕色文字 */
+        --color-fd-background: var(--fd-background);
+        --color-fd-foreground: var(--fd-foreground);
+
+        /* 品牌色: 橙紅色 (來自您的 primary) */
+        --fd-primary: oklch(0.6 0.18 55);
+        --fd-primary-foreground: oklch(0.985 0 0); /* 白色文字 */
+        --color-fd-primary: var(--fd-primary);
+        --color-fd-primary-foreground: var(--fd-primary-foreground);
+
+        /* 靜態與次要元素 */
+        --fd-muted: oklch(0.97 0.005 60);
+        --fd-muted-foreground: oklch(0.556 0 0);
+        --color-fd-muted: var(--fd-muted);
+        --color-fd-muted-foreground: var(--fd-muted-foreground);
+
+        /* 容器與卡片 */
+        --fd-card: oklch(0.98 0.005 60);
+        --fd-card-foreground: var(--fd-foreground);
+        --fd-popover: oklch(1 0 0);
+        --color-fd-card: var(--fd-card);
+        --color-fd-card-foreground: var(--fd-card-foreground);
+        --color-fd-popover: var(--fd-popover);
+
+        /* 邊框與裝飾 */
+        --fd-border: oklch(0.922 0 0 / 0.5);
+        --fd-secondary: oklch(0.95 0.01 50);
+        --fd-secondary-foreground: var(--fd-foreground);
+        --color-fd-border: var(--fd-border);
+        --color-fd-secondary: var(--fd-secondary);
+        --color-fd-secondary-foreground: var(--fd-secondary-foreground);
+    }
+}
+
+/* 額外微調：確保標題與連結使用品牌色 */
+@layer components {
+    .prose h1,
+    .prose h2,
+    .prose h3 {
+        @apply text-fd-foreground font-bold;
+    }
+
+    /* 讓 Fumadocs 的 UI 元素更貼近您的主題 */
+    #nd-sidebar {
+        --fd-background: var(--fd-background);
+        --fd-border: var(--fd-border);
+    }
+}
+
+.dark {
+    /* --- Dark Mode: 深紅棕色 --- */
+    --fd-background: oklch(0.1 0.01 60);
+    --fd-foreground: oklch(0.985 0 0); /* 亮白色文字 */
+    --color-fd-background: var(--fd-background);
+    --color-fd-foreground: var(--fd-foreground);
+
+    /* 品牌色: 亮橙紅色 */
+    --fd-primary: oklch(0.7 0.15 55);
+    --fd-primary-foreground: oklch(0.1 0 0); /* 深色文字 */
+    --color-fd-primary: var(--fd-primary);
+    --color-fd-primary-foreground: var(--fd-primary-foreground);
+
+    /* 靜態與次要元素 */
+    --fd-muted: oklch(0.15 0.01 60);
+    --fd-muted-foreground: oklch(0.708 0 0);
+    --color-fd-muted: var(--fd-muted);
+    --color-fd-muted-foreground: var(--fd-muted-foreground);
+
+    /* 容器與卡片 */
+    --fd-card: oklch(0.12 0.01 60);
+    --fd-card-foreground: var(--fd-foreground);
+    --fd-popover: oklch(0.11 0.01 60);
+    --color-fd-popover: var(--fd-popover);
+    --color-fd-card: var(--fd-card);
+    --color-fd-card-foreground: var(--fd-card-foreground);
+
+    /* 邊框與裝飾 */
+    --fd-border: oklch(0.3 0.01 60 / 0.3);
+    --fd-secondary: oklch(0.2 0.01 60);
+    --fd-secondary-foreground: var(--fd-foreground);
+    --color-fd-border: var(--fd-border);
+    --color-fd-secondary: var(--fd-secondary);
+    --color-fd-secondary-foreground: var(--fd-secondary-foreground);
+}
