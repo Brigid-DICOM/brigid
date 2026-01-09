@@ -19,6 +19,11 @@ export async function register() {
         );
 
         await initializeDb();
+        if (!env.NEXT_PUBLIC_ENABLE_AUTH) {
+            const { WorkspaceService } = await import("@/server/services/workspace.service");
+            const workspaceService = new WorkspaceService();
+            await workspaceService.getOrCreateSystemWorkspace();
+        }
 
         const jrePath = path.join(getWritableRoot(), "jre");
         console.log("jrePath", jrePath);
