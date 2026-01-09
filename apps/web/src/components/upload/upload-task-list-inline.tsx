@@ -120,7 +120,7 @@ export function UploadTaskListInLine() {
                 <div className="flex gap-4 text-xs text-muted-foreground">
                     {activeTasksCount > 0 && (
                         <span>
-                            {t("upload.uploading")} {activeTasksCount}
+                            {t("upload.uploading", { count: activeTasksCount })}
                         </span>
                     )}
                     {validCount > 0 && (
