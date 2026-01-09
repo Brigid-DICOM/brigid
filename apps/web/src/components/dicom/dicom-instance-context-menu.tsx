@@ -381,7 +381,7 @@ export function DicomInstanceContextMenu({
                             {canRead && (
                                 <ContextMenuSub>
                                     <ContextMenuSubTrigger>
-                                        <DownloadIcon className="size-4 mr-2" />
+                                        <DownloadIcon className="size-4 mr-4" />
                                         <span>
                                             {t("dicom.contextMenu.download")}
                                         </span>
@@ -437,7 +437,7 @@ export function DicomInstanceContextMenu({
 
                                     <ContextMenuItem
                                         onClick={handleRecycle}
-                                        className="flex items-center"
+                                        className="flex items-center space-x-2"
                                     >
                                         <Trash2Icon className="size-4" />
                                         <span>
