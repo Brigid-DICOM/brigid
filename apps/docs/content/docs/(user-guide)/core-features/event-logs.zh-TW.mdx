@@ -1,0 +1,28 @@
+---
+title: 事件日誌
+description: Brigid 的事件日誌功能介紹
+---
+
+![Event Logs preview screenshot](event-logs.png)
+
+Brigid 內建事件日誌系統，記錄平台運行的各項操作。管理員可透過日誌監控系統狀態、追蹤使用者行為，並在發生異常時進行快速排錯
+
+## 事件日誌功能
+
+- **日誌檢視**：即時查看系統產生的所有事件記錄
+- **多維度篩選**：
+  - **層級過濾 (Level Filter)**：支援 Info (資訊)、Warning (警告) 及 Error (錯誤) 三種等級，幫助快速鎖定異常
+  - **事件名稱搜尋 (Name Filter)**：可針對特定的 DICOM 操作行為進行精確檢索
+
+## 支援的事件類型 (Event Names)
+
+為了便於管理與精確排錯，Brigid 將 DICOM 相關事件細分為以下類別。您可以根據這些特定的事件名稱進行篩選：
+
+| 分類 | 支援的事件名稱 (Event Name) |
+| :--- | :--- |
+| **資料儲存 (Storage)** | `storeInstance` |
+| **影像查詢 (Search)** | `searchStudies`, `searchSeries`, `searchInstances`, `searchStudySeries`, `searchStudySeriesInstances` |
+| **影像檢索 (Retrieve)** | `retrieveStudy`, `retrieveSeries`, `retrieveInstance` |
+| **視覺化影像檢索 (Rendered)** | `retrieveRenderedSeries`, `retrieveRenderedInstance`, `retrieveRenderedFrames`, `retrieveFramePixelData` |
+| **縮圖獲取 (Thumbnail)** | `retrieveStudyThumbnail`, `retrieveSeriesThumbnail`, `retrieveInstanceThumbnail` |
+| **中繼資料 (Metadata)** | `retrieveStudyMetadata`, `retrieveSeriesMetadata`, `retrieveInstanceMetadata` |
