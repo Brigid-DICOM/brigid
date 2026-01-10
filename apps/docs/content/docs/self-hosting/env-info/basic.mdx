@@ -1,0 +1,57 @@
+---
+title: Basic Environment Variables
+description: Brigid Basic Environment Variables
+---
+
+## General Environment Variables
+
+### `JWT_SECRET`
+
+- Type: string (required)
+- Description: The secret key for JWT signing (at least 32 characters)
+- Default: None
+- Example: `a-very-long-and-secure-random-string-at-least-32-chars`
+
+### `TYPEORM_CONNECTION`
+
+- Type: string (required)
+- Description: The connection string for the database (Connection String)
+- Default: None
+- Example: `postgres://user:password@localhost:5432/brigid` or `better-sqlite3://./bridge-local-db/data.db`
+
+### `NEXT_PUBLIC_APP_URL`
+
+- Type: string (optional)
+- Description: The public URL of the application, used for CORS and return paths
+- Default: `http://localhost:3119`
+- Example: `https://brigid.example.com`
+
+## DICOM Environment Variables
+
+### `QUERY_MAX_LIMIT`
+
+- Type: number (optional)
+- Description: The maximum limit for query results
+- Default: `100`
+- Example: `100`
+
+### `DICOM_RECYCLE_BIN_RETENTION_DAYS`
+
+- Type: number (optional)
+- Description: The retention period for files in the recycle bin (in days)
+- Default: `90`
+- Example: `90`
+
+### `DICOM_CLEANUP_RETENTION_DAYS`
+
+- Type: number (optional)
+- Description: The retention period for files to be permanently deleted (in days)
+- Default: `30`
+- Example: `30`
+
+### `DICOM_CLEANUP_INTERVAL_HOURS`
+
+- Type: number (optional)
+- Description: The interval for executing cleanup tasks (in hours)
+- Default: `24`
+- Example: `24`

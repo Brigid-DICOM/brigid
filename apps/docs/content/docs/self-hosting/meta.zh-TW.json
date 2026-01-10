@@ -1,0 +1,13 @@
+{
+    "title": "自架服務",
+    "description": "自架 Brigid 服務",
+    "icon": "Server",
+    "root": true,
+    "pages": [
+        "---開始部署---",
+        "get-started",
+        "---配置說明---",
+        "configuration",
+        "env-info"
+    ]
+}

@@ -1,5 +1,6 @@
 {
     "pages": [
-        "(user-guide)"
+        "(user-guide)",
+        "self-hosting"
     ]
 }

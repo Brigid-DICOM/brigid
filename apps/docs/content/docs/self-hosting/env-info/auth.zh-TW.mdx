@@ -1,0 +1,84 @@
+---
+title: 身分驗證
+description: Brigid 身分驗證環境變數說明
+---
+
+##  Next Auth 身分驗證環境變數
+
+### 通用設置
+
+#### `NEXT_PUBLIC_ENABLE_AUTH`
+
+- 類型：boolean (optional)
+- 描述：是否啟用身分驗證功能
+- 預設值：`false`
+- 範例：`true`
+
+#### `NEXTAUTH_SECRET`
+
+- 類型：string (required)
+- 描述：NextAuth (Auth.js) 使用的金鑰 (至少 32 字元)
+- 預設值：無
+- 範例：`a-very-long-and-secure-random-string-at-least-32-chars`
+
+#### `NEXTAUTH_URL`
+
+- 類型：string (optional)
+- 描述：NextAuth (Auth.js) 使用的 URL
+- 預設值：`http://localhost:3119`
+- 範例：`https://brigid.example.com`
+
+### Casdoor
+
+#### `AUTH_CASDOOR_ID`
+
+- 類型：string (optional)
+- 描述：Casdoor 的 Client ID
+- 預設值：無
+- 範例：`casdoor_id`
+
+#### `AUTH_CASDOOR_SECRET`
+
+- 類型：string (optional)
+- 描述：Casdoor 的 Secret
+- 預設值：無
+- 範例：`casdoor_secret`
+
+#### `AUTH_CASDOOR_ISSUER`
+
+- 類型：string (optional)
+- 描述：Casdoor 的 Issuer (通常是 Casdoor 的 URL)
+- 預設值：無
+- 範例：`https://casdoor.example.com`
+
+### GitHub
+
+#### `AUTH_GITHUB_ID`
+
+- 類型：string (optional)
+- 描述：GitHub 的 Client ID
+- 預設值：無
+- 範例：`github_id`
+
+#### `AUTH_GITHUB_SECRET`
+
+- 類型：string (optional)
+- 描述：GitHub 的 Secret
+- 預設值：無
+- 範例：`github_secret`
+
+### Google
+
+#### `AUTH_GOOGLE_ID`
+
+- 類型：string (optional)
+- 描述：Google 的 Client ID
+- 預設值：無
+- 範例：`google_id`
+
+#### `AUTH_GOOGLE_SECRET`
+
+- 類型：string (optional)
+- 描述：Google 的 Secret
+- 預設值：無
+- 範例：`google_secret`

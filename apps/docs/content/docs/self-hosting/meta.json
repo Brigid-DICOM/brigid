@@ -1,0 +1,13 @@
+{
+    "title": "Self Hosting",
+    "description": "Self Hosting for Brigid",
+    "icon": "Server",
+    "root": true,
+    "pages": [
+        "---Start Deploying---",
+        "get-started",
+        "---Configuration---",
+        "configuration",
+        "env-info"
+    ]
+}

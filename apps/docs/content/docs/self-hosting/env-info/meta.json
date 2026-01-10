@@ -1,0 +1,10 @@
+{
+    "title": "Environment Variables",
+    "description": "Brigid Environment Variables",
+    "pages": [
+        "basic",
+        "auth",
+        "storage",
+        "dimse"
+    ]
+}

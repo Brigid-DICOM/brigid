@@ -1,0 +1,52 @@
+---
+title: 使用單一執行檔
+description: 使用單一執行檔執行 Brigid
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+## 執行步驟
+
+Brigid 提供單一執行檔的版本，你可以在 [Releases](https://github.com/Brigid-DICOM/brigid/releases) 頁面下載 Brigid 的單一執行檔
+
+<Steps>
+    <Step>
+        ### 下載單一執行檔
+
+        進入 [Releases](https://github.com/Brigid-DICOM/brigid/releases) 頁面，下載 Brigid 的單一執行檔
+
+        <Callout title="注意">
+            如果你想使用系統的 JRE，可以下載不含 JRE 的版本，且必須確認以下事項：
+                - 在 JRE 的 `lib` (windows 為 `bin`) 目錄下，放置 OpenCV 的函式庫，可參考[手動配置 OpenCV 函式庫](#手動配置-opencv-函式庫)
+                - Java 版本 >= 17
+        </Callout>
+    </Step>
+
+    <Step>
+        ### 解壓縮
+    </Step>
+
+    <Step>
+        ### 執行
+
+        執行 `brigid-server` 檔案啟動 Brigid 服務
+        
+        接下來，打開 `http://localhost:3119` 即可進入 Brigid 系統
+    </Step>
+</Steps>
+
+## 手動配置 OpenCV 函式庫
+
+如果選擇**不含 JRE 的版本**，請務必手動配置所需的 OpenCV 函式庫，否則部分功能將無法正常運作
+
+### Windows
+
+- 請將 `data/dcm4che/lib/windows-x86-64/opencv_java.dll` 複製到 JRE 的 `bin` 目錄
+
+### Linux
+
+- 請將 `data/dcm4che/lib/linux-x86-64/libclib_jiio.so` 與 `data/dcm4che/lib/linux-x86-64/libopencv_java.so` 複製到 JRE 的 `lib` 目錄
+
+### macOS
+
+- 請將 `data/dcm4che/lib/macosx-x86-64/*libopencv_java.dylib` 複製到 JRE 的 `lib` 目錄

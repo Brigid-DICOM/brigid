@@ -1,0 +1,10 @@
+{
+    "title": "環境變數",
+    "description": "Brigid 環境變數說明",
+    "pages": [
+        "basic",
+        "auth",
+        "storage",
+        "dimse"
+    ]
+}

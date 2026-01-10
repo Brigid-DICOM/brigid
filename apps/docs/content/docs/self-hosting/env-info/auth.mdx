@@ -1,0 +1,84 @@
+---
+title: Authentication
+description: Brigid Authentication Environment Variables
+---
+
+## Next Auth Authentication Environment Variables
+
+### General Settings
+
+#### `NEXT_PUBLIC_ENABLE_AUTH`
+
+- Type: boolean (optional)
+- Description: Whether to enable the authentication system
+- Default: `false`
+- Example: `true`
+
+#### `NEXTAUTH_SECRET`
+
+- Type: string (required)
+- Description: The secret key for NextAuth (Auth.js)
+- Default: None
+- Example: `a-very-long-and-secure-random-string-at-least-32-chars`
+
+#### `NEXTAUTH_URL`
+
+- Type: string (optional)
+- Description: The URL for NextAuth (Auth.js)
+- Default: `http://localhost:3119`
+- Example: `https://brigid.example.com`
+
+### Casdoor
+
+#### `AUTH_CASDOOR_ID`
+
+- Type: string (optional)
+- Description: The Client ID for Casdoor
+- Default: None
+- Example: `casdoor_id`
+
+#### `AUTH_CASDOOR_SECRET`
+
+- Type: string (optional)
+- Description: The Secret for Casdoor
+- Default: None
+- Example: `casdoor_secret`
+
+#### `AUTH_CASDOOR_ISSUER`
+
+- Type: string (optional)
+- Description: The Issuer for Casdoor (usually the URL of Casdoor)
+- Default: None
+- Example: `https://casdoor.example.com`
+
+### GitHub
+
+#### `AUTH_GITHUB_ID`
+
+- Type: string (optional)
+- Description: The Client ID for GitHub
+- Default: None
+- Example: `github_id`
+
+#### `AUTH_GITHUB_SECRET`
+
+- Type: string (optional)
+- Description: The Secret for GitHub
+- Default: None
+- Example: `github_secret`
+
+### Google
+
+#### `AUTH_GOOGLE_ID`
+
+- Type: string (optional)
+- Description: The Client ID for Google
+- Default: None
+- Example: `google_id`
+
+#### `AUTH_GOOGLE_SECRET`
+
+- Type: string (optional)
+- Description: The Secret for Google
+- Default: None
+- Example: `google_secret`

@@ -1,0 +1,150 @@
+---
+title: DIMSE Service
+description: Brigid DIMSE Service Environment Variables
+---
+
+## DIMSE Service Environment Variables
+
+### General Settings
+
+#### `DIMSE_HOSTNAME`
+
+- Type: string (required)
+- Description: The hostname to bind the DIMSE service
+- Default: `0.0.0.0`
+- Example: `127.0.0.1`
+
+#### `DIMSE_PORT`
+
+- Type: number (required)
+- Description: The port to bind the DIMSE service
+- Default: `11112`
+- Example: `11112`
+
+#### `DIMSE_MAX_PDU_LEN_RCV`
+
+- Type: number (required)
+- Description: The maximum length of the PDU received by the DIMSE service
+- Default: `16378`
+- Example: `16378`
+
+#### `DIMSE_MAX_PDU_LEN_SND`
+
+- Type: number (required)
+- Description: The maximum length of the PDU sent by the DIMSE service
+- Default: `16378`
+- Example: `16378`
+
+#### `DIMSE_NOT_ASYNC`
+
+- Type: boolean (required)
+- Description: Whether the DIMSE service is asynchronous
+- Default: `false`
+- Example: `true`
+
+#### `DIMSE_MAX_OPS_INVOKED`
+
+- Type: number (required)
+- Description: The maximum number of operations invoked by the DIMSE service
+- Default: `0`
+- Example: `100`
+
+#### `DIMSE_MAX_OPS_PERFORMED`
+
+- Type: number (required)
+- Description: The maximum number of operations performed by the DIMSE service
+- Default: `0`
+- Example: `100`
+
+#### `DIMSE_NOT_PACK_PDV`
+
+- Type: boolean (required)
+- Description: Send only one PDV in one P-Data-TF PDU; pack command and data PDV in one P-DATA-TF PDU by default
+- Default: `false`
+- Example: `true`
+
+#### `DIMSE_CONNECT_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service connection (TCP) (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_REQUEST_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service request (A-ASSOCIATE-RQ) (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_ACCEPT_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service accept (A-ASSOCIATE-AC) (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_RELEASE_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service release (A-RELEASE-RP) (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_SEND_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service send (DIMSE RQs except C-STORE) (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_STORE_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service store (C-STORE) (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_RESPONSE_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service response (DIMSE RSPs, C-MOVE, C-GET except) (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_IDLE_TIMEOUT`
+
+- Type: number (required)
+- Description: The timeout for the DIMSE service idle (milliseconds)
+- Default: `0`
+- Example: `1000`
+
+#### `DIMSE_SO_CLOSE_DELAY`
+
+- Type: number (required)
+- Description: The delay for the DIMSE service socket close (milliseconds)
+- Default: `50`
+- Example: `50`
+
+#### `DIMSE_SO_SND_BUFFER`
+
+- Type: number (required)
+- Description: The size of the send buffer for the DIMSE service socket (bytes)
+- Default: `0`
+- Example: `1024`
+
+#### `DIMSE_SO_RCV_BUFFER`
+
+- Type: number (required)
+- Description: The size of the receive buffer for the DIMSE service socket (bytes)
+- Default: `0`
+- Example: `1024`
+
+#### `DIMSE_TCP_NO_DELAY`
+
+- Type: boolean (required)
+- Description: Whether the DIMSE service uses TCP No Delay
+- Default: `true`
+- Example: `true`
+
+Brigid's DIMSE service is implemented using the Dcm4che package, please refer to [Dcm4che QRSCP](https://github.com/dcm4che/dcm4che/blob/master/dcm4che-tool/dcm4che-tool-dcmqrscp/README.md) for detailed environment variables.

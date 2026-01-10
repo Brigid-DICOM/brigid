@@ -1,0 +1,50 @@
+---
+title: Using SEA (Single Executable Application)
+description: Using SEA (Single Executable Application) to run Brigid
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+## Execution Steps
+
+Brigid provides a single executable version, which you can download from the [Releases](https://github.com/Brigid-DICOM/brigid/releases) page.
+
+<Steps>
+    <Step>
+        ### Download the single executable file
+
+        Go to the [Releases](https://github.com/Brigid-DICOM/brigid/releases) page, and download the single executable file.
+
+        <Callout title="Note">
+            If you want to use the system JRE, you can download the version without JRE, and you must ensure the following:
+            - Put the OpenCV libraries in the `lib` (windows is `bin`) directory of the JRE, you can refer to [Manual Configuration of OpenCV Libraries](#manual-configuration-of-opencv-libraries)
+            - Java version >= 17
+        </Callout>
+    </Step>
+    <Step>
+        ### Extract the files
+    </Step>
+    <Step>
+        ### Run
+
+        Run the `brigid-server` file to start the Brigid service
+
+        Then, open `http://localhost:3119` to enter the Brigid system
+    </Step>
+</Steps>
+
+## Manual Configuration of OpenCV Libraries
+
+If you choose the version **without an embedded JRE**, you must manually configure the required OpenCV libraries; otherwise, some features may not function properly.
+
+### Windows
+
+- Copy `data/dcm4che/lib/windows-x86-64/opencv_java.dll` to the `bin` directory of the JRE
+
+### Linux
+
+- Copy `data/dcm4che/lib/linux-x86-64/libclib_jiio.so` and `data/dcm4che/lib/linux-x86-64/libopencv_java.so` to the `lib` directory of the JRE
+
+### macOS
+
+- Copy `data/dcm4che/lib/macosx-x86-64/*libopencv_java.dylib` to the `lib` directory of the JRE

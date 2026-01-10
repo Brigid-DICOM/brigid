@@ -1,0 +1,150 @@
+---
+title: DIMSE 服務
+description: Brigid DIMSE 服務環境變數說明
+---
+
+## DIMSE Service Environment Variables
+
+### 通用設置
+
+#### `DIMSE_HOSTNAME`
+
+- 類型：string (required)
+- 描述：DIMSE 服務綁定主機
+- 預設值：`0.0.0.0`
+- 範例：`127.0.0.1`
+
+#### `DIMSE_PORT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務綁定埠號
+- 預設值：`11112`
+- 範例：`11112`
+
+#### `DIMSE_MAX_PDU_LEN_RCV`
+
+- 類型：number (required)
+- 描述：DIMSE 服務接收 PDU 最大長度
+- 預設值：`16378`
+- 範例：`16378`
+
+#### `DIMSE_MAX_PDU_LEN_SND`
+
+- 類型：number (required)
+- 描述：DIMSE 服務發送 PDU 最大長度
+- 預設值：`16378`
+- 範例：`16378`
+
+#### `DIMSE_NOT_ASYNC`
+
+- 類型：boolean (required)
+- 描述：DIMSE 服務是否為非同步模式
+- 預設值：`false`
+- 範例：`true`
+
+#### `DIMSE_MAX_OPS_INVOKED`
+
+- 類型：number (required)
+- 描述：DIMSE 服務最大操作數
+- 預設值：`0`
+- 範例：`100`
+
+#### `DIMSE_MAX_OPS_PERFORMED`
+
+- 類型：number (required)
+- 描述：DIMSE 服務最大操作數
+- 預設值：`0`
+- 範例：`100`
+
+#### `DIMSE_NOT_PACK_PDV`
+
+- 類型：boolean (required)
+- 描述：在單一 P-Data-TF PDU 中只發送一個 PDV；預設為命令和資料 PDV 打包在一個 P-DATA-TF PDU 中
+- 預設值：`false`
+- 範例：`true`
+
+#### `DIMSE_CONNECT_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務連接 (TCP) 超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_REQUEST_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務接收 (A-ASSOCIATE-RQ) 超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_ACCEPT_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務接受 (A-ASSOCIATE-AC) 超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_RELEASE_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務釋放 (A-RELEASE-RP) 超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_SEND_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務發送 DIMSE RQs (C-STORE 除外) 超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_STORE_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務儲存 (C-STORE) 超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_RESPONSE_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務接收 (DIMSE RSPs, C-MOVE, C-GET 除外) 回應超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_IDLE_TIMEOUT`
+
+- 類型：number (required)
+- 描述：DIMSE 服務停止 Association 閒置超時時間 (毫秒)
+- 預設值：`0`
+- 範例：`1000`
+
+#### `DIMSE_SO_CLOSE_DELAY`
+
+- 類型：number (required)
+- 描述：DIMSE 服務關閉延遲時間 (毫秒)
+- 預設值：`50`
+- 範例：`50`
+
+#### `DIMSE_SO_SND_BUFFER`
+
+- 類型：number (required)
+- 描述：DIMSE 服務發送緩衝區大小 (bytes)
+- 預設值：`0`
+- 範例：`1024`
+
+#### `DIMSE_SO_RCV_BUFFER`
+
+- 類型：number (required)
+- 描述：DIMSE 服務接收緩衝區大小 (bytes)
+- 預設值：`0`
+- 範例：`1024`
+
+#### `DIMSE_TCP_NO_DELAY`
+
+- 類型：boolean (required)
+- 描述：DIMSE 服務是否使用 TCP No Delay
+- 預設值：`true`
+- 範例：`true`
+
+Brigid 的 DIMSE 服務使用 Dcm4che 套件實現，詳細環境變數可參照 [Dcm4che QRSCP](https://github.com/dcm4che/dcm4che/blob/master/dcm4che-tool/dcm4che-tool-dcmqrscp/README.md)

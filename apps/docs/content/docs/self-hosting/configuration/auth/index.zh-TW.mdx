@@ -1,0 +1,33 @@
+---
+title: 身分驗證
+description: Brigid 身分驗證配置說明
+---
+
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
+Brigid 預設不啟用身分驗證功能，若需要啟用，請在 `.env` 檔案中設定 `NEXT_PUBLIC_ENABLE_AUTH=true`，並設定相應的身分驗證配置
+
+Brigid 支持使用 Next Auth (Auth.js) 配置外部身分驗證系統，供組織內部使用，統一管理使用者授權
+
+## Next Auth
+
+在使用 Next Auth 之前，請先在 Brigid 的 `.env` 檔案中設定 `NEXT_PUBLIC_ENABLE_AUTH=true`，並設定相應的身分驗證配置
+
+以下是 Brigid 的 Next Auth 環境變數：
+
+| 環境變數 | 類型 | 描述 |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_ENABLE_AUTH` | boolean | 是否啟用身分驗證功能 |
+| `NEXTAUTH_SECRET` | string | NextAuth (Auth.js) 使用的金鑰 (至少 32 字元) |
+| `NEXTAUTH_URL` | string | NextAuth (Auth.js) 使用的 URL |
+
+### 目前支持的身分驗證系統
+
+<Cards>
+  {getPageTreePeers(source.getPageTree('zh-TW'), '/zh-TW/docs/self-hosting/configuration/auth').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
+</Cards>

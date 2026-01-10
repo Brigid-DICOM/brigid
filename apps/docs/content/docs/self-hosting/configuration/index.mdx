@@ -1,0 +1,15 @@
+---
+title: Advanced Usage
+description: Brigid Advanced Usage description
+---
+
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
+<Cards>
+  {getPageTreePeers(source.getPageTree('en'), '/en/docs/self-hosting/configuration').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
+</Cards>

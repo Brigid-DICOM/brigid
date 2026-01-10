@@ -1,0 +1,58 @@
+---
+title: 基本環境變數
+description: Brigid 基本環境變數說明
+---
+
+## 通用環境變數
+
+### `JWT_SECRET`
+
+- 類型：string (required)
+- 描述：用於加密與驗證應用程式內部 JWT Token 的私鑰。長度需在 32 到 255 字元之間
+- 預設值：無
+- 範例：`a-very-long-and-secure-random-string-at-least-32-chars`
+
+### `TYPEORM_CONNECTION`
+
+- 類型：string (required)
+- 描述：資料庫連接字串（Connection String），用於 TypeORM 連接資料庫
+- 預設值：無
+- 範例：`postgres://user:password@localhost:5432/brigid` 或 `better-sqlite3://./bridge-local-db/data.db`
+
+### `NEXT_PUBLIC_APP_URL`
+
+- 類型：string (optional)
+- 描述：應用程式的前端公開網址，用於 CORS 以及回傳路徑
+- 預設值：`http://localhost:3119`
+- 範例：`https://brigid.example.com`
+
+
+## DICOM 環境變數
+
+### `QUERY_MAX_LIMIT`
+
+- 類型：number (optional)
+- 描述：查詢結果的最大限制
+- 預設值：`100`
+- 範例：`100`
+
+### `DICOM_RECYCLE_BIN_RETENTION_DAYS`
+
+- 類型：number (optional)
+- 描述：回收桶檔案保留天數
+- 預設值：`90`
+- 範例：`90`
+
+### `DICOM_CLEANUP_RETENTION_DAYS`
+
+- 類型：number (optional)
+- 描述：永久刪除檔案保留天數
+- 預設值：`30`
+- 範例：`30`
+
+### `DICOM_CLEANUP_INTERVAL_HOURS`
+
+- 類型：number (optional)
+- 描述：清理任務執行間隔 (小時)
+- 預設值：`24`
+- 範例：`24`

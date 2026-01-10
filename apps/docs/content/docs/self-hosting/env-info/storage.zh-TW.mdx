@@ -1,0 +1,61 @@
+---
+title: 儲存服務
+description: Brigid 儲存服務環境變數說明
+---
+
+## 儲存服務環境變數
+
+### 通用設置
+
+#### `DICOM_STORAGE_FILEPATH`
+
+- 類型：string (required)
+- 描述：DICOM 檔案儲存路徑，可使用參數 `workspaceId`, `0020000D`, `0020000E`, `00080018` 以及補上 `hash` 參數 (如： `{0020000D,hash}`)
+- 預設值：`/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm`
+- 範例：`/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm`
+
+#### `STORAGE_PROVIDER`
+
+- 類型：string (required)
+- 描述：儲存服務提供者，可選擇 `local` 或 `s3`
+- 預設值：`local`
+- 範例：`s3`
+
+### 本地儲存 (local) 設置
+
+#### `STORAGE_LOCAL_DIR`
+
+- 類型：string (required)
+- 描述：檔案存放路徑
+- 預設值：`./dicom-files`
+- 範例：`./dicom-files`
+
+### S3 設置
+
+#### `S3_ENDPOINT`
+
+- 類型：string (required)
+- 描述：S3 服務網址
+- 預設值：無
+- 範例：`http://localhost:9000`
+
+#### `S3_BUCKET`
+
+- 類型：string (required)
+- 描述：S3 Bucket 名稱
+- 預設值：無
+- 範例：`brigid`
+
+#### `S3_ACCESS_KEY`
+
+- 類型：string (required)
+- 描述：S3 Access Key
+- 預設值：無
+- 範例：`access_key`
+
+#### `S3_SECRET_KEY`
+
+- 類型：string (required)
+- 描述：S3 Secret Key
+- 預設值：無
+- 範例：`secret_key`

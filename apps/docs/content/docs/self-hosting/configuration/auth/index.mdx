@@ -1,0 +1,20 @@
+---
+title: Authentication
+description: Brigid Authentication Configuration
+---
+
+Brigid do not enable authentication by default, if you need to enable it, please set `NEXT_PUBLIC_ENABLE_AUTH=true` in the `.env` file and configure the corresponding authentication settings
+
+Brigid supports using Next Auth (Auth.js) to configure external authentication systems for internal use, unified management of user authorization
+
+## Next Auth
+
+Before using Next Auth, please set `NEXT_PUBLIC_ENABLE_AUTH=true` in the `.env` file and configure the corresponding authentication settings
+
+Below are the environment variables for Next Auth in Brigid:
+
+| Environment Variable | Type | Description |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_ENABLE_AUTH` | boolean | Whether to enable the authentication system |
+| `NEXTAUTH_SECRET` | string | The secret key for NextAuth (Auth.js) |
+| `NEXTAUTH_URL` | string | The URL for NextAuth (Auth.js) |

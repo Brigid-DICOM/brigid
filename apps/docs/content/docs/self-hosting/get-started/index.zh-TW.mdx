@@ -1,0 +1,15 @@
+---
+title: 快速部署
+description: Brigid 自架服務快速部屬
+---
+
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
+<Cards>
+  {getPageTreePeers(source.getPageTree('zh-TW'), '/zh-TW/docs/self-hosting/get-started').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
+</Cards>
