@@ -3,4 +3,48 @@ title: GitHub
 description: GitHub Authentication Configuration for Brigid
 ---
 
-TODO: add github authentication configuration setup steps
+import { Steps, Step } from "fumadocs-ui/components/steps";
+
+## GitHub OAuth Configuration Steps
+
+<Steps>
+    <Step>
+        ## Create OAuth App
+
+        - Navigate to [GitHub Developer Settings](https://github.com/settings/developers)
+        - Click "New OAuth App"
+        - Fill in the "Application Name", "Homepage URL", and "Authorization Callback URL"
+        - Click "Register application"
+        ![GitHub Developer Settings - New OAuth App](github-register-oauth-app.png)
+    </Step>
+
+    <Step>
+        ## Get Client ID and Client Secret
+
+        - Navigate to the recently created OAuth App page
+        - Click "Generate a new client secret"
+        ![GitHub Developer Settings - Generate Client Secret](github-generate-secret.png)
+        - After creation, copy the "`Client ID`" and "`Client Secret`"
+        ![GitHub Developer Settings - Client Secret](github-client-secret.png)
+    </Step>
+
+    <Step>
+        ## Set Up Brigid Environment Variables
+
+        - Set the "Client ID" and "Client Secret" in the `.env` file as the `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET` environment variables
+
+        When enabling Next Auth authentication, you need to configure the following environment variables:
+
+        | Environment Variable | Type | Description |
+        | :--- | :--- | :--- |
+        | `NEXT_PUBLIC_ENABLE_AUTH` | boolean | Whether to enable the authentication system |
+        | `NEXTAUTH_SECRET` | string | NextAuth (Auth.js) used secret key (at least 32 characters) |
+        | `NEXTAUTH_URL` | string | NextAuth (Auth.js) used URL, usually the URL of your application |
+        | `AUTH_GITHUB_ID` | string | GitHub Client ID |
+        | `AUTH_GITHUB_SECRET` | string | GitHub Client Secret |
+
+        <Callout type="info">
+        Visit [Environment Variables](/en/docs/self-hosting/env-info/auth) for more information about environment variables
+        </Callout>
+    </Step>
+</Steps>
