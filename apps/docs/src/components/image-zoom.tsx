@@ -35,6 +35,7 @@ export function ImageZoom({ zoomInProps, children, rmiz, ...props }: ImageZoomPr
       zoomMargin={20}
       wrapElement="span"
       {...rmiz}
+      // @ts-expect-error
       zoomImg={{
         src: getImageSrc(props.src),
         sizes: undefined,
