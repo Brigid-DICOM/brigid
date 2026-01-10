@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.3](https://github.com/Brigid-DICOM/brigid/compare/v1.2.2...v1.2.3) (2026-01-10)
+
+
+### Bug Fixes
+
+* **dicom:** adjust spacing in context menu icons for improved layout ([e906fa9](https://github.com/Brigid-DICOM/brigid/commit/e906fa9f54c37f8a6051da046d40b4c923c6de8d))
+* **upload:** update upload task count display to use translation parameters ([a0cd4c6](https://github.com/Brigid-DICOM/brigid/commit/a0cd4c6e0e8ac736f0f93b48d2e3306cca676a95))
+* **workspace:** fix 404 when guest access another own workspace ([c3df773](https://github.com/Brigid-DICOM/brigid/commit/c3df773a958097aaa7ec9a5f4f93eaf9f582d4ab))
+
+
+### Documentation
+
+* **fd:** add `Casdoor OAuth Configuration Steps` in next auth configuration ([4d488ff](https://github.com/Brigid-DICOM/brigid/commit/4d488ff834851ea776d9afeb84a4a7b2a4b6cb30))
+* **fd:** add `Further Reading` in core features index page ([d1a6900](https://github.com/Brigid-DICOM/brigid/commit/d1a6900acd93bb9b5efc8e651792da102e86f5ba))
+* **fd:** add `GitHub OAuth Configuration Steps` in next auth configuration ([f364706](https://github.com/Brigid-DICOM/brigid/commit/f364706d95d01aa09d569e0b860c0078bc7e3248))
+* **fd:** add `image-zoom` and `steps` components ([ea347b6](https://github.com/Brigid-DICOM/brigid/commit/ea347b62ed9bb587f04867902c813e9762de0e7b))
+* **fd:** add `self-hosting` ([568649a](https://github.com/Brigid-DICOM/brigid/commit/568649adf2fa1fb5b035ed3b3e1ecc9dba00d862))
+* **fd:** add descriptions for core features pages and update index to include `further reading` ([29a9b28](https://github.com/Brigid-DICOM/brigid/commit/29a9b28549af7e275cb71492c2908b72eaf5fa51))
+* **fd:** add DICOM Management intro in core features ([1d98cfc](https://github.com/Brigid-DICOM/brigid/commit/1d98cfc0d1b54ff71dce53797d94fda9ce428100))
+* **fd:** add DICOM sharing intro in core features ([cf6b798](https://github.com/Brigid-DICOM/brigid/commit/cf6b7987e997d7b366368078d5a564436d38ffbc))
+* **fd:** add DICOM Viewer chapter in core features ([ace39fd](https://github.com/Brigid-DICOM/brigid/commit/ace39fd3ea23b84ea139f2746b1b0646df2e4600))
+* **fd:** add event logs intro in core features ([a8c3c05](https://github.com/Brigid-DICOM/brigid/commit/a8c3c05ddbb69ff4d6094d408a37c96faa635f84))
+* **fd:** add executable application intro in core features ([86621df](https://github.com/Brigid-DICOM/brigid/commit/86621df42ac987d34cc01c46644598f1ffc5c976))
+* **fd:** add first version docs for project with fumadocs ([f8de9ff](https://github.com/Brigid-DICOM/brigid/commit/f8de9ff2dc9fe5144dbd44bdc79b39f4301b9d32))
+* **fd:** add multi-workspaces intro in core features ([8d1b20c](https://github.com/Brigid-DICOM/brigid/commit/8d1b20cdc56109a12d7944f0555119494cd93c89))
+* **fd:** add upload dicom intro in core features ([92d90be](https://github.com/Brigid-DICOM/brigid/commit/92d90be2dd946975bb6d3b144f560f06471af752))
+
 ## [1.2.2](https://github.com/Brigid-DICOM/brigid/compare/v1.2.1...v1.2.2) (2026-01-06)
 
 
