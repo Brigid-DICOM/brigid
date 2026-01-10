@@ -3,12 +3,19 @@ title: Brigid - Introduction
 description: Introduction to Brigid project
 ---
 
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
 ## Features Overview
 
 ![Overview](overview.webp)
 
 <Cards>
-  <Card title="DICOM Viewer" href="/en/docs/core-features/dicom-viewer" />
+  {getPageTreePeers(source.getPageTree('en'), '/en/docs/core-features').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
 </Cards>
 
 ---

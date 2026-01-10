@@ -5,10 +5,17 @@ description: Brigid 總覽介紹
 
 ## 核心功能
 
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
 ![Overview](overview.webp)
 
 <Cards>
-  <Card title="DICOM Viewer" href="/zh-TW/docs/core-features/dicom-viewer" />
+  {getPageTreePeers(source.getPageTree('zh-TW'), '/zh-TW/docs/core-features').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
 </Cards>
 
 ---
