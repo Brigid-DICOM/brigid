@@ -41,7 +41,7 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --filter "!@brigid/docs"
       - name: Build Web application
         run: pnpm build:web
       - name: Build SEA application
