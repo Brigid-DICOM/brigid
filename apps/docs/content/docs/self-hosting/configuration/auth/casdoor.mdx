@@ -3,4 +3,60 @@ title: Casdoor
 description: Casdoor Authentication Configuration for Brigid
 ---
 
-TODO: add casdoor authentication configuration setup steps
+import { Steps, Step } from "fumadocs-ui/components/steps";
+
+## Casdoor OAuth Configuration Steps
+
+<Steps>
+    <Step>
+        ## Create Organization
+        
+        
+        - Navigate to `User Management` -> `Organizations` page
+        ![Casdoor User Management - Organizations](casdoor-go-to-orgs.png)
+        - Click `Add` button
+        - Fill in the `Name`, `Display Name` etc. information
+        - Click `Save & Exit` button
+    </Step>
+
+    <Step>
+        ## Create Application
+        
+        - Navigate to `Identity` -> `Applications` page
+        ![Casdoor Identity - Applications](casdoor-go-to-apps.png)
+        - Click `Add` button
+        - Fill in the `Name`, `Display Name` etc. information
+        - Click `Save` button
+    </Step>
+
+    <Step>
+        ## Get Client ID and Client Secret
+
+        - Navigate to the recently created Application page
+        - Find the `Client ID` and `Client Secret` fields
+        ![Casdoor Identity - Application Client ID and Client Secret](casdoor-app-client-id-secret.png)
+        - Copy the `Client ID` and `Client Secret`
+    </Step>
+
+    <Step>
+        ## Set Up Brigid Environment Variables
+
+        - Set the `Client ID` and `Client Secret` in the `.env` file as the `AUTH_CASDOOR_ID` and `AUTH_CASDOOR_SECRET` environment variables
+        - Set the `AUTH_CASDOOR_ISSUER` environment variable to the Casdoor URL, for example: `https://casdoor.example.com`
+
+        When enabling Next Auth authentication, you need to configure the following environment variables:
+
+        | Environment Variable | Type | Description |
+        | :--- | :--- | :--- |
+        | `NEXT_PUBLIC_ENABLE_AUTH` | boolean | Whether to enable the authentication system |
+        | `NEXTAUTH_SECRET` | string | NextAuth (Auth.js) used secret key (at least 32 characters) |
+        | `NEXTAUTH_URL` | string | NextAuth (Auth.js) used URL, usually the URL of your application |
+        | `AUTH_CASDOOR_ID` | string | Casdoor Client ID |
+        | `AUTH_CASDOOR_SECRET` | string | Casdoor Client Secret |
+        | `AUTH_CASDOOR_ISSUER` | string | Casdoor Issuer (usually the URL of Casdoor) |
+
+        <Callout type="info">
+        Visit [Environment Variables](/en/docs/self-hosting/env-info/auth) for more information about environment variables
+        </Callout>
+    </Step>
+</Steps>
