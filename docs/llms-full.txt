@@ -200,155 +200,6 @@ import { source } from '@/lib/source';
 </Cards>
 
 
-# Deploy with Docker Compose
-
-
-
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-
-## Deployment Steps
-
-<Steps>
-  <Step>
-    ### Install Docker Environment
-  </Step>
-
-  <Step>
-    ### Run Docker Compose
-
-    Here is the Docker Compose configuration file for Brigid:
-
-    ```yaml
-    services:
-        db:
-            image: postgres:17-alpine
-            container_name: brigid-db
-            restart: always
-            environment:
-            - POSTGRES_USER=${POSTGRES_USER:-postgres}
-            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-            - POSTGRES_DB=${POSTGRES_DB:-brigid}
-            volumes:
-            - pgdata:/var/lib/postgresql/data
-            networks:
-            - brigid-network
-            healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-brigid}"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-            start_period: 30s
-
-        brigid-web:
-            build:
-            context: .
-            dockerfile: Dockerfile
-            container_name: brigid-web
-            restart: always
-            ports:
-            - "3119:3119"
-            environment:
-            - NODE_ENV=production
-            # Add your environment variables here, or use env_file
-            - TYPEORM_CONNECTION=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-brigid}
-            depends_on:
-            - db
-            volumes:
-            - ./logs:/app/apps/web/logs
-            networks:
-            - brigid-network
-
-        networks:
-        brigid-network:
-            driver: bridge
-
-        volumes:
-        pgdata:
-    ```
-  </Step>
-
-  <Step>
-    ### Start Brigid
-
-    Run the following command to start Brigid:
-
-    ```bash
-    docker compose up -d
-    ```
-  </Step>
-</Steps>
-
-
-# Getting Started
-
-
-
-import { getPageTreePeers } from 'fumadocs-core/page-tree';
-import { source } from '@/lib/source';
-
-<Cards>
-  {getPageTreePeers(source.getPageTree('en'), '/en/docs/self-hosting/get-started').map((peer) => (
-      <Card key={peer.url} title={peer.name} href={peer.url}>
-        {peer.description}
-      </Card>
-    ))}
-</Cards>
-
-
-# Using SEA (Single Executable Application)
-
-
-
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-
-## Execution Steps
-
-Brigid provides a single executable version, which you can download from the [Releases](https://github.com/Brigid-DICOM/brigid/releases) page.
-
-<Steps>
-  <Step>
-    ### Download the single executable file
-
-    Go to the [Releases](https://github.com/Brigid-DICOM/brigid/releases) page, and download the single executable file.
-
-    <Callout title="Note">
-      If you want to use the system JRE, you can download the version without JRE, and you must ensure the following:
-
-      * Put the OpenCV libraries in the `lib` (windows is `bin`) directory of the JRE, you can refer to [Manual Configuration of OpenCV Libraries](#manual-configuration-of-opencv-libraries)
-      * Java version >= 17
-    </Callout>
-  </Step>
-
-  <Step>
-    ### Extract the files
-  </Step>
-
-  <Step>
-    ### Run
-
-    Run the `brigid-server` file to start the Brigid service
-
-    Then, open `http://localhost:3119` to enter the Brigid system
-  </Step>
-</Steps>
-
-## Manual Configuration of OpenCV Libraries
-
-If you choose the version **without an embedded JRE**, you must manually configure the required OpenCV libraries; otherwise, some features may not function properly.
-
-### Windows
-
-* Copy `data/dcm4che/lib/windows-x86-64/opencv_java.dll` to the `bin` directory of the JRE
-
-### Linux
-
-* Copy `data/dcm4che/lib/linux-x86-64/libclib_jiio.so` and `data/dcm4che/lib/linux-x86-64/libopencv_java.so` to the `lib` directory of the JRE
-
-### macOS
-
-* Copy `data/dcm4che/lib/macosx-x86-64/*libopencv_java.dylib` to the `lib` directory of the JRE
-
-
 # Authentication
 
 
@@ -719,6 +570,155 @@ import { source } from '@/lib/source';
 * Description: The secret key for the S3 service
 * Default: None
 * Example: `secret_key`
+
+
+# Deploy with Docker Compose
+
+
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+## Deployment Steps
+
+<Steps>
+  <Step>
+    ### Install Docker Environment
+  </Step>
+
+  <Step>
+    ### Run Docker Compose
+
+    Here is the Docker Compose configuration file for Brigid:
+
+    ```yaml
+    services:
+        db:
+            image: postgres:17-alpine
+            container_name: brigid-db
+            restart: always
+            environment:
+            - POSTGRES_USER=${POSTGRES_USER:-postgres}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+            - POSTGRES_DB=${POSTGRES_DB:-brigid}
+            volumes:
+            - pgdata:/var/lib/postgresql/data
+            networks:
+            - brigid-network
+            healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-brigid}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+
+        brigid-web:
+            build:
+            context: .
+            dockerfile: Dockerfile
+            container_name: brigid-web
+            restart: always
+            ports:
+            - "3119:3119"
+            environment:
+            - NODE_ENV=production
+            # Add your environment variables here, or use env_file
+            - TYPEORM_CONNECTION=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-brigid}
+            depends_on:
+            - db
+            volumes:
+            - ./logs:/app/apps/web/logs
+            networks:
+            - brigid-network
+
+        networks:
+        brigid-network:
+            driver: bridge
+
+        volumes:
+        pgdata:
+    ```
+  </Step>
+
+  <Step>
+    ### Start Brigid
+
+    Run the following command to start Brigid:
+
+    ```bash
+    docker compose up -d
+    ```
+  </Step>
+</Steps>
+
+
+# Getting Started
+
+
+
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
+<Cards>
+  {getPageTreePeers(source.getPageTree('en'), '/en/docs/self-hosting/get-started').map((peer) => (
+      <Card key={peer.url} title={peer.name} href={peer.url}>
+        {peer.description}
+      </Card>
+    ))}
+</Cards>
+
+
+# Using SEA (Single Executable Application)
+
+
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+## Execution Steps
+
+Brigid provides a single executable version, which you can download from the [Releases](https://github.com/Brigid-DICOM/brigid/releases) page.
+
+<Steps>
+  <Step>
+    ### Download the single executable file
+
+    Go to the [Releases](https://github.com/Brigid-DICOM/brigid/releases) page, and download the single executable file.
+
+    <Callout title="Note">
+      If you want to use the system JRE, you can download the version without JRE, and you must ensure the following:
+
+      * Put the OpenCV libraries in the `lib` (windows is `bin`) directory of the JRE, you can refer to [Manual Configuration of OpenCV Libraries](#manual-configuration-of-opencv-libraries)
+      * Java version >= 17
+    </Callout>
+  </Step>
+
+  <Step>
+    ### Extract the files
+  </Step>
+
+  <Step>
+    ### Run
+
+    Run the `brigid-server` file to start the Brigid service
+
+    Then, open `http://localhost:3119` to enter the Brigid system
+  </Step>
+</Steps>
+
+## Manual Configuration of OpenCV Libraries
+
+If you choose the version **without an embedded JRE**, you must manually configure the required OpenCV libraries; otherwise, some features may not function properly.
+
+### Windows
+
+* Copy `data/dcm4che/lib/windows-x86-64/opencv_java.dll` to the `bin` directory of the JRE
+
+### Linux
+
+* Copy `data/dcm4che/lib/linux-x86-64/libclib_jiio.so` and `data/dcm4che/lib/linux-x86-64/libopencv_java.so` to the `lib` directory of the JRE
+
+### macOS
+
+* Copy `data/dcm4che/lib/macosx-x86-64/*libopencv_java.dylib` to the `lib` directory of the JRE
 
 
 # Casdoor
@@ -1148,151 +1148,6 @@ import { source } from '@/lib/source';
 </Cards>
 
 
-# 使用 Docker Compose 部署
-
-
-
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-
-## 部屬步驟
-
-<Steps>
-  <Step>
-    ### 安裝 Docker 環境
-  </Step>
-
-  <Step>
-    ### 運行 Docker Compose
-
-    以下是 Brigid 的 Docker Compose 設定檔：
-
-    ```yaml
-    services:
-        db:
-            image: postgres:17-alpine
-            container_name: brigid-db
-            restart: always
-            environment:
-            - POSTGRES_USER=${POSTGRES_USER:-postgres}
-            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-            - POSTGRES_DB=${POSTGRES_DB:-brigid}
-            volumes:
-            - pgdata:/var/lib/postgresql/data
-            networks:
-            - brigid-network
-            healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-brigid}"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-            start_period: 30s
-
-        brigid-web:
-            build:
-            context: .
-            dockerfile: Dockerfile
-            container_name: brigid-web
-            restart: always
-            ports:
-            - "3119:3119"
-            environment:
-            - NODE_ENV=production
-            # 在此加入你的環境變數，或使用 env_file
-            - TYPEORM_CONNECTION=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-brigid}
-            depends_on:
-            - db
-            volumes:
-            - ./logs:/app/apps/web/logs
-            networks:
-            - brigid-network
-
-        networks:
-        brigid-network:
-            driver: bridge
-
-        volumes:
-        pgdata:
-    ```
-
-    接下來，運行以下指令啟動 Brigid：
-
-    ```bash
-    docker compose up -d
-    ```
-  </Step>
-</Steps>
-
-
-# 快速部署
-
-
-
-import { getPageTreePeers } from 'fumadocs-core/page-tree';
-import { source } from '@/lib/source';
-
-<Cards>
-  {getPageTreePeers(source.getPageTree('zh-TW'), '/zh-TW/docs/self-hosting/get-started').map((peer) => (
-      <Card key={peer.url} title={peer.name} href={peer.url}>
-        {peer.description}
-      </Card>
-    ))}
-</Cards>
-
-
-# 使用單一執行檔
-
-
-
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-
-## 執行步驟
-
-Brigid 提供單一執行檔的版本，你可以在 [Releases](https://github.com/Brigid-DICOM/brigid/releases) 頁面下載 Brigid 的單一執行檔
-
-<Steps>
-  <Step>
-    ### 下載單一執行檔
-
-    進入 [Releases](https://github.com/Brigid-DICOM/brigid/releases) 頁面，下載 Brigid 的單一執行檔
-
-    <Callout title="注意">
-      如果你想使用系統的 JRE，可以下載不含 JRE 的版本，且必須確認以下事項：
-
-      * 在 JRE 的 `lib` (windows 為 `bin`) 目錄下，放置 OpenCV 的函式庫，可參考[手動配置 OpenCV 函式庫](#手動配置-opencv-函式庫)
-      * Java 版本 >= 17
-    </Callout>
-  </Step>
-
-  <Step>
-    ### 解壓縮
-  </Step>
-
-  <Step>
-    ### 執行
-
-    執行 `brigid-server` 檔案啟動 Brigid 服務
-
-    接下來，打開 `http://localhost:3119` 即可進入 Brigid 系統
-  </Step>
-</Steps>
-
-## 手動配置 OpenCV 函式庫
-
-如果選擇**不含 JRE 的版本**，請務必手動配置所需的 OpenCV 函式庫，否則部分功能將無法正常運作
-
-### Windows
-
-* 請將 `data/dcm4che/lib/windows-x86-64/opencv_java.dll` 複製到 JRE 的 `bin` 目錄
-
-### Linux
-
-* 請將 `data/dcm4che/lib/linux-x86-64/libclib_jiio.so` 與 `data/dcm4che/lib/linux-x86-64/libopencv_java.so` 複製到 JRE 的 `lib` 目錄
-
-### macOS
-
-* 請將 `data/dcm4che/lib/macosx-x86-64/*libopencv_java.dylib` 複製到 JRE 的 `lib` 目錄
-
-
 # 身分驗證
 
 
@@ -1663,6 +1518,151 @@ import { source } from '@/lib/source';
 * 描述：S3 Secret Key
 * 預設值：無
 * 範例：`secret_key`
+
+
+# 使用 Docker Compose 部署
+
+
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+## 部屬步驟
+
+<Steps>
+  <Step>
+    ### 安裝 Docker 環境
+  </Step>
+
+  <Step>
+    ### 運行 Docker Compose
+
+    以下是 Brigid 的 Docker Compose 設定檔：
+
+    ```yaml
+    services:
+        db:
+            image: postgres:17-alpine
+            container_name: brigid-db
+            restart: always
+            environment:
+            - POSTGRES_USER=${POSTGRES_USER:-postgres}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+            - POSTGRES_DB=${POSTGRES_DB:-brigid}
+            volumes:
+            - pgdata:/var/lib/postgresql/data
+            networks:
+            - brigid-network
+            healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-brigid}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+
+        brigid-web:
+            build:
+            context: .
+            dockerfile: Dockerfile
+            container_name: brigid-web
+            restart: always
+            ports:
+            - "3119:3119"
+            environment:
+            - NODE_ENV=production
+            # 在此加入你的環境變數，或使用 env_file
+            - TYPEORM_CONNECTION=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-brigid}
+            depends_on:
+            - db
+            volumes:
+            - ./logs:/app/apps/web/logs
+            networks:
+            - brigid-network
+
+        networks:
+        brigid-network:
+            driver: bridge
+
+        volumes:
+        pgdata:
+    ```
+
+    接下來，運行以下指令啟動 Brigid：
+
+    ```bash
+    docker compose up -d
+    ```
+  </Step>
+</Steps>
+
+
+# 快速部署
+
+
+
+import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { source } from '@/lib/source';
+
+<Cards>
+  {getPageTreePeers(source.getPageTree('zh-TW'), '/zh-TW/docs/self-hosting/get-started').map((peer) => (
+      <Card key={peer.url} title={peer.name} href={peer.url}>
+        {peer.description}
+      </Card>
+    ))}
+</Cards>
+
+
+# 使用單一執行檔
+
+
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+## 執行步驟
+
+Brigid 提供單一執行檔的版本，你可以在 [Releases](https://github.com/Brigid-DICOM/brigid/releases) 頁面下載 Brigid 的單一執行檔
+
+<Steps>
+  <Step>
+    ### 下載單一執行檔
+
+    進入 [Releases](https://github.com/Brigid-DICOM/brigid/releases) 頁面，下載 Brigid 的單一執行檔
+
+    <Callout title="注意">
+      如果你想使用系統的 JRE，可以下載不含 JRE 的版本，且必須確認以下事項：
+
+      * 在 JRE 的 `lib` (windows 為 `bin`) 目錄下，放置 OpenCV 的函式庫，可參考[手動配置 OpenCV 函式庫](#手動配置-opencv-函式庫)
+      * Java 版本 >= 17
+    </Callout>
+  </Step>
+
+  <Step>
+    ### 解壓縮
+  </Step>
+
+  <Step>
+    ### 執行
+
+    執行 `brigid-server` 檔案啟動 Brigid 服務
+
+    接下來，打開 `http://localhost:3119` 即可進入 Brigid 系統
+  </Step>
+</Steps>
+
+## 手動配置 OpenCV 函式庫
+
+如果選擇**不含 JRE 的版本**，請務必手動配置所需的 OpenCV 函式庫，否則部分功能將無法正常運作
+
+### Windows
+
+* 請將 `data/dcm4che/lib/windows-x86-64/opencv_java.dll` 複製到 JRE 的 `bin` 目錄
+
+### Linux
+
+* 請將 `data/dcm4che/lib/linux-x86-64/libclib_jiio.so` 與 `data/dcm4che/lib/linux-x86-64/libopencv_java.so` 複製到 JRE 的 `lib` 目錄
+
+### macOS
+
+* 請將 `data/dcm4che/lib/macosx-x86-64/*libopencv_java.dylib` 複製到 JRE 的 `lib` 目錄
 
 
 # Casdoor

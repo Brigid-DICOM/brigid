@@ -28,6 +28,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
     type: 'static',
     initOrama,
     locale,
+    from: process.env.NODE_ENV === 'production' ? '/brigid/api/search' : "/api/search",
   });
 
   return (
