@@ -1,7 +1,7 @@
 import { hc } from "hono/client";
 import type { HonoAppRoute } from "@/app/api/[...route]/route";
 
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
     if (typeof window !== "undefined" && (window as any).ENV?.NEXT_PUBLIC_APP_URL) {
         return (window as any).ENV.NEXT_PUBLIC_APP_URL;
     }

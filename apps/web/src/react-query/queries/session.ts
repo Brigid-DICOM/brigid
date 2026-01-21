@@ -1,6 +1,6 @@
 import type { Session } from "@auth/core/types";
-
 import { queryOptions } from "@tanstack/react-query";
+import { getBaseUrl } from "../apiClient";
 
 export const authSessionQuery = (cookie?: string) => {
     const headers: HeadersInit = {};
@@ -12,7 +12,7 @@ export const authSessionQuery = (cookie?: string) => {
         queryKey: ["auth", "session"],
         queryFn: async () => {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/session`,
+                `${getBaseUrl()}/api/auth/session`,
                 {
                     headers,
                 },
