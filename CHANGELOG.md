@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.4](https://github.com/Brigid-DICOM/brigid/compare/v1.2.3...v1.2.4) (2026-01-21)
+
+
+### Bug Fixes
+
+* **api:** update session query to use `getBaseUrl` to get correct url in frontend ([add8788](https://github.com/Brigid-DICOM/brigid/commit/add8788f0901b6b6ca293cfb6154933686e6ab9e))
+
+
+### Documentation
+
+* **fd:** update search `from` to fit github page path ([47e99b1](https://github.com/Brigid-DICOM/brigid/commit/47e99b1e09e4a051653029be17a05cc6f922fc72))
+
 ## [1.2.3](https://github.com/Brigid-DICOM/brigid/compare/v1.2.2...v1.2.3) (2026-01-10)
 
 
