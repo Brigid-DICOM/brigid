@@ -22,7 +22,7 @@ It offers an efficient and flexible solution for **storing, retrieving, sharing,
 
 - Introduction video created using remotion
 
-<video src="video.mp4" controls></video>
+https://github.com/user-attachments/assets/870eac66-671f-4b4d-ad2d-6359e6075867
 
 ## Core Features
 
