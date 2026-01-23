@@ -22,7 +22,7 @@ Brigid 是一個全方位的開源 **DICOM 醫學影像管理與檢視平台**�
 
 - 使用 remotion 製作的介紹影片
 
-![intro video](video.mp4)
+<video src="video.mp4" controls></video>
 
 ## 核心特色
 
