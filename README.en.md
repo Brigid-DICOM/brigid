@@ -18,6 +18,12 @@ It offers an efficient and flexible solution for **storing, retrieving, sharing,
 > This project is primarily intended for personal practice and technical validation. **Not all features are fully implemented, and it is not recommended for use in a production environment**.  
 > If you have any questions or suggestions regarding the project, feel free to open an Issue or submit a Pull Request for discussion.
 
+## Introduction Video
+
+- Introduction video created using remotion
+
+![intro video](video.mp4)
+
 ## Core Features
 
 - **DICOM Standard Support**:
