@@ -1,0 +1,23 @@
+{
+  "name": "@brigid/video",
+  "version": "1.0.0",
+  "description": "Remotion video for Brigid",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "remotion preview",
+    "build": "remotion render BrigidIntro out/video.mp4"
+  },
+  "dependencies": {
+    "remotion": "4.0.228",
+    "@remotion/cli": "4.0.228",
+    "@remotion/gif": "4.0.228",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "lucide-react": "^0.473.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5.2.2"
+  }
+}
