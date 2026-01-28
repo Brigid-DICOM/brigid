@@ -64,6 +64,10 @@ function getBlueLightConfig(workspaceId: string) {
                 },
             },
         ],
+        "thumnail_witdth": 70,
+        "TitleTag": "BlueLight Viewer",
+        "study_comparison": false,
+        "AdvanceMode": true
     };
 }
 
