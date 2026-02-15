@@ -28,7 +28,9 @@ vi.mock("@brigid/database", () => ({
         }),
         initialize: vi.fn(),
         destroy: vi.fn(),
-        isInitialized: true,
+        get isInitialized() {
+            return !!testDataSource?.isInitialized;
+        },
     },
     initializeDb: vi.fn(async () => {
         // 在測試環境中，資料庫初始化由 TestDatabaseManager 處理
@@ -41,7 +43,7 @@ vi.mock("@brigid/database", () => ({
 vi.mock("@brigid/env", () => ({
     default: {
         NEXT_PUBLIC_ENABLE_AUTH: false,
-        TYPEORM_CONNECTION: "sqlite://:memory:",
+        TYPEORM_CONNECTION: process.env.TEST_DB_URL || "sqlite://:memory:",
         LOG_LEVEL: "error",
         STORAGE_PROVIDER: "local",
         STORAGE_LOCAL_DIR: "tests/fixtures/dicomFiles/temp",

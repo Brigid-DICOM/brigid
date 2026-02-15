@@ -21,6 +21,7 @@ import { UserEntity } from "@brigid/database/src/entities/user.entity";
 import { UserWorkspaceEntity } from "@brigid/database/src/entities/userWorkspace.entity";
 import { VerificationTokenEntity } from "@brigid/database/src/entities/verificationToken.entity";
 import { WorkspaceEntity } from "@brigid/database/src/entities/workspace.entity";
+import { parseDataSourceConfig } from "@brigid/database/src/utils/parseDataSourceConfig";
 import * as SqliteDriver from "sqlite3";
 import { DataSource } from "typeorm";
 import { WorkspaceService } from "@/server/services/workspace.service";
@@ -30,9 +31,12 @@ export class TestDatabaseManager {
     private isInitialized: boolean = false;
 
     constructor() {
+        const dataSourceConfig = parseDataSourceConfig(process.env.TEST_DB_URL || "sqlite://:memory:");
+
+        console.log(`test database manager dataSourceConfig: ${JSON.stringify(dataSourceConfig)}`);
+
         this.dataSource = new DataSource({
-            type: "sqlite",
-            database: ":memory:",
+            ...dataSourceConfig,
             entities: [
                 UserEntity,
                 AccountEntity,
@@ -59,7 +63,7 @@ export class TestDatabaseManager {
             ],
             synchronize: true,
             logging: false,
-            driver: SqliteDriver,
+            driver: dataSourceConfig.type === "sqlite" ? SqliteDriver : undefined,
         });
     }
 
@@ -78,18 +82,26 @@ export class TestDatabaseManager {
     }
 
     async clearDatabase() {
-        await this.dataSource.manager.clear(DimseAllowedRemoteEntity);
-        await this.dataSource.manager.clear(DimseAllowedIpEntity);
-        await this.dataSource.manager.clear(DimseConfigEntity);
-        await this.dataSource.manager.clear(ShareLinkRecipientEntity);
-        await this.dataSource.manager.clear(ShareLinkTargetEntity);
-        await this.dataSource.manager.clear(ShareLinkEntity);
-        await this.dataSource.manager.clear(TagAssignmentEntity);
-        await this.dataSource.manager.clear(TagEntity);
-        await this.dataSource.manager.clear(InstanceEntity);
-        await this.dataSource.manager.clear(SeriesEntity);
-        await this.dataSource.manager.clear(StudyEntity);
-        await this.dataSource.manager.clear(WorkspaceEntity);
+        const type = this.dataSource.options.type;
+
+        if (type === "postgres") {
+            const entities = this.dataSource.entityMetadatas;
+            const tableNames = entities?.map(entity => `"${entity.tableName}"`).join(", ");
+            await this.dataSource.query(`TRUNCATE TABLE ${tableNames} CASCADE`);
+        } else {
+            await this.dataSource.manager.clear(DimseAllowedRemoteEntity);
+            await this.dataSource.manager.clear(DimseAllowedIpEntity);
+            await this.dataSource.manager.clear(DimseConfigEntity);
+            await this.dataSource.manager.clear(ShareLinkRecipientEntity);
+            await this.dataSource.manager.clear(ShareLinkTargetEntity);
+            await this.dataSource.manager.clear(ShareLinkEntity);
+            await this.dataSource.manager.clear(TagAssignmentEntity);
+            await this.dataSource.manager.clear(TagEntity);
+            await this.dataSource.manager.clear(InstanceEntity);
+            await this.dataSource.manager.clear(SeriesEntity);
+            await this.dataSource.manager.clear(StudyEntity);
+            await this.dataSource.manager.clear(WorkspaceEntity);
+        }
     }
 
     async seedTestData() {

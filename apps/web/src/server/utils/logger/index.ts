@@ -25,6 +25,8 @@ const customConsoleFormat = printf(
     },
 );
 
+const isTest = process.env.NODE_ENV === "test";
+
 loggers.add("brigid", {
     level: "info",
     transports: [
@@ -53,7 +55,7 @@ loggers.add("brigid", {
 });
 
 loggers.add("event", {
-    level: "info",
+    level: isTest ? "error" : "info",
     transports: [
         new transports.Console({
             format: combine(
@@ -64,7 +66,7 @@ loggers.add("event", {
                 colorize({ all: true }),
             ),
         }),
-        new DbTransport(),
+        ...(isTest ? [] : [new DbTransport()]),
     ],
 });
 

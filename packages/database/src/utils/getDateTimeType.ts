@@ -4,7 +4,7 @@ import { parseDataSourceConfig } from "./parseDataSourceConfig";
 const dataSourceConfig = parseDataSourceConfig(env.TYPEORM_CONNECTION);
 
 export function getDateTimeType() {
-    if (process.env.NODE_ENV === "test" || dataSourceConfig.type === "better-sqlite3") {
+    if (dataSourceConfig.type === "better-sqlite3" || dataSourceConfig.type === "sqlite") {
         return "datetime";
     }
 
