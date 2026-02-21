@@ -9,7 +9,7 @@ import {
     toInstanceDbEntity,
     toPatientDbEntity,
     toSeriesDbEntity,
-    toStudyDbEntity,
+    toStudyDbEntity
 } from "./dicomJsonDbMapper";
 import type { DicomJsonUtils } from "./dicomJsonUtils";
 
@@ -18,7 +18,7 @@ export class DicomFileSaver {
 
     constructor(
         dicomJsonUtils: DicomJsonUtils,
-        private readonly workspaceId: string,
+        private readonly workspaceId: string
     ) {
         this.dicomJsonUtils = dicomJsonUtils;
     }
@@ -26,12 +26,12 @@ export class DicomFileSaver {
     async saveDicomFileToStorage(file: MultipartFile) {
         // save to storage
         const filePath = this.dicomJsonUtils.getFilePath({
-            workspaceId: this.workspaceId,
+            workspaceId: this.workspaceId
         });
         const storageProvider = getStorageProvider();
         const { filePath: storedFilePath } = await storageProvider.uploadFile(
             file,
-            filePath,
+            filePath
         );
 
         return { storedFilePath };
@@ -40,7 +40,7 @@ export class DicomFileSaver {
     async saveToDb(storedFilePath: string) {
         const patientEntity = toPatientDbEntity(
             this.dicomJsonUtils,
-            this.workspaceId,
+            this.workspaceId
         );
 
         // 先在 transaction 外計算 hash，不要鎖住資料庫
@@ -48,65 +48,108 @@ export class DicomFileSaver {
             this.dicomJsonUtils,
             this.workspaceId,
             "", // 先傳空字串，後續再填入
-            storedFilePath,
+            storedFilePath
         );
 
         const result = await AppDataSource.transaction(
             async (transactionalEntityManager) => {
                 try {
                     const patientService = new PatientService(
-                        transactionalEntityManager,
+                        transactionalEntityManager
                     );
-                    const patient =
-                        await patientService.insertOrUpdatePatient(
-                            patientEntity,
-                        );
+                    const patient = await patientService.insertOrUpdatePatient(
+                        patientEntity
+                    );
 
                     const studyEntity = toStudyDbEntity(
                         this.dicomJsonUtils,
                         this.workspaceId,
-                        patient.id,
+                        patient.id
                     );
 
                     const studyService = new StudyService(
-                        transactionalEntityManager,
+                        transactionalEntityManager
                     );
-                    const study =
-                        await studyService.insertOrUpdateStudy(studyEntity);
+                    const study = await studyService.insertOrUpdateStudy(
+                        studyEntity
+                    );
 
                     const seriesEntity = toSeriesDbEntity(
                         this.dicomJsonUtils,
                         this.workspaceId,
-                        study.id,
+                        study.id
                     );
                     const seriesService = new SeriesService(
-                        transactionalEntityManager,
+                        transactionalEntityManager
                     );
-                    const series =
-                        await seriesService.insertOrUpdateSeries(seriesEntity);
+                    const series = await seriesService.insertOrUpdateSeries(
+                        seriesEntity
+                    );
 
                     instanceEntity.localSeriesId = series.id;
                     const instanceService = new InstanceService(
-                        transactionalEntityManager,
+                        transactionalEntityManager
                     );
                     const instance =
                         await instanceService.insertOrUpdateInstance(
-                            instanceEntity,
+                            instanceEntity
                         );
 
                     return {
                         patient,
                         study,
                         series,
-                        instance,
+                        instance
                     };
                 } catch (error) {
                     console.error("CRITICAL ERROR INSIDE TRANSACTION:", error);
                     throw error;
                 }
-            },
+            }
         );
 
         return result;
+    }
+
+    async saveToDbWithRetry(storedFilePath: string, maxRetries: number = 3) {
+        let lastError: unknown;
+        
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                return await this.saveToDb(storedFilePath);
+            } catch (error) {
+                lastError = error;
+                if (this.isConflictError(error)) {
+                    console.warn(
+                        "Storing DICOM file to database failed with conflict error, retrying..."
+                    );
+                    const delay = Math.random() * 200 * (i + 1);
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                    continue;
+                }
+                throw error;
+            }
+        }
+        throw lastError;
+    }
+
+    private isConflictError(error: unknown) {
+        if (typeof error !== "object" || error === null) {
+            return false;
+        }
+
+        const err = error as { code?: string; driveError?: { code?: string } };
+        const code = err.code || err.driveError?.code;
+
+        if (!code) return false;
+
+        const conflictCodes = [
+            "23505", // PostgresSQL: unique_violation
+            "40P01", // PostgresSQL: deadlock_detected
+            "ER_DUP_ENTRY", // MySQL: duplicate entry
+            "701" // SQL Server: deadlock
+        ];
+
+        return conflictCodes.includes(code);
     }
 }
