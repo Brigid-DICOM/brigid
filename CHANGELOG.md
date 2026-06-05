@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.3.1](https://github.com/Brigid-DICOM/brigid/compare/v1.3.0...v1.3.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **web:** bundle dotenv in standalone Docker image ([18e28be](https://github.com/Brigid-DICOM/brigid/commit/18e28be72dd03c13289489c03e2588372ba9d563))
+
 ## [1.3.0](https://github.com/Brigid-DICOM/brigid/compare/v1.2.4...v1.3.0) (2026-06-05)
 
 
