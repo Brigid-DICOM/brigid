@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.3.0](https://github.com/Brigid-DICOM/brigid/compare/v1.2.4...v1.3.0) (2026-06-05)
+
+
+### Features
+
+* **dicom:** implement retry logic for DICOM storage ([a70eef1](https://github.com/Brigid-DICOM/brigid/commit/a70eef1b795bc7225bc3856756728469b7e684ef))
+* update bluelight config in `getConfig` route to align new version of bluelight ([67e454f](https://github.com/Brigid-DICOM/brigid/commit/67e454fffded589b11ab6d545b8ab350cb6134ee))
+
+
+### Bug Fixes
+
+* **upload:** remove unnecessary text from upload task list component ([6828a4d](https://github.com/Brigid-DICOM/brigid/commit/6828a4dc6aa8849f061f67732875e40cf3df65ce))
+
+
+### Others
+
+* update `next`, `react`, `react-dom` ([2c476eb](https://github.com/Brigid-DICOM/brigid/commit/2c476eb565d491136c26ebfc5ffd33c62fc99d16))
+* update bluelight ([dfa011a](https://github.com/Brigid-DICOM/brigid/commit/dfa011a9e365dacdd7374acf356094d2a052f04c))
+* **video:** add video application with Remotion, including skill ([c52aa20](https://github.com/Brigid-DICOM/brigid/commit/c52aa2044f3efcee3ae61446b9e98ad8b4857c36))
+
+
+### Documentation
+
+* add intro video ([0fa1104](https://github.com/Brigid-DICOM/brigid/commit/0fa1104ab9b4572e252ad113c50d217beb36b1ca))
+* **readme:** update video display with video element ([f1b57e1](https://github.com/Brigid-DICOM/brigid/commit/f1b57e1d16bc899fbdffa26f99aaf0b584499eae))
+* **readme:** update video in en readme ([6193572](https://github.com/Brigid-DICOM/brigid/commit/619357297d448730a2d54ec6561ebfc878153c96))
+* **video:** upload video via github ([799e9db](https://github.com/Brigid-DICOM/brigid/commit/799e9db728546ec1c8b290a8ddbf089e9835d94d))
+
 ## [1.2.4](https://github.com/Brigid-DICOM/brigid/compare/v1.2.3...v1.2.4) (2026-01-21)
 
 
