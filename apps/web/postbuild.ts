@@ -1,14 +1,32 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const serverJsPath = path.join(
-    process.cwd(),
-    ".next",
-    "standalone",
-    "apps",
-    "web",
-    "server.js",
-);
+const standaloneDir = path.join(process.cwd(), ".next", "standalone");
+const serverJsPath = path.join(standaloneDir, "apps", "web", "server.js");
+
+function resolveDotenvPackageDir(): string | undefined {
+    const candidates = [
+        path.join(process.cwd(), "node_modules", "dotenv"),
+        path.join(process.cwd(), "..", "..", "node_modules", "dotenv"),
+    ];
+
+    return candidates.find((candidate) =>
+        fs.existsSync(path.join(candidate, "lib", "main.js")),
+    );
+}
+
+function copyDotenvToStandalone(): void {
+    const dotenvSrc = resolveDotenvPackageDir();
+    if (!dotenvSrc) {
+        console.warn("⚠️ dotenv package not found, skipping copy to standalone");
+        return;
+    }
+
+    const dotenvDest = path.join(standaloneDir, "node_modules", "dotenv");
+    fs.mkdirSync(path.dirname(dotenvDest), { recursive: true });
+    fs.cpSync(dotenvSrc, dotenvDest, { recursive: true });
+    console.log(`✅ Copied dotenv from ${dotenvSrc} to standalone`);
+}
 
 try {
     if (!fs.existsSync(serverJsPath)) {
@@ -16,25 +34,21 @@ try {
         process.exit(1);
     }
 
-    // 讀取現有的 server.js
+    // postbuild 注入的 require 不會被 next build trace，需手動複製實體檔案
+    copyDotenvToStandalone();
+
     const originalContent = fs.readFileSync(serverJsPath, "utf-8");
 
-    // 在最上頭加入 sea 的 require 和 dotenv 設置
     const dotenvSetup = `
 const { createRequire } = require('node:module');
 require = createRequire(__filename);
-// Load environment variables from .env file
 require('dotenv').config();
 
 `;
 
-    // 組合新內容
-    const newContent = dotenvSetup + originalContent;
-
-    // 寫回檔案
-    fs.writeFileSync(serverJsPath, newContent, "utf-8");
-
+    fs.writeFileSync(serverJsPath, dotenvSetup + originalContent, "utf-8");
     console.log("✅ Successfully added dotenv setup to standalone server.js");
 } catch (error) {
     console.error("❌ Failed to modify server.js:", error);
+    process.exit(1);
 }
