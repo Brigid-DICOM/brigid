@@ -76,9 +76,9 @@ export const logApplicationActivityMessage = ({
         NetworkAccessPointType.IPAddress,
     );
 
-    const auditMessage = auditMessageBuilder.build();
+    const auditMessage = JSON.stringify(auditMessageBuilder.build().toJSON());
 
-    logger.info("dicom audit", { auditMessage: auditMessage.toJSON() });
+    logger.info("dicom audit", { auditMessage });
 };
 
 export interface LogBeginTransferringDicomInstancesParams {
@@ -170,7 +170,7 @@ export const logBeginTransferringDicomInstancesMessage = ({
 
     const message = builder.build().toJSON();
 
-    logger.info("dicom audit", { auditMessage: message });
+    logger.info("dicom audit", { auditMessage: JSON.stringify(message) });
 };
 
 export const logDicomInstancesTransferred = ({
@@ -260,7 +260,7 @@ export const logDicomInstancesTransferred = ({
 
     const message = builder.build().toJSON();
 
-    logger.info("dicom audit", { auditMessage: message });
+    logger.info("dicom audit", { auditMessage: JSON.stringify(message) });
 };
 
 export const logDicomInstancesAccessedMessage = ({
@@ -322,7 +322,7 @@ export const logDicomInstancesAccessedMessage = ({
 
     const message = builder.build().toJSON();
 
-    logger.info("dicom audit", { auditMessage: message });
+    logger.info("dicom audit", { auditMessage: JSON.stringify(message) });
 };
 
 export const logQueryMessage = async ({
@@ -389,5 +389,5 @@ export const logQueryMessage = async ({
     );
 
     const message = builder.build().toJSON();
-    logger.info("dicom audit", { auditMessage: message });
+    logger.info("dicom audit", { auditMessage: JSON.stringify(message) });
 };
