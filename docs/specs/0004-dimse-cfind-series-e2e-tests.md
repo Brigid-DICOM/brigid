@@ -247,7 +247,7 @@ Fixture 根目錄：`tests/fixtures/dicomFiles/`
 
 ## Out of Scope
 
-- Image / Instance level C-FIND
+- Image / Instance level C-FIND（見 [0005](./0005-dimse-cfind-image-e2e-tests.md)）
 - Workspace-wide series 查詢（不帶 `StudyInstanceUID` scope）
 - Patient Root（`-P`）+ `QueryRetrieveLevel=SERIES`
 - Patient Study Only Query/Retrieve Model
