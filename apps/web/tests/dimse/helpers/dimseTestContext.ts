@@ -17,6 +17,7 @@ import {
 } from "./dcmsendRunner";
 import { getStorageLocalDir } from "./storage";
 import {
+    seedAllInstancesFromDataJson,
     seedAllSeriesFromDataJson,
     seedOneInstancePerStudyFromDataJson,
 } from "./seedFromDataJson";
@@ -45,6 +46,13 @@ export async function clearAndSeedDicomDataForCfindSeriesSuite(): Promise<void> 
     await testDb.clearDicomData();
     await clearTestStorage();
     await seedAllSeriesFromDataJson();
+}
+
+export async function clearAndSeedDicomDataForCfindImageSuite(): Promise<void> {
+    preserveDicomDataForSuite();
+    await testDb.clearDicomData();
+    await clearTestStorage();
+    await seedAllInstancesFromDataJson();
 }
 
 export function useDimseTestContext(): void {

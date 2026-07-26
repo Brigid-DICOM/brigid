@@ -29,6 +29,13 @@ export type CFindSeriesMatchingKey =
     | "SeriesDate"
     | "SeriesDescription";
 
+export type CFindImageMatchingKey =
+    | "SOPClassUID"
+    | "SOPInstanceUID"
+    | "InstanceNumber"
+    | "ContentDate"
+    | "ContentTime";
+
 const RETURN_KEYS: readonly CFindMatchingKey[] = [
     "PatientID",
     "PatientName",
@@ -56,6 +63,18 @@ const SERIES_RETURN_KEYS: readonly (
     "SeriesNumber",
     "SeriesDate",
     "SeriesDescription",
+    "PatientID",
+];
+
+const IMAGE_RETURN_KEYS: readonly (
+    | CFindImageMatchingKey
+    | "PatientID"
+)[] = [
+    "SOPClassUID",
+    "SOPInstanceUID",
+    "InstanceNumber",
+    "ContentDate",
+    "ContentTime",
     "PatientID",
 ];
 
@@ -139,6 +158,41 @@ export async function runFindscuSeries(
     ];
 
     for (const key of SERIES_RETURN_KEYS) {
+        if (key === matchingKey) {
+            args.push("-k", `${key}=${queryValue}`);
+        } else {
+            args.push("-k", `${key}=`);
+        }
+    }
+
+    return runProcessAsync("findscu", args);
+}
+
+export async function runFindscuImage(
+    studyInstanceUid: string,
+    seriesInstanceUid: string,
+    matchingKey: CFindImageMatchingKey,
+    queryValue: string,
+): Promise<FindscuResult> {
+    const { host, port, calledAe, callingAe } = getDimseConnectionArgs();
+    const args = [
+        "-v",
+        "-S",
+        host,
+        port,
+        "-aec",
+        calledAe,
+        "-aet",
+        callingAe,
+        "-k",
+        "QueryRetrieveLevel=IMAGE",
+        "-k",
+        `StudyInstanceUID=${studyInstanceUid}`,
+        "-k",
+        `SeriesInstanceUID=${seriesInstanceUid}`,
+    ];
+
+    for (const key of IMAGE_RETURN_KEYS) {
         if (key === matchingKey) {
             args.push("-k", `${key}=${queryValue}`);
         } else {

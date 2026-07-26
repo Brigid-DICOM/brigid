@@ -64,3 +64,18 @@ export async function seedAllSeriesFromDataJson(): Promise<void> {
         }
     }
 }
+
+export async function seedAllInstancesFromDataJson(): Promise<void> {
+    for (const study of Object.values(testData as Record<string, DataJsonStudy>)) {
+        for (const series of study.series) {
+            for (const instance of series.instances) {
+                const fixturePath = path.join(
+                    FIXTURES_ROOT,
+                    instance.file.replace(/\\/g, path.sep),
+                );
+                const result = await runDcmsend(fixturePath);
+                expectDcmsendSuccess(result);
+            }
+        }
+    }
+}
