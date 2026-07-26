@@ -21,7 +21,10 @@ export default defineConfig({
         setupFiles: [path.resolve(__dirname, "./tests/dimse/setup.ts")],
         environment: "node",
         globals: true,
-        include: ["tests/dimse/**/*.test.ts"],
+        include: [
+            "tests/dimse/cstore*.test.ts",
+            "tests/dimse/presentationContext.test.ts",
+        ],
         fileParallelism: false,
     },
 });

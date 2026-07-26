@@ -23,6 +23,19 @@ export function runEchoscu(): DcmsendResult {
     ]);
 }
 
+export async function runEchoscuAsync(): Promise<DcmsendResult> {
+    const { host, port, calledAe, callingAe } = getDimseConnectionArgs();
+
+    return runProcessAsync("echoscu", [
+        host,
+        port,
+        "-aec",
+        calledAe,
+        "-aet",
+        callingAe,
+    ]);
+}
+
 export async function runDcmsend(fixturePath: string): Promise<DcmsendResult> {
     const { host, port, calledAe, callingAe } = getDimseConnectionArgs();
     const args = [

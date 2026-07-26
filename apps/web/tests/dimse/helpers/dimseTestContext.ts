@@ -13,7 +13,7 @@ import { WorkspaceService } from "@/server/services/workspace.service";
 import { TestDatabaseManager } from "../../utils/testDatabaseManager";
 import {
     assertDcmtkInstalled,
-    runEchoscu,
+    runEchoscuAsync,
 } from "./dcmsendRunner";
 import { getStorageLocalDir } from "./storage";
 import {
@@ -88,7 +88,7 @@ export function useDimseTestContext(): void {
         dimseApp = DimseApp.getInstance(host, port);
         await dimseApp.start();
 
-        const echo = runEchoscu();
+        const echo = await runEchoscuAsync();
         if (echo.exitCode !== 0) {
             throw new Error(
                 `DIMSE C-ECHO warmup failed (exit ${echo.exitCode}): ${echo.stderr}`,
