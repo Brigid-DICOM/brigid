@@ -6,7 +6,7 @@ DIMSE E2E 測試使用獨立 vitest config（`vitest.dimse.config.mts`）與 `pn
 
 C-STORE SCP 透過 raccoon-dcm4che Java bridge 在收到 DIMSE 請求時回呼 Node.js（`cstoreScp.ts` 的 `preDimseRQ`、`postStore` 等）。`spawnSync("dcmsend")` 會阻塞 Node event loop，導致這些 callback 無法執行，測試會在約 60 秒後以 `Peer aborted Association` 失敗；手動在另一個 terminal 執行 `dcmsend` 則不受影響。
 
-因此 `dcmsendRunner.ts` 的 `runDcmsend` 必須以 async `spawn` 執行，讓 event loop 在 dcmsend 等待 C-STORE response 期間仍能處理 Java bridge callback。`echoscu` 的 C-ECHO warmup 可繼續使用 `spawnSync`，因為 `BasicCEchoSCP` 完全在 Java 端處理，不依賴 Node callback。
+因此 `dcmsendRunner.ts` 的 `runDcmsend` 必須以 async `spawn` 執行，讓 event loop 在 dcmsend 等待 C-STORE response 期間仍能處理 callback。`echoscu` 的 C-ECHO warmup 在 raccoon-dcm4che 時期可使用 `spawnSync`，因為 `BasicCEchoSCP` 完全在 Java 端處理；遷移至 `dcmjs-dimse` 後（見 ADR-0002），`runEchoscuAsync` 也必須以 async `spawn` 執行，否則 SCP 無法在 event loop 上回應 association。
 
 ## findscu 必須使用 async `spawn`，不可 `spawnSync`
 
