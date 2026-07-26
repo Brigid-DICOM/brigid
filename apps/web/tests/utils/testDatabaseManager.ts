@@ -26,6 +26,23 @@ import * as SqliteDriver from "sqlite3";
 import { DataSource } from "typeorm";
 import { WorkspaceService } from "@/server/services/workspace.service";
 
+// DICOM 業務資料 entity，clearDicomData 清除範圍 / Entities cleared by clearDicomData
+const DICOM_DATA_ENTITIES = [
+    ShareLinkRecipientEntity,
+    ShareLinkTargetEntity,
+    ShareLinkEntity,
+    TagAssignmentEntity,
+    TagEntity,
+    InstanceEntity,
+    SeriesRequestAttributesEntity,
+    DicomCodeSequenceEntity,
+    SeriesEntity,
+    StudyEntity,
+    PatientEntity,
+    PersonNameEntity,
+    EventLogEntity,
+] as const;
+
 export class TestDatabaseManager {
     public dataSource: DataSource;
     private isInitialized: boolean = false;
@@ -109,37 +126,15 @@ export class TestDatabaseManager {
         const type = this.dataSource.options.type;
 
         if (type === "postgres") {
-            const dicomTables = [
-                "share_link_recipient",
-                "share_link_target",
-                "share_link",
-                "tag_assignment",
-                "tag",
-                "instance",
-                "series_request_attributes",
-                "dicom_code_sequence",
-                "series",
-                "study",
-                "patient",
-                "person_name",
-                "event_log",
-            ];
-            const tableNames = dicomTables.map((table) => `"${table}"`).join(", ");
+            const tableNames = DICOM_DATA_ENTITIES.map(
+                (entity) =>
+                    `"${this.dataSource.getMetadata(entity).tableName}"`,
+            ).join(", ");
             await this.dataSource.query(`TRUNCATE TABLE ${tableNames} CASCADE`);
         } else {
-            await this.dataSource.manager.clear(ShareLinkRecipientEntity);
-            await this.dataSource.manager.clear(ShareLinkTargetEntity);
-            await this.dataSource.manager.clear(ShareLinkEntity);
-            await this.dataSource.manager.clear(TagAssignmentEntity);
-            await this.dataSource.manager.clear(TagEntity);
-            await this.dataSource.manager.clear(InstanceEntity);
-            await this.dataSource.manager.clear(SeriesRequestAttributesEntity);
-            await this.dataSource.manager.clear(DicomCodeSequenceEntity);
-            await this.dataSource.manager.clear(SeriesEntity);
-            await this.dataSource.manager.clear(StudyEntity);
-            await this.dataSource.manager.clear(PatientEntity);
-            await this.dataSource.manager.clear(PersonNameEntity);
-            await this.dataSource.manager.clear(EventLogEntity);
+            for (const entity of DICOM_DATA_ENTITIES) {
+                await this.dataSource.manager.clear(entity);
+            }
         }
     }
 

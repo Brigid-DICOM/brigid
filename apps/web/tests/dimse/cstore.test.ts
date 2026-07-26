@@ -1,5 +1,6 @@
 import path from "node:path";
 import { join } from "desm";
+import type { DicomTag } from "@brigid/types";
 import { describe, expect, it } from "vitest";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { assertStoredInstance } from "./helpers/assertStoredInstance";
@@ -10,6 +11,14 @@ const FIXTURES_ROOT = path.resolve(
     join(import.meta.url, "../fixtures/forStore"),
 );
 
+function getSopInstanceUid(dicomJson: DicomTag): string {
+    const uid = dicomJson["00080018"]?.Value?.[0];
+    if (typeof uid !== "string" || uid.length === 0) {
+        expect.fail("fixture must contain SOP Instance UID (0008,0018)");
+    }
+    return uid;
+}
+
 function itShouldUsingCStoreDicomInstanceWith(
     label: string,
     fixtureRelativePath: string,
@@ -17,7 +26,7 @@ function itShouldUsingCStoreDicomInstanceWith(
     it(label, async () => {
         const fixturePath = path.join(FIXTURES_ROOT, fixtureRelativePath);
         const dicomJson = await parseFromFilename(fixturePath);
-        const sopInstanceUid = dicomJson["00080018"]?.Value?.[0] as string;
+        const sopInstanceUid = getSopInstanceUid(dicomJson);
 
         const { exitCode, stderr } = runDcmsend(fixturePath);
         expect(exitCode, stderr).toBe(0);
@@ -50,7 +59,7 @@ describe("C-STORE E2E", () => {
         "US/1-001.dcm",
     );
     itShouldUsingCStoreDicomInstanceWith(
-        "SOP Class: 1.2.840.10008.5.1.4.1.1.104.1, US",
+        "SOP Class: 1.2.840.10008.5.1.4.1.1.104.1, PDF",
         "PDF/pdf.dcm",
     );
     itShouldUsingCStoreDicomInstanceWith(

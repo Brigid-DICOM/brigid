@@ -14,12 +14,12 @@ export async function assertStoredInstance(
     });
 
     expect(instance).not.toBeNull();
+    if (!instance) {
+        return expect.fail("Instance not found in database");
+    }
 
-    const absolutePath = path.join(
-        getStorageLocalDir(),
-        instance!.instancePath,
-    );
+    const absolutePath = path.join(getStorageLocalDir(), instance.instancePath);
     expect(existsSync(absolutePath)).toBe(true);
 
-    return instance as InstanceEntity;
+    return instance;
 }
