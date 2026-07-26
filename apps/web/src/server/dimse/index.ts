@@ -253,6 +253,14 @@ export class DimseApp {
         return globalForDimse.dimseApp;
     }
 
+    public static resetInstance(): void {
+        globalForDimse.dimseApp = undefined;
+    }
+
+    public stop(): void {
+        this.deviceService?.stop();
+    }
+
     public async reconfigureDevice() {
         const tempDevice = new Device("brigid");
 
