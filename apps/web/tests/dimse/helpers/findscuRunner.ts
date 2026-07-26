@@ -22,6 +22,13 @@ export type CFindStudyMatchingKey =
     | "StudyID"
     | "ReferringPhysicianName";
 
+export type CFindSeriesMatchingKey =
+    | "Modality"
+    | "SeriesInstanceUID"
+    | "SeriesNumber"
+    | "SeriesDate"
+    | "SeriesDescription";
+
 const RETURN_KEYS: readonly CFindMatchingKey[] = [
     "PatientID",
     "PatientName",
@@ -38,6 +45,18 @@ const STUDY_RETURN_KEYS: readonly CFindStudyMatchingKey[] = [
     "ModalitiesInStudy",
     "StudyID",
     "ReferringPhysicianName",
+];
+
+const SERIES_RETURN_KEYS: readonly (
+    | CFindSeriesMatchingKey
+    | "PatientID"
+)[] = [
+    "Modality",
+    "SeriesInstanceUID",
+    "SeriesNumber",
+    "SeriesDate",
+    "SeriesDescription",
+    "PatientID",
 ];
 
 export async function runFindscu(
@@ -88,6 +107,38 @@ export async function runFindscuStudy(
     ];
 
     for (const key of STUDY_RETURN_KEYS) {
+        if (key === matchingKey) {
+            args.push("-k", `${key}=${queryValue}`);
+        } else {
+            args.push("-k", `${key}=`);
+        }
+    }
+
+    return runProcessAsync("findscu", args);
+}
+
+export async function runFindscuSeries(
+    studyInstanceUid: string,
+    matchingKey: CFindSeriesMatchingKey,
+    queryValue: string,
+): Promise<FindscuResult> {
+    const { host, port, calledAe, callingAe } = getDimseConnectionArgs();
+    const args = [
+        "-v",
+        "-S",
+        host,
+        port,
+        "-aec",
+        calledAe,
+        "-aet",
+        callingAe,
+        "-k",
+        "QueryRetrieveLevel=SERIES",
+        "-k",
+        `StudyInstanceUID=${studyInstanceUid}`,
+    ];
+
+    for (const key of SERIES_RETURN_KEYS) {
         if (key === matchingKey) {
             args.push("-k", `${key}=${queryValue}`);
         } else {

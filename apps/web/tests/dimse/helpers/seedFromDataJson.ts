@@ -15,8 +15,12 @@ interface DataJsonSeries {
     instances: DataJsonInstance[];
 }
 
+interface DataJsonSeriesWithInstances extends DataJsonSeries {
+    seriesInstanceUid?: string;
+}
+
 interface DataJsonStudy {
-    series: DataJsonSeries[];
+    series: DataJsonSeriesWithInstances[];
 }
 
 function expectDcmsendSuccess(result: DcmsendResult): void {
@@ -40,5 +44,23 @@ export async function seedOneInstancePerStudyFromDataJson(): Promise<void> {
         );
         const result = await runDcmsend(fixturePath);
         expectDcmsendSuccess(result);
+    }
+}
+
+export async function seedAllSeriesFromDataJson(): Promise<void> {
+    for (const study of Object.values(testData as Record<string, DataJsonStudy>)) {
+        for (const series of study.series) {
+            const instanceFile = series.instances[0]?.file;
+            if (!instanceFile) {
+                throw new Error("data.json series is missing instances[0]");
+            }
+
+            const fixturePath = path.join(
+                FIXTURES_ROOT,
+                instanceFile.replace(/\\/g, path.sep),
+            );
+            const result = await runDcmsend(fixturePath);
+            expectDcmsendSuccess(result);
+        }
     }
 }
