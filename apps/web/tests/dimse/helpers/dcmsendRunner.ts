@@ -1,7 +1,7 @@
 import { execSync, spawn, spawnSync } from "node:child_process";
 
 const DCMTK_INSTALL_HINT =
-    "Install DCMTK 3.7.x and ensure dcmsend is in PATH. See https://dcmtk.org/";
+    "Install DCMTK 3.7.x and ensure dcmsend and findscu are in PATH. See https://dcmtk.org/";
 
 export function assertDcmtkInstalled(): void {
     let output = "";
@@ -29,6 +29,31 @@ export function assertDcmtkInstalled(): void {
         throw new Error(
             `DCMTK 3.7.x required for dimse e2e tests.\n${output}\n${DCMTK_INSTALL_HINT}`,
         );
+    }
+
+    let findscuOutput = "";
+    try {
+        findscuOutput = execSync("findscu --version", {
+            encoding: "utf-8",
+            stdio: ["pipe", "pipe", "pipe"],
+        });
+    } catch (error) {
+        const execError = error as {
+            stdout?: string;
+            stderr?: string;
+            message?: string;
+        };
+        findscuOutput = [
+            execError.stdout,
+            execError.stderr,
+            execError.message,
+        ]
+            .filter(Boolean)
+            .join("\n");
+    }
+
+    if (!/findscu/i.test(findscuOutput)) {
+        throw new Error(`findscu not found in PATH.\n${DCMTK_INSTALL_HINT}`);
     }
 }
 

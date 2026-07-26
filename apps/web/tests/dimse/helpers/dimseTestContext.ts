@@ -19,6 +19,15 @@ import { getStorageLocalDir } from "./storage";
 
 let testDb: TestDatabaseManager;
 let dimseApp: DimseApp;
+let preserveDicomDataDepth = 0;
+
+export function preserveDicomDataForSuite(): void {
+    preserveDicomDataDepth++;
+}
+
+export function releaseDicomDataPreservation(): void {
+    preserveDicomDataDepth = Math.max(0, preserveDicomDataDepth - 1);
+}
 
 export function useDimseTestContext(): void {
     beforeAll(async () => {
@@ -62,6 +71,10 @@ export function useDimseTestContext(): void {
     });
 
     beforeEach(async () => {
+        if (preserveDicomDataDepth > 0) {
+            return;
+        }
+
         await testDb.clearDicomData();
         await clearTestStorage();
     });

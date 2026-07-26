@@ -8,6 +8,14 @@ Brigid 是一個 DICOM 影像管理平台，支援 DICOMweb 與 DIMSE 協定接�
 透過真實 DIMSE 協定（dcmsend）驗證 Brigid 接收並儲存 DICOM instance 的端對端測試；只啟動 DimseApp 子系統，不啟動 HTTP server。
 _Avoid_: integration test, DIMSE unit test
 
+**C-FIND E2E 測試**:
+透過真實 DIMSE 協定（findscu）驗證 Brigid C-FIND SCP 依查詢條件回傳正確 Patient 屬性的端對端測試；以 findscu 回應作為斷言依據，不查 DB。
+_Avoid_: integration test, query builder unit test
+
+**Fixture catalog**:
+測試資料的結構化索引，存放於 tests/fixtures/dicomFiles/data.json；描述 study、series、instance 的 UID 與檔案路徑，供 seed 與斷言選取 fixture 使用。
+_Avoid_: test data, sample metadata
+
 **DimseApp**:
 Brigid 的 DIMSE SCP 執行時，負責監聽 DIMSE 連線並處理 C-ECHO、C-STORE、C-FIND、C-MOVE。
 _Avoid_: DIMSE server, dcm4che service
