@@ -4,10 +4,9 @@ import { runFindscu } from "./helpers/findscuRunner";
 import type { FindscuPatientResponse } from "./helpers/parseFindscuResponses";
 import { parseFindscuResponses } from "./helpers/parseFindscuResponses";
 import {
-    preserveDicomDataForSuite,
+    clearAndSeedDicomDataForCfindSuite,
     releaseDicomDataPreservation,
 } from "./helpers/dimseTestContext";
-import { seedOneInstancePerStudyFromDataJson } from "./helpers/seedFromDataJson";
 
 interface ExpectedPatient {
     patientId: string;
@@ -168,8 +167,7 @@ function expectPatientsMatch(
 
 describe("C-FIND patient level E2E", () => {
     beforeAll(async () => {
-        preserveDicomDataForSuite();
-        await seedOneInstancePerStudyFromDataJson();
+        await clearAndSeedDicomDataForCfindSuite();
     });
 
     afterAll(() => {

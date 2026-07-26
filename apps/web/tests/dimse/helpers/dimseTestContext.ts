@@ -16,6 +16,7 @@ import {
     runEchoscu,
 } from "./dcmsendRunner";
 import { getStorageLocalDir } from "./storage";
+import { seedOneInstancePerStudyFromDataJson } from "./seedFromDataJson";
 
 let testDb: TestDatabaseManager;
 let dimseApp: DimseApp;
@@ -27,6 +28,13 @@ export function preserveDicomDataForSuite(): void {
 
 export function releaseDicomDataPreservation(): void {
     preserveDicomDataDepth = Math.max(0, preserveDicomDataDepth - 1);
+}
+
+export async function clearAndSeedDicomDataForCfindSuite(): Promise<void> {
+    preserveDicomDataForSuite();
+    await testDb.clearDicomData();
+    await clearTestStorage();
+    await seedOneInstancePerStudyFromDataJson();
 }
 
 export function useDimseTestContext(): void {
