@@ -9,12 +9,20 @@ Brigid 是一個 DICOM 影像管理平台，支援 DICOMweb 與 DIMSE 協定接�
 _Avoid_: integration test, DIMSE unit test
 
 **C-FIND E2E 測試**:
-透過真實 DIMSE 協定（findscu）驗證 Brigid C-FIND SCP 依查詢條件回傳正確屬性的端對端測試；以 findscu 回應作為斷言依據，不查 DB。依 Query/Retrieve Level 分為 Patient level（`-P`）與 Study level（`-S`）兩套 suite。
+透過真實 DIMSE 協定（findscu）驗證 Brigid C-FIND SCP 依查詢條件回傳正確屬性的端對端測試；以 findscu 回應作為斷言依據，不查 DB。依 Query/Retrieve Level 分為 Patient level（`-P`）、Study level（`-S`）與 Series level（`-S` + `SERIES`）suite。
 _Avoid_: integration test, query builder unit test
 
 **C-FIND Study Level E2E 測試**:
 使用 Study Root Query/Retrieve Information Model - FIND（`findscu -S`），`QueryRetrieveLevel=STUDY`，驗證 study 層級查詢鍵（StudyDate、AccessionNumber 等）的回應筆數與欄位值。
 _Avoid_: Patient Root study query, QIDO-RS test
+
+**C-FIND Series Level E2E 測試**:
+使用 Study Root Query/Retrieve Information Model - FIND（`findscu -S`），`QueryRetrieveLevel=SERIES`，identifier 必帶 `StudyInstanceUID` scope，驗證 series 層級查詢鍵（Modality、SeriesDate、SeriesDescription 等）的回應筆數與欄位值；suite 獨立全 series seed。
+_Avoid_: workspace-wide series query, Patient Root series query, QIDO-RS test
+
+**DIMSE 階層查詢**:
+DIMSE C-FIND 依 Query/Retrieve Information Model 階層下鑽：Series level 查詢須在 identifier 帶上層 `StudyInstanceUID`，不能像 QIDO-RS 在 workspace 內跨 study 直接以目標層級鍵搜尋。
+_Avoid_: hierarchical query, parent key constraint
 
 **Fixture catalog**:
 測試資料的結構化索引，存放於 tests/fixtures/dicomFiles/data.json；描述 study、series、instance 的 UID 與檔案路徑，供 seed 與斷言選取 fixture 使用。

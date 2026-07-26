@@ -245,7 +245,7 @@ Fixture 根目錄：`tests/fixtures/dicomFiles/`
 
 ## Out of Scope
 
-- Series / Image level C-FIND
+- Series / Image level C-FIND（Series level 見 [0004](./0004-dimse-cfind-series-e2e-tests.md)）
 - Patient Root（`-P`）+ `QueryRetrieveLevel=STUDY`
 - Patient Study Only Query/Retrieve Model
 - Combined query keys（同時指定多個 matching key）
