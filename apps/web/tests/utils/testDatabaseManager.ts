@@ -104,6 +104,45 @@ export class TestDatabaseManager {
         }
     }
 
+    // 只清除 DICOM 業務資料，保留 DimseConfig 等測試基礎設施 / Clear DICOM data only, keep test infra like DimseConfig
+    async clearDicomData() {
+        const type = this.dataSource.options.type;
+
+        if (type === "postgres") {
+            const dicomTables = [
+                "share_link_recipient",
+                "share_link_target",
+                "share_link",
+                "tag_assignment",
+                "tag",
+                "instance",
+                "series_request_attributes",
+                "dicom_code_sequence",
+                "series",
+                "study",
+                "patient",
+                "person_name",
+                "event_log",
+            ];
+            const tableNames = dicomTables.map((table) => `"${table}"`).join(", ");
+            await this.dataSource.query(`TRUNCATE TABLE ${tableNames} CASCADE`);
+        } else {
+            await this.dataSource.manager.clear(ShareLinkRecipientEntity);
+            await this.dataSource.manager.clear(ShareLinkTargetEntity);
+            await this.dataSource.manager.clear(ShareLinkEntity);
+            await this.dataSource.manager.clear(TagAssignmentEntity);
+            await this.dataSource.manager.clear(TagEntity);
+            await this.dataSource.manager.clear(InstanceEntity);
+            await this.dataSource.manager.clear(SeriesRequestAttributesEntity);
+            await this.dataSource.manager.clear(DicomCodeSequenceEntity);
+            await this.dataSource.manager.clear(SeriesEntity);
+            await this.dataSource.manager.clear(StudyEntity);
+            await this.dataSource.manager.clear(PatientEntity);
+            await this.dataSource.manager.clear(PersonNameEntity);
+            await this.dataSource.manager.clear(EventLogEntity);
+        }
+    }
+
     async seedTestData() {
         const manager = this.dataSource.manager;
 
