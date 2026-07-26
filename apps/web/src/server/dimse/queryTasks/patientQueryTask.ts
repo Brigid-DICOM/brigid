@@ -109,11 +109,14 @@ export class PatientQueryTask
             const referencedSopClassUID = await match?.getString(
                 Tag.ReferencedSOPClassUIDInFile,
             );
-            if (referencedSopClassUID) {
+            const sopClassUID =
+                referencedSopClassUID ??
+                (await match?.getString(Tag.SOPClassUID));
+            if (sopClassUID) {
                 await basicAdjusted.setString(
                     Tag.SOPClassUID,
                     VR.UI,
-                    referencedSopClassUID,
+                    sopClassUID,
                 );
             }
         }
