@@ -6,8 +6,8 @@
 
 **Blocked by:** None — can start immediately
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `TestDatabaseManager` 新增 `clearDicomData()`，只清除 patient / study / series / instance 及相關聯資料
-- [ ] `clearDicomData()` 不清除 `DimseConfig`、`DimseAllowedIp`、`DimseAllowedRemote`
-- [ ] 現有 `test:backend` 測試套件行為不變（`clearDatabase()` 維持原樣）
+- [x] `TestDatabaseManager` 新增 `clearDicomData()`，只清除 patient / study / series / instance 及相關聯資料
+- [x] `clearDicomData()` 不清除 `DimseConfig`、`DimseAllowedIp`、`DimseAllowedRemote`
+- [x] 現有 `test:backend` 測試套件行為不變（`clearDatabase()` 維持原樣）

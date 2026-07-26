@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { assertStoredInstance } from "./helpers/assertStoredInstance";
 import { runDcmsend } from "./helpers/dcmsendRunner";
-import { useDimseTestContext } from "./helpers/dimseTestContext";
 
 const FIXTURES_ROOT = path.resolve(
     join(import.meta.url, "../fixtures/forStore"),
@@ -36,8 +35,6 @@ function itShouldUsingCStoreDicomInstanceWith(
 }
 
 describe("C-STORE E2E", () => {
-    useDimseTestContext();
-
     itShouldUsingCStoreDicomInstanceWith(
         "SOP Class: 1.2.840.10008.5.1.4.1.1.1, CR",
         "CR/6154.dcm",

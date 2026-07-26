@@ -6,11 +6,11 @@
 
 **Blocked by:** None — can start immediately
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] 新增獨立 vitest config，`include` 範圍為 `tests/dimse/**/*.test.ts`，`fileParallelism: false`
-- [ ] vitest config 透過 dotenv 載入 `.env.test`
-- [ ] `package.json` 新增 `test:dimse` script
-- [ ] `.env.test` 補齊 `TEST_DIMSE_HOST`、`TEST_DIMSE_PORT`、`TEST_DIMSE_AE_TITLE`、`TEST_DIMSE_CALLING_AE`、`TYPEORM_CONNECTION`、`STORAGE_LOCAL_DIR`、`STORAGE_PROVIDER=local`
-- [ ] `env.test.example` 記錄上述 `TEST_DIMSE_*` 與測試 storage 變數（供新開發者參考）
-- [ ] `TYPEORM_CONNECTION` 與 `TEST_DB_URL` 指向同一測試資料庫
+- [x] 新增獨立 vitest config，`include` 範圍為 `tests/dimse/**/*.test.ts`，`fileParallelism: false`
+- [x] vitest config 透過 dotenv 載入 `.env.test`
+- [x] `package.json` 新增 `test:dimse` script
+- [x] `.env.test` 補齊 `TEST_DIMSE_HOST`、`TEST_DIMSE_PORT`、`TEST_DIMSE_AE_TITLE`、`TEST_DIMSE_CALLING_AE`、`TYPEORM_CONNECTION`、`STORAGE_LOCAL_DIR`、`STORAGE_PROVIDER=local`（見 `env.test.example`，本機複製為 `.env.test`）
+- [x] `env.test.example` 記錄上述 `TEST_DIMSE_*` 與測試 storage 變數（供新開發者參考）
+- [x] `TYPEORM_CONNECTION` 與 `TEST_DB_URL` 指向同一測試資料庫
