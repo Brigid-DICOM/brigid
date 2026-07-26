@@ -6,6 +6,13 @@ dotenv.config({
     path: path.resolve(__dirname, ".env.test"),
 });
 
+if (process.env.STORAGE_LOCAL_DIR && !path.isAbsolute(process.env.STORAGE_LOCAL_DIR)) {
+    process.env.STORAGE_LOCAL_DIR = path.resolve(
+        __dirname,
+        process.env.STORAGE_LOCAL_DIR,
+    );
+}
+
 export default defineConfig({
     test: {
         alias: {

@@ -1,6 +1,6 @@
 import path from "node:path";
-import { join } from "desm";
 import type { DicomTag } from "@brigid/types";
+import { join } from "desm";
 import { describe, expect, it } from "vitest";
 import { parseFromFilename } from "@/server/services/dicom/dicomJsonParser";
 import { assertStoredInstance } from "./helpers/assertStoredInstance";
@@ -27,8 +27,9 @@ function itShouldUsingCStoreDicomInstanceWith(
         const dicomJson = await parseFromFilename(fixturePath);
         const sopInstanceUid = getSopInstanceUid(dicomJson);
 
-        const { exitCode, stderr } = runDcmsend(fixturePath);
-        expect(exitCode, stderr).toBe(0);
+        const { stderr } = await runDcmsend(fixturePath);
+        console.log("stderr", stderr);
+        expect(stderr).toContain("with status SUCCESS  : 1");
 
         await assertStoredInstance(sopInstanceUid);
     });

@@ -1,4 +1,4 @@
-import { execSync, spawnSync } from "node:child_process";
+import { execSync, spawn, spawnSync } from "node:child_process";
 
 const DCMTK_INSTALL_HINT =
     "Install DCMTK 3.7.x and ensure dcmsend is in PATH. See https://dcmtk.org/";
@@ -38,15 +38,54 @@ export interface DcmsendResult {
     stderr: string;
 }
 
-export function runDcmsend(fixturePath: string): DcmsendResult {
-    const host = process.env.TEST_DIMSE_HOST ?? "127.0.0.1";
-    const port = process.env.TEST_DIMSE_PORT ?? "11113";
-    const calledAe = process.env.TEST_DIMSE_AE_TITLE ?? "BRIGID_TEST";
-    const callingAe = process.env.TEST_DIMSE_CALLING_AE ?? "DCMSEND_SCU";
+function getDimseConnectionArgs(): {
+    host: string;
+    port: string;
+    calledAe: string;
+    callingAe: string;
+} {
+    return {
+        host: process.env.TEST_DIMSE_HOST ?? "127.0.0.1",
+        port: process.env.TEST_DIMSE_PORT ?? "11113",
+        calledAe: process.env.TEST_DIMSE_AE_TITLE ?? "BRIGID_TEST",
+        callingAe: process.env.TEST_DIMSE_CALLING_AE ?? "DCMSEND_SCU",
+    };
+}
+
+function runProcess(
+    command: string,
+    args: string[],
+): Promise<DcmsendResult> {
+    return new Promise((resolve, reject) => {
+        const child = spawn(command, args);
+        let stdout = "";
+        let stderr = "";
+
+        child.stdout.setEncoding("utf-8");
+        child.stderr.setEncoding("utf-8");
+        child.stdout.on("data", (chunk: string) => {
+            stdout += chunk;
+        });
+        child.stderr.on("data", (chunk: string) => {
+            stderr += chunk;
+        });
+        child.on("error", reject);
+        child.on("close", (code: number | null) => {
+            resolve({
+                exitCode: code ?? 1,
+                stdout,
+                stderr,
+            });
+        });
+    });
+}
+
+export function runEchoscu(): DcmsendResult {
+    const { host, port, calledAe, callingAe } = getDimseConnectionArgs();
 
     const result = spawnSync(
-        "dcmsend",
-        [host, port, fixturePath, "-aec", calledAe, "-aet", callingAe],
+        "echoscu",
+        [host, port, "-aec", calledAe, "-aet", callingAe],
         { encoding: "utf-8" },
     );
 
@@ -55,4 +94,20 @@ export function runDcmsend(fixturePath: string): DcmsendResult {
         stdout: result.stdout ?? "",
         stderr: result.stderr ?? "",
     };
+}
+
+export async function runDcmsend(fixturePath: string): Promise<DcmsendResult> {
+    const { host, port, calledAe, callingAe } = getDimseConnectionArgs();
+    const args = [
+        host,
+        port,
+        fixturePath,
+        "-aec",
+        calledAe,
+        "-aet",
+        callingAe,
+        "-v",
+    ];
+    console.log("running dcmsend with args", args);
+    return runProcess("dcmsend", args);
 }

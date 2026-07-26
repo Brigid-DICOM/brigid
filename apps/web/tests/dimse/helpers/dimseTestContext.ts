@@ -1,8 +1,8 @@
 import path from "node:path";
 import { AppDataSource, initializeDb } from "@brigid/database";
 import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
-import fsE from "fs-extra";
 import env from "@brigid/env";
+import fsE from "fs-extra";
 import {
     afterAll,
     beforeAll,
@@ -11,7 +11,10 @@ import {
 import { DimseApp } from "@/server/dimse";
 import { WorkspaceService } from "@/server/services/workspace.service";
 import { TestDatabaseManager } from "../../utils/testDatabaseManager";
-import { assertDcmtkInstalled } from "./dcmsendRunner";
+import {
+    assertDcmtkInstalled,
+    runEchoscu,
+} from "./dcmsendRunner";
 import { getStorageLocalDir } from "./storage";
 
 let testDb: TestDatabaseManager;
@@ -49,13 +52,20 @@ export function useDimseTestContext(): void {
 
         dimseApp = DimseApp.getInstance(host, port);
         await dimseApp.start();
+
+        const echo = runEchoscu();
+        if (echo.exitCode !== 0) {
+            throw new Error(
+                `DIMSE C-ECHO warmup failed (exit ${echo.exitCode}): ${echo.stderr}`,
+            );
+        }
     });
 
     beforeEach(async () => {
         await testDb.clearDicomData();
         await clearTestStorage();
     });
-
+    
     afterAll(async () => {
         dimseApp?.stop();
         DimseApp.resetInstance();
@@ -63,7 +73,7 @@ export function useDimseTestContext(): void {
         if (AppDataSource.isInitialized) {
             await AppDataSource.destroy();
         }
-
+        
         await testDb?.cleanup();
     });
 }
