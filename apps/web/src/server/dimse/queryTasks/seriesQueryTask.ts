@@ -53,6 +53,7 @@ export class SeriesQueryTask
         );
 
         await super.get();
+        this.offset = 0;
         await this.seriesQueryTaskInjectProxy?.wrappedFindNextSeries();
 
         return seriesQueryTask;

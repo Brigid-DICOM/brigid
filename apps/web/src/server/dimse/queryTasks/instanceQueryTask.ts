@@ -54,6 +54,7 @@ export class InstanceQueryTask
         );
 
         await super.get();
+        this.offset = 0;
         await this.instanceQueryTaskInjectProxy?.wrappedFindNextInstance();
 
         return instanceQueryTask;
