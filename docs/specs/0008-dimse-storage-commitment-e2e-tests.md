@@ -1,22 +1,20 @@
 # DIMSE Storage Commitment E2E 測試
 
-> Status: ready-for-agent
+> Status: implemented
 > Related ADR: [0002-dimse-dcmjs-dimse-migration](../adr/0002-dimse-dcmjs-dimse-migration.md), [0001-dimse-e2e-test-architecture](../adr/0001-dimse-e2e-test-architecture.md)
 > Related Spec: [0006-dimse-cmove-e2e-tests](./0006-dimse-cmove-e2e-tests.md)
 
 ## Problem Statement
 
-Brigid 的 `DimseApp` 目前已處理 C-ECHO、C-STORE、C-FIND、C-MOVE，但**尚未實作 Storage Commitment Push Model SCP**（N-ACTION / N-EVENT-REPORT）。外部 modality 或 PACS 常以 Storage Commitment 確認 archive 已安全儲存指定 instances；缺少此 SCP 表示 Brigid 無法在 DIMSE 協定層回應 commitment 請求。
+Brigid 的 `DimseApp` 原先僅處理 C-ECHO、C-STORE、C-FIND、C-MOVE，缺少 Storage Commitment Push Model SCP（N-ACTION / N-EVENT-REPORT）。外部 modality 或 PACS 常以 Storage Commitment 確認 archive 已安全儲存指定 instances。
 
-同時，repo 內已 vendoring dcm4che `stgcmtscu` 至 `apps/web/tests/tools/dcm4che/`，但**沒有任何 E2E 測試**驗證「真實 DIMSE 協定下，Brigid 能否正確處理 Storage Commitment Request 並以 N-EVENT-REPORT 回報 per-instance 結果」。
-
-開發者與 CI 因此無法建立 Storage Commitment 的驗收標準，也無法在回歸時自動確認與 dcm4che SCU 的互操作性，以及 `DimseAllowedRemote` 作為 Commitment Report Destination 的語意。
+本 spec 已交付：vendored dcm4che `stgcmtscu` E2E 測試與 Storage Commitment SCP 實作，使 `pnpm test:dimse` 可驗證協定邊界與 per-instance 結果回報。
 
 ## Solution
 
-**先寫測試、再實作（TDD）。** 分兩個 PR 交付：
+**先寫測試、再實作（TDD）。** 分兩個 PR 交付（均已合併至 `dev`）：
 
-1. **PR 1（本 spec 範圍）**：`docs/specs/0008` + E2E helpers + `storage-commitment.test.ts`（預期全紅）
+1. **PR 1**：`docs/specs/0008` + E2E helpers + `storage-commitment.test.ts`
 2. **PR 2**：Storage Commitment SCP 實作（`presentationContext` + `storageCommitment/` + `BrigidDimseScp.nActionRequest`），使測試全綠
 
 新增一組 **C-Storage-Commitment E2E 測試**，使用 vendored dcm4che `stgcmtscu` 作為外部 SCU，驗證兩層成功條件：
@@ -30,8 +28,8 @@ Brigid 的 `DimseApp` 目前已處理 C-ECHO、C-STORE、C-FIND、C-MOVE，但**
 
 1. As a Brigid 開發者，我想要用 `pnpm test:dimse` 執行 Storage Commitment E2E 測試，以便在實作 SCP 前後快速驗證回歸。
 2. As a Brigid 開發者，我想要測試使用 vendored `stgcmtscu`（`tests/tools/dcm4che/`），以便版本鎖定且 CI / 本地環境一致。
-3. As a Brigid 開發者，我想要 `stgcmtscu` 以 `-b <callingAe>:<port>` listen 接收 N-EVENT-REPORT，以便驗證 Brigid 以新 association 反向回報結果（標準 Push Model 流程）。
-4. As a Brigid 開發者，我想要 seed `DimseAllowedRemote` 指向 `stgcmtscu` bind 的 AE:port，以便驗證 Commitment Report Destination 白名單語意（類似 C-MOVE 的 Move Destination）。
+3. As a Brigid 開發者，我想要 `stgcmtscu` 以 `-b <callingAe>:<port>` listen 接收 N-EVENT-REPORT，以便驗證 Brigid 回報 per-instance 結果至 `stgcmtscu`（見下方「N-EVENT-REPORT 傳送方式」實作決策）。
+4. As a Brigid 開發者，我想要 seed `DimseAllowedRemote` 指向 `stgcmtscu` bind 的 AE:port，以便驗證 Commitment Report Destination 白名單語意（N-ACTION 時以 Calling AE Title 查詢；見下方實作決策）。
 5. As a Brigid 開發者，我想要以 `stgcmtscu --directory` 輸出的結果檔作為斷言依據，以便驗證協定邊界而非查 Brigid DB。
 6. As a Brigid 開發者，我想要驗證全部 instance 存在的 happy path，以便確認 N-EVENT-REPORT 全 Success。
 7. As a Brigid 開發者，我想要驗證混合存在 / 不存在的 partial failure path，以便確認 `ReferencedSOPSequence` 與 `FailedSOPSequence` 分流正確。
@@ -59,7 +57,29 @@ Brigid 的 `DimseApp` 目前已處理 C-ECHO、C-STORE、C-FIND、C-MOVE，但**
 |------|------|
 | Brigid 角色 | Push Model **SCP**（接收 N-ACTION） |
 | Commitment 成功 | 協定層確認：SOP Instance 存在於該 workspace 儲存中；不寫入額外業務狀態 |
-| Commitment Report Destination | Brigid 發送 N-EVENT-REPORT 的目標 AE；以 N-ACTION 請求的 **Calling AE Title** 查 `DimseAllowedRemote` 取得 host:port |
+| Commitment Report Destination | 以 N-ACTION 請求的 **Calling AE Title** 查 `DimseAllowedRemote`；白名單未命中則 N-ACTION 回 `ProcessingFailure`。目前 N-EVENT-REPORT 於**同一 association** 送出，尚未以查得的 host:port 開 outbound association（見下方實作決策） |
+
+### 實作回歸（原草案與交付差異）
+
+| 主題 | 原草案 | 交付實作 | 原因 |
+|------|--------|----------|------|
+| N-EVENT-REPORT 傳送 | 以 `dcmjs-dimse` `Client` 開**新 association** 至 `DimseAllowedRemote` host:port | 於 N-ACTION **同一 association** 以 `scp.sendRequests(NEventReportRequest)` 送出 | `stgcmtscu -b` listener 僅註冊 SCU role；Brigid 若開新 association 會被拒。同 association 送報可讓 `stgcmtscu --directory` 正確收到結果，E2E 全綠 |
+| N-EVENT-REPORT 時機 | 非同步觸發 | **同步**：於回傳 N-ACTION Success 前先 `await` 送完 N-EVENT-REPORT | 簡化錯誤處理；N-ACTION 失敗可反映送報失敗 |
+| 不存在 UID 模擬 | `stgcmtscu -s SOPInstanceUID=…` 覆寫 fixture | `storageCommitmentFixtures.ts` 以 `dcmjs` 寫入**暫存 Part-10 檔**並覆寫 `SOPInstanceUID` | dcm4che `-s` 為**全域**屬性，多檔案 case 無法各自指定 UID；Windows shell 對 `-s` 參數解析亦不穩定 |
+| `DimseAllowedRemote` 用途 | 查 host:port 後 outbound 連線 | N-ACTION 前**白名單驗證** + log destination；未用於實際連線 | 與同 association 送報決策一致；outbound `Client` 留待後續 spec |
+| N-ACTION 拒絕 | Out of Scope | 已實作：空 `ReferencedSOPSequence`、未知 Calling AE → `ProcessingFailure` | 防禦性檢查，成本低 |
+| Fixture 路徑 | `C3N-00953/Topogram  1.0  T20s/1000.dcm` | `C3N-00953/images/1000.dcm`（catalog `file` 欄位實際路徑） | 對齊 `data.json` 與 repo 目錄結構 |
+| `--directory` 結果檔 | 假設 `.dcm` 副檔名 | 檔名為 `TransactionUID`，**無副檔名**；`parseStgcmtResults` 列舉目錄內所有檔案 | 校準自 dcm4che 5.34.1 實際輸出 |
+
+### N-EVENT-REPORT 傳送方式（已交付）
+
+1. Brigid 於 inbound association 收到 N-ACTION RQ（Action Type ID = 1）
+2. 以 Calling AE Title 查 `DimseAllowedRemote`；未命中則 N-ACTION `ProcessingFailure`
+3. 逐筆查 workspace instance 存在性，組 Success / Failed 集合
+4. 於**同一 association** 送 N-EVENT-REPORT（Event Type ID = 2；Affected SOP Instance UID = `1.2.840.10008.1.20.1.1`）
+5. N-EVENT-REPORT 完成後回 N-ACTION Success
+
+`stgcmtscu` 仍以 `-b` listen；在 dcm4che 實作下，同 association 的 N-EVENT-REPORT 會被寫入 `--directory`，滿足 E2E 斷言接縫。標準 Push Model 的 outbound 新 association 列為後續工作（需不同 SCU 或測試架構）。
 
 詳見根目錄 `CONTEXT.md` 的 **Storage Commitment SCP**、**Commitment Report Destination**、**C-Storage-Commitment E2E 測試** 條目。
 
@@ -69,8 +89,8 @@ Brigid 的 `DimseApp` 目前已處理 C-ECHO、C-STORE、C-FIND、C-MOVE，但**
 
 ```
 tests/tools/dcm4che/
-├── VERSION          # 5.34.1（待補）
-├── NOTICE           # 授權與來源說明（待補）
+├── VERSION          # 5.34.1
+├── NOTICE           # 授權與來源說明
 ├── bin/
 │   ├── stgcmtscu
 │   └── stgcmtscu.bat
@@ -88,6 +108,7 @@ tests/tools/dcm4che/
 | `stgcmtscuRunner.ts` | 組裝 `stgcmtscu` CLI 參數、執行程序、回傳 exit code / stdout / stderr |
 | `parseStgcmtResults.ts` | 讀取 `--directory` 輸出檔，解析 per-instance Success / Failure UID |
 | `storageCommitmentTestSetup.ts` | suite `beforeAll` / `afterAll`：seed、allowed remote、輸出目錄管理 |
+| `storageCommitmentFixtures.ts` | 以 `dcmjs` 從 catalog fixture 產生暫存 DICOM，覆寫 `SOPInstanceUID`（mixed / all-failed case） |
 
 **平台選擇**：`process.platform === "win32"` 時使用 `stgcmtscu.bat`，否則使用 `stgcmtscu`。
 
@@ -109,7 +130,7 @@ stgcmtscu -b STGCMTSCU:11114 -c BRIGID_TEST@127.0.0.1:11113 \
 - **Bind port**：ephemeral port（`127.0.0.1:0` 模式，對齊 `storescpRunner`）
 - **Connect**：`-c <calledAe>@<host>:<dimsePort>`，沿用 `getDimseConnectionArgs()` 的 `TEST_DIMSE_*` env
 - **輸出目錄**：`tests/dimse/.tmp/stgcmt-output/`（每 case 執行前清空）
-- **不**使用 `--keep-alive`（本 spec 驗證標準新 association 流程）
+- **不**使用 `--keep-alive`（維持 one-shot `stgcmtscu` 流程；N-EVENT-REPORT 由 Brigid 於同一 association 送出，見「N-EVENT-REPORT 傳送方式」）
 
 #### DimseAllowedRemote（Commitment Report Destination）
 
@@ -119,9 +140,12 @@ stgcmtscu -b STGCMTSCU:11114 -c BRIGID_TEST@127.0.0.1:11113 \
 - `host` = `127.0.0.1`
 - `port` = `stgcmtscu` bind 的 ephemeral port
 
-Brigid SCP 收到 N-ACTION 後，以 **Calling AE Title**（即 `STGCMTSCU_TEST`）查詢 `DimseAllowedRemote`，取得 host:port 後開新 association 發送 N-EVENT-REPORT。
+Brigid SCP 收到 N-ACTION 後，以 **Calling AE Title**（即 `STGCMTSCU_TEST`）查詢 `DimseAllowedRemote`：
 
-可新增 `seedCommitmentReportDestinationAllowedRemote(port)` helper（對齊 `seedMoveDestinationAllowedRemote`）。
+- **已交付**：白名單未命中 → N-ACTION `ProcessingFailure`；命中後記錄 `host:port` 至 log
+- **未交付**：以查得的 host:port 開新 association 送 N-EVENT-REPORT（見「實作回歸」）
+
+已實作 `seedCommitmentReportDestinationAllowedRemote(port)`（對齊 `seedMoveDestinationAllowedRemote`）。
 
 #### Seed Helper
 
@@ -147,18 +171,11 @@ Suite `beforeAll` 呼叫 `preserveDicomDataForSuite()` + `clearDicomData()` + `s
 
 | 用途 | SOPInstanceUID | Fixture 檔案 |
 |------|----------------|-------------|
-| 存在 instance A | `…310894536700672302243471156028` | `C3N-00953/Topogram  1.0  T20s/1000.dcm` |
-| 存在 instance B | 自 ABD ROUTINE series 任選一筆 | `C3N-00953/ABD ROUTINE  3.0  B31f/*.dcm` |
-| 不存在 instance | `1.2.3.4.5.6.7.8.9.0.99` | 以 `-s SOPInstanceUID=…` 覆寫真實 fixture 的 UID |
+| 存在 instance A | `…310894536700672302243471156028` | `C3N-00953/images/1000.dcm`（Topogram） |
+| 存在 instance B | `…ABD_ROUTINE`（見 `seedC3N00953` 常數） | `C3N-00953/images/1001.dcm`（ABD ROUTINE） |
+| 不存在 instance | `1.2.3.4.5.6.7.8.9.0.99` | 以 `storageCommitmentFixtures.createFixtureWithSopInstanceUid()` 從真實 fixture 複製並覆寫 UID |
 
-**不存在 UID 的產生方式**：`stgcmtscu` 從 DICOM 檔掃描 Referenced SOP Sequence，無法直接指定任意 UID。使用 `-s SOPInstanceUID=<uid>` 覆寫 fixture 檔案的 UID 後再傳入，以模擬不存在的 instance：
-
-```bash
-stgcmtscu -b STGCMTSCU_TEST:11114 -c BRIGID_TEST@127.0.0.1:11113 \
-  --directory /tmp/stgcmt-output \
-  path/to/existing.dcm \
-  -s SOPInstanceUID=1.2.3.4.5.6.7.8.9.0.99 path/to/template.dcm
-```
+**不存在 UID 的產生方式**：`stgcmtscu` 從 DICOM 檔掃描 Referenced SOP Sequence，無法直接指定任意 UID。原草案以 `-s SOPInstanceUID=<uid>` 覆寫；**交付改為** `storageCommitmentFixtures.ts` 寫入暫存 Part-10 檔（目錄：`os.tmpdir()/brigid-stgcmt-fixtures/`），因 dcm4che `-s` 為全域覆寫且不利於多檔案 case。
 
 Fixture 根目錄：`tests/fixtures/dicomFiles/C3N-00953/`
 
@@ -167,29 +184,30 @@ Fixture 根目錄：`tests/fixtures/dicomFiles/C3N-00953/`
 每個 case 執行：
 
 1. 清空 `stgcmtscu` 輸出目錄
-2. 執行 `stgcmtscu`（含 `-b`、`-c`、`--directory`、fixture 路徑與必要的 `-s` 覆寫）
+2. 執行 `stgcmtscu`（含 `-b`、`-c`、`--directory`、fixture 路徑；mixed / all-failed 先以 `createFixtureWithSopInstanceUid` 產生暫存檔）
 3. 斷言 `stgcmtscu` exit code = 0
-4. 列舉 `--directory` 輸出檔，以 `readDicomTags` 或 `dcmjs` 解析 `(0008,1150) Referenced SOP Class UID` / `(0008,1155) Referenced SOP Instance UID` 與 Failed SOP Sequence
+4. 列舉 `--directory` 輸出檔（檔名為 `TransactionUID`，無 `.dcm` 副檔名），以 `dcmjs` 解析 `ReferencedSOPSequence` / `FailedSOPSequence`
 5. 斷言 Success UID 集合與 Failed UID 集合符合預期（順序不拘）
 
 **解析來源**：僅解析 **`stgcmtscu --directory` 輸出檔**，不解析 Brigid server 端 log（避免測試依賴 server logging 格式）。
 
-實作前應以真實 `stgcmtscu` 輸出校準 `parseStgcmtResults` 的 tag 路徑與檔案命名規則。
+`parseStgcmtResults` 已依 dcm4che 5.34.1 實際輸出校準。
 
 ### Test Files
 
 ```
 tests/dimse/
 ├── helpers/
-│   ├── dcm4cheToolRunner.ts           # NEW
-│   ├── stgcmtscuRunner.ts             # NEW
-│   ├── parseStgcmtResults.ts          # NEW
-│   ├── storageCommitmentTestSetup.ts  # NEW
-│   └── seedC3N00953.ts                # 擴充 seedCommitmentReportDestinationAllowedRemote
-└── storage-commitment.test.ts         # NEW
+│   ├── dcm4cheToolRunner.ts           # vendored tool path、Java 檢查
+│   ├── stgcmtscuRunner.ts             # stgcmtscu CLI 執行
+│   ├── parseStgcmtResults.ts          # --directory 結果解析
+│   ├── storageCommitmentTestSetup.ts  # suite setup、seed、輸出目錄
+│   ├── storageCommitmentFixtures.ts   # 暫存 fixture（覆寫 SOPInstanceUID）
+│   └── seedC3N00953.ts                # 含 seedCommitmentReportDestinationAllowedRemote
+└── storage-commitment.test.ts
 ```
 
-`vitest.dimse.config.mts` 新增 `tests/dimse/storage-commitment.test.ts`。
+`vitest.dimse.config.mts` 已納入 `tests/dimse/storage-commitment.test.ts`。`presentationContext.test.ts` 另含 Storage Commitment SOP class 協商 case。
 
 ### 環境變數
 
@@ -212,8 +230,8 @@ SOP Class：Storage Commitment Push Model（`1.2.840.10008.1.20.1`）
 | Label | Referenced UIDs | 預期 Success UIDs | 預期 Failed UIDs |
 |-------|-----------------|-------------------|------------------|
 | All instances exist | 2 個已 seed 的真實 UID | 2 個全部 | （空） |
-| Mixed exist / not exist | 1 真實 + 1 不存在（`-s` 覆寫） | 1 個 | 1 個 |
-| All instances not exist | 2 個不存在（`-s` 覆寫） | （空） | 2 個全部 |
+| Mixed exist / not exist | 1 真實 + 1 暫存 fixture（不存在 UID） | 1 個 | 1 個 |
+| All instances not exist | 2 個暫存 fixture（不存在 UID） | （空） | 2 個全部 |
 
 **`stgcmtscu` 指令範例（all exist）**：
 
@@ -221,24 +239,25 @@ SOP Class：Storage Commitment Push Model（`1.2.840.10008.1.20.1`）
 stgcmtscu -b STGCMTSCU_TEST:<bindPort> \
   -c BRIGID_TEST@127.0.0.1:11113 \
   --directory tests/dimse/.tmp/stgcmt-output \
-  tests/fixtures/dicomFiles/C3N-00953/Topogram\ 1.0\ T20s/1000.dcm \
-  tests/fixtures/dicomFiles/C3N-00953/ABD\ ROUTINE\ 3.0\ B31f/<instance>.dcm
+  tests/fixtures/dicomFiles/C3N-00953/images/1000.dcm \
+  tests/fixtures/dicomFiles/C3N-00953/images/1001.dcm
 ```
 
-## SCP 實作指引（PR 2，供 agent 參考）
+## SCP 實作（已交付）
 
-測試全紅後，依本 spec 與 [ADR-0002](../adr/0002-dimse-dcmjs-dimse-migration.md) 擴展 `dcmjs-dimse` stack：
+依 [ADR-0002](../adr/0002-dimse-dcmjs-dimse-migration.md) 擴展 `dcmjs-dimse` stack：
 
 1. **`presentationContext.ts`**：接受 `SopClass.StorageCommitmentPushModel`（Implicit / Explicit VR LE）
-2. **新建 `dimse/storageCommitment/`**：
-   - `executor.ts`：`executeStorageCommitment()` — 解析 N-ACTION dataset（`TransactionUID`、`ReferencedSOPSequence`），逐筆查詢 workspace 內 instance 是否存在，組 N-ACTION Success response，並觸發非同步 N-EVENT-REPORT
-   - `eventReportClient.ts`：`dcmjs-dimse` `Client` 包裝；以 Calling AE Title 查 `DimseAllowedRemote`，開新 association 送 N-EVENT-REPORT（Event Type ID = 2）；dataset 含 `TransactionUID`、`ReferencedSOPSequence`（Success）與 `FailedSOPSequence`（Failure，Status `0110` No such object instance）
-3. **`brigidDimseScp.nActionRequest`** 委派 `executeStorageCommitment()`，不內嵌業務邏輯
-4. **Instance 存在性查詢**：複用 workspace scope 的 instance lookup（與 C-FIND image level 或 storage path 查詢一致），不引入額外 DB 狀態欄位
-5. **Outbound association**：Calling AE = Brigid Called AE Title，Called AE = N-ACTION 請求的 Calling AE Title（與 C-MOVE outbound 語意對稱）
-6. `pnpm test:dimse` 全綠
+2. **`dimse/storageCommitment/`**：
+   - `executor.ts`：`executeStorageCommitment()` — 解析 N-ACTION dataset、白名單查詢、instance 存在性、N-ACTION Success、同步送 N-EVENT-REPORT
+   - `eventReportClient.ts`：`sendStorageCommitmentEventReportOnAssociation()` — 於 inbound association 以 `scp.sendRequests(NEventReportRequest)` 送報（Event Type ID = 2；`FailedSOPSequence` 使用 `0110` No such object instance）
+   - `instanceResolver.ts`：workspace scope instance 存在性查詢
+3. **`brigidDimseScp.nActionRequest`** 委派 `executeStorageCommitment()`
+4. **Instance 存在性**：複用 workspace instance lookup，不引入額外 DB 狀態欄位
+5. **Outbound association（未交付）**：原草案以 `Client` 開新 association 至 `DimseAllowedRemote` host:port；列為後續 spec
+6. `pnpm test:dimse` 全綠（含本 suite 3 case）
 
-**dcmjs-dimse 參考**：`Scp.nActionRequest` / `NEventReportRequest`；`SopClass.StorageCommitmentPushModel`；Action Type ID `1`（Storage Commitment Request）；Event Type ID `2`（Storage Commitment Response）。
+**dcmjs-dimse 參考**：`Scp.nActionRequest` / `NEventReportRequest`；`SopClass.StorageCommitmentPushModel`；Action Type ID `1`；Event Type ID `2`。
 
 ## Testing Decisions
 
@@ -248,15 +267,15 @@ stgcmtscu -b STGCMTSCU_TEST:<bindPort> \
 - **不驗證內部實作細節**：不 mock `storageCommitment` executor、不以 Brigid DB 作為主要斷言
 - **共用 seed**：suite `beforeAll` seed C3N-00953 全 11 instances
 - **每 case 清空輸出目錄**：避免前次 N-EVENT-REPORT 結果干擾
-- **不存在 UID 以 `-s` 覆寫**：不引入額外 synthetic fixture 目錄
+- **不存在 UID 以暫存 fixture 覆寫**：`storageCommitmentFixtures.ts`；不使用 dcm4che `-s`（見「實作回歸」）
 
 ### 測試模組
 
 | 模組 | 測試方式 |
 |------|----------|
 | `DimseApp` + Storage Commitment SCP | 透過 `stgcmtscu` 真實 DIMSE 連線 |
-| `DimseAllowedRemote` 白名單 | 透過 PR 2 實作驗證；E2E 以正確 seed 覆蓋 happy path |
-| N-EVENT-REPORT 反向 association | 透過 `--directory` 結果檔斷言覆蓋 |
+| `DimseAllowedRemote` 白名單 | N-ACTION 時 Calling AE 查詢；未命中則 `ProcessingFailure` |
+| N-EVENT-REPORT 結果 | 透過 `--directory` 結果檔斷言（同 association 送報） |
 | `dcm4cheToolRunner` / `stgcmtscuRunner` / `parseStgcmtResults` | 不單獨單元測試；由 E2E case 覆蓋 |
 
 ### Prior Art
@@ -269,7 +288,7 @@ stgcmtscu -b STGCMTSCU_TEST:<bindPort> \
 ## Out of Scope
 
 - Storage Commitment **Pull Model**（Brigid 作為 SCU）
-- N-ACTION 層拒絕（空 sequence、未知 Calling AE 不在白名單）— 留待後續 spec
+- **Outbound 新 association** 送 N-EVENT-REPORT（`dcmjs-dimse` `Client` 至 `DimseAllowedRemote` host:port）— 原 PR 2 草案；列為後續 spec
 - 業務狀態持久化（commitment 紀錄寫入 DB）
 - TLS / 使用者身份協商
 - `stgcmtscu --one-per-series` / `--one-per-study` 分組行為
@@ -279,12 +298,14 @@ stgcmtscu -b STGCMTSCU_TEST:<bindPort> \
 - `storageCommitment/` 模組 unit test（E2E 已覆蓋協定邊界）
 - 修改 C-FIND / C-MOVE suite 的 seed 策略
 
+**原 Out of Scope、交付時已實作（防禦性）**：N-ACTION 層拒絕（空 `ReferencedSOPSequence`、未知 Calling AE 不在白名單）。
+
 ## Delivery Plan
 
-| PR | 範圍 | 驗收 |
-|----|------|------|
-| PR 1 | 本 spec + `VERSION`/`NOTICE` + E2E helpers + `storage-commitment.test.ts` | 測試可執行、預期全紅 |
-| PR 2 | SCP 實作（`presentationContext` + `storageCommitment/` + `brigidDimseScp`） | `pnpm test:dimse` 全綠 |
+| PR | 範圍 | 驗收 | 狀態 |
+|----|------|------|------|
+| PR 1 | 本 spec + `VERSION`/`NOTICE` + E2E helpers + `storage-commitment.test.ts` | 測試可執行 | ✅ `727e8ea` 等 |
+| PR 2 | SCP 實作（`presentationContext` + `storageCommitment/` + `brigidDimseScp`） | `pnpm test:dimse` 全綠 | ✅ `d7cce4c` |
 
 ## Further Notes
 
@@ -292,4 +313,5 @@ stgcmtscu -b STGCMTSCU_TEST:<bindPort> \
 - `fileParallelism: false` 已於 `vitest.dimse.config.mts` 設定；`stgcmtscu` ephemeral bind port 仍應避免與其他程序衝突。
 - Linux CI 需確認 `stgcmtscu` shell script 具 execute permission（`chmod +x`）。
 - C-STORE ingest（`parseFromFilename`）仍需要 JVM，`tests/dimse/setup.ts` 的 `raccoonDcm4cheJavaLoader` 仍須保留。
-- `tests/tools/dcm4che/VERSION` 與 `NOTICE` 應於 PR 1 一併補齊（grilling 共識）。
+- `tests/tools/dcm4che/VERSION` 與 `NOTICE` 已於 PR 1 補齊。
+- 後續 spec 建議涵蓋：outbound `Client` 新 association 與非 `stgcmtscu` SCU 的互操作性驗證。

@@ -45,7 +45,7 @@ Brigid 的 DIMSE SCP 執行時，負責監聽 DIMSE 連線並處理 C-ECHO、C-S
 _Avoid_: DIMSE server, dcm4che service
 
 **Storage Commitment SCP**:
-Brigid 在 Push Model 中扮演的角色；接收外部 SCU 的 N-ACTION 請求，確認指定 SOP Instance 已存在於 workspace 後回應，並非同步以 N-EVENT-REPORT 回報 per-instance 結果。
+Brigid 在 Push Model 中扮演的角色；接收外部 SCU 的 N-ACTION 請求，確認指定 SOP Instance 已存在於 workspace 後回應，並於**同一 inbound association** 以 N-EVENT-REPORT 回報 per-instance 結果（同步，於 N-ACTION Success 前完成）。
 _Avoid_: storage commit server, stgcmt SCP
 
 **Storage Commitment 成功**:
@@ -53,7 +53,7 @@ _Avoid_: storage commit server, stgcmt SCP
 _Avoid_: committed status, storage committed flag
 
 **Commitment Report Destination**:
-Storage Commitment Push Model 中，Brigid 發送 N-EVENT-REPORT 的目標遠端 AE；以 N-ACTION 請求的 Calling AE Title 查詢 `DimseAllowedRemote` 取得 host:port，語意類似 C-MOVE 的 Move Destination，但承載的是 N-EVENT-REPORT 而非 C-STORE。
+Storage Commitment Push Model 中，Brigid 發送 N-EVENT-REPORT 的目標遠端 AE；以 N-ACTION 請求的 Calling AE Title 查詢 `DimseAllowedRemote` 作白名單驗證（語意類似 C-MOVE 的 Move Destination）。目前 E2E 以同 association 送報，尚未以查得的 host:port 開 outbound association。
 _Avoid_: report AE, event report target
 
 **C-Storage-Commitment E2E 測試**:
