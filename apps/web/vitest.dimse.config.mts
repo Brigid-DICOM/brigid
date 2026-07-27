@@ -23,6 +23,7 @@ export default defineConfig({
         globals: true,
         include: [
             "tests/dimse/cstore*.test.ts",
+            "tests/dimse/cfind*.test.ts",
             "tests/dimse/presentationContext.test.ts",
         ],
         fileParallelism: false,

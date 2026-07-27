@@ -78,6 +78,21 @@ const IMAGE_RETURN_KEYS: readonly (
     "PatientID",
 ];
 
+function formatFindscuQueryValue(
+    matchingKey: string,
+    queryValue: string,
+): string {
+    if (
+        (matchingKey === "SeriesNumber" ||
+            matchingKey === "InstanceNumber") &&
+        queryValue.includes(",")
+    ) {
+        return queryValue.replace(/,/g, "\\");
+    }
+
+    return queryValue;
+}
+
 export async function runFindscu(
     matchingKey: CFindMatchingKey,
     queryValue: string,
@@ -98,7 +113,10 @@ export async function runFindscu(
 
     for (const key of RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push("-k", `${key}=${queryValue}`);
+            args.push(
+                "-k",
+                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+            );
         } else {
             args.push("-k", `${key}=`);
         }
@@ -127,7 +145,10 @@ export async function runFindscuStudy(
 
     for (const key of STUDY_RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push("-k", `${key}=${queryValue}`);
+            args.push(
+                "-k",
+                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+            );
         } else {
             args.push("-k", `${key}=`);
         }
@@ -159,7 +180,10 @@ export async function runFindscuSeries(
 
     for (const key of SERIES_RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push("-k", `${key}=${queryValue}`);
+            args.push(
+                "-k",
+                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+            );
         } else {
             args.push("-k", `${key}=`);
         }
@@ -194,7 +218,10 @@ export async function runFindscuImage(
 
     for (const key of IMAGE_RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push("-k", `${key}=${queryValue}`);
+            args.push(
+                "-k",
+                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+            );
         } else {
             args.push("-k", `${key}=`);
         }
