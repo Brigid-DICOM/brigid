@@ -1,8 +1,8 @@
 import { expect } from "vitest";
 import { getMovescuOutput, type MovescuResult } from "./movescuRunner";
 import {
-    parseMovescuResponses,
     type MovescuMoveResponse,
+    parseMovescuResponses,
 } from "./parseMovescuResponses";
 
 export interface ExpectedMoveCounts {
@@ -25,7 +25,7 @@ function resolveFinalCompleted(
     const lastPending = pendingResponses[pendingResponses.length - 1];
     const lastPendingCompleted = lastPending.completed;
     expect(lastPendingCompleted).toBeDefined();
-    return lastPendingCompleted + 1;
+    return (lastPendingCompleted ?? 0) + 1;
 }
 
 export function assertMovescuMoveCounts(
