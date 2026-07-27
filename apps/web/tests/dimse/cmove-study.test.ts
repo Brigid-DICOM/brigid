@@ -10,6 +10,7 @@ import {
     getMovescuOutput,
     runMovescuStudy,
 } from "./helpers/movescuRunner";
+import { assertMovescuMoveCounts } from "./helpers/parseMovescuResponses";
 import {
     C3N_00953_STUDY_UID,
     getC3N00953SopInstanceUids,
@@ -31,6 +32,7 @@ describe("DIMSE C-MOVE (Study level)", () => {
         );
 
         expect(result.exitCode).toBe(0);
+        assertMovescuMoveCounts(result, { expectedCompleted: 11 });
         await assertReceivedSopInstanceUids(
             storescp,
             getC3N00953SopInstanceUids(),
@@ -47,8 +49,7 @@ describe("DIMSE C-MOVE (Study level)", () => {
         );
 
         const output = getMovescuOutput(result);
-        const hasFailure =
-            result.exitCode !== 0 || /0xA801/i.test(output);
+        const hasFailure = result.exitCode !== 0 || /0xA801/i.test(output);
         expect(hasFailure).toBe(true);
         expectMovescuStatus(result, "0xA801");
         expect(await readReceivedInstanceCount(storescp)).toBe(0);

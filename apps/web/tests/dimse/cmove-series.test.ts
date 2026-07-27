@@ -8,6 +8,7 @@ import {
     getMoveDestinationAeTitle,
     runMovescuSeries,
 } from "./helpers/movescuRunner";
+import { assertMovescuMoveCounts } from "./helpers/parseMovescuResponses";
 import {
     C3N_00953_SERIES_ABD_ROUTINE_UID,
     C3N_00953_SERIES_TOPOGRAM_UID,
@@ -31,6 +32,7 @@ describe("DIMSE C-MOVE (Series level)", () => {
         );
 
         expect(result.exitCode).toBe(0);
+        assertMovescuMoveCounts(result, { expectedCompleted: 5 });
         await assertReceivedSopInstanceUids(
             storescp,
             getC3N00953SeriesSopInstanceUids(C3N_00953_SERIES_ABD_ROUTINE_UID),
@@ -49,6 +51,7 @@ describe("DIMSE C-MOVE (Series level)", () => {
         );
 
         expect(result.exitCode).toBe(0);
+        assertMovescuMoveCounts(result, { expectedCompleted: 1 });
         await assertReceivedSopInstanceUids(
             storescp,
             getC3N00953SeriesSopInstanceUids(C3N_00953_SERIES_TOPOGRAM_UID),

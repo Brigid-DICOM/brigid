@@ -8,6 +8,7 @@ import {
     getMoveDestinationAeTitle,
     runMovescuImage,
 } from "./helpers/movescuRunner";
+import { assertMovescuMoveCounts } from "./helpers/parseMovescuResponses";
 import {
     C3N_00953_SERIES_TOPOGRAM_UID,
     C3N_00953_STUDY_UID,
@@ -31,6 +32,7 @@ describe("DIMSE C-MOVE (Image level)", () => {
         );
 
         expect(result.exitCode).toBe(0);
+        assertMovescuMoveCounts(result, { expectedCompleted: 1 });
         await assertReceivedSopInstanceUids(storescp, [
             C3N_00953_TOPOGRAM_SOP_INSTANCE_UID,
         ]);
