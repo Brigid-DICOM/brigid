@@ -8,7 +8,7 @@ import {
     getMoveDestinationAeTitle,
     runMovescuPatient,
 } from "./helpers/movescuRunner";
-import { assertMovescuMoveCounts } from "./helpers/parseMovescuResponses";
+import { assertMovescuMoveCounts } from "./helpers/assertMovescuMoveCounts";
 import { getC3N00953SopInstanceUids } from "./helpers/seedC3N00953";
 
 // biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test

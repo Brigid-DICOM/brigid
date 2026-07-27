@@ -8,7 +8,7 @@ import {
     getMoveDestinationAeTitle,
     runMovescuSeries,
 } from "./helpers/movescuRunner";
-import { assertMovescuMoveCounts } from "./helpers/parseMovescuResponses";
+import { assertMovescuMoveCounts } from "./helpers/assertMovescuMoveCounts";
 import {
     C3N_00953_SERIES_ABD_ROUTINE_UID,
     C3N_00953_SERIES_TOPOGRAM_UID,

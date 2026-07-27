@@ -10,7 +10,7 @@ import {
     getMovescuOutput,
     runMovescuStudy,
 } from "./helpers/movescuRunner";
-import { assertMovescuMoveCounts } from "./helpers/parseMovescuResponses";
+import { assertMovescuMoveCounts } from "./helpers/assertMovescuMoveCounts";
 import {
     C3N_00953_STUDY_UID,
     getC3N00953SopInstanceUids,
