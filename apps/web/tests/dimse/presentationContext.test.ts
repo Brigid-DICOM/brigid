@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
     isQueryRetrieveMoveSopClass,
     isQueryRetrieveSopClass,
+    isStorageCommitmentSopClass,
     isStorageSopClass,
     isVerificationSopClass,
     PATIENT_ROOT_QUERY_RETRIEVE_MOVE_SOP_CLASS_UID,
@@ -63,5 +64,12 @@ describe("presentationContext", () => {
                 SopClass.StudyRootQueryRetrieveInformationModelGet,
             ),
         ).toBe(false);
+    });
+
+    it("identifies Storage Commitment Push Model SOP class", () => {
+        expect(
+            isStorageCommitmentSopClass(SopClass.StorageCommitmentPushModel),
+        ).toBe(true);
+        expect(isStorageCommitmentSopClass(SopClass.Verification)).toBe(false);
     });
 });

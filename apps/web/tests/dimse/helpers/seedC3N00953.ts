@@ -6,6 +6,7 @@ import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.ent
 import testData from "../../fixtures/dicomFiles/data.json";
 import { runDcmsend, type DcmsendResult } from "./dcmsendRunner";
 import { getMoveDestinationAeTitle } from "./movescuRunner";
+import { getStgcmtCallingAeTitle } from "./stgcmtscuRunner";
 
 export const C3N_00953_STUDY_UID =
     "1.3.6.1.4.1.14519.5.2.1.7085.2626.192997540292073877946622133586";
@@ -18,6 +19,12 @@ export const C3N_00953_SERIES_TOPOGRAM_UID =
 
 export const C3N_00953_TOPOGRAM_SOP_INSTANCE_UID =
     "1.3.6.1.4.1.14519.5.2.1.7085.2626.310894536700672302243471156028";
+
+export const C3N_00953_ABD_ROUTINE_SOP_INSTANCE_UID =
+    "1.3.6.1.4.1.14519.5.2.1.7085.2626.217106578590152045405778705262";
+
+export const NONEXISTENT_SOP_INSTANCE_UID =
+    "1.2.3.4.5.6.7.8.9.0.99";
 
 const FIXTURES_ROOT = path.resolve(
     join(import.meta.url, "../../fixtures/dicomFiles"),
@@ -93,6 +100,47 @@ export async function seedC3N00953FromDataJson(): Promise<void> {
             expectDcmsendSuccess(result);
         }
     }
+}
+
+export function getC3N00953TopogramFixturePath(): string {
+    return path.join(FIXTURES_ROOT, "C3N-00953", "images", "1000.dcm");
+}
+
+export function getC3N00953AbdRoutineFixturePath(): string {
+    return path.join(FIXTURES_ROOT, "C3N-00953", "images", "1001.dcm");
+}
+
+export async function seedCommitmentReportDestinationAllowedRemote(
+    port: number,
+    host = "127.0.0.1",
+): Promise<void> {
+    const aeTitle = process.env.TEST_DIMSE_AE_TITLE ?? "BRIGID_TEST";
+    const commitmentAeTitle = getStgcmtCallingAeTitle();
+
+    const dimseConfig = await AppDataSource.manager.findOne(DimseConfigEntity, {
+        where: { aeTitle },
+    });
+    if (!dimseConfig) {
+        throw new Error(`DimseConfig not found for AE title ${aeTitle}`);
+    }
+
+    const existing = await AppDataSource.manager.find(DimseAllowedRemoteEntity, {
+        where: {
+            dimseConfigId: dimseConfig.id,
+            aeTitle: commitmentAeTitle,
+        },
+    });
+    if (existing.length > 0) {
+        await AppDataSource.manager.remove(existing);
+    }
+
+    await AppDataSource.manager.save(DimseAllowedRemoteEntity, {
+        dimseConfigId: dimseConfig.id,
+        aeTitle: commitmentAeTitle,
+        host,
+        port,
+        description: "Storage Commitment E2E stgcmtscu destination",
+    });
 }
 
 export async function seedMoveDestinationAllowedRemote(
