@@ -10,6 +10,7 @@ import {
 } from "./helpers/movescuRunner";
 import { getC3N00953SopInstanceUids } from "./helpers/seedC3N00953";
 
+// biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test
 useCmoveTestSetup();
 
 describe("DIMSE C-MOVE (Patient level)", () => {

@@ -15,6 +15,7 @@ import {
     getC3N00953SeriesSopInstanceUids,
 } from "./helpers/seedC3N00953";
 
+// biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test
 useCmoveTestSetup();
 
 describe("DIMSE C-MOVE (Series level)", () => {

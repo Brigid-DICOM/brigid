@@ -16,6 +16,7 @@ import {
 } from "./helpers/seedC3N00953";
 import { readReceivedInstanceCount } from "./helpers/storescpRunner";
 
+// biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test
 useCmoveTestSetup();
 
 describe("DIMSE C-MOVE (Study level)", () => {

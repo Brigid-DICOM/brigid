@@ -14,6 +14,7 @@ import {
     C3N_00953_TOPOGRAM_SOP_INSTANCE_UID,
 } from "./helpers/seedC3N00953";
 
+// biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test
 useCmoveTestSetup();
 
 describe("DIMSE C-MOVE (Image level)", () => {
