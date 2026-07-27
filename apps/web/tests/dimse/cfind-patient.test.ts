@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { CFindMatchingKey } from "./helpers/findscuRunner";
-import { runFindscu } from "./helpers/findscuRunner";
-import type { FindscuPatientResponse } from "./helpers/parseFindscuResponses";
-import { parseFindscuResponses } from "./helpers/parseFindscuResponses";
 import {
     clearAndSeedDicomDataForCfindSuite,
     releaseDicomDataPreservation,
 } from "./helpers/dimseTestContext";
+import type { CFindMatchingKey } from "./helpers/findscuRunner";
+import { runFindscu } from "./helpers/findscuRunner";
+import type { FindscuPatientResponse } from "./helpers/parseFindscuResponses";
+import { parseFindscuResponses } from "./helpers/parseFindscuResponses";
 
 interface ExpectedPatient {
     patientId: string;
@@ -26,7 +26,9 @@ const CASES: CFindPatientCase[] = [
         label: "PatientID wildcard: TC*",
         matchingKey: "PatientID",
         queryValue: "TC*",
-        expectedPatients: [{ patientId: "TCGA-G4-6304", patientName: "TCGA-G4-6304" }],
+        expectedPatients: [
+            { patientId: "TCGA-G4-6304", patientName: "TCGA-G4-6304" },
+        ],
     },
     {
         label: "PatientID wildcard: C3*",
@@ -47,7 +49,9 @@ const CASES: CFindPatientCase[] = [
         label: "PatientName wildcard: TCGA*",
         matchingKey: "PatientName",
         queryValue: "TCGA*",
-        expectedPatients: [{ patientId: "TCGA-G4-6304", patientName: "TCGA-G4-6304" }],
+        expectedPatients: [
+            { patientId: "TCGA-G4-6304", patientName: "TCGA-G4-6304" },
+        ],
     },
     {
         label: "PatientName wildcard: Philips*",
@@ -174,7 +178,11 @@ describe("C-FIND patient level E2E", () => {
         releaseDicomDataPreservation();
     });
 
-    it.each(CASES)("$label", async ({ matchingKey, queryValue, expectedPatients }) => {
+    it.each(CASES)("$label", async ({
+        matchingKey,
+        queryValue,
+        expectedPatients,
+    }) => {
         const result = await runFindscu(matchingKey, queryValue);
         const log = `${result.stdout}\n${result.stderr}`;
 

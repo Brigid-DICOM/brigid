@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { assertMovescuMoveCounts } from "./helpers/assertMovescuMoveCounts";
 import {
     assertReceivedSopInstanceUids,
     prepareMoveCase,
@@ -8,14 +9,12 @@ import {
     getMoveDestinationAeTitle,
     runMovescuImage,
 } from "./helpers/movescuRunner";
-import { assertMovescuMoveCounts } from "./helpers/assertMovescuMoveCounts";
 import {
     C3N_00953_SERIES_TOPOGRAM_UID,
     C3N_00953_STUDY_UID,
     C3N_00953_TOPOGRAM_SOP_INSTANCE_UID,
 } from "./helpers/seedC3N00953";
 
-// biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test
 useCmoveTestSetup();
 
 describe("DIMSE C-MOVE (Image level)", () => {

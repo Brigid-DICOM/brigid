@@ -40,6 +40,9 @@ export function readDicomTags(
     return values;
 }
 
-export function resolveSeedFilePath(fixturesRoot: string, relativeFile: string): string {
+export function resolveSeedFilePath(
+    fixturesRoot: string,
+    relativeFile: string,
+): string {
     return path.join(fixturesRoot, relativeFile.replace(/\\/g, path.sep));
 }

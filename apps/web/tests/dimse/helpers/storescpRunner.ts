@@ -1,10 +1,10 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { createServer } from "node:net";
 import path from "node:path";
 import { join } from "desm";
 import fsE from "fs-extra";
-import { readDicomTags } from "./readDicomTags";
 import { getMoveDestinationAeTitle } from "./movescuRunner";
+import { readDicomTags } from "./readDicomTags";
 
 const OUTPUT_DIR = path.resolve(
     join(import.meta.url, "../.tmp/storescp-output"),
@@ -13,7 +13,7 @@ const OUTPUT_DIR = path.resolve(
 const SOP_INSTANCE_UID_TAG = "0008,0018" as const;
 
 export interface StorescpInstance {
-    process: ChildProcessWithoutNullStreams;
+    process: ChildProcess;
     port: number;
     aeTitle: string;
     outputDir: string;
@@ -66,7 +66,7 @@ export async function startStorescp(): Promise<StorescpInstance> {
 }
 
 async function waitForStorescpReady(
-    child: ChildProcessWithoutNullStreams,
+    child: ChildProcess,
     port: number,
     timeoutMs = 10_000,
 ): Promise<void> {
@@ -122,7 +122,9 @@ export async function stopStorescp(instance: StorescpInstance): Promise<void> {
     ]);
 }
 
-export async function clearStorescpOutput(instance: StorescpInstance): Promise<void> {
+export async function clearStorescpOutput(
+    instance: StorescpInstance,
+): Promise<void> {
     await fsE.emptyDir(instance.outputDir);
 }
 

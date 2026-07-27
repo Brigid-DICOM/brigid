@@ -1,24 +1,24 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { CFindImageMatchingKey } from "./helpers/findscuRunner";
-import { runFindscuImage } from "./helpers/findscuRunner";
+import {
+    clearAndSeedDicomDataForCfindImageSuite,
+    releaseDicomDataPreservation,
+} from "./helpers/dimseTestContext";
 import {
     buildExpectedInstanceCatalog,
+    type ExpectedInstanceCatalog,
+    type ExpectedInstanceEntry,
     getInstanceUidByNumber,
     getInstanceUidsByNumbers,
     getInstanceUidsInSeries,
-    type ExpectedInstanceCatalog,
-    type ExpectedInstanceEntry,
 } from "./helpers/expectedInstanceCatalog";
 import {
     buildExpectedSeriesCatalog,
     getSeriesUidsByNumbers,
 } from "./helpers/expectedSeriesCatalog";
+import type { CFindImageMatchingKey } from "./helpers/findscuRunner";
+import { runFindscuImage } from "./helpers/findscuRunner";
 import type { FindscuImageResponse } from "./helpers/parseFindscuImageResponses";
 import { parseFindscuImageResponses } from "./helpers/parseFindscuImageResponses";
-import {
-    clearAndSeedDicomDataForCfindImageSuite,
-    releaseDicomDataPreservation,
-} from "./helpers/dimseTestContext";
 
 interface CFindImageCase {
     label: string;
@@ -35,10 +35,7 @@ const MATCHING_KEY_FIELDS = {
     InstanceNumber: "instanceNumber",
     ContentDate: "contentDate",
     ContentTime: "contentTime",
-} as const satisfies Record<
-    CFindImageMatchingKey,
-    keyof ExpectedInstanceEntry
->;
+} as const satisfies Record<CFindImageMatchingKey, keyof ExpectedInstanceEntry>;
 
 function buildCases(catalog: ExpectedInstanceCatalog): CFindImageCase[] {
     const seriesCatalog = buildExpectedSeriesCatalog();
@@ -92,8 +89,7 @@ function buildCases(catalog: ExpectedInstanceCatalog): CFindImageCase[] {
             studyInstanceUid: tcgaStudyUid,
             seriesInstanceUid: tcgaOtSeriesUid,
             matchingKey: "SOPClassUID",
-            queryValue:
-                "1.2.840.10008.5.1.4.1.1.7\\1.2.840.10008.5.1.4.1.1.2",
+            queryValue: "1.2.840.10008.5.1.4.1.1.7\\1.2.840.10008.5.1.4.1.1.2",
             expectedSopInstanceUids: getInstanceUidsInSeries(
                 catalog,
                 tcgaOtSeriesUid,
@@ -426,32 +422,29 @@ describe("C-FIND image level E2E", () => {
         releaseDicomDataPreservation();
     });
 
-    it.each(CASES)(
-        "$label",
-        async ({
+    it.each(CASES)("$label", async ({
+        studyInstanceUid,
+        seriesInstanceUid,
+        matchingKey,
+        queryValue,
+        expectedSopInstanceUids,
+    }) => {
+        const result = await runFindscuImage(
             studyInstanceUid,
             seriesInstanceUid,
             matchingKey,
             queryValue,
+        );
+        const log = `${result.stdout}\n${result.stderr}`;
+
+        expect(result.exitCode).toBe(0);
+
+        const responses = parseFindscuImageResponses(log);
+        expectInstancesMatch(
+            responses,
             expectedSopInstanceUids,
-        }) => {
-            const result = await runFindscuImage(
-                studyInstanceUid,
-                seriesInstanceUid,
-                matchingKey,
-                queryValue,
-            );
-            const log = `${result.stdout}\n${result.stderr}`;
-
-            expect(result.exitCode).toBe(0);
-
-            const responses = parseFindscuImageResponses(log);
-            expectInstancesMatch(
-                responses,
-                expectedSopInstanceUids,
-                catalog,
-                matchingKey,
-            );
-        },
-    );
+            catalog,
+            matchingKey,
+        );
+    });
 });

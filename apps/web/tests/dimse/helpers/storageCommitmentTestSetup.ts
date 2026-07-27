@@ -1,16 +1,13 @@
-import { afterAll, beforeAll } from "vitest";
 import fsE from "fs-extra";
+import { afterAll, beforeAll } from "vitest";
+import { assertDcm4cheToolInstalled } from "./dcm4cheToolRunner";
 import {
     clearAndSeedDicomDataForCmoveSuite,
     releaseDicomDataPreservation,
 } from "./dimseTestContext";
-import { assertDcm4cheToolInstalled } from "./dcm4cheToolRunner";
 import { seedCommitmentReportDestinationAllowedRemote } from "./seedC3N00953";
+import { getEphemeralPort, getStgcmtOutputDir } from "./stgcmtscuRunner";
 import { clearStgcmtFixtureTempDir } from "./storageCommitmentFixtures";
-import {
-    getEphemeralPort,
-    getStgcmtOutputDir,
-} from "./stgcmtscuRunner";
 
 let bindPort: number | undefined;
 

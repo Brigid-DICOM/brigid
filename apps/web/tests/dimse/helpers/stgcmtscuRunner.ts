@@ -6,10 +6,7 @@ import {
     getDcm4cheToolRoot,
     getStgcmtscuExecutable,
 } from "./dcm4cheToolRunner";
-import {
-    getDimseConnectionArgs,
-    type DimseScuResult,
-} from "./dimseScuRunner";
+import { type DimseScuResult, getDimseConnectionArgs } from "./dimseScuRunner";
 
 export type StgcmtscuResult = DimseScuResult;
 
@@ -89,8 +86,7 @@ export async function runStgcmtscu(
     const args = buildStgcmtscuArgs(options);
     process.env.DCM4CHE_HOME = getDcm4cheToolRoot();
 
-    const spawnCommand =
-        process.platform === "win32" ? "cmd.exe" : executable;
+    const spawnCommand = process.platform === "win32" ? "cmd.exe" : executable;
     const spawnArgs =
         process.platform === "win32"
             ? ["/d", "/s", "/c", executable, ...args]

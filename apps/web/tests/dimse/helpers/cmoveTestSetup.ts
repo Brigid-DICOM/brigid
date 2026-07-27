@@ -7,9 +7,9 @@ import { seedMoveDestinationAllowedRemote } from "./seedC3N00953";
 import {
     clearStorescpOutput,
     readReceivedSopInstanceUids,
+    type StorescpInstance,
     startStorescp,
     stopStorescp,
-    type StorescpInstance,
 } from "./storescpRunner";
 
 let storescpInstance: StorescpInstance | undefined;
@@ -32,7 +32,9 @@ export function useCmoveTestSetup(): void {
 
 export function getStorescpInstance(): StorescpInstance {
     if (!storescpInstance) {
-        throw new Error("storescp is not started; call useCmoveTestSetup() first");
+        throw new Error(
+            "storescp is not started; call useCmoveTestSetup() first",
+        );
     }
 
     return storescpInstance;

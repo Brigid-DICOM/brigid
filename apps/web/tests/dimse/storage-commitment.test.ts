@@ -10,15 +10,14 @@ import {
     getC3N00953TopogramFixturePath,
     NONEXISTENT_SOP_INSTANCE_UID,
 } from "./helpers/seedC3N00953";
+import { runStgcmtscu } from "./helpers/stgcmtscuRunner";
+import { createFixtureWithSopInstanceUid } from "./helpers/storageCommitmentFixtures";
 import {
     getStgcmtBindPort,
     prepareStorageCommitmentCase,
     useStorageCommitmentTestSetup,
 } from "./helpers/storageCommitmentTestSetup";
-import { createFixtureWithSopInstanceUid } from "./helpers/storageCommitmentFixtures";
-import { runStgcmtscu } from "./helpers/stgcmtscuRunner";
 
-// biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test
 useStorageCommitmentTestSetup();
 
 describe("DIMSE Storage Commitment (Push Model)", () => {

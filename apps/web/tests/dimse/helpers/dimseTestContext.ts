@@ -3,25 +3,18 @@ import { AppDataSource, initializeDb } from "@brigid/database";
 import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
 import env from "@brigid/env";
 import fsE from "fs-extra";
-import {
-    afterAll,
-    beforeAll,
-    beforeEach,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach } from "vitest";
 import { DimseApp } from "@/server/dimse";
 import { WorkspaceService } from "@/server/services/workspace.service";
 import { TestDatabaseManager } from "../../utils/testDatabaseManager";
-import {
-    assertDcmtkInstalled,
-    runEchoscuAsync,
-} from "./dcmsendRunner";
-import { getStorageLocalDir } from "./storage";
+import { assertDcmtkInstalled, runEchoscuAsync } from "./dcmsendRunner";
+import { seedC3N00953FromDataJson } from "./seedC3N00953";
 import {
     seedAllInstancesFromDataJson,
     seedAllSeriesFromDataJson,
     seedOneInstancePerStudyFromDataJson,
 } from "./seedFromDataJson";
-import { seedC3N00953FromDataJson } from "./seedC3N00953";
+import { getStorageLocalDir } from "./storage";
 
 let testDb: TestDatabaseManager;
 let dimseApp: DimseApp;
@@ -112,7 +105,7 @@ export function useDimseTestContext(): void {
         await testDb.clearDicomData();
         await clearTestStorage();
     });
-    
+
     afterAll(async () => {
         dimseApp?.stop();
         DimseApp.resetInstance();
@@ -120,7 +113,7 @@ export function useDimseTestContext(): void {
         if (AppDataSource.isInitialized) {
             await AppDataSource.destroy();
         }
-        
+
         await testDb?.cleanup();
     });
 }

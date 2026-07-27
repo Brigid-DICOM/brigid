@@ -1,7 +1,7 @@
 import path from "node:path";
 import { join } from "desm";
 import testData from "../../fixtures/dicomFiles/data.json";
-import { runDcmsend, type DcmsendResult } from "./dcmsendRunner";
+import { type DcmsendResult, runDcmsend } from "./dcmsendRunner";
 
 const FIXTURES_ROOT = path.resolve(
     join(import.meta.url, "../../fixtures/dicomFiles"),
@@ -32,10 +32,14 @@ function expectDcmsendSuccess(result: DcmsendResult): void {
 }
 
 export async function seedOneInstancePerStudyFromDataJson(): Promise<void> {
-    for (const study of Object.values(testData as Record<string, DataJsonStudy>)) {
+    for (const study of Object.values(
+        testData as Record<string, DataJsonStudy>,
+    )) {
         const instanceFile = study.series[0]?.instances[0]?.file;
         if (!instanceFile) {
-            throw new Error("data.json study is missing series[0].instances[0]");
+            throw new Error(
+                "data.json study is missing series[0].instances[0]",
+            );
         }
 
         const fixturePath = path.join(
@@ -48,7 +52,9 @@ export async function seedOneInstancePerStudyFromDataJson(): Promise<void> {
 }
 
 export async function seedAllSeriesFromDataJson(): Promise<void> {
-    for (const study of Object.values(testData as Record<string, DataJsonStudy>)) {
+    for (const study of Object.values(
+        testData as Record<string, DataJsonStudy>,
+    )) {
         for (const series of study.series) {
             const instanceFile = series.instances[0]?.file;
             if (!instanceFile) {
@@ -66,7 +72,9 @@ export async function seedAllSeriesFromDataJson(): Promise<void> {
 }
 
 export async function seedAllInstancesFromDataJson(): Promise<void> {
-    for (const study of Object.values(testData as Record<string, DataJsonStudy>)) {
+    for (const study of Object.values(
+        testData as Record<string, DataJsonStudy>,
+    )) {
         for (const series of study.series) {
             for (const instance of series.instances) {
                 const fixturePath = path.join(

@@ -58,7 +58,9 @@ export function buildExpectedStudyCatalog(): ExpectedStudyCatalog {
     )) {
         const instanceFile = study.series[0]?.instances[0]?.file;
         if (!instanceFile) {
-            throw new Error("data.json study is missing series[0].instances[0]");
+            throw new Error(
+                "data.json study is missing series[0].instances[0]",
+            );
         }
 
         const modality = study.series[0]?.modality;

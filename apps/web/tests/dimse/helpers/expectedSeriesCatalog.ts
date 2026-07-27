@@ -58,7 +58,9 @@ export function buildExpectedSeriesCatalog(): ExpectedSeriesCatalog {
                 modality: series.modality,
                 seriesNumber: optionalSeriesField(series.seriesNumber),
                 seriesDate: optionalSeriesField(series.seriesDate),
-                seriesDescription: optionalSeriesField(series.seriesDescription),
+                seriesDescription: optionalSeriesField(
+                    series.seriesDescription,
+                ),
             };
 
             entries.push(entry);

@@ -156,7 +156,9 @@ export function expectMovescuStatus(
     }
 
     if (
-        [...hexPatterns, ...textPatterns].some((pattern) => pattern.test(output))
+        [...hexPatterns, ...textPatterns].some((pattern) =>
+            pattern.test(output),
+        )
     ) {
         return;
     }

@@ -25,7 +25,9 @@ function parseTagValue(
     bracketValue: string | undefined,
     nameValue: string | undefined,
 ): string | undefined {
-    const rawValue = (bracketValue ?? nameValue ?? "").replace(/\0/g, "").trim();
+    const rawValue = (bracketValue ?? nameValue ?? "")
+        .replace(/\0/g, "")
+        .trim();
     if (rawValue.length === 0) {
         return undefined;
     }

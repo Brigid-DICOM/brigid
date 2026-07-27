@@ -1,19 +1,19 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { CFindSeriesMatchingKey } from "./helpers/findscuRunner";
-import { runFindscuSeries } from "./helpers/findscuRunner";
-import {
-    buildExpectedSeriesCatalog,
-    getSeriesUidsByNumbers,
-    getSeriesUidsInStudy,
-    type ExpectedSeriesCatalog,
-    type ExpectedSeriesEntry,
-} from "./helpers/expectedSeriesCatalog";
-import type { FindscuSeriesResponse } from "./helpers/parseFindscuSeriesResponses";
-import { parseFindscuSeriesResponses } from "./helpers/parseFindscuSeriesResponses";
 import {
     clearAndSeedDicomDataForCfindSeriesSuite,
     releaseDicomDataPreservation,
 } from "./helpers/dimseTestContext";
+import {
+    buildExpectedSeriesCatalog,
+    type ExpectedSeriesCatalog,
+    type ExpectedSeriesEntry,
+    getSeriesUidsByNumbers,
+    getSeriesUidsInStudy,
+} from "./helpers/expectedSeriesCatalog";
+import type { CFindSeriesMatchingKey } from "./helpers/findscuRunner";
+import { runFindscuSeries } from "./helpers/findscuRunner";
+import type { FindscuSeriesResponse } from "./helpers/parseFindscuSeriesResponses";
+import { parseFindscuSeriesResponses } from "./helpers/parseFindscuSeriesResponses";
 
 interface CFindSeriesCase {
     label: string;
@@ -29,10 +29,7 @@ const MATCHING_KEY_FIELDS = {
     SeriesNumber: "seriesNumber",
     SeriesDate: "seriesDate",
     SeriesDescription: "seriesDescription",
-} as const satisfies Record<
-    CFindSeriesMatchingKey,
-    keyof ExpectedSeriesEntry
->;
+} as const satisfies Record<CFindSeriesMatchingKey, keyof ExpectedSeriesEntry>;
 
 function buildCases(catalog: ExpectedSeriesCatalog): CFindSeriesCase[] {
     const tcgaStudyUid = catalog.byPatientId.get("TCGA-G4-6304") ?? "";
@@ -333,30 +330,27 @@ describe("C-FIND series level E2E", () => {
         releaseDicomDataPreservation();
     });
 
-    it.each(CASES)(
-        "$label",
-        async ({
+    it.each(CASES)("$label", async ({
+        studyInstanceUid,
+        matchingKey,
+        queryValue,
+        expectedSeriesInstanceUids,
+    }) => {
+        const result = await runFindscuSeries(
             studyInstanceUid,
             matchingKey,
             queryValue,
+        );
+        const log = `${result.stdout}\n${result.stderr}`;
+
+        expect(result.exitCode).toBe(0);
+
+        const responses = parseFindscuSeriesResponses(log);
+        expectSeriesMatch(
+            responses,
             expectedSeriesInstanceUids,
-        }) => {
-            const result = await runFindscuSeries(
-                studyInstanceUid,
-                matchingKey,
-                queryValue,
-            );
-            const log = `${result.stdout}\n${result.stderr}`;
-
-            expect(result.exitCode).toBe(0);
-
-            const responses = parseFindscuSeriesResponses(log);
-            expectSeriesMatch(
-                responses,
-                expectedSeriesInstanceUids,
-                catalog,
-                matchingKey,
-            );
-        },
-    );
+            catalog,
+            matchingKey,
+        );
+    });
 });

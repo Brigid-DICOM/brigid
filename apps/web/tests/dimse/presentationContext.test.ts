@@ -14,9 +14,7 @@ const { SopClass } = dcmjsDimse.constants;
 describe("presentationContext", () => {
     it("identifies C-ECHO verification SOP class", () => {
         expect(isVerificationSopClass(SopClass.Verification)).toBe(true);
-        expect(isVerificationSopClass("1.2.840.10008.5.1.4.1.1.2")).toBe(
-            false,
-        );
+        expect(isVerificationSopClass("1.2.840.10008.5.1.4.1.1.2")).toBe(false);
     });
 
     it("identifies query/retrieve SOP classes including Patient Root FIND", () => {

@@ -6,10 +6,7 @@ import {
 
 export type FindscuResult = DimseScuResult;
 
-export type CFindMatchingKey =
-    | "PatientID"
-    | "PatientName"
-    | "PatientBirthDate";
+export type CFindMatchingKey = "PatientID" | "PatientName" | "PatientBirthDate";
 
 export type CFindStudyMatchingKey =
     | "PatientID"
@@ -54,10 +51,7 @@ const STUDY_RETURN_KEYS: readonly CFindStudyMatchingKey[] = [
     "ReferringPhysicianName",
 ];
 
-const SERIES_RETURN_KEYS: readonly (
-    | CFindSeriesMatchingKey
-    | "PatientID"
-)[] = [
+const SERIES_RETURN_KEYS: readonly (CFindSeriesMatchingKey | "PatientID")[] = [
     "Modality",
     "SeriesInstanceUID",
     "SeriesNumber",
@@ -66,10 +60,7 @@ const SERIES_RETURN_KEYS: readonly (
     "PatientID",
 ];
 
-const IMAGE_RETURN_KEYS: readonly (
-    | CFindImageMatchingKey
-    | "PatientID"
-)[] = [
+const IMAGE_RETURN_KEYS: readonly (CFindImageMatchingKey | "PatientID")[] = [
     "SOPClassUID",
     "SOPInstanceUID",
     "InstanceNumber",
@@ -98,10 +89,7 @@ export async function runFindscu(
 
     for (const key of RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push(
-                "-k",
-                `${key}=${queryValue}`,
-            );
+            args.push("-k", `${key}=${queryValue}`);
         } else {
             args.push("-k", `${key}=`);
         }
@@ -130,10 +118,7 @@ export async function runFindscuStudy(
 
     for (const key of STUDY_RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push(
-                "-k",
-                `${key}=${queryValue}`,
-            );
+            args.push("-k", `${key}=${queryValue}`);
         } else {
             args.push("-k", `${key}=`);
         }
@@ -165,10 +150,7 @@ export async function runFindscuSeries(
 
     for (const key of SERIES_RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push(
-                "-k",
-                `${key}=${queryValue}`,
-            );
+            args.push("-k", `${key}=${queryValue}`);
         } else {
             args.push("-k", `${key}=`);
         }
@@ -203,10 +185,7 @@ export async function runFindscuImage(
 
     for (const key of IMAGE_RETURN_KEYS) {
         if (key === matchingKey) {
-            args.push(
-                "-k",
-                `${key}=${queryValue}`,
-            );
+            args.push("-k", `${key}=${queryValue}`);
         } else {
             args.push("-k", `${key}=`);
         }

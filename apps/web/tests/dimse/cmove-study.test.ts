@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { assertMovescuMoveCounts } from "./helpers/assertMovescuMoveCounts";
 import {
     assertReceivedSopInstanceUids,
     prepareMoveCase,
@@ -10,14 +11,12 @@ import {
     getMovescuOutput,
     runMovescuStudy,
 } from "./helpers/movescuRunner";
-import { assertMovescuMoveCounts } from "./helpers/assertMovescuMoveCounts";
 import {
     C3N_00953_STUDY_UID,
     getC3N00953SopInstanceUids,
 } from "./helpers/seedC3N00953";
 import { readReceivedInstanceCount } from "./helpers/storescpRunner";
 
-// biome-ignore lint/correctness/useHookAtTopLevel: this is a backend test
 useCmoveTestSetup();
 
 describe("DIMSE C-MOVE (Study level)", () => {

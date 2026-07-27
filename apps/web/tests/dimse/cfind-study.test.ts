@@ -1,17 +1,17 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { CFindStudyMatchingKey } from "./helpers/findscuRunner";
-import { runFindscuStudy } from "./helpers/findscuRunner";
+import {
+    clearAndSeedDicomDataForCfindSuite,
+    releaseDicomDataPreservation,
+} from "./helpers/dimseTestContext";
 import {
     buildExpectedStudyCatalog,
     type ExpectedStudyCatalog,
     type ExpectedStudyEntry,
 } from "./helpers/expectedStudyCatalog";
+import type { CFindStudyMatchingKey } from "./helpers/findscuRunner";
+import { runFindscuStudy } from "./helpers/findscuRunner";
 import type { FindscuStudyResponse } from "./helpers/parseFindscuStudyResponses";
 import { parseFindscuStudyResponses } from "./helpers/parseFindscuStudyResponses";
-import {
-    clearAndSeedDicomDataForCfindSuite,
-    releaseDicomDataPreservation,
-} from "./helpers/dimseTestContext";
 
 interface CFindStudyCase {
     label: string;
@@ -30,10 +30,7 @@ const MATCHING_KEY_FIELDS = {
     ModalitiesInStudy: "modalitiesInStudy",
     StudyID: "studyId",
     ReferringPhysicianName: "referringPhysicianName",
-} as const satisfies Record<
-    CFindStudyMatchingKey,
-    keyof ExpectedStudyEntry
->;
+} as const satisfies Record<CFindStudyMatchingKey, keyof ExpectedStudyEntry>;
 
 function buildCases(catalog: ExpectedStudyCatalog): CFindStudyCase[] {
     const philipsUid =
@@ -98,7 +95,11 @@ function buildCases(catalog: ExpectedStudyCatalog): CFindStudyCase[] {
             label: "StudyDate range: 19990101-20100101",
             matchingKey: "StudyDate",
             queryValue: "19990101-20100101",
-            expectedPatientIds: ["TCGA-G4-6304", "C3L-00277", "GLIOMA01-i_03A6"],
+            expectedPatientIds: [
+                "TCGA-G4-6304",
+                "C3L-00277",
+                "GLIOMA01-i_03A6",
+            ],
         },
         {
             label: "StudyDate exact: no match",
@@ -288,21 +289,17 @@ describe("C-FIND study level E2E", () => {
         releaseDicomDataPreservation();
     });
 
-    it.each(CASES)(
-        "$label",
-        async ({ matchingKey, queryValue, expectedPatientIds }) => {
-            const result = await runFindscuStudy(matchingKey, queryValue);
-            const log = `${result.stdout}\n${result.stderr}`;
+    it.each(CASES)("$label", async ({
+        matchingKey,
+        queryValue,
+        expectedPatientIds,
+    }) => {
+        const result = await runFindscuStudy(matchingKey, queryValue);
+        const log = `${result.stdout}\n${result.stderr}`;
 
-            expect(result.exitCode).toBe(0);
+        expect(result.exitCode).toBe(0);
 
-            const responses = parseFindscuStudyResponses(log);
-            expectStudiesMatch(
-                responses,
-                expectedPatientIds,
-                catalog,
-                matchingKey,
-            );
-        },
-    );
+        const responses = parseFindscuStudyResponses(log);
+        expectStudiesMatch(responses, expectedPatientIds, catalog, matchingKey);
+    });
 });

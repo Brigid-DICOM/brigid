@@ -37,9 +37,9 @@ async function expectIngestStructureCounts(): Promise<void> {
             where: { workspaceId: WORKSPACE_ID },
         }),
     ).toBe(1);
-    expect(await AppDataSource.manager.count(SeriesRequestAttributesEntity)).toBe(
-        1,
-    );
+    expect(
+        await AppDataSource.manager.count(SeriesRequestAttributesEntity),
+    ).toBe(1);
     expect(
         await AppDataSource.manager.count(InstanceEntity, {
             where: { workspaceId: WORKSPACE_ID },
@@ -67,9 +67,9 @@ describe("C-STORE series request attributes", () => {
             "Series Instance UID",
         );
 
-        expect(
-            getUid(updatedDicomJson, "00080018", "SOP Instance UID"),
-        ).toBe(sopInstanceUid);
+        expect(getUid(updatedDicomJson, "00080018", "SOP Instance UID")).toBe(
+            sopInstanceUid,
+        );
 
         const firstSend = await runDcmsend(initialFixturePath);
         expectDcmsendSuccess(firstSend.stderr);
@@ -78,7 +78,9 @@ describe("C-STORE series request attributes", () => {
         const seriesAfterFirstSend =
             await getSeriesWithRequestAttributes(seriesInstanceUid);
         if (!seriesAfterFirstSend?.seriesRequestAttributes) {
-            expect.fail("series request attributes not found after first C-STORE");
+            expect.fail(
+                "series request attributes not found after first C-STORE",
+            );
         }
 
         expect(

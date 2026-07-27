@@ -1,10 +1,10 @@
 import path from "node:path";
-import { join } from "desm";
 import { AppDataSource } from "@brigid/database";
 import { DimseAllowedRemoteEntity } from "@brigid/database/src/entities/dimseAllowedRemote.entity";
 import { DimseConfigEntity } from "@brigid/database/src/entities/dimseConfig.entity";
+import { join } from "desm";
 import testData from "../../fixtures/dicomFiles/data.json";
-import { runDcmsend, type DcmsendResult } from "./dcmsendRunner";
+import { type DcmsendResult, runDcmsend } from "./dcmsendRunner";
 import { getMoveDestinationAeTitle } from "./movescuRunner";
 import { getStgcmtCallingAeTitle } from "./stgcmtscuRunner";
 
@@ -23,8 +23,7 @@ export const C3N_00953_TOPOGRAM_SOP_INSTANCE_UID =
 export const C3N_00953_ABD_ROUTINE_SOP_INSTANCE_UID =
     "1.3.6.1.4.1.14519.5.2.1.7085.2626.217106578590152045405778705262";
 
-export const NONEXISTENT_SOP_INSTANCE_UID =
-    "1.2.3.4.5.6.7.8.9.0.99";
+export const NONEXISTENT_SOP_INSTANCE_UID = "1.2.3.4.5.6.7.8.9.0.99";
 
 const FIXTURES_ROOT = path.resolve(
     join(import.meta.url, "../../fixtures/dicomFiles"),
@@ -54,20 +53,26 @@ function expectDcmsendSuccess(result: DcmsendResult): void {
 }
 
 export function getC3N00953SopInstanceUids(): string[] {
-    const study = (testData as Record<string, DataJsonStudy>)[C3N_00953_STUDY_UID];
+    const study = (testData as Record<string, DataJsonStudy>)[
+        C3N_00953_STUDY_UID
+    ];
     if (!study) {
         throw new Error(`data.json is missing study ${C3N_00953_STUDY_UID}`);
     }
 
     return study.series
-        .flatMap((series) => series.instances.map((instance) => instance.sopInstanceUid))
+        .flatMap((series) =>
+            series.instances.map((instance) => instance.sopInstanceUid),
+        )
         .sort((left, right) => left.localeCompare(right));
 }
 
 export function getC3N00953SeriesSopInstanceUids(
     seriesInstanceUid: string,
 ): string[] {
-    const study = (testData as Record<string, DataJsonStudy>)[C3N_00953_STUDY_UID];
+    const study = (testData as Record<string, DataJsonStudy>)[
+        C3N_00953_STUDY_UID
+    ];
     if (!study) {
         throw new Error(`data.json is missing study ${C3N_00953_STUDY_UID}`);
     }
@@ -85,7 +90,9 @@ export function getC3N00953SeriesSopInstanceUids(
 }
 
 export async function seedC3N00953FromDataJson(): Promise<void> {
-    const study = (testData as Record<string, DataJsonStudy>)[C3N_00953_STUDY_UID];
+    const study = (testData as Record<string, DataJsonStudy>)[
+        C3N_00953_STUDY_UID
+    ];
     if (!study) {
         throw new Error(`data.json is missing study ${C3N_00953_STUDY_UID}`);
     }
@@ -124,12 +131,15 @@ export async function seedCommitmentReportDestinationAllowedRemote(
         throw new Error(`DimseConfig not found for AE title ${aeTitle}`);
     }
 
-    const existing = await AppDataSource.manager.find(DimseAllowedRemoteEntity, {
-        where: {
-            dimseConfigId: dimseConfig.id,
-            aeTitle: commitmentAeTitle,
+    const existing = await AppDataSource.manager.find(
+        DimseAllowedRemoteEntity,
+        {
+            where: {
+                dimseConfigId: dimseConfig.id,
+                aeTitle: commitmentAeTitle,
+            },
         },
-    });
+    );
     if (existing.length > 0) {
         await AppDataSource.manager.remove(existing);
     }
@@ -157,12 +167,15 @@ export async function seedMoveDestinationAllowedRemote(
         throw new Error(`DimseConfig not found for AE title ${aeTitle}`);
     }
 
-    const existing = await AppDataSource.manager.find(DimseAllowedRemoteEntity, {
-        where: {
-            dimseConfigId: dimseConfig.id,
-            aeTitle: moveDestAeTitle,
+    const existing = await AppDataSource.manager.find(
+        DimseAllowedRemoteEntity,
+        {
+            where: {
+                dimseConfigId: dimseConfig.id,
+                aeTitle: moveDestAeTitle,
+            },
         },
-    });
+    );
     if (existing.length > 0) {
         await AppDataSource.manager.remove(existing);
     }
