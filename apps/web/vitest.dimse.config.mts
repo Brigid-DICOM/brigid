@@ -25,6 +25,7 @@ export default defineConfig({
             "tests/dimse/cstore*.test.ts",
             "tests/dimse/cfind*.test.ts",
             "tests/dimse/cmove*.test.ts",
+            "tests/dimse/storage-commitment.test.ts",
             "tests/dimse/presentationContext.test.ts",
         ],
         fileParallelism: false,

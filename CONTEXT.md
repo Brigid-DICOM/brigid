@@ -41,8 +41,24 @@ _Avoid_: hierarchical query, parent key constraint
 _Avoid_: test data, sample metadata
 
 **DimseApp**:
-Brigid 的 DIMSE SCP 執行時，負責監聽 DIMSE 連線並處理 C-ECHO、C-STORE、C-FIND、C-MOVE。
+Brigid 的 DIMSE SCP 執行時，負責監聽 DIMSE 連線並處理 C-ECHO、C-STORE、C-FIND、C-MOVE、Storage Commitment（N-ACTION / N-EVENT-REPORT）。
 _Avoid_: DIMSE server, dcm4che service
+
+**Storage Commitment SCP**:
+Brigid 在 Push Model 中扮演的角色；接收外部 SCU 的 N-ACTION 請求，確認指定 SOP Instance 已存在於 workspace 後回應，並非同步以 N-EVENT-REPORT 回報 per-instance 結果。
+_Avoid_: storage commit server, stgcmt SCP
+
+**Storage Commitment 成功**:
+協定層語意：Brigid 確認請求中的 SOP Instance 確實存在於該 workspace 的儲存中；不涉及額外的業務狀態持久化。
+_Avoid_: committed status, storage committed flag
+
+**Commitment Report Destination**:
+Storage Commitment Push Model 中，Brigid 發送 N-EVENT-REPORT 的目標遠端 AE；以 N-ACTION 請求的 Calling AE Title 查詢 `DimseAllowedRemote` 取得 host:port，語意類似 C-MOVE 的 Move Destination，但承載的是 N-EVENT-REPORT 而非 C-STORE。
+_Avoid_: report AE, event report target
+
+**C-Storage-Commitment E2E 測試**:
+透過真實 DIMSE 協定（`stgcmtscu`）驗證 Brigid Storage Commitment SCP 依 Referenced SOP Sequence 確認 instance 存在性，並以 N-EVENT-REPORT 回報 per-instance 結果的端對端測試；以 `stgcmtscu --directory` 輸出的結果檔作為斷言依據，不查 Brigid DB。
+_Avoid_: integration test, storage commitment unit test
 
 **Called AE Title**:
 C-STORE 連線中被呼叫端（Brigid）的 Application Entity Title；對應資料庫中的 DimseConfig.aeTitle，決定 instance 寫入哪個 workspace。

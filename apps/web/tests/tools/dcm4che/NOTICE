@@ -1,0 +1,12 @@
+dcm4che tools vendored for DIMSE E2E tests.
+
+Source: https://github.com/dcm4che/dcm4che
+Version: 5.34.1 (see VERSION)
+
+Components:
+- stgcmtscu (Storage Commitment Push Model SCU)
+
+License: Mozilla Public License Version 2.0
+See upstream dcm4che distribution for full license text.
+
+This copy is used only by automated tests under apps/web/tests/dimse/.
