@@ -1,9 +1,11 @@
 import dcmjsDimse from "dcmjs-dimse";
 import { describe, expect, it } from "vitest";
 import {
+    isQueryRetrieveMoveSopClass,
     isQueryRetrieveSopClass,
     isStorageSopClass,
     isVerificationSopClass,
+    PATIENT_ROOT_QUERY_RETRIEVE_MOVE_SOP_CLASS_UID,
 } from "@/server/dimse/presentationContext";
 
 const { SopClass } = dcmjsDimse.constants;
@@ -41,6 +43,24 @@ describe("presentationContext", () => {
         expect(
             isStorageSopClass(
                 SopClass.StudyRootQueryRetrieveInformationModelFind,
+            ),
+        ).toBe(false);
+    });
+
+    it("identifies query/retrieve MOVE SOP classes", () => {
+        expect(
+            isQueryRetrieveMoveSopClass(
+                SopClass.StudyRootQueryRetrieveInformationModelMove,
+            ),
+        ).toBe(true);
+        expect(
+            isQueryRetrieveMoveSopClass(
+                PATIENT_ROOT_QUERY_RETRIEVE_MOVE_SOP_CLASS_UID,
+            ),
+        ).toBe(true);
+        expect(
+            isQueryRetrieveMoveSopClass(
+                SopClass.StudyRootQueryRetrieveInformationModelGet,
             ),
         ).toBe(false);
     });

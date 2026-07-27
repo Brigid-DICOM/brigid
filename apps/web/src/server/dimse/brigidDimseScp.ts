@@ -13,6 +13,7 @@ import type { MultipartFile } from "../types/file";
 import { appLogger } from "../utils/logger";
 import { dimseAeRegistry } from "./aeRegistry";
 import { executeCFind } from "./cfind/executor";
+import { executeCMove } from "./cmove/executor";
 import { negotiatePresentationContext } from "./presentationContext";
 
 const { DicomMetaDictionary, DicomDict } = dcmjs.data;
@@ -125,6 +126,44 @@ export class BrigidDimseScp extends Scp {
                 workspaceId,
             });
             const response = responses.CFindResponse.fromRequest(request);
+            response.setStatus(Status.ProcessingFailure);
+            callback([response]);
+        }
+    }
+
+    async cMoveRequest(
+        request: dcmjsDimse.requests.CMoveRequest,
+        callback: (
+            responses: dcmjsDimse.responses.CMoveResponse[],
+        ) => void,
+    ): Promise<void> {
+        const workspaceId = this.workspaceId;
+        const calledAeTitle = this.association?.getCalledAeTitle() ?? "";
+        const callingAeTitle = this.association?.getCallingAeTitle() ?? "";
+
+        if (!workspaceId) {
+            const response = responses.CMoveResponse.fromRequest(request);
+            response.setStatus(Status.ProcessingFailure);
+            callback([response]);
+            return;
+        }
+
+        try {
+            const cMoveResponses = await executeCMove({
+                workspaceId,
+                calledAeTitle,
+                callingAeTitle,
+                identifier: request.getDataset(),
+                request,
+                sendResponse: (response) => this.sendResponse(request, response),
+            });
+            callback(cMoveResponses);
+        } catch (error) {
+            logger.error("Failed to execute C-MOVE", error, {
+                op: "C-MOVE",
+                workspaceId,
+            });
+            const response = responses.CMoveResponse.fromRequest(request);
             response.setStatus(Status.ProcessingFailure);
             callback([response]);
         }

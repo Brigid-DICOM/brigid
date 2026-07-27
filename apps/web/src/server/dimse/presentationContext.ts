@@ -14,8 +14,12 @@ const KNOWN_STORAGE_CLASS_UIDS = new Set<string>(
 export const PATIENT_ROOT_QUERY_RETRIEVE_FIND_SOP_CLASS_UID =
     "1.2.840.10008.5.1.4.1.2.1.1";
 
+export const PATIENT_ROOT_QUERY_RETRIEVE_MOVE_SOP_CLASS_UID =
+    "1.2.840.10008.5.1.4.1.2.1.2";
+
 const KNOWN_QUERY_RETRIEVE_SOP_CLASS_UIDS = new Set<string>([
     PATIENT_ROOT_QUERY_RETRIEVE_FIND_SOP_CLASS_UID,
+    PATIENT_ROOT_QUERY_RETRIEVE_MOVE_SOP_CLASS_UID,
     SopClass.StudyRootQueryRetrieveInformationModelFind,
     SopClass.StudyRootQueryRetrieveInformationModelMove,
     SopClass.StudyRootQueryRetrieveInformationModelGet,
@@ -27,6 +31,11 @@ const QUERY_RETRIEVE_FIND_SOP_CLASS_UIDS = new Set<string>([
     SopClass.StudyRootQueryRetrieveInformationModelFind,
 ]);
 
+const QUERY_RETRIEVE_MOVE_SOP_CLASS_UIDS = new Set<string>([
+    PATIENT_ROOT_QUERY_RETRIEVE_MOVE_SOP_CLASS_UID,
+    SopClass.StudyRootQueryRetrieveInformationModelMove,
+]);
+
 export function isVerificationSopClass(abstractSyntaxUid: string): boolean {
     return abstractSyntaxUid === SopClass.Verification;
 }
@@ -35,6 +44,12 @@ export function isQueryRetrieveFindSopClass(
     abstractSyntaxUid: string,
 ): boolean {
     return QUERY_RETRIEVE_FIND_SOP_CLASS_UIDS.has(abstractSyntaxUid);
+}
+
+export function isQueryRetrieveMoveSopClass(
+    abstractSyntaxUid: string,
+): boolean {
+    return QUERY_RETRIEVE_MOVE_SOP_CLASS_UIDS.has(abstractSyntaxUid);
 }
 
 export function isQueryRetrieveSopClass(abstractSyntaxUid: string): boolean {
@@ -99,6 +114,11 @@ export function negotiatePresentationContext(
     }
 
     if (isQueryRetrieveFindSopClass(abstractSyntaxUid)) {
+        acceptLittleEndianTransferSyntaxes(context);
+        return;
+    }
+
+    if (isQueryRetrieveMoveSopClass(abstractSyntaxUid)) {
         acceptLittleEndianTransferSyntaxes(context);
         return;
     }

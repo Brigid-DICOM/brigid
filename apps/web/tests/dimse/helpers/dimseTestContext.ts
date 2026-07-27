@@ -21,6 +21,7 @@ import {
     seedAllSeriesFromDataJson,
     seedOneInstancePerStudyFromDataJson,
 } from "./seedFromDataJson";
+import { seedC3N00953FromDataJson } from "./seedC3N00953";
 
 let testDb: TestDatabaseManager;
 let dimseApp: DimseApp;
@@ -53,6 +54,13 @@ export async function clearAndSeedDicomDataForCfindImageSuite(): Promise<void> {
     await testDb.clearDicomData();
     await clearTestStorage();
     await seedAllInstancesFromDataJson();
+}
+
+export async function clearAndSeedDicomDataForCmoveSuite(): Promise<void> {
+    preserveDicomDataForSuite();
+    await testDb.clearDicomData();
+    await clearTestStorage();
+    await seedC3N00953FromDataJson();
 }
 
 export function useDimseTestContext(): void {

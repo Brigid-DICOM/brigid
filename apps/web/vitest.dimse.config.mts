@@ -24,8 +24,11 @@ export default defineConfig({
         include: [
             "tests/dimse/cstore*.test.ts",
             "tests/dimse/cfind*.test.ts",
+            "tests/dimse/cmove*.test.ts",
             "tests/dimse/presentationContext.test.ts",
         ],
         fileParallelism: false,
+        testTimeout: 120_000,
+        hookTimeout: 120_000,
     },
 });

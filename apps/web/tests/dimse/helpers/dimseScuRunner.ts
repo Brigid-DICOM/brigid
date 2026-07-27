@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from "node:child_process";
 
 export const DCMTK_INSTALL_HINT =
-    "Install DCMTK 3.7.x and ensure dcmsend and findscu are in PATH. See https://dcmtk.org/";
+    "Install DCMTK 3.7.x and ensure dcmsend, findscu, movescu, and storescp are in PATH. See https://dcmtk.org/";
 
 export interface DimseScuResult {
     exitCode: number;
@@ -55,6 +55,19 @@ export function assertDcmtkInstalled(): void {
     }
 
     assertCommandAvailable("findscu", /findscu/i, "findscu");
+
+    const movescuOutput = assertCommandAvailable(
+        "movescu",
+        /movescu/i,
+        "movescu",
+    );
+    if (!/3\.7\./.test(movescuOutput)) {
+        throw new Error(
+            `DCMTK 3.7.x required for movescu dimse e2e tests.\n${movescuOutput}\n${DCMTK_INSTALL_HINT}`,
+        );
+    }
+
+    assertCommandAvailable("storescp", /storescp/i, "storescp");
 }
 
 export function getDimseConnectionArgs(): DimseConnectionArgs {

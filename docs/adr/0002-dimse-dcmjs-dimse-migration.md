@@ -135,3 +135,69 @@ dimse/
 - C-FIND 路徑不再依賴 Java bridge；C-MOVE 與 C-STORE ingest 仍需要 JVM
 - `tests/dimse/setup.ts` 的 `raccoonDcm4cheJavaLoader` 仍須保留
 - ADR-0001 待 Phase 2b 完成後一併更新
+
+## Phase 2b 範圍（C-MOVE）
+
+- 在 `BrigidDimseScp.cMoveRequest` 掛載 C-MOVE SCP；刪除 `cmoveScp.ts`（`NativeCMoveScp`）
+- 支援 **Patient Root** 與 **Study Root** Query/Retrieve Information Model - MOVE（對應 4 個 C-MOVE E2E suite）
+- **先寫 E2E 測試、再實作**（見 [0006-dimse-cmove-e2e-tests](../specs/0006-dimse-cmove-e2e-tests.md)）
+- 驗收標準：`pnpm test:dimse` 全綠（`cstore*`、`cfind*`、`cmove*`、`presentationContext.test.ts`）
+
+## C-MOVE 執行層
+
+新建純 Node 的 `dimse/cmove/` 模組：
+
+- `executor.ts`：驗證 `DimseAllowedRemote`、resolve instances、outbound C-STORE、以 `sendResponse()` 送 Pending `CMoveResponse`（remaining / completed）+ 最終 Success
+- `instanceResolver.ts`：複用 `cfind/datasetQuery.ts` 的 `datasetToJsonQuery("instance", identifier)` → `DicomSearchInstanceQueryBuilder`（與現有 Java 路徑一致，不論 `QueryRetrieveLevel` 皆 instance-level query）
+- `storeClient.ts`：`dcmjs-dimse` `Client` 包裝；對 `MoveDestination` 開 association 逐筆 C-STORE
+
+`brigidDimseScp.ts` 只負責委派 `executeCMove()`，不內嵌業務邏輯。Outbound C-STORE association：**Calling AE = 原始 SCU Calling AE**，**Called AE = MoveDestination**（與現有 Java 行為一致）。Instance 查詢上限維持 1,000,000（與現有 Java 路徑一致）。
+
+C-MOVE 失敗回傳語意與現有 Java 實作一致：`MoveDestinationUnknown`（0xA801）、`NoSuchObjectInstance`（0x0112）；其餘錯誤回 `ProcessingFailure`（0x0110）。
+
+## Presentation Context 協商（Phase 2b 更新）
+
+在 Phase 2a 基礎上，新增 Q/R MOVE 協商：
+
+- **Patient Root MOVE**、**Study Root MOVE**：接受 Implicit VR LE 與 Explicit VR LE
+- **GET / Modality Worklist** 及其他 Q/R SOP：繼續 `RejectAbstractSyntaxNotSupported`
+
+## 模組切割（Phase 2b 完成後）
+
+```
+dimse/
+├── index.ts
+├── brigidDimseScp.ts       # + cMoveRequest 委派
+├── presentationContext.ts  # 更新 Q/R MOVE 協商
+├── cfind/                  # Phase 2a
+├── cmove/
+│   ├── executor.ts
+│   ├── instanceResolver.ts
+│   └── storeClient.ts
+└── dimseUtils.ts
+```
+
+刪除 `cmoveScp.ts`、`queryUtils.ts`（及 `queryTasks/` 若 Phase 2a 已刪除）。`vitest.dimse.config.mts` 新增 `tests/dimse/cmove*.test.ts`。
+
+## 明確不在 Phase 2b 範圍
+
+- Patient Study Only Q/R Model
+- C-GET
+- `parseFromFilename` 脫離 Java
+- C-MOVE wildcard / range 查詢鍵 E2E
+- `DIMSE_*` timeout 映射
+- `cmove/` 模組 unit test（E2E 已覆蓋協定邊界）
+
+**Considered Options（Phase 2b）**
+
+- Phase 2a 與 2b 一次完成：C-MOVE 在 Phase 2a 前無 E2E，無法先寫測試再實作
+- 鏡像 `cfind/levels/` 結構：C-MOVE 最終皆 resolve 為 instance list，per-level 檔案重複高
+- 只斷言 `movescu` log、不驗證 destination 收到檔案：無法確認 outbound C-STORE 鏈路
+- Outbound Calling AE 改用 Brigid AE：與現有 Java 行為不一致，可能破壞 destination 白名單
+- seed 整份 `data.json` catalog：計數難預期、seed 慢；C3N-00953 已涵蓋多 series 情境
+
+**Consequences（Phase 2b）**
+
+- C-MOVE 路徑不再依賴 Java bridge；C-STORE ingest 仍需要 JVM
+- `tests/dimse/setup.ts` 的 `raccoonDcm4cheJavaLoader` 仍須保留（`parseFromFilename`）
+- ADR-0001 應於 Phase 2b 完成後更新，移除 C-MOVE 相關 Java bridge 描述
