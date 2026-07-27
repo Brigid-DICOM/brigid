@@ -15,6 +15,7 @@ import { dimseAeRegistry } from "./aeRegistry";
 import { executeCFind } from "./cfind/executor";
 import { executeCMove } from "./cmove/executor";
 import { negotiatePresentationContext } from "./presentationContext";
+import { executeStorageCommitment } from "./storageCommitment/executor";
 
 const { DicomMetaDictionary, DicomDict } = dcmjs.data;
 const { constants, responses, Scp } = dcmjsDimse;
@@ -166,6 +167,41 @@ export class BrigidDimseScp extends Scp {
             const response = responses.CMoveResponse.fromRequest(request);
             response.setStatus(Status.ProcessingFailure);
             callback([response]);
+        }
+    }
+
+    async nActionRequest(
+        request: dcmjsDimse.requests.NActionRequest,
+        callback: (response: dcmjsDimse.responses.NActionResponse) => void,
+    ): Promise<void> {
+        const workspaceId = this.workspaceId;
+        const calledAeTitle = this.association?.getCalledAeTitle() ?? "";
+        const callingAeTitle = this.association?.getCallingAeTitle() ?? "";
+
+        if (!workspaceId) {
+            const response = responses.NActionResponse.fromRequest(request);
+            response.setStatus(Status.ProcessingFailure);
+            callback(response);
+            return;
+        }
+
+        try {
+            const response = await executeStorageCommitment({
+                workspaceId,
+                calledAeTitle,
+                callingAeTitle,
+                request,
+                scp: this,
+            });
+            callback(response);
+        } catch (error) {
+            logger.error("Failed to execute Storage Commitment N-ACTION", error, {
+                op: "N-ACTION",
+                workspaceId,
+            });
+            const response = responses.NActionResponse.fromRequest(request);
+            response.setStatus(Status.ProcessingFailure);
+            callback(response);
         }
     }
 

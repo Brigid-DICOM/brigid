@@ -16,6 +16,16 @@ declare module "dcmjs" {
             denaturalizeDataset(
                 dataset: Record<string, unknown>,
             ): DicomDenaturalizedDataset;
+            naturalizeDataset(
+                dataset: DicomDenaturalizedDataset,
+            ): Record<string, unknown>;
         };
+
+        class DicomMessage {
+            static readFile(buffer: ArrayBuffer): {
+                meta: DicomDenaturalizedDataset;
+                dict: DicomDenaturalizedDataset;
+            };
+        }
     }
 }

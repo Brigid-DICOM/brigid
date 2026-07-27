@@ -52,6 +52,10 @@ export function isQueryRetrieveMoveSopClass(
     return QUERY_RETRIEVE_MOVE_SOP_CLASS_UIDS.has(abstractSyntaxUid);
 }
 
+export function isStorageCommitmentSopClass(abstractSyntaxUid: string): boolean {
+    return abstractSyntaxUid === SopClass.StorageCommitmentPushModel;
+}
+
 export function isQueryRetrieveSopClass(abstractSyntaxUid: string): boolean {
     if (KNOWN_QUERY_RETRIEVE_SOP_CLASS_UIDS.has(abstractSyntaxUid)) {
         return true;
@@ -119,6 +123,11 @@ export function negotiatePresentationContext(
     }
 
     if (isQueryRetrieveMoveSopClass(abstractSyntaxUid)) {
+        acceptLittleEndianTransferSyntaxes(context);
+        return;
+    }
+
+    if (isStorageCommitmentSopClass(abstractSyntaxUid)) {
         acceptLittleEndianTransferSyntaxes(context);
         return;
     }
