@@ -12,6 +12,7 @@ import { StowRsService } from "../services/stowRs.service";
 import type { MultipartFile } from "../types/file";
 import { appLogger } from "../utils/logger";
 import { dimseAeRegistry } from "./aeRegistry";
+import { executeCFind } from "./cfind/executor";
 import { negotiatePresentationContext } from "./presentationContext";
 
 const { DicomMetaDictionary, DicomDict } = dcmjs.data;
@@ -85,6 +86,48 @@ export class BrigidDimseScp extends Scp {
         const response = responses.CEchoResponse.fromRequest(request);
         response.setStatus(Status.Success);
         callback(response);
+    }
+
+    async cFindRequest(
+        request: dcmjsDimse.requests.CFindRequest,
+        callback: (
+            responses: dcmjsDimse.responses.CFindResponse[],
+        ) => void,
+    ): Promise<void> {
+        const workspaceId = this.workspaceId;
+
+        if (!workspaceId) {
+            const response = responses.CFindResponse.fromRequest(request);
+            response.setStatus(Status.ProcessingFailure);
+            callback([response]);
+            return;
+        }
+
+        const identifier = request.getDataset();
+        if (!identifier) {
+            const response = responses.CFindResponse.fromRequest(request);
+            response.setStatus(Status.ProcessingFailure);
+            callback([response]);
+            return;
+        }
+
+        try {
+            const cFindResponses = await executeCFind({
+                abstractSyntaxUid: request.getAffectedSopClassUid(),
+                workspaceId,
+                identifier,
+                request,
+            });
+            callback(cFindResponses);
+        } catch (error) {
+            logger.error("Failed to execute C-FIND", error, {
+                op: "C-FIND",
+                workspaceId,
+            });
+            const response = responses.CFindResponse.fromRequest(request);
+            response.setStatus(Status.ProcessingFailure);
+            callback([response]);
+        }
     }
 
     async cStoreRequest(

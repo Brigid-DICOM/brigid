@@ -56,7 +56,7 @@ export const attributesToToJsonQuery = async (
     level: keyof typeof queryTagsOfEachLevel,
     attributes: Attributes,
 ) => {
-    const query: Record<string, any> = {};
+    const query: Record<string, string> = {};
 
     const queryTags = queryTagsOfEachLevel[level];
 

@@ -11,15 +11,30 @@ const KNOWN_STORAGE_CLASS_UIDS = new Set<string>(
     Object.values(StorageClass),
 );
 
+export const PATIENT_ROOT_QUERY_RETRIEVE_FIND_SOP_CLASS_UID =
+    "1.2.840.10008.5.1.4.1.2.1.1";
+
 const KNOWN_QUERY_RETRIEVE_SOP_CLASS_UIDS = new Set<string>([
+    PATIENT_ROOT_QUERY_RETRIEVE_FIND_SOP_CLASS_UID,
     SopClass.StudyRootQueryRetrieveInformationModelFind,
     SopClass.StudyRootQueryRetrieveInformationModelMove,
     SopClass.StudyRootQueryRetrieveInformationModelGet,
     SopClass.ModalityWorklistInformationModelFind,
 ]);
 
+const QUERY_RETRIEVE_FIND_SOP_CLASS_UIDS = new Set<string>([
+    PATIENT_ROOT_QUERY_RETRIEVE_FIND_SOP_CLASS_UID,
+    SopClass.StudyRootQueryRetrieveInformationModelFind,
+]);
+
 export function isVerificationSopClass(abstractSyntaxUid: string): boolean {
     return abstractSyntaxUid === SopClass.Verification;
+}
+
+export function isQueryRetrieveFindSopClass(
+    abstractSyntaxUid: string,
+): boolean {
+    return QUERY_RETRIEVE_FIND_SOP_CLASS_UIDS.has(abstractSyntaxUid);
 }
 
 export function isQueryRetrieveSopClass(abstractSyntaxUid: string): boolean {
@@ -79,6 +94,11 @@ export function negotiatePresentationContext(
     context: dcmjsDimse.association.PresentationContext,
 ): void {
     if (isVerificationSopClass(abstractSyntaxUid)) {
+        acceptLittleEndianTransferSyntaxes(context);
+        return;
+    }
+
+    if (isQueryRetrieveFindSopClass(abstractSyntaxUid)) {
         acceptLittleEndianTransferSyntaxes(context);
         return;
     }

@@ -36,7 +36,7 @@ import {
     PATIENT_STUDY_ONLY_LEVELS,
     STUDY_ROOT_LEVELS,
 } from "./queryRetrieveLevels";
-import { attributesToToJsonQuery } from "./queryTasks/queryUtils";
+import { attributesToToJsonQuery } from "./queryUtils";
 
 const logger = appLogger.child({
     module: "NativeCMoveScp",
