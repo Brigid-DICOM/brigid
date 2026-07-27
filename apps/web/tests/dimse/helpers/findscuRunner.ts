@@ -78,21 +78,6 @@ const IMAGE_RETURN_KEYS: readonly (
     "PatientID",
 ];
 
-function formatFindscuQueryValue(
-    matchingKey: string,
-    queryValue: string,
-): string {
-    if (
-        (matchingKey === "SeriesNumber" ||
-            matchingKey === "InstanceNumber") &&
-        queryValue.includes(",")
-    ) {
-        return queryValue.replace(/,/g, "\\");
-    }
-
-    return queryValue;
-}
-
 export async function runFindscu(
     matchingKey: CFindMatchingKey,
     queryValue: string,
@@ -115,7 +100,7 @@ export async function runFindscu(
         if (key === matchingKey) {
             args.push(
                 "-k",
-                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+                `${key}=${queryValue}`,
             );
         } else {
             args.push("-k", `${key}=`);
@@ -147,7 +132,7 @@ export async function runFindscuStudy(
         if (key === matchingKey) {
             args.push(
                 "-k",
-                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+                `${key}=${queryValue}`,
             );
         } else {
             args.push("-k", `${key}=`);
@@ -182,7 +167,7 @@ export async function runFindscuSeries(
         if (key === matchingKey) {
             args.push(
                 "-k",
-                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+                `${key}=${queryValue}`,
             );
         } else {
             args.push("-k", `${key}=`);
@@ -220,7 +205,7 @@ export async function runFindscuImage(
         if (key === matchingKey) {
             args.push(
                 "-k",
-                `${key}=${formatFindscuQueryValue(matchingKey, queryValue)}`,
+                `${key}=${queryValue}`,
             );
         } else {
             args.push("-k", `${key}=`);

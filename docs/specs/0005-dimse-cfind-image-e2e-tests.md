@@ -165,7 +165,7 @@ interface CFindImageCase {
 | 完整（B） | SOPClassUID | exact、wildcard、multi-value（`\` 分隔）、no match |
 | 完整（B） | ContentDate | exact、range（date）、no match |
 | 完整（B） | ContentTime | exact、range（time）、no match |
-| 完整（B） | InstanceNumber | exact、multi-value（`,`）、no match（**無 wildcard**） |
+| 完整（B） | InstanceNumber | exact、multi-value（`\` 分隔）、no match（**無 wildcard**） |
 | 煙霧（A） | SOPInstanceUID | exact match only |
 
 ### `findscu` 執行方式
@@ -208,9 +208,9 @@ interface CFindImageCase {
 |-------|----------------------------------|--------------|-------------|----------|-------------------------------|
 | InstanceNumber exact: 1 duplicate (TCGA LOCALIZER) | TCGA-G4-6304 / 1 | InstanceNumber | `1` | 4 | 1, 1, 1, 1（4 個不同 SOPInstanceUID） |
 | InstanceNumber exact: 6 (TCGA OT) | TCGA-G4-6304 / 3001 | InstanceNumber | `6` | 1 | 6 |
-| InstanceNumber multi-value: 1,2 (TCGA OT) | TCGA-G4-6304 / 3001 | InstanceNumber | `1,2` | 2 | 1, 2 |
+| InstanceNumber multi-value: 1\2 (TCGA OT) | TCGA-G4-6304 / 3001 | InstanceNumber | `1\2` | 2 | 1, 2 |
 | InstanceNumber exact: 72 (C3N #4) | C3N-00953 / 4 | InstanceNumber | `72` | 1 | 72 |
-| InstanceNumber multi-value: 18,27 (C3N #4) | C3N-00953 / 4 | InstanceNumber | `18,27` | 2 | 18, 27 |
+| InstanceNumber multi-value: 18\27 (C3N #4) | C3N-00953 / 4 | InstanceNumber | `18\27` | 2 | 18, 27 |
 | InstanceNumber exact: no match (C3N #4) | C3N-00953 / 4 | InstanceNumber | `9999` | 0 | — |
 
 #### ContentDate

@@ -6,7 +6,7 @@
 
 ## Problem Statement
 
-Brigid 已實作 DIMSE C-FIND SCP 的 Study Root Q/R Information Model - FIND，Series level 查詢透過 `SeriesQueryTask` 委派至 `DicomSearchSeriesQueryBuilder`，與 QIDO-RS search series 共用 wildcard（`*`/`?`）、date range（`YYYYMMDD-`、`-YYYYMMDD`、`YYYYMMDD-YYYYMMDD`）、number exact / multi-value 與字串多值（`,` / DICOM `\` 分隔）語意。[0003](./0003-dimse-cfind-study-e2e-tests.md) 已涵蓋 Study Root 的 Study level C-FIND，但沒有任何測試驗證「真實 DIMSE 協定下，Study Root C-FIND 能否依 series 層級查詢鍵回傳正確屬性」。
+Brigid 已實作 DIMSE C-FIND SCP 的 Study Root Q/R Information Model - FIND，Series level 查詢透過 `SeriesQueryTask` 委派至 `DicomSearchSeriesQueryBuilder`，與 QIDO-RS search series 共用 wildcard（`*`/`?`）、date range（`YYYYMMDD-`、`-YYYYMMDD`、`YYYYMMDD-YYYYMMDD`）、number exact / multi-value 與字串多值（DICOM `\` 分隔）語意。[0003](./0003-dimse-cfind-study-e2e-tests.md) 已涵蓋 Study Root 的 Study level C-FIND，但沒有任何測試驗證「真實 DIMSE 協定下，Study Root C-FIND 能否依 series 層級查詢鍵回傳正確屬性」。
 
 與 QIDO-RS 不同，DIMSE C-FIND 必須依 **階層式 identifier** 查詢：Series level 查詢須在 identifier 中帶上層 `StudyInstanceUID`，不能像 QIDO-RS 在 workspace 範圍內跨 study 直接以 series 鍵搜尋。
 
@@ -150,7 +150,7 @@ interface CFindSeriesCase {
 | 分級 | 欄位 | 測試類型 |
 |------|------|----------|
 | 完整（B） | Modality、SeriesDate、SeriesDescription | exact / wildcard / range（date）/ multi-value（Modality）/ no match |
-| 完整（B） | SeriesNumber | exact、multi-value（`,`）、no match（**無 wildcard**） |
+| 完整（B） | SeriesNumber | exact、multi-value（`\` 分隔）、no match（**無 wildcard**） |
 | 煙霧（A） | SeriesInstanceUID | exact match only |
 
 ### `findscu` 執行方式
@@ -194,7 +194,7 @@ interface CFindSeriesCase {
 |-------|-------------------|--------------|-------------|----------|----------------------------|
 | SeriesNumber exact: 1 (TCGA) | TCGA-G4-6304 | SeriesNumber | `1` | 1 | 1 (LOCALIZER) |
 | SeriesNumber exact: 3001 (TCGA) | TCGA-G4-6304 | SeriesNumber | `3001` | 1 | 3001 (OT) |
-| SeriesNumber multi-value: 1,2 (TCGA) | TCGA-G4-6304 | SeriesNumber | `1,2` | 2 | 1, 2 |
+| SeriesNumber multi-value: 1\2 (TCGA) | TCGA-G4-6304 | SeriesNumber | `1\2` | 2 | 1, 2 |
 | SeriesNumber exact: no match (TCGA) | TCGA-G4-6304 | SeriesNumber | `9999` | 0 | — |
 | SeriesNumber exact: 4 (C3N) | C3N-00953 | SeriesNumber | `4` | 1 | 4 |
 

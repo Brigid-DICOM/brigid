@@ -164,11 +164,11 @@ function buildCases(catalog: ExpectedInstanceCatalog): CFindImageCase[] {
             ),
         },
         {
-            label: "InstanceNumber multi-value: 1,2 (TCGA OT)",
+            label: "InstanceNumber multi-value: 1\\2 (TCGA OT)",
             studyInstanceUid: tcgaStudyUid,
             seriesInstanceUid: tcgaOtSeriesUid,
             matchingKey: "InstanceNumber",
-            queryValue: "1,2",
+            queryValue: "1\\2",
             expectedSopInstanceUids: getInstanceUidsByNumbers(
                 catalog,
                 tcgaOtSeriesUid,
@@ -188,11 +188,11 @@ function buildCases(catalog: ExpectedInstanceCatalog): CFindImageCase[] {
             ),
         },
         {
-            label: "InstanceNumber multi-value: 18,27 (C3N #4)",
+            label: "InstanceNumber multi-value: 18\\27 (C3N #4)",
             studyInstanceUid: c3nStudyUid,
             seriesInstanceUid: c3nSeries4Uid,
             matchingKey: "InstanceNumber",
-            queryValue: "18,27",
+            queryValue: "18\\27",
             expectedSopInstanceUids: getInstanceUidsByNumbers(
                 catalog,
                 c3nSeries4Uid,

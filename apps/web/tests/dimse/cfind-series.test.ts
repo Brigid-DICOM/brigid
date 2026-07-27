@@ -144,10 +144,10 @@ function buildCases(catalog: ExpectedSeriesCatalog): CFindSeriesCase[] {
             ),
         },
         {
-            label: "SeriesNumber multi-value: 1,2 (TCGA)",
+            label: "SeriesNumber multi-value: 1\\2 (TCGA)",
             studyInstanceUid: tcgaStudyUid,
             matchingKey: "SeriesNumber",
-            queryValue: "1,2",
+            queryValue: "1\\2",
             expectedSeriesInstanceUids: getSeriesUidsByNumbers(
                 catalog,
                 tcgaStudyUid,
