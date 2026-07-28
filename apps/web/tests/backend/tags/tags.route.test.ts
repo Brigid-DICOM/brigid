@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { DataSource } from "typeorm";
 import {
     afterAll,
@@ -33,6 +34,7 @@ describe("Tags Routes", () => {
         vi.clearAllMocks();
         vi.restoreAllMocks();
         await testDb.clearDatabase();
+        await testDb.seedTestData();
     });
 
     describe("POST /workspaces/:workspaceId/tags - Create Tag", () => {
@@ -225,7 +227,7 @@ describe("Tags Routes", () => {
 
         it("should return 404 if tag not found", async () => {
             const response = await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/tags/non-existent-tag-id`,
+                `/api/workspaces/${WORKSPACE_ID}/tags/${randomUUID()}`,
                 {
                     method: "PATCH",
                     body: JSON.stringify({
@@ -271,7 +273,7 @@ describe("Tags Routes", () => {
 
         it("should return 404 if tag not found", async () => {
             const response = await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/tags/non-existent-tag-id`,
+                `/api/workspaces/${WORKSPACE_ID}/tags/${randomUUID()}`,
                 {
                     method: "DELETE",
                 },
