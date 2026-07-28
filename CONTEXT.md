@@ -79,3 +79,7 @@ _Avoid_: test data, DICOM records
 **測試基礎設施**:
 測試環境的固定設定，如 DimseConfig、DimseApp AE 註冊；測試間保留不清除。
 _Avoid_: test setup, fixtures config
+
+**測試 Schema 策略**:
+測試資料庫的 schema 一律透過 TypeORM migration 建立，與 production 相同；不使用 `synchronize`。backend 測試透過 `createMigratedDataSource()`，DIMSE E2E 透過 `initializeDb()` 的 `AppDataSource`。
+_Avoid_: synchronize, entity sync, schema auto-sync

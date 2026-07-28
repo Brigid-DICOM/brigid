@@ -60,9 +60,9 @@ export function useDimseTestContext(): void {
     beforeAll(async () => {
         assertDcmtkInstalled();
 
-        await initializeDb();
+        const dataSource = await initializeDb();
 
-        testDb = new TestDatabaseManager();
+        testDb = new TestDatabaseManager(dataSource);
         await testDb.initialize();
 
         const workspaceService = new WorkspaceService();

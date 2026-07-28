@@ -198,7 +198,7 @@ export class CreateAuthTables1759306542840 implements MigrationInterface {
             await queryRunner.dropForeignKey("account", accountsForeignKey);
         }
 
-        await queryRunner.dropTable("verification_token");
+        await queryRunner.dropTable("verification_tokens");
         await queryRunner.dropTable("session");
         await queryRunner.dropTable("account");
         await queryRunner.dropTable("user");
