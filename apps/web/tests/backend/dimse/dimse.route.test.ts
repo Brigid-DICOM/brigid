@@ -33,6 +33,7 @@ describe("DIMSE Routes", () => {
         vi.clearAllMocks();
         vi.restoreAllMocks();
         await testDb.clearDatabase();
+        await testDb.seedTestData();
     });
 
     describe("GET /workspace/:workspaceId/dimse - Get DIMSE Config", () => {

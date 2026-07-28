@@ -74,6 +74,7 @@ describe("WADO-RS Series Route", () => {
         vi.restoreAllMocks();
 
         await testDb.clearDatabase();
+        await testDb.seedTestData();
 
         const testFileManager = new TestFileManager();
         for (const instance of TEST_DICOM_DATA.instances) {
@@ -357,7 +358,7 @@ describe("WADO-RS Series Route", () => {
             );
             vi.spyOn(
                 SeriesService.prototype,
-                "getSeriesByUid",
+                "getSeriesInstancesByCursor",
             ).mockRejectedValue(new Error("Database error"));
 
             const seriesPath = `/api/workspaces/${WORKSPACE_ID}/studies/${TEST_DICOM_DATA.studyInstanceUid}/series/${TEST_DICOM_DATA.seriesInstanceUid}`;

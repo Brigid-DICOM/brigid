@@ -49,6 +49,7 @@ vi.mock("@brigid/env", () => ({
         STORAGE_LOCAL_DIR: "tests/fixtures/dicomFiles/temp",
         DICOM_STORAGE_FILEPATH:
             "/dicom/{workspaceId}/{0020000D,hash}/{0020000E,hash}/{00080018,hash}.dcm",
+        JWT_SECRET: "test-jwt-secret",
     },
 }));
 
