@@ -83,3 +83,19 @@ _Avoid_: test setup, fixtures config
 **測試 Schema 策略**:
 測試資料庫的 schema 一律透過 TypeORM migration 建立，與 production 相同；不使用 `synchronize`。backend 測試透過 `createMigratedDataSource()`，DIMSE E2E 透過 `initializeDb()` 的 `AppDataSource`。
 _Avoid_: synchronize, entity sync, schema auto-sync
+
+**Routing Destination**:
+Routing 規則指向的出站目標；統一 entity，type 為 DIMSE（C-STORE SCU）或 DICOMweb（STOW-RS client）。與 C-MOVE 的 Move Destination 不同——後者是被動協定觸發，前者是主動 routing job 的目標。
+_Avoid_: destination AE, remote PACS
+
+**Routing Rule**:
+Workspace 內 user 自訂的條件→目的地對應。ingest 時以 dicom2json 輸出（in-memory，不查 DB）對 instance 層級 DICOM tag 條件做匹配，命中後建立 routing job。無系統預設 routing rule；無命中則不轉送。
+_Avoid_: forward rule, routing policy
+
+**Routing Tag**:
+Routing rule 條件可引用的 DICOM attribute。分為 built-in（系統預建常用 tag 目錄，供選用）與 user（workspace 自訂新增，必須為真實存在的 DICOM attribute）。built-in 指 tag 目錄，不是 routing rule。
+_Avoid_: built-in rule, tag preset rule
+
+**Routing Job**:
+單次 instance 轉送任務的持久化記錄；一 job 對應一 instance、一 destination、一 rule。ingest 命中 rule 且 DB 寫入成功後建立 job，依 rule 的 delay 排程送出；狀態歷程為 queued → scheduled → sending → succeeded | failed | dead。同一 instance 重複 ingest 且命中同一 rule 時重建 job；若 job 正在 sending 則標記 pendingRebuild，待 send 完成後重建。failed/dead 僅能手動 retry（回 scheduled、scheduledAt=now）。使用者可對已建立 job 手動立即送出（bypass delay）。
+_Avoid_: forward task, send queue item
