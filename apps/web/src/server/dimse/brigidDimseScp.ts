@@ -229,7 +229,12 @@ export class BrigidDimseScp extends Scp {
                 sopInstanceUid: request.getAffectedSopInstanceUid(),
             });
             const multipartFile = await this.toMultipartFile(part10FilePath);
-            const stowRsService = new StowRsService(workspaceId);
+            const callingAeTitle =
+                this.association?.getCallingAeTitle() ?? undefined;
+            const stowRsService = new StowRsService(
+                workspaceId,
+                callingAeTitle,
+            );
             const { message } = await stowRsService.storeDicomFiles([
                 multipartFile,
             ]);
