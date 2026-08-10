@@ -44,6 +44,10 @@ _Avoid_: test data, sample metadata
 Brigid 的 DIMSE SCP 執行時，負責監聽 DIMSE 連線並處理 C-ECHO、C-STORE、C-FIND、C-MOVE、Storage Commitment（N-ACTION / N-EVENT-REPORT）。
 _Avoid_: DIMSE server, dcm4che service
 
+**DIMSE 服務**:
+Workspace 的 DIMSE SCP 能力；啟用後該 workspace 才以自家 AE 接受 inbound DIMSE。與 Routing Destination（type=DIMSE，outbound C-STORE）及 Move Destination 不同。
+_Avoid_: DIMSE server, Enable DIMSE Service, dimse config
+
 **Storage Commitment SCP**:
 Brigid 在 Push Model 中扮演的角色；接收外部 SCU 的 N-ACTION 請求，確認指定 SOP Instance 已存在於 workspace 後回應，並於**同一 inbound association** 以 N-EVENT-REPORT 回報 per-instance 結果（同步，於 N-ACTION Success 前完成）。
 _Avoid_: storage commit server, stgcmt SCP

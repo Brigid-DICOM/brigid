@@ -60,6 +60,13 @@
         "routingSettings": "Routing 設定",
         "routingActivity": "Routing 活動"
     },
+    "routingSettings": {
+        "rules": {
+            "dimseServiceNotConfigured": "此規則指向 DIMSE destination，但此 workspace 尚未設定 DIMSE 服務。請至 Workspace Settings → DIMSE (SCP) 建立設定。",
+            "dimseServiceDisabled": "此規則指向 DIMSE destination，但 DIMSE 服務未啟用。請至 Workspace Settings → DIMSE (SCP) 啟用。",
+            "dimseServiceStatusUnknown": "無法確認 DIMSE 服務狀態。"
+        }
+    },
     "navWorkspace": {
         "settings": "設定",
         "inviteMembers": "邀請成員",

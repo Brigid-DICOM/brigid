@@ -60,6 +60,13 @@
         "routingSettings": "Routing Settings",
         "routingActivity": "Routing Activity"
     },
+    "routingSettings": {
+        "rules": {
+            "dimseServiceNotConfigured": "This rule targets a DIMSE destination, but this workspace has no DIMSE service configured. Configure it under Workspace Settings → DIMSE (SCP).",
+            "dimseServiceDisabled": "This rule targets a DIMSE destination, but the DIMSE service is disabled. Enable it under Workspace Settings → DIMSE (SCP).",
+            "dimseServiceStatusUnknown": "Unable to verify DIMSE service status."
+        }
+    },
     "navWorkspace": {
         "settings": "Settings",
         "inviteMembers": "Invite Members",
