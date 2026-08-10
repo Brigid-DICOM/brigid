@@ -6,7 +6,6 @@ import type {
     RoutingRule,
     RoutingTag,
 } from "./types";
-import type { DimseConfigSummary } from "@/lib/routing/dimseServiceReadiness";
 
 async function handle<T>(res: Response): Promise<T> {
     const json = await res.json();
@@ -55,11 +54,6 @@ export const routingApi = {
             `/api/workspaces/${workspaceId}/routing/destinations/import-from-allowed-remote/${allowedRemoteId}`,
             { method: "POST" },
         ).then((res) => handle<RoutingDestination>(res)),
-
-    getDimseConfig: (workspaceId: string) =>
-        fetch(`/api/workspaces/${workspaceId}/dimse`).then((res) =>
-            handle<DimseConfigSummary | null>(res),
-        ),
 
     listAllowedRemotes: (workspaceId: string) =>
         fetch(`/api/workspaces/${workspaceId}/dimse`)

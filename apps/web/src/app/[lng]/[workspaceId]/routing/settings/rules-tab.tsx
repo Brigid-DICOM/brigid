@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { AlertTriangleIcon, Loader2Icon, PlusIcon, TrashIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,13 +24,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { routingApi } from "../api";
 import {
     dimseReadinessWarningKey,
     getDimseServiceReadiness,
     shouldWarnDimseDestinationRule,
     type DimseConfigSummary,
 } from "@/lib/routing/dimseServiceReadiness";
+import { getDimseConfigQuery } from "@/react-query/queries/dimseConfig";
+import { routingApi } from "../api";
 import type {
     RoutingCondition,
     RoutingConditionOperator,
@@ -47,10 +49,6 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
     const { t } = useT("translation");
     const [rules, setRules] = useState<RoutingRule[]>([]);
     const [destinations, setDestinations] = useState<RoutingDestination[]>([]);
-    const [dimseConfig, setDimseConfig] = useState<DimseConfigSummary | null>(
-        null,
-    );
-    const [dimseConfigLoadFailed, setDimseConfigLoadFailed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -62,12 +60,23 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
         { ...emptyCondition },
     ]);
 
+    const {
+        data: dimseConfigResponse,
+        isError: dimseConfigLoadFailed,
+        isPending: dimseConfigPending,
+    } = useQuery(getDimseConfigQuery(workspaceId));
+
+    const dimseConfig: DimseConfigSummary | null = dimseConfigResponse?.data
+        ? { enabled: dimseConfigResponse.data.enabled }
+        : null;
+    const dimseReadiness = getDimseServiceReadiness(dimseConfig);
+    const dimseSettingsKnown = !dimseConfigPending && !dimseConfigLoadFailed;
+
     const selectedDestination = destinations.find(
         (destination) => destination.id === destinationId,
     );
-    const dimseReadiness = getDimseServiceReadiness(dimseConfig);
     const showDimseInlineWarning =
-        !dimseConfigLoadFailed &&
+        dimseSettingsKnown &&
         selectedDestination !== undefined &&
         shouldWarnDimseDestinationRule(
             selectedDestination.type,
@@ -76,61 +85,16 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
         );
     const dimseInlineWarningKey = dimseReadinessWarningKey(dimseReadiness);
 
-    const notifyDimseRuleWarning = (
-        destination: RoutingDestination | undefined,
-        config: DimseConfigSummary | null,
-        loadFailed: boolean,
-    ) => {
-        if (
-            !destination ||
-            !shouldWarnDimseDestinationRule(
-                destination.type,
-                getDimseServiceReadiness(config),
-                destination.enabled,
-            )
-        ) {
-            return;
-        }
-
-        if (loadFailed) {
-            toast.error(t("routingSettings.rules.dimseServiceStatusUnknown"));
-            return;
-        }
-
-        const warningKey = dimseReadinessWarningKey(
-            getDimseServiceReadiness(config),
-        );
-        if (warningKey) {
-            toast.warning(t(`routingSettings.rules.${warningKey}`));
-        }
-    };
-
-    const load = async (): Promise<{
-        dimseConfig: DimseConfigSummary | null;
-        dimseLoadFailed: boolean;
-    }> => {
+    const load = async () => {
         setIsLoading(true);
-        setDimseConfigLoadFailed(false);
-        let dimseLoadFailed = false;
-        let dimseConfigResult: DimseConfigSummary | null = null;
         try {
-            const [
-                { rules: ruleList },
-                { destinations: destList },
-                fetchedDimseConfig,
-            ] = await Promise.all([
-                routingApi.listRules(workspaceId),
-                routingApi.listDestinations(workspaceId),
-                routingApi.getDimseConfig(workspaceId).catch(() => {
-                    dimseLoadFailed = true;
-                    return null;
-                }),
-            ]);
-            dimseConfigResult = fetchedDimseConfig;
+            const [{ rules: ruleList }, { destinations: destList }] =
+                await Promise.all([
+                    routingApi.listRules(workspaceId),
+                    routingApi.listDestinations(workspaceId),
+                ]);
             setRules(ruleList);
             setDestinations(destList);
-            setDimseConfig(dimseConfigResult);
-            setDimseConfigLoadFailed(dimseLoadFailed);
             if (!destinationId && destList[0]) {
                 setDestinationId(destList[0].id);
             }
@@ -139,7 +103,6 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
         } finally {
             setIsLoading(false);
         }
-        return { dimseConfig: dimseConfigResult, dimseLoadFailed };
     };
 
     useEffect(() => {
@@ -161,10 +124,6 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
     const handleCreate = async () => {
         if (!name.trim() || !destinationId) return;
 
-        const destination = destinations.find(
-            (item) => item.id === destinationId,
-        );
-
         setIsSaving(true);
         try {
             await routingApi.createRule(workspaceId, {
@@ -178,14 +137,8 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
             setPriority("0");
             setDelaySeconds("0");
             setConditions([{ ...emptyCondition }]);
-            const { dimseConfig: freshDimseConfig, dimseLoadFailed } =
-                await load();
+            await load();
             toast.success("Rule created");
-            notifyDimseRuleWarning(
-                destination,
-                freshDimseConfig,
-                dimseLoadFailed,
-            );
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Failed to create rule",
@@ -206,27 +159,27 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
     };
 
     const handleToggleEnabled = async (rule: RoutingRule) => {
-        const destination = destinations.find(
-            (item) => item.id === rule.destinationId,
-        );
-        const enabling = !rule.enabled;
-
         try {
             await routingApi.updateRule(workspaceId, rule.id, {
-                enabled: enabling,
+                enabled: !rule.enabled,
             });
-            const { dimseConfig: freshDimseConfig, dimseLoadFailed } =
-                await load();
-            if (enabling) {
-                notifyDimseRuleWarning(
-                    destination,
-                    freshDimseConfig,
-                    dimseLoadFailed,
-                );
-            }
+            await load();
         } catch {
             toast.error("Failed to update rule");
         }
+    };
+
+    const ruleShowsDimseSettingsWarning = (rule: RoutingRule): boolean => {
+        if (!dimseSettingsKnown) return false;
+        const destination = destinations.find(
+            (item) => item.id === rule.destinationId,
+        );
+        if (!destination) return false;
+        return shouldWarnDimseDestinationRule(
+            destination.type,
+            dimseReadiness,
+            destination.enabled,
+        );
     };
 
     if (isLoading) {
@@ -424,48 +377,64 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {rules.map((rule) => (
-                        <TableRow key={rule.id}>
-                            <TableCell className="font-medium">
-                                {rule.name}
-                            </TableCell>
-                            <TableCell>{rule.priority}</TableCell>
-                            <TableCell>
-                                {destinations.find(
-                                    (d) => d.id === rule.destinationId,
-                                )?.name ?? rule.destinationId}
-                            </TableCell>
-                            <TableCell>{rule.delaySeconds}s</TableCell>
-                            <TableCell className="text-xs">
-                                {rule.conditions
-                                    .map(
-                                        (c) =>
-                                            `${c.tag} ${c.operator} ${Array.isArray(c.value) ? c.value.join(",") : c.value}`,
-                                    )
-                                    .join(" AND ")}
-                            </TableCell>
-                            <TableCell>
-                                <Badge
-                                    variant={
-                                        rule.enabled ? "default" : "outline"
-                                    }
-                                    className="cursor-pointer"
-                                    onClick={() => handleToggleEnabled(rule)}
-                                >
-                                    {rule.enabled ? "Enabled" : "Disabled"}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleDelete(rule.id)}
-                                >
-                                    <TrashIcon className="size-4 text-destructive" />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                    {rules.map((rule) => {
+                        const showRowWarning =
+                            ruleShowsDimseSettingsWarning(rule);
+                        return (
+                            <TableRow key={rule.id}>
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-1.5">
+                                        {showRowWarning && (
+                                            <AlertTriangleIcon
+                                                className="size-3.5 shrink-0 text-amber-600"
+                                                aria-label={t(
+                                                    "routingSettings.rules.dimseSettingsNotConfigured",
+                                                )}
+                                            />
+                                        )}
+                                        <span>{rule.name}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{rule.priority}</TableCell>
+                                <TableCell>
+                                    {destinations.find(
+                                        (d) => d.id === rule.destinationId,
+                                    )?.name ?? rule.destinationId}
+                                </TableCell>
+                                <TableCell>{rule.delaySeconds}s</TableCell>
+                                <TableCell className="text-xs">
+                                    {rule.conditions
+                                        .map(
+                                            (c) =>
+                                                `${c.tag} ${c.operator} ${Array.isArray(c.value) ? c.value.join(",") : c.value}`,
+                                        )
+                                        .join(" AND ")}
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        variant={
+                                            rule.enabled ? "default" : "outline"
+                                        }
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                            handleToggleEnabled(rule)
+                                        }
+                                    >
+                                        {rule.enabled ? "Enabled" : "Disabled"}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleDelete(rule.id)}
+                                    >
+                                        <TrashIcon className="size-4 text-destructive" />
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
                     {rules.length === 0 && (
                         <TableRow>
                             <TableCell
