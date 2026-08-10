@@ -8,6 +8,10 @@ import { EventLogEntity } from "./entities/eventLog.entity";
 import { InstanceEntity } from "./entities/instance.entity";
 import { PatientEntity } from "./entities/patient.entity";
 import { PersonNameEntity } from "./entities/personName.entity";
+import { RoutingDestinationEntity } from "./entities/routingDestination.entity";
+import { RoutingJobEntity } from "./entities/routingJob.entity";
+import { RoutingRuleEntity } from "./entities/routingRule.entity";
+import { RoutingTagEntity } from "./entities/routingTag.entity";
 import { SeriesEntity } from "./entities/series.entity";
 import { SeriesRequestAttributesEntity } from "./entities/seriesRequestAttributes.entity";
 import { SessionEntity } from "./entities/session.entity";
@@ -48,6 +52,10 @@ export const databaseEntities = [
     DimseAllowedIpEntity,
     DimseAllowedRemoteEntity,
     EventLogEntity,
+    RoutingDestinationEntity,
+    RoutingTagEntity,
+    RoutingRuleEntity,
+    RoutingJobEntity,
 ];
 
 export function buildMigratedDataSourceOptions(

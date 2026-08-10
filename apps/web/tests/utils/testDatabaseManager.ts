@@ -11,6 +11,10 @@ import { EventLogEntity } from "@brigid/database/src/entities/eventLog.entity";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
 import { PersonNameEntity } from "@brigid/database/src/entities/personName.entity";
+import { RoutingDestinationEntity } from "@brigid/database/src/entities/routingDestination.entity";
+import { RoutingJobEntity } from "@brigid/database/src/entities/routingJob.entity";
+import { RoutingRuleEntity } from "@brigid/database/src/entities/routingRule.entity";
+import { RoutingTagEntity } from "@brigid/database/src/entities/routingTag.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import { SeriesRequestAttributesEntity } from "@brigid/database/src/entities/seriesRequestAttributes.entity";
 import { ShareLinkEntity } from "@brigid/database/src/entities/shareLink.entity";
@@ -85,6 +89,10 @@ export class TestDatabaseManager {
             const tableNames = entities?.map(entity => `"${entity.tableName}"`).join(", ");
             await this.dataSource.query(`TRUNCATE TABLE ${tableNames} CASCADE`);
         } else {
+            await this.dataSource.manager.clear(RoutingJobEntity);
+            await this.dataSource.manager.clear(RoutingRuleEntity);
+            await this.dataSource.manager.clear(RoutingTagEntity);
+            await this.dataSource.manager.clear(RoutingDestinationEntity);
             await this.dataSource.manager.clear(DimseAllowedRemoteEntity);
             await this.dataSource.manager.clear(DimseAllowedIpEntity);
             await this.dataSource.manager.clear(DimseConfigEntity);

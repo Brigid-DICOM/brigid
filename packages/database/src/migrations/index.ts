@@ -23,3 +23,4 @@ export { CreateDimseTables1765948809824 } from "./1765948809824-createDimseTable
 export { CreateEventLogTable1766905546307 } from "./1766905546307-createEventLogTable";
 export { AddTimeIndexToEventLog1766935045857 } from "./1766935045857-addTimeIndexToEventLog";
 export { AddWorkspaceIdToEventLog1766935255090 } from "./1766935255090-addWorkspaceIdToEventLog";
+export { CreateRoutingTables1770532800000 } from "./1770532800000-createRoutingTables";
