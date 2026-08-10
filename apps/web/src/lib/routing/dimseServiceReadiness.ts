@@ -27,18 +27,15 @@ export function shouldWarnDimseDestinationRule(
     return (
         destinationType === "dimse" &&
         destinationEnabled &&
-        readiness !== "ready"
+        readiness === "not-configured"
     );
 }
 
 export function dimseReadinessWarningKey(
     readiness: DimseServiceReadiness,
-): "dimseServiceNotConfigured" | "dimseServiceDisabled" | null {
+): "dimseSettingsNotConfigured" | null {
     if (readiness === "not-configured") {
-        return "dimseServiceNotConfigured";
-    }
-    if (readiness === "disabled") {
-        return "dimseServiceDisabled";
+        return "dimseSettingsNotConfigured";
     }
     return null;
 }

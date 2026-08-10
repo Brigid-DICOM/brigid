@@ -24,12 +24,15 @@ describe("dimseServiceReadiness", () => {
     });
 
     describe("shouldWarnDimseDestinationRule", () => {
-        it("warns for dimse destination when service is not ready", () => {
+        it("warns for dimse destination only when DIMSE settings are missing", () => {
             expect(
                 shouldWarnDimseDestinationRule("dimse", "not-configured"),
             ).toBe(true);
+        });
+
+        it("does not warn when DIMSE settings exist but service is disabled", () => {
             expect(shouldWarnDimseDestinationRule("dimse", "disabled")).toBe(
-                true,
+                false,
             );
         });
 
@@ -47,19 +50,24 @@ describe("dimseServiceReadiness", () => {
 
         it("does not warn when dimse destination is disabled", () => {
             expect(
-                shouldWarnDimseDestinationRule("dimse", "not-configured", false),
+                shouldWarnDimseDestinationRule(
+                    "dimse",
+                    "not-configured",
+                    false,
+                ),
             ).toBe(false);
         });
     });
 
     describe("dimseReadinessWarningKey", () => {
-        it("maps readiness to warning keys", () => {
+        it("maps not-configured to settings warning key", () => {
             expect(dimseReadinessWarningKey("not-configured")).toBe(
-                "dimseServiceNotConfigured",
+                "dimseSettingsNotConfigured",
             );
-            expect(dimseReadinessWarningKey("disabled")).toBe(
-                "dimseServiceDisabled",
-            );
+        });
+
+        it("returns null when settings exist (including disabled service)", () => {
+            expect(dimseReadinessWarningKey("disabled")).toBeNull();
             expect(dimseReadinessWarningKey("ready")).toBeNull();
         });
     });
