@@ -26,6 +26,7 @@ import getStatsRoute from "./dicom/getStats.route";
 import dimseRoute from "./dimse/dimse.route";
 import getEventLogsRoute from "./getEventLogs.route";
 import qidoRsRoute from "./qido-rs";
+import routingRoute from "./routing/routing.route";
 import shareLinkRoute from "./shareLinks/shareLink.route";
 import stowRsRoute from "./stow-rs/stowRs.route";
 import tagRoute from "./tags/tag.route";
@@ -385,6 +386,7 @@ const workspacesRoute = new Hono()
     )
     .route("/", workspaceMemberRoute)
     .route("/", dimseRoute)
+    .route("/", routingRoute)
     .route("/", getEventLogsRoute);
 
 export default workspacesRoute;
