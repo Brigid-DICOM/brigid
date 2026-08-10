@@ -44,9 +44,13 @@ _Avoid_: test data, sample metadata
 Brigid 的 DIMSE SCP 執行時，負責監聽 DIMSE 連線並處理 C-ECHO、C-STORE、C-FIND、C-MOVE、Storage Commitment（N-ACTION / N-EVENT-REPORT）。
 _Avoid_: DIMSE server, dcm4che service
 
+**DIMSE 設定**:
+Workspace 的 DIMSE 組態（含自家 AE Title 等）。同一份設定同時支撐 inbound（DIMSE 服務）與 outbound Routing Destination（type=DIMSE）的 calling AE。有設定稱為「已設定」，與「DIMSE 服務已啟用」不同。
+_Avoid_: DimseConfig, dimse config, DIMSE configuration
+
 **DIMSE 服務**:
-Workspace 的 DIMSE SCP 能力；啟用後該 workspace 才以自家 AE 接受 inbound DIMSE。與 Routing Destination（type=DIMSE，outbound C-STORE）及 Move Destination 不同。
-_Avoid_: DIMSE server, Enable DIMSE Service, dimse config
+Workspace 的 inbound DIMSE SCP 能力；僅在已設定且啟用後，該 workspace 才以自家 AE 接受 inbound DIMSE。啟用與否不決定 outbound routing 能否使用同一份 DIMSE 設定的 AE。與 Routing Destination（type=DIMSE）及 Move Destination 不同。
+_Avoid_: DIMSE server, Enable DIMSE Service
 
 **Storage Commitment SCP**:
 Brigid 在 Push Model 中扮演的角色；接收外部 SCU 的 N-ACTION 請求，確認指定 SOP Instance 已存在於 workspace 後回應，並於**同一 inbound association** 以 N-EVENT-REPORT 回報 per-instance 結果（同步，於 N-ACTION Success 前完成）。
@@ -89,11 +93,11 @@ _Avoid_: test setup, fixtures config
 _Avoid_: synchronize, entity sync, schema auto-sync
 
 **Routing Destination**:
-Routing 規則指向的出站目標；統一 entity，type 為 DIMSE（C-STORE SCU）或 DICOMweb（STOW-RS client）。與 C-MOVE 的 Move Destination 不同——後者是被動協定觸發，前者是主動 routing job 的目標。
+Routing 規則指向的出站目標；統一 entity，type 為 DIMSE（C-STORE SCU）或 DICOMweb（STOW-RS client）。type=DIMSE 時 outbound 使用該 workspace DIMSE 設定的 AE 作為 calling AE。與 C-MOVE 的 Move Destination 不同——後者是被動協定觸發，前者是主動 routing job 的目標。
 _Avoid_: destination AE, remote PACS
 
 **Routing Rule**:
-Workspace 內 user 自訂的條件→目的地對應。ingest 時以 dicom2json 輸出（in-memory，不查 DB）對 instance 層級 DICOM tag 條件做匹配，命中後建立 routing job。無系統預設 routing rule；無命中則不轉送。
+Workspace 內 user 自訂的條件→目的地對應。ingest 時以 dicom2json 輸出（in-memory，不查 DB）對 instance 層級 DICOM tag 條件做匹配，命中後建立 routing job。無系統預設 routing rule；無命中則不轉送。指向 DIMSE destination 時要求 workspace 已有 DIMSE 設定，不要求 DIMSE 服務已啟用。
 _Avoid_: forward rule, routing policy
 
 **Routing Tag**:
