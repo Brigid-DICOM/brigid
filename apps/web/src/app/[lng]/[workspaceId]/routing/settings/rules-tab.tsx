@@ -25,11 +25,10 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import {
-    dimseReadinessWarningKey,
-    getDimseServiceReadiness,
+    dimseSettingsWarningKey,
+    hasDimseSettings,
     shouldWarnDimseDestinationRule,
-    type DimseConfigSummary,
-} from "@/lib/routing/dimseServiceReadiness";
+} from "@/lib/routing/dimseSettingsWarning";
 import { getDimseConfigQuery } from "@/react-query/queries/dimseConfig";
 import { routingApi } from "../api";
 import type {
@@ -66,10 +65,7 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
         isPending: dimseConfigPending,
     } = useQuery(getDimseConfigQuery(workspaceId));
 
-    const dimseConfig: DimseConfigSummary | null = dimseConfigResponse?.data
-        ? { enabled: dimseConfigResponse.data.enabled }
-        : null;
-    const dimseReadiness = getDimseServiceReadiness(dimseConfig);
+    const settingsPresent = hasDimseSettings(dimseConfigResponse?.data ?? null);
     const dimseSettingsKnown = !dimseConfigPending && !dimseConfigLoadFailed;
 
     const selectedDestination = destinations.find(
@@ -80,10 +76,10 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
         selectedDestination !== undefined &&
         shouldWarnDimseDestinationRule(
             selectedDestination.type,
-            dimseReadiness,
+            settingsPresent,
             selectedDestination.enabled,
         );
-    const dimseInlineWarningKey = dimseReadinessWarningKey(dimseReadiness);
+    const dimseInlineWarningKey = dimseSettingsWarningKey(settingsPresent);
 
     const load = async () => {
         setIsLoading(true);
@@ -177,7 +173,7 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
         if (!destination) return false;
         return shouldWarnDimseDestinationRule(
             destination.type,
-            dimseReadiness,
+            settingsPresent,
             destination.enabled,
         );
     };
