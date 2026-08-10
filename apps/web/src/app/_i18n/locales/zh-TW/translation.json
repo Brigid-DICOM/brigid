@@ -56,7 +56,9 @@
         "uploadDicom": "上傳 DICOM 影像",
         "myShares": "我的分享",
         "shareWithMe": "與我分享",
-        "eventLogs": "事件日誌"
+        "eventLogs": "事件日誌",
+        "routingSettings": "Routing 設定",
+        "routingActivity": "Routing 活動"
     },
     "navWorkspace": {
         "settings": "設定",

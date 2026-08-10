@@ -56,7 +56,9 @@
         "uploadDicom": "Upload DICOM",
         "myShares": "My Shares",
         "shareWithMe": "Share With Me",
-        "eventLogs": "Event Logs"
+        "eventLogs": "Event Logs",
+        "routingSettings": "Routing Settings",
+        "routingActivity": "Routing Activity"
     },
     "navWorkspace": {
         "settings": "Settings",
