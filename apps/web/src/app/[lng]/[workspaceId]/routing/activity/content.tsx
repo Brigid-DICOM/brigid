@@ -2,7 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { RefreshCcwIcon } from "lucide-react";
 import { useState } from "react";
+import { routingApi } from "@/app/[lng]/[workspaceId]/routing/api";
+import type { RoutingJobStatus } from "@/app/[lng]/[workspaceId]/routing/types";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingDataTable } from "@/components/common/loading-data-table";
 import { PaginationControls } from "@/components/common/pagination-controls";
@@ -16,27 +19,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import {
+    getRoutingJobsQuery,
+    ROUTING_JOBS_QUERY_KEY,
+} from "@/react-query/queries/routing";
 
-type JobStatus =
-    | "scheduled"
-    | "sending"
-    | "succeeded"
-    | "failed"
-    | "dead"
-    | "queued";
-
-type RoutingJob = {
-    id: string;
-    status: JobStatus;
-    scheduledAt: string;
-    sopInstanceUid: string;
-    lastError?: string | null;
-    warning?: string | null;
-    rule?: { name: string };
-    destination?: { name: string };
-};
-
-const STATUS_FILTERS: Array<JobStatus | "all"> = [
+const STATUS_FILTERS: Array<RoutingJobStatus | "all"> = [
     "all",
     "scheduled",
     "sending",
@@ -51,48 +40,36 @@ export default function RoutingActivityContent({
     workspaceId: string;
 }) {
     const queryClient = useQueryClient();
-    const [status, setStatus] = useState<JobStatus | "all">("all");
+    const [status, setStatus] = useState<RoutingJobStatus | "all">("all");
     const [page, setPage] = useState(0);
     const limit = 20;
-    const base = `/api/workspaces/${workspaceId}/routing`;
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["routing-jobs", workspaceId, status, page],
-        queryFn: async () => {
-            const params = new URLSearchParams({
-                limit: String(limit),
-                offset: String(page * limit),
-            });
-            if (status !== "all") {
-                params.set("status", status);
-            }
-            const response = await fetch(`${base}/jobs?${params.toString()}`);
-            return response.json() as Promise<{
-                ok: boolean;
-                data: { items: RoutingJob[]; total: number };
-            }>;
-        },
-    });
+    const { data, isLoading, isFetching, error, refetch } = useQuery(
+        getRoutingJobsQuery({
+            workspaceId,
+            status,
+            page,
+            limit,
+        }),
+    );
 
     const sendNow = useMutation({
-        mutationFn: (id: string) =>
-            fetch(`${base}/jobs/${id}/send-now`, { method: "POST" }),
+        mutationFn: (id: string) => routingApi.sendNowJob(workspaceId, id),
         onSuccess: () =>
             queryClient.invalidateQueries({
-                queryKey: ["routing-jobs", workspaceId],
+                queryKey: [ROUTING_JOBS_QUERY_KEY, workspaceId],
             }),
     });
 
     const retry = useMutation({
-        mutationFn: (id: string) =>
-            fetch(`${base}/jobs/${id}/retry`, { method: "POST" }),
+        mutationFn: (id: string) => routingApi.retryJob(workspaceId, id),
         onSuccess: () =>
             queryClient.invalidateQueries({
-                queryKey: ["routing-jobs", workspaceId],
+                queryKey: [ROUTING_JOBS_QUERY_KEY, workspaceId],
             }),
     });
 
-    if (error) {
+    if (error && !data) {
         return (
             <EmptyState
                 title="Error"
@@ -101,13 +78,28 @@ export default function RoutingActivityContent({
         );
     }
 
-    const items = data?.data.items ?? [];
-    const total = data?.data.total ?? 0;
+    const items = data?.items ?? [];
+    const total = data?.total ?? 0;
     const hasNextPage = (page + 1) * limit < total;
 
     return (
         <div className="p-6 space-y-4">
-            <h1 className="text-2xl font-bold">Routing Activity</h1>
+            <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold">Routing Activity</h1>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => refetch()}
+                    title="Refresh"
+                >
+                    <RefreshCcwIcon
+                        className={cn(
+                            "size-4",
+                            isFetching && !isLoading && "animate-spin",
+                        )}
+                    />
+                </Button>
+            </div>
 
             <div className="flex flex-wrap gap-2">
                 {STATUS_FILTERS.map((filter) => (
