@@ -2,15 +2,21 @@ name: Auto Release
 
 # dev merge 到 main 時自動打版本，流程：
 # 1. commit-and-tag-version 依 conventional commits 推算下一版，更新 CHANGELOG.md 與 package.json
-# 2. 以 chore(release) commit 推回 main（[skip ci] 避免遞迴觸發本 workflow）
-# 3. 推送 v* tag，連動既有 release.yaml（SEA 建置 + GitHub Release）與 docker-publish.yaml（Docker Hub）
+# 2. 以 chore(release) commit 推回 main，並打上 v* tag
+# 3. 以 workflow_dispatch 明確派發 release.yaml（GitHub Release + SEA）與 docker-publish.yaml（Docker Hub）
+#
+# 遞迴防護：GITHUB_TOKEN 推送的 commit / tag 不會觸發任何 workflow（GitHub 反遞迴機制），
+# 第 2 步的三個推送都不會重跑本 workflow；job guard 與腳本的 tag==version 判斷作為雙重補強。
+# release commit 刻意不帶 [skip ci]：skip 關鍵字會連同 tag 一起被封鎖，導致 v1.4.0 那輪
+# release.yaml / docker-publish.yaml 完全沒被觸發（本次事故根因）。
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: write # 推 release commit 與 tag
+  actions: write # 派發 release.yaml / docker-publish.yaml
 
 concurrency:
   group: auto-release-main
@@ -20,8 +26,8 @@ jobs:
   version-and-tag:
     name: Version, Changelog and Tag
     runs-on: ubuntu-latest
-    # release commit 帶 [skip ci]，雙重防護避免遞迴觸發
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    # 自己產生的 release commit 不再走一輪發版
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -45,6 +51,8 @@ jobs:
         run: pnpm install --frozen-lockfile --filter "!@brigid/docs" --filter "!@brigid/video"
 
       - name: Bump version, update changelog, commit and tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -58,32 +66,38 @@ jobs:
           # 無 tag 時（全新 repo）以 root commit 作為 log 起點
           LOG_FROM=${LAST_TAG:-$(git rev-list --max-parents=0 HEAD)}
 
-          # 前次執行已推回 release commit 但 tag 推送失敗：只補 tag，不重跑版本遞增
           if [ -n "$LAST_VERSION" ] && [ "$CURRENT_VERSION" != "$LAST_VERSION" ]; then
+            # 前次執行已推回 release commit 但 tag 推送失敗：只補 tag，不重跑版本遞增
             echo "::notice::package.json 已達 $CURRENT_VERSION 但最新 tag 為 $LAST_TAG，補推 tag v$CURRENT_VERSION"
-            git tag "v$CURRENT_VERSION"
-            git push origin "v$CURRENT_VERSION"
-            exit 0
-          fi
-
-          # 沒有可發布的 conventional commits 就不發版，避免空版本與空 changelog
-          if ! git log "$LOG_FROM..HEAD" --format='%s' | grep -qE '^(feat|fix|perf|revert|chore|docs|refactor|style|test|build|ci)(\([^)]+\))?!?:'; then
-            echo "::notice::$LOG_FROM..HEAD 沒有 conventional commits，跳過發版"
-            exit 0
-          fi
-
-          # package.json 的 skip.commit/skip.tag 已關閉自動 commit/tag，此處只寫 CHANGELOG.md + package.json
-          pnpm release
-
-          NEW_VERSION=$(node -p "require('./package.json').version")
-
-          git add CHANGELOG.md package.json
-          git commit -m "chore(release): \`v${NEW_VERSION}\` [skip ci]"
-          git push origin HEAD:main
-
-          if git rev-parse -q --verify "refs/tags/v${NEW_VERSION}" >/dev/null; then
-            echo "::notice::tag v${NEW_VERSION} 已存在，略過"
+            TARGET_VERSION=$CURRENT_VERSION
+            git tag "v$TARGET_VERSION"
+            git push origin "v$TARGET_VERSION"
           else
-            git tag "v${NEW_VERSION}"
-            git push origin "v${NEW_VERSION}"
+            # 沒有可發布的 conventional commits 就不發版，避免空版本與空 changelog
+            if ! git log "$LOG_FROM..HEAD" --format='%s' | grep -qE '^(feat|fix|perf|revert|chore|docs|refactor|style|test|build|ci)(\([^)]+\))?!?:'; then
+              echo "::notice::$LOG_FROM..HEAD 沒有 conventional commits，跳過發版"
+              exit 0
+            fi
+
+            # package.json 的 skip.commit/skip.tag 已關閉自動 commit/tag，此處只寫 CHANGELOG.md + package.json
+            pnpm release
+
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            git add CHANGELOG.md package.json
+            git commit -m "chore(release): \`v${NEW_VERSION}\`"
+            git push origin HEAD:main
+
+            TARGET_VERSION=$NEW_VERSION
+            if git rev-parse -q --verify "refs/tags/v${TARGET_VERSION}" >/dev/null; then
+              echo "::notice::tag v${TARGET_VERSION} 已存在，略過建立"
+            else
+              git tag "v$TARGET_VERSION"
+              git push origin "v$TARGET_VERSION"
+            fi
           fi
+
+          # GITHUB_TOKEN 推送的 commit / tag 不會觸發任何 workflow（GitHub 反遞迴機制），
+          # 文件指明 workflow_dispatch 是例外：用 gh 明確派發下游建置與發布
+          gh workflow run release.yaml --ref "v${TARGET_VERSION}"
+          gh workflow run docker-publish.yaml --ref "v${TARGET_VERSION}"
+          echo "::notice::已派發 release.yaml 與 docker-publish.yaml（ref=v${TARGET_VERSION}）"
