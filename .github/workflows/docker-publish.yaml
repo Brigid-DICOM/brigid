@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  # 手動派發用（GITHUB_TOKEN 推送的 tag 不會觸發 workflow，auto-release 以 gh workflow run 派發）
   workflow_dispatch:
 
 jobs:
