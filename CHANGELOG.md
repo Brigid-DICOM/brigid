@@ -2,6 +2,87 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.4.0](https://github.com/Brigid-DICOM/brigid/compare/v1.3.1...v1.4.0) (2026-10-09)
+
+
+* **web:** apply biome format and ignore conventions to routing ([0eefa31](https://github.com/Brigid-DICOM/brigid/commit/0eefa31a5577fd1d2f64ee8638dce10e8af2d323))
+
+
+### Features
+
+* **database:** add routing entities and migration ([1061714](https://github.com/Brigid-DICOM/brigid/commit/10617140feb3c85b1131d68d4ca84a15452cd504))
+* **dimse:** add C-MOVE E2E tests and dcmjs-dimse implementation ([52a1990](https://github.com/Brigid-DICOM/brigid/commit/52a1990b5dda9a06272ad8a8c7806e367f23387d))
+* **dimse:** add presentation context negotiation helpers ([317e700](https://github.com/Brigid-DICOM/brigid/commit/317e7008602583f82d2a9d22b688509cf7374fa5))
+* **dimse:** add pure Node C-FIND query module ([c6a4a22](https://github.com/Brigid-DICOM/brigid/commit/c6a4a22a6299b2d4717208ccb31a02b6472d25df))
+* **dimse:** implement storage commitment push model scp ([d7cce4c](https://github.com/Brigid-DICOM/brigid/commit/d7cce4cacd577717604fcb777c64a4d47f5d5ce9))
+* **dimse:** migrate DimseApp to dcmjs-dimse for C-ECHO and C-STORE ([40246da](https://github.com/Brigid-DICOM/brigid/commit/40246da22bc4afe896360d8b680ee94a3c3ef952))
+* **dimse:** mount C-FIND on dcmjs-dimse SCP ([fd05c2c](https://github.com/Brigid-DICOM/brigid/commit/fd05c2c0a68073a532d3b7b237fc32e3f8675c3c))
+* **routing:** add destination rule and tag services ([a1011cc](https://github.com/Brigid-DICOM/brigid/commit/a1011ccf5599b3d208fe769afa0e85760cc7a2c1))
+* **routing:** add in-memory rule engine ([2c0efb0](https://github.com/Brigid-DICOM/brigid/commit/2c0efb030c85ff63c23b84b64ea28450ed04613b))
+* **routing:** add job create rebuild and retry lifecycle ([4ed45e5](https://github.com/Brigid-DICOM/brigid/commit/4ed45e5dd2fa78631efec2e336ebfbaf99b3c295))
+* **routing:** add outbound executor and job poller ([99be695](https://github.com/Brigid-DICOM/brigid/commit/99be69515ddc6806a886ffce0fd9d7c001823493))
+* **routing:** add REST API for destinations rules tags and jobs ([f4b4092](https://github.com/Brigid-DICOM/brigid/commit/f4b40920b15931b8de6ba6ee80ef3286b14bf810))
+* **routing:** add STOW-RS outbound client ([5146272](https://github.com/Brigid-DICOM/brigid/commit/5146272adcbb483b65c1cc720955da2eb6532463))
+* **routing:** enqueue jobs after successful ingest ([2c9737a](https://github.com/Brigid-DICOM/brigid/commit/2c9737af0b7b8fcdc5bf422e607bf99496e51e89))
+* **routing:** warn on DIMSE rules when service not ready ([6c0105d](https://github.com/Brigid-DICOM/brigid/commit/6c0105d97563803d20feb2f4356522c58723ce80))
+* **test:** add clearDicomData for dimse e2e isolation ([f5c6937](https://github.com/Brigid-DICOM/brigid/commit/f5c6937a2b4372b7807df5be375425e8a2a04077))
+* **test:** add dimse e2e test infrastructure ([a36ad69](https://github.com/Brigid-DICOM/brigid/commit/a36ad6993f0fd805db35f8fd676afd3ab2c79cd1))
+* **test:** add dimse vitest config and test:dimse script ([d5965b7](https://github.com/Brigid-DICOM/brigid/commit/d5965b772ecc615157e3424eb2c16477a948fa24))
+* **ui:** add routing settings and activity pages ([5b04a21](https://github.com/Brigid-DICOM/brigid/commit/5b04a21ef446c80830463dc209b09481ecc20746))
+* **web:** add routing jobs query factory with polling ([791f021](https://github.com/Brigid-DICOM/brigid/commit/791f02114fdaac8d669e0381498e8e4b2a2d5b32))
+* **web:** wire routing activity to polled query and refresh ([52e419e](https://github.com/Brigid-DICOM/brigid/commit/52e419e49b0dad8476fb7162ba3cbc0ba2e88723))
+
+
+### Bug Fixes
+
+* **dicom:** stringify audit log payloads ([e8e1411](https://github.com/Brigid-DICOM/brigid/commit/e8e14116f93c44b7abf6aa6bc9ae60f7cc6763b4))
+* **dimse:** fallback SOPClassUID in C-FIND response adjust ([49a2c7d](https://github.com/Brigid-DICOM/brigid/commit/49a2c7dd915812d79a51943b851ac48184839e0d))
+* **dimse:** handle undefined lastPendingCompleted in assertMovescuMoveCounts ([b25b834](https://github.com/Brigid-DICOM/brigid/commit/b25b83479a939b5bf463661810ba88b1ed1de803))
+* **dimse:** reset query offset before series/instance C-FIND iteration ([dae0fc5](https://github.com/Brigid-DICOM/brigid/commit/dae0fc504bad45ad5d4d7739dbd3c71e28eb09a1))
+* **dimse:** use DICOM backslash for multi-value findscu queries ([5aac008](https://github.com/Brigid-DICOM/brigid/commit/5aac008c747c32049cf3fac86eda8ccaa5a1bb31))
+* **next.config:** add turbopack alias for node:fs/promises to resolve Windows compatibility issue ([1bc5090](https://github.com/Brigid-DICOM/brigid/commit/1bc5090575790e6c5adc7dec35ab144a58806c85))
+* **routing:** warn only when DIMSE settings missing ([ae64eca](https://github.com/Brigid-DICOM/brigid/commit/ae64eca9f523cd578d14d1171f586f29167ef65e))
+* **test:** align test schema on migrations ([fd10ab5](https://github.com/Brigid-DICOM/brigid/commit/fd10ab5a924fcce4b8ea51d0b34315b78e6b3fed))
+* **test:** disable useHookAtTopLevel for backend dimse tests ([73b0100](https://github.com/Brigid-DICOM/brigid/commit/73b0100b02f0e93bc484b02e87776bd6d197e02b))
+* **test:** init JVM before dimse lifecycle imports ([563aae8](https://github.com/Brigid-DICOM/brigid/commit/563aae863d5bb3562adcbf39d142f304bd644692))
+* **test:** use async spawn for dimse dcmsend ([c5f7fe7](https://github.com/Brigid-DICOM/brigid/commit/c5f7fe7a3196fc4c990b4dbc16fc1aa083181229))
+* **ui:** sync DIMSE settings warning via shared query ([c5e1599](https://github.com/Brigid-DICOM/brigid/commit/c5e15992107f46af35f1c949701ed9dabeaa5c6d))
+* **web:** add dcmjs module declarations ([90ab338](https://github.com/Brigid-DICOM/brigid/commit/90ab33897386b7b772f057ab19803914607ca9f7))
+
+
+### Others
+
+* **env:** add routing credential and poller settings ([2a53b03](https://github.com/Brigid-DICOM/brigid/commit/2a53b039082f884cc83e4835e0520e68d8955277))
+* **packages:** add `dcmjs`, `dcmjs-dimse`, `dcmjs-stream` ([840a174](https://github.com/Brigid-DICOM/brigid/commit/840a1747763ee57c6dabc8a6de9380a1dd60272b))
+* remove stale DIMSE C-STORE e2e planning docs ([3c8ada6](https://github.com/Brigid-DICOM/brigid/commit/3c8ada6531464a5dcc0c0e1b9f4f1743ed44deb5))
+* setup matt skill ([9fc27dd](https://github.com/Brigid-DICOM/brigid/commit/9fc27dd583c3e1c48d0fb66ced913206ef892377))
+* **test:** align dimse setup with spec and update issues ([6ecf09c](https://github.com/Brigid-DICOM/brigid/commit/6ecf09ce43d9ea21369111a39113e41c3c63579f))
+* **tests:** add biome-ignore comments for backend test setup in DIMSE C-MOVE tests ([b4d096e](https://github.com/Brigid-DICOM/brigid/commit/b4d096eb7ce8fc8264d196b1d30487f6c5fdbbf7))
+
+
+### Documentation
+
+* add Brigid domain glossary ([0b5a22e](https://github.com/Brigid-DICOM/brigid/commit/0b5a22e50ce9812624a0d177b754be0fafbbc3b0))
+* add C-FIND image level E2E spec ([d9fa901](https://github.com/Brigid-DICOM/brigid/commit/d9fa90120451a66db5b7e81b541df42f8b1bc055))
+* add C-FIND series level E2E spec and domain terms ([ab3922b](https://github.com/Brigid-DICOM/brigid/commit/ab3922b42ace39ea71c6a4c3b3823a0ed9c48464))
+* add DICOM routing spec and domain glossary ([af32698](https://github.com/Brigid-DICOM/brigid/commit/af32698433560464f3c5e169e5c5595aad787e5c))
+* add DIMSE C-STORE e2e plan ([8ad3b68](https://github.com/Brigid-DICOM/brigid/commit/8ad3b684f1d2babd7e130373035872b9c62ad8e7))
+* **adr:** define Phase 2a C-FIND migration scope ([6fd7465](https://github.com/Brigid-DICOM/brigid/commit/6fd7465d2dcbb5bd56d47f772fd1219e9d8c7848))
+* **adr:** record DIMSE dcmjs-dimse Phase 1 migration ([adf897a](https://github.com/Brigid-DICOM/brigid/commit/adf897abf65de00234885c715f7d30ad0e86d3cc))
+* **agents:** wire triage labels for setup skill output ([0a03324](https://github.com/Brigid-DICOM/brigid/commit/0a0332453415cd381447142116497a1ec7c9af8b))
+* clarify DIMSE settings vs service for routing ([2fe68c1](https://github.com/Brigid-DICOM/brigid/commit/2fe68c1c29a93ca5886563e1c4891cda02418a70))
+* **spec:** add dimse cmove rsp count e2e test spec ([b244250](https://github.com/Brigid-DICOM/brigid/commit/b24425046bd035f23bc314e4cd6aa1eca8c8433b))
+* **spec:** add storage commitment e2e test spec ([d779964](https://github.com/Brigid-DICOM/brigid/commit/d779964a22f251e556b299d524cae9c3c2e149e7))
+* **spec:** reconcile storage commitment spec with implementation ([90dc861](https://github.com/Brigid-DICOM/brigid/commit/90dc861924ed75d73ec562351d9afb384e68e274))
+
+
+### Refactor
+
+* **dimse:** extract shared SCU runner helpers ([0991837](https://github.com/Brigid-DICOM/brigid/commit/09918376849f1b304e8d42c060e6c78b38569132))
+* **dimse:** split movescu parser from RSP count assertions ([413fce5](https://github.com/Brigid-DICOM/brigid/commit/413fce55070fe967115651c511bbc1a76d88cb34))
+* **routing:** name helpers after DIMSE settings ([1044aec](https://github.com/Brigid-DICOM/brigid/commit/1044aec112b23f0cc37ca6e53b97b0c08f79b043))
+* **test:** address dimse e2e review follow-ups ([f7bdcdf](https://github.com/Brigid-DICOM/brigid/commit/f7bdcdfd4d8e9e678a97058dba1745d83027d6f9))
+
 ## [1.3.1](https://github.com/Brigid-DICOM/brigid/compare/v1.3.0...v1.3.1) (2026-06-05)
 
 
