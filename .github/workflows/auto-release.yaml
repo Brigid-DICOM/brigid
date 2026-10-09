@@ -1,0 +1,89 @@
+name: Auto Release
+
+# dev merge 到 main 時自動打版本，流程：
+# 1. commit-and-tag-version 依 conventional commits 推算下一版，更新 CHANGELOG.md 與 package.json
+# 2. 以 chore(release) commit 推回 main（[skip ci] 避免遞迴觸發本 workflow）
+# 3. 推送 v* tag，連動既有 release.yaml（SEA 建置 + GitHub Release）與 docker-publish.yaml（Docker Hub）
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-release-main
+  cancel-in-progress: false
+
+jobs:
+  version-and-tag:
+    name: Version, Changelog and Tag
+    runs-on: ubuntu-latest
+    # release commit 帶 [skip ci]，雙重防護避免遞迴觸發
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          # commit-and-tag-version 需完整歷史與既有 tag 才能推算版本
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.7.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter "!@brigid/docs" --filter "!@brigid/video"
+
+      - name: Bump version, update changelog, commit and tag
+        run: |
+          set -euo pipefail
+
+          # 推送歸屬 github-actions bot（credentials 由 checkout 持久化）
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          LAST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
+          LAST_VERSION=${LAST_TAG#v}
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          # 無 tag 時（全新 repo）以 root commit 作為 log 起點
+          LOG_FROM=${LAST_TAG:-$(git rev-list --max-parents=0 HEAD)}
+
+          # 前次執行已推回 release commit 但 tag 推送失敗：只補 tag，不重跑版本遞增
+          if [ -n "$LAST_VERSION" ] && [ "$CURRENT_VERSION" != "$LAST_VERSION" ]; then
+            echo "::notice::package.json 已達 $CURRENT_VERSION 但最新 tag 為 $LAST_TAG，補推 tag v$CURRENT_VERSION"
+            git tag "v$CURRENT_VERSION"
+            git push origin "v$CURRENT_VERSION"
+            exit 0
+          fi
+
+          # 沒有可發布的 conventional commits 就不發版，避免空版本與空 changelog
+          if ! git log "$LOG_FROM..HEAD" --format='%s' | grep -qE '^(feat|fix|perf|revert|chore|docs|refactor|style|test|build|ci)(\([^)]+\))?!?:'; then
+            echo "::notice::$LOG_FROM..HEAD 沒有 conventional commits，跳過發版"
+            exit 0
+          fi
+
+          # package.json 的 skip.commit/skip.tag 已關閉自動 commit/tag，此處只寫 CHANGELOG.md + package.json
+          pnpm release
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+
+          git add CHANGELOG.md package.json
+          git commit -m "chore(release): \`v${NEW_VERSION}\` [skip ci]"
+          git push origin HEAD:main
+
+          if git rev-parse -q --verify "refs/tags/v${NEW_VERSION}" >/dev/null; then
+            echo "::notice::tag v${NEW_VERSION} 已存在，略過"
+          else
+            git tag "v${NEW_VERSION}"
+            git push origin "v${NEW_VERSION}"
+          fi
