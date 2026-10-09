@@ -59,8 +59,7 @@ export const routingApi = {
         fetch(`/api/workspaces/${workspaceId}/dimse`)
             .then((res) => res.json())
             .then(
-                (json) =>
-                    (json?.data?.allowedRemotes ?? []) as AllowedRemote[],
+                (json) => (json?.data?.allowedRemotes ?? []) as AllowedRemote[],
             ),
 
     listRules: (workspaceId: string) =>

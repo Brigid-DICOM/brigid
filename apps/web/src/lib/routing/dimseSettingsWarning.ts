@@ -3,9 +3,7 @@
  * Warn only when workspace DIMSE 設定 is missing — not when DIMSE 服務 is disabled.
  */
 
-export function hasDimseSettings(
-    config: object | null | undefined,
-): boolean {
+export function hasDimseSettings(config: object | null | undefined): boolean {
     return config != null;
 }
 
@@ -14,11 +12,7 @@ export function shouldWarnDimseDestinationRule(
     hasSettings: boolean,
     destinationEnabled = true,
 ): boolean {
-    return (
-        destinationType === "dimse" &&
-        destinationEnabled &&
-        !hasSettings
-    );
+    return destinationType === "dimse" && destinationEnabled && !hasSettings;
 }
 
 export function dimseSettingsWarningKey(

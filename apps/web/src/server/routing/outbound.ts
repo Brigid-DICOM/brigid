@@ -108,14 +108,12 @@ async function executeDicomwebOutbound(
 export async function executeRoutingJob(
     job: RoutingJobEntity,
 ): Promise<RoutingOutboundResult> {
-    const instance = await AppDataSource.getRepository(InstanceEntity).findOne(
-        {
-            where: {
-                workspaceId: job.workspaceId,
-                sopInstanceUid: job.sopInstanceUid,
-            },
+    const instance = await AppDataSource.getRepository(InstanceEntity).findOne({
+        where: {
+            workspaceId: job.workspaceId,
+            sopInstanceUid: job.sopInstanceUid,
         },
-    );
+    });
     if (!instance) {
         return { outcome: "failed", error: "Instance not found" };
     }

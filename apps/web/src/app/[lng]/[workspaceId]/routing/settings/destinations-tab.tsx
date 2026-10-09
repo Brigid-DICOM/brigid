@@ -65,9 +65,9 @@ export function DestinationsTab({ workspaceId }: { workspaceId: string }) {
         }
     };
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 只在 workspaceId 改變時重新載入
     useEffect(() => {
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workspaceId]);
 
     const handleCreate = async () => {
@@ -293,8 +293,7 @@ export function DestinationsTab({ workspaceId }: { workspaceId: string }) {
                                             onChange={(e) =>
                                                 setForm({
                                                     ...form,
-                                                    authSecret:
-                                                        e.target.value,
+                                                    authSecret: e.target.value,
                                                 })
                                             }
                                             className="w-36"
@@ -374,9 +373,7 @@ export function DestinationsTab({ workspaceId }: { workspaceId: string }) {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() =>
-                                        handleDelete(destination.id)
-                                    }
+                                    onClick={() => handleDelete(destination.id)}
                                 >
                                     <TrashIcon className="size-4 text-destructive" />
                                 </Button>

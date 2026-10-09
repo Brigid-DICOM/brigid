@@ -1,7 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangleIcon, Loader2Icon, PlusIcon, TrashIcon } from "lucide-react";
+import {
+    AlertTriangleIcon,
+    Loader2Icon,
+    PlusIcon,
+    TrashIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/app/_i18n/client";
@@ -101,9 +106,9 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
         }
     };
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 只在 workspaceId 改變時重新載入
     useEffect(() => {
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workspaceId]);
 
     const updateCondition = (
@@ -137,7 +142,9 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
             toast.success("Rule created");
         } catch (error) {
             toast.error(
-                error instanceof Error ? error.message : "Failed to create rule",
+                error instanceof Error
+                    ? error.message
+                    : "Failed to create rule",
             );
         } finally {
             setIsSaving(false);
@@ -243,9 +250,7 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
                 {showDimseInlineWarning && dimseInlineWarningKey && (
                     <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
                         <div className="flex gap-2">
-                            <AlertTriangleIcon
-                                className="mt-0.5 size-4 shrink-0 text-amber-600"
-                            />
+                            <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
                             <p className="text-sm text-amber-800">
                                 {t(
                                     `routingSettings.rules.${dimseInlineWarningKey}`,
@@ -259,6 +264,7 @@ export function RulesTab({ workspaceId }: { workspaceId: string }) {
                     <Label>Conditions (AND)</Label>
                     {conditions.map((condition, index) => (
                         <div
+                            // biome-ignore lint/suspicious/noArrayIndexKey: 條件列為表單暫存狀態，無穩定 id
                             key={`condition-${index}`}
                             className="flex gap-2 items-center"
                         >

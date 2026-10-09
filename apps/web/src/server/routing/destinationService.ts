@@ -101,8 +101,7 @@ export class RoutingDestinationService {
         if (input.host !== undefined) destination.host = input.host;
         if (input.port !== undefined) destination.port = input.port;
         if (input.baseUrl !== undefined) destination.baseUrl = input.baseUrl;
-        if (input.authType !== undefined)
-            destination.authType = input.authType;
+        if (input.authType !== undefined) destination.authType = input.authType;
         if (input.authUsername !== undefined)
             destination.authUsername = input.authUsername;
         if (input.authSecret !== undefined) {
@@ -147,7 +146,10 @@ export class RoutingDestinationService {
         const remote = await this.entityManager.findOne(
             DimseAllowedRemoteEntity,
             {
-                where: { id: options.allowedRemoteId, dimseConfigId: config.id },
+                where: {
+                    id: options.allowedRemoteId,
+                    dimseConfigId: config.id,
+                },
             },
         );
         if (!remote) return null;

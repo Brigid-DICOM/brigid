@@ -44,7 +44,9 @@ export class RoutingJobPoller {
         const checkIntervalMs = 100;
         const startTime = Date.now();
         while (this.isPolling && Date.now() - startTime < maxWaitTime) {
-            await new Promise((resolve) => setTimeout(resolve, checkIntervalMs));
+            await new Promise((resolve) =>
+                setTimeout(resolve, checkIntervalMs),
+            );
         }
     }
 

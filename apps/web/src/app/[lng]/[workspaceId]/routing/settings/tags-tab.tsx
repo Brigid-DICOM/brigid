@@ -43,9 +43,9 @@ export function TagsTab({ workspaceId }: { workspaceId: string }) {
         }
     };
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 只在 workspaceId 改變時重新載入
     useEffect(() => {
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workspaceId]);
 
     const handleCreate = async () => {

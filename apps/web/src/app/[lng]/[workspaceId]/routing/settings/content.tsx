@@ -16,9 +16,7 @@ export default function RoutingSettingsContent({
 
             <Tabs defaultValue="destinations">
                 <TabsList>
-                    <TabsTrigger value="destinations">
-                        Destinations
-                    </TabsTrigger>
+                    <TabsTrigger value="destinations">Destinations</TabsTrigger>
                     <TabsTrigger value="rules">Rules</TabsTrigger>
                     <TabsTrigger value="tags">Tags</TabsTrigger>
                 </TabsList>

@@ -2,10 +2,7 @@ import { AppDataSource } from "@brigid/database";
 import { RoutingJobEntity } from "@brigid/database/src/entities/routingJob.entity";
 import { RoutingRuleEntity } from "@brigid/database/src/entities/routingRule.entity";
 import type { DicomTag } from "@brigid/types";
-import {
-    matchRoutingRules,
-    type RoutingEvaluateContext,
-} from "./ruleEngine";
+import { matchRoutingRules, type RoutingEvaluateContext } from "./ruleEngine";
 
 export type CreateJobsFromIngestInput = {
     workspaceId: string;
@@ -90,7 +87,12 @@ export class RoutingJobService {
         input: CreateJobsFromIngestInput & {
             rules: Pick<
                 RoutingRuleEntity,
-                "id" | "enabled" | "priority" | "conditions" | "destinationId" | "delaySeconds"
+                | "id"
+                | "enabled"
+                | "priority"
+                | "conditions"
+                | "destinationId"
+                | "delaySeconds"
             >[];
         },
     ): Promise<RoutingJobEntity[]> {
@@ -175,9 +177,9 @@ export class RoutingJobService {
             return job;
         }
 
-        const rule = await AppDataSource.getRepository(RoutingRuleEntity).findOne(
-            { where: { id: job.ruleId } },
-        );
+        const rule = await AppDataSource.getRepository(
+            RoutingRuleEntity,
+        ).findOne({ where: { id: job.ruleId } });
 
         job.status = "scheduled";
         job.scheduledAt = computeScheduledAt(

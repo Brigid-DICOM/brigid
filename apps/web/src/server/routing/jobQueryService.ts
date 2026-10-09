@@ -1,7 +1,7 @@
 import { AppDataSource } from "@brigid/database";
 import {
-    type RoutingJobStatus,
     RoutingJobEntity,
+    type RoutingJobStatus,
 } from "@brigid/database/src/entities/routingJob.entity";
 import type { FindOptionsWhere } from "typeorm";
 import { Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
