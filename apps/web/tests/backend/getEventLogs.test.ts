@@ -34,6 +34,7 @@ describe("Event Logs API", () => {
         vi.clearAllMocks();
         await testDb.clearDatabase();
         await testDb.dataSource.getRepository(EventLogEntity).clear();
+        await testDb.seedTestData();
     });
 
     async function seedLogs() {
@@ -122,18 +123,38 @@ describe("Event Logs API", () => {
     });
 
     it("should filter logs by date range", async () => {
-        await seedLogs();
-
-        const now = new Date();
-        const startDate = new Date(now.getTime() - 2000).toISOString();
+        const repo = testDb.dataSource.getRepository(EventLogEntity);
+        await repo.save(
+            repo.create([
+                {
+                    name: "OLD_LOG",
+                    level: "info",
+                    message: "Old log",
+                    workspaceId: WORKSPACE_ID,
+                    requestId: "req-old",
+                    createdAt: new Date("2026-01-10T10:00:00Z"),
+                },
+                {
+                    name: "RECENT_LOG",
+                    level: "info",
+                    message: "Recent log",
+                    workspaceId: WORKSPACE_ID,
+                    requestId: "req-recent",
+                    createdAt: new Date("2026-01-20T10:00:00Z"),
+                },
+            ]),
+        );
 
         const response = await app.request(
-            `/api/workspaces/${WORKSPACE_ID}/event-logs?startDate=${startDate}`,
+            `/api/workspaces/${WORKSPACE_ID}/event-logs?startDate=2026-01-20`,
             { method: "GET" },
         );
 
+        expect(response.status).toBe(200);
         const json = await response.json();
+        expect(json.ok).toBe(true);
         expect(json.data.eventLogs).toHaveLength(1);
+        expect(json.data.eventLogs[0].name).toBe("RECENT_LOG");
     });
 
     it("should support pagination", async () => {

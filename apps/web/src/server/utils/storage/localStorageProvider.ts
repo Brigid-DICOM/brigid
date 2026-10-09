@@ -5,6 +5,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import type { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import env from "@brigid/env";
 import type { MultipartFile } from "@/server/types/file";
 import { appLogger } from "../logger";
@@ -51,13 +52,14 @@ export class LocalStorageProvider implements StorageProvider {
 
         try {
             const writeStream = createWriteStream(filePath);
-            readableStream.pipe(writeStream);
+            await pipeline(readableStream, writeStream);
             logger.info(`upload ${file.filename} to ${filePath} successfully`);
 
             this.uploadingFiles.delete(key);
 
             return { key, filePath };
         } catch (error) {
+            this.uploadingFiles.delete(key);
             console.error("Failed to upload file", error);
             throw error;
         }

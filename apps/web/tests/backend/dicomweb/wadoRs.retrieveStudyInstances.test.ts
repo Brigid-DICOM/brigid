@@ -74,6 +74,7 @@ describe("WADO-RS Study Route", () => {
         vi.restoreAllMocks();
 
         await testDb.clearDatabase();
+        await testDb.seedTestData();
 
         const testFileManager = new TestFileManager();
         for (const instance of TEST_DICOM_DATA.instances) {
@@ -355,7 +356,7 @@ describe("WADO-RS Study Route", () => {
             const { StudyService } = await import(
                 "@/server/services/study.service"
             );
-            vi.spyOn(StudyService.prototype, "getStudyByUid").mockRejectedValue(
+            vi.spyOn(StudyService.prototype, "getStudyInstancesByCursor").mockRejectedValue(
                 new Error("Database error"),
             );
 

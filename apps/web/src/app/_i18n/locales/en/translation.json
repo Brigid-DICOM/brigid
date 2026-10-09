@@ -56,7 +56,14 @@
         "uploadDicom": "Upload DICOM",
         "myShares": "My Shares",
         "shareWithMe": "Share With Me",
-        "eventLogs": "Event Logs"
+        "eventLogs": "Event Logs",
+        "routingSettings": "Routing Settings",
+        "routingActivity": "Routing Activity"
+    },
+    "routingSettings": {
+        "rules": {
+            "dimseSettingsNotConfigured": "This rule targets a DIMSE destination, but this workspace has no DIMSE settings yet. Create them under Workspace Settings → DIMSE (SCP)."
+        }
     },
     "navWorkspace": {
         "settings": "Settings",

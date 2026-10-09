@@ -50,7 +50,14 @@ export async function register() {
         });
         console.log("Raccoon DCM4CHE Java loader registered");
 
-        let cleanupScheduler: any;
+        let cleanupScheduler: {
+            start: () => void;
+            stop: () => Promise<void>;
+        } | undefined;
+        let routingPoller: {
+            start: (intervalMs?: number, batchSize?: number) => void;
+            stop: () => Promise<void>;
+        } | undefined;
         try {
             const { DicomCleanupSchedulerService } = await import(
                 "@/server/services/dicom/dicomCleanupScheduler.service"
@@ -60,6 +67,17 @@ export async function register() {
             console.log("Dicom cleanup scheduler started");
         } catch (error) {
             console.error("Failed to start dicom cleanup scheduler", error);
+        }
+
+        try {
+            const { RoutingJobPoller } = await import(
+                "@/server/routing/poller"
+            );
+            routingPoller = new RoutingJobPoller();
+            routingPoller.start();
+            console.log("Routing job poller started");
+        } catch (error) {
+            console.error("Failed to start routing job poller", error);
         }
 
         const { DimseApp } = await import("./server/dimse/index");
@@ -77,6 +95,11 @@ export async function register() {
             if (cleanupScheduler) {
                 await cleanupScheduler.stop();
                 console.log("Dicom cleanup scheduler stopped");
+            }
+
+            if (routingPoller) {
+                await routingPoller.stop();
+                console.log("Routing job poller stopped");
             }
 
             if (AppDataSource.isInitialized) {

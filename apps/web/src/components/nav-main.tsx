@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
     DatabaseIcon,
     GaugeIcon,
+    GitBranchIcon,
+    RouteIcon,
     ScrollTextIcon,
     Share2Icon,
     Trash2Icon,
@@ -134,6 +136,38 @@ export function NavMain() {
                     )}
 
                     <SidebarSeparator />
+
+                    {canManage && (
+                        <SidebarMenuItem key="routing settings">
+                            <SidebarMenuButton
+                                tooltip={t("sidebar.routingSettings")}
+                            >
+                                <RouteIcon className="size-4" />
+                                <Link
+                                    href={`/${lng}/${workspaceId}/routing/settings`}
+                                    className="w-full"
+                                >
+                                    {t("sidebar.routingSettings")}
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
+
+                    {canRead && (
+                        <SidebarMenuItem key="routing activity">
+                            <SidebarMenuButton
+                                tooltip={t("sidebar.routingActivity")}
+                            >
+                                <GitBranchIcon className="size-4" />
+                                <Link
+                                    href={`/${lng}/${workspaceId}/routing/activity`}
+                                    className="w-full"
+                                >
+                                    {t("sidebar.routingActivity")}
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
 
                     <SidebarMenuItem key="share with me">
                         <SidebarMenuButton tooltip={t("sidebar.shareWithMe")}>

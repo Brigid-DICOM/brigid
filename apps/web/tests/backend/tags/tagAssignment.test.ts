@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import type { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import type { StudyEntity } from "@brigid/database/src/entities/study.entity";
@@ -57,7 +58,7 @@ describe("Tag Assignment Routes", () => {
                 "Important",
                 "#FF5735",
             );
-            const studyId = testStudies[0].id;
+            const studyId = testStudies[0].studyInstanceUid;
 
             // Act
             const response = await app.request(
@@ -76,7 +77,7 @@ describe("Tag Assignment Routes", () => {
             );
 
             // Assert
-            expect(response.status).toBe(200);
+            expect(response.status).toBe(201);
             const json = await response.json();
             expect(json.ok).toBe(true);
             expect(json.data).toBeDefined();
@@ -92,7 +93,7 @@ describe("Tag Assignment Routes", () => {
                 "Important",
                 "#FF5735",
             );
-            const seriesId = testSeries[0].id;
+            const seriesId = testSeries[0].seriesInstanceUid;
 
             // Act
             const response = await app.request(
@@ -111,7 +112,7 @@ describe("Tag Assignment Routes", () => {
             );
 
             // Assert
-            expect(response.status).toBe(200);
+            expect(response.status).toBe(201);
             const json = await response.json();
             expect(json.ok).toBe(true);
             expect(json.data).toBeDefined();
@@ -127,7 +128,7 @@ describe("Tag Assignment Routes", () => {
                 "Important",
                 "#FF5735",
             );
-            const instanceId = testInstances[0].id;
+            const instanceId = testInstances[0].sopInstanceUid;
 
             // Act
             const response = await app.request(
@@ -136,6 +137,8 @@ describe("Tag Assignment Routes", () => {
                     method: "POST",
                     body: JSON.stringify({
                         tagId: tag.id,
+                        targetType: "instance",
+                        targetId: instanceId,
                     }),
                     headers: new Headers({
                         "Content-Type": "application/json",
@@ -144,7 +147,7 @@ describe("Tag Assignment Routes", () => {
             );
 
             // Assert
-            expect(response.status).toBe(200);
+            expect(response.status).toBe(201);
             const json = await response.json();
             expect(json.ok).toBe(true);
             expect(json.data).toBeDefined();
@@ -155,7 +158,7 @@ describe("Tag Assignment Routes", () => {
 
         it("should return 404 if tag is not found", async () => {
             // Arrange
-            const nonExistentTagId = "non-existent-tag-id";
+            const nonExistentTagId = randomUUID();
 
             // Act
             const response = await app.request(
@@ -184,7 +187,7 @@ describe("Tag Assignment Routes", () => {
                 "Important",
                 "#FF5735",
             );
-            const nonExistentTargetId = "non-existent-target-id";
+            const nonExistentTargetId = randomUUID();
 
             // Act
             const response = await app.request(
@@ -265,9 +268,11 @@ describe("Tag Assignment Routes", () => {
         });
 
         it("should return 404 if assignment is not found", async () => {
+            const nonExistentAssignmentId = randomUUID();
+
             // Act
             const response = await app.request(
-                `/api/workspaces/${WORKSPACE_ID}/tag-assignments/non-existent-assignment-id`,
+                `/api/workspaces/${WORKSPACE_ID}/tag-assignments/${nonExistentAssignmentId}`,
                 {
                     method: "DELETE",
                 },

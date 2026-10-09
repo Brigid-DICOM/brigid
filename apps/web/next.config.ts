@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
         "@brigid/database",
         "java-bridge",
     ],
+    // Turbopack 會將 node: 協定寫入 chunk 檔名，Windows NTFS 不允許冒號導致 standalone copyfile 失敗
+    turbopack: {
+        resolveAlias: {
+            "node:fs/promises": "fs/promises",
+        },
+    },
     experimental: {
         serverMinification: true,
         turbopackMinify: false,

@@ -53,6 +53,7 @@ describe("WADO-URI Route", () => {
         vi.clearAllMocks();
         vi.restoreAllMocks();
         await testDb.clearDatabase();
+        await testDb.seedTestData();
 
         const testFileManager = new TestFileManager();
 

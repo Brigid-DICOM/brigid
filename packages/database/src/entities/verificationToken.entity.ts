@@ -5,7 +5,7 @@ import {
 } from "typeorm";
 import { transformer } from "../utils/transformer";
 
-@Entity("verification_token")
+@Entity({ name: "verification_tokens" })
 export class VerificationTokenEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;

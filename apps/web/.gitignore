@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/tests/fixtures/dicomFiles/dimse-temp/
+/tests/dimse/.tmp/
 
 # next.js
 /.next/

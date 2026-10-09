@@ -1,5 +1,8 @@
 import { PATIENT_SEX } from "@brigid/database/src/const/dicom";
-import { AccountEntity } from "@brigid/database/src/entities/account.entity";
+import {
+    createMigratedDataSource,
+    initializeDataSource,
+} from "@brigid/database/src/createMigratedDataSource";
 import { DicomCodeSequenceEntity } from "@brigid/database/src/entities/dicomCodeSequence.entity";
 import { DimseAllowedIpEntity } from "@brigid/database/src/entities/dimseAllowedIp.entity";
 import { DimseAllowedRemoteEntity } from "@brigid/database/src/entities/dimseAllowedRemote.entity";
@@ -8,77 +11,74 @@ import { EventLogEntity } from "@brigid/database/src/entities/eventLog.entity";
 import { InstanceEntity } from "@brigid/database/src/entities/instance.entity";
 import { PatientEntity } from "@brigid/database/src/entities/patient.entity";
 import { PersonNameEntity } from "@brigid/database/src/entities/personName.entity";
+import { RoutingDestinationEntity } from "@brigid/database/src/entities/routingDestination.entity";
+import { RoutingJobEntity } from "@brigid/database/src/entities/routingJob.entity";
+import { RoutingRuleEntity } from "@brigid/database/src/entities/routingRule.entity";
+import { RoutingTagEntity } from "@brigid/database/src/entities/routingTag.entity";
 import { SeriesEntity } from "@brigid/database/src/entities/series.entity";
 import { SeriesRequestAttributesEntity } from "@brigid/database/src/entities/seriesRequestAttributes.entity";
-import { SessionEntity } from "@brigid/database/src/entities/session.entity";
 import { ShareLinkEntity } from "@brigid/database/src/entities/shareLink.entity";
 import { ShareLinkRecipientEntity } from "@brigid/database/src/entities/shareLinkRecipient.entity";
 import { ShareLinkTargetEntity } from "@brigid/database/src/entities/shareLinkTarget.entity";
 import { StudyEntity } from "@brigid/database/src/entities/study.entity";
 import { TagEntity } from "@brigid/database/src/entities/tag.entity";
 import { TagAssignmentEntity } from "@brigid/database/src/entities/tagAssignment.entity";
-import { UserEntity } from "@brigid/database/src/entities/user.entity";
-import { UserWorkspaceEntity } from "@brigid/database/src/entities/userWorkspace.entity";
-import { VerificationTokenEntity } from "@brigid/database/src/entities/verificationToken.entity";
 import { WorkspaceEntity } from "@brigid/database/src/entities/workspace.entity";
-import { parseDataSourceConfig } from "@brigid/database/src/utils/parseDataSourceConfig";
-import * as SqliteDriver from "sqlite3";
-import { DataSource } from "typeorm";
+import type { DataSource } from "typeorm";
 import { WorkspaceService } from "@/server/services/workspace.service";
+
+// DICOM 業務資料 entity，clearDicomData 清除範圍 / Entities cleared by clearDicomData
+const DICOM_DATA_ENTITIES = [
+    ShareLinkRecipientEntity,
+    ShareLinkTargetEntity,
+    ShareLinkEntity,
+    TagAssignmentEntity,
+    TagEntity,
+    InstanceEntity,
+    SeriesRequestAttributesEntity,
+    DicomCodeSequenceEntity,
+    SeriesEntity,
+    StudyEntity,
+    PatientEntity,
+    PersonNameEntity,
+    EventLogEntity,
+] as const;
 
 export class TestDatabaseManager {
     public dataSource: DataSource;
     private isInitialized: boolean = false;
+    private readonly ownsDataSource: boolean;
 
-    constructor() {
-        const dataSourceConfig = parseDataSourceConfig(process.env.TEST_DB_URL || "sqlite://:memory:");
+    constructor(dataSource?: DataSource) {
+        if (dataSource) {
+            this.dataSource = dataSource;
+            this.ownsDataSource = false;
+            return;
+        }
 
-        console.log(`test database manager dataSourceConfig: ${JSON.stringify(dataSourceConfig)}`);
-
-        this.dataSource = new DataSource({
-            ...dataSourceConfig,
-            entities: [
-                UserEntity,
-                AccountEntity,
-                SessionEntity,
-                VerificationTokenEntity,
-                WorkspaceEntity,
-                UserWorkspaceEntity,
-                PersonNameEntity,
-                PatientEntity,
-                StudyEntity,
-                SeriesEntity,
-                InstanceEntity,
-                DicomCodeSequenceEntity,
-                SeriesRequestAttributesEntity,
-                TagEntity,
-                TagAssignmentEntity,
-                ShareLinkEntity,
-                ShareLinkTargetEntity,
-                ShareLinkRecipientEntity,
-                DimseConfigEntity,
-                DimseAllowedIpEntity,
-                DimseAllowedRemoteEntity,
-                EventLogEntity,
-            ],
-            synchronize: true,
-            logging: false,
-            driver: dataSourceConfig.type === "sqlite" ? SqliteDriver : undefined,
-        });
+        this.ownsDataSource = true;
+        this.dataSource = createMigratedDataSource(
+            process.env.TEST_DB_URL || "sqlite://:memory:",
+        );
     }
 
     async initialize() {
         if (!this.isInitialized) {
-            await this.dataSource.initialize();
+            await initializeDataSource(this.dataSource);
             this.isInitialized = true;
         }
     }
 
     async cleanup() {
-        if (this.isInitialized) {
-            await this.dataSource.destroy();
-            this.isInitialized = false;
+        if (!this.isInitialized) {
+            return;
         }
+
+        if (this.ownsDataSource) {
+            await this.dataSource.destroy();
+        }
+
+        this.isInitialized = false;
     }
 
     async clearDatabase() {
@@ -89,6 +89,10 @@ export class TestDatabaseManager {
             const tableNames = entities?.map(entity => `"${entity.tableName}"`).join(", ");
             await this.dataSource.query(`TRUNCATE TABLE ${tableNames} CASCADE`);
         } else {
+            await this.dataSource.manager.clear(RoutingJobEntity);
+            await this.dataSource.manager.clear(RoutingRuleEntity);
+            await this.dataSource.manager.clear(RoutingTagEntity);
+            await this.dataSource.manager.clear(RoutingDestinationEntity);
             await this.dataSource.manager.clear(DimseAllowedRemoteEntity);
             await this.dataSource.manager.clear(DimseAllowedIpEntity);
             await this.dataSource.manager.clear(DimseConfigEntity);
@@ -101,6 +105,23 @@ export class TestDatabaseManager {
             await this.dataSource.manager.clear(SeriesEntity);
             await this.dataSource.manager.clear(StudyEntity);
             await this.dataSource.manager.clear(WorkspaceEntity);
+        }
+    }
+
+    // 只清除 DICOM 業務資料，保留 DimseConfig 等測試基礎設施 / Clear DICOM data only, keep test infra like DimseConfig
+    async clearDicomData() {
+        const type = this.dataSource.options.type;
+
+        if (type === "postgres") {
+            const tableNames = DICOM_DATA_ENTITIES.map(
+                (entity) =>
+                    `"${this.dataSource.getMetadata(entity).tableName}"`,
+            ).join(", ");
+            await this.dataSource.query(`TRUNCATE TABLE ${tableNames} CASCADE`);
+        } else {
+            for (const entity of DICOM_DATA_ENTITIES) {
+                await this.dataSource.manager.clear(entity);
+            }
         }
     }
 

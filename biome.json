@@ -45,6 +45,16 @@
       "linter": {
         "enabled": false
       }
+    },
+    {
+      "includes": ["apps/web/tests/dimse/**", "apps/web/tests/backend/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useHookAtTopLevel": "off"
+          }
+        }
+      }
     }
   ]
 }

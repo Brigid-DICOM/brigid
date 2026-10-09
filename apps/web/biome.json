@@ -1,6 +1,18 @@
 {
-    "extends": ["../../biome.json"],
+    "extends": "//",
     "files": {
         "includes": ["!public/**/*"]
-    }
+    },
+    "overrides": [
+        {
+            "includes": ["tests/dimse/**", "tests/backend/**"],
+            "linter": {
+                "rules": {
+                    "correctness": {
+                        "useHookAtTopLevel": "off"
+                    }
+                }
+            }
+        }
+    ]
 }

@@ -112,7 +112,11 @@ const baseSchema = z.object({
     DICOM_CLEANUP_RETENTION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
     DICOM_CLEANUP_INTERVAL_HOURS: z.coerce.number().int().min(1).max(168).default(24),
     // query
-    QUERY_MAX_LIMIT: z.coerce.number().int().min(1).max(1000).default(100)
+    QUERY_MAX_LIMIT: z.coerce.number().int().min(1).max(1000).default(100),
+    // routing
+    ROUTING_CREDENTIAL_SECRET: z.string().min(32).optional(),
+    ROUTING_POLLER_INTERVAL_MS: z.coerce.number().int().min(1000).max(60000).default(2000),
+    ROUTING_POLLER_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(10),
 });
 
 const envSchemaBase = z.intersection(z.intersection(z.intersection(baseSchema, storageSchema), authSchema), dimseSchema);

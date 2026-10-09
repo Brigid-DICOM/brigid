@@ -79,6 +79,7 @@ describe("WADO-RS Retrieve Frame Pixel Data Route", () => {
         vi.restoreAllMocks();
 
         await testDb.clearDatabase();
+        await testDb.seedTestData();
 
         const testFileManager = new TestFileManager();
         const res = await testFileManager.uploadTestFile(

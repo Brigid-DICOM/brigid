@@ -214,6 +214,15 @@ export const toStudyDbEntity = (
     study.studyId = dicomJsonUtils.getValue<string>(
         DICOM_TAG_KEYWORD_REGISTRY.StudyID.tag,
     );
+    const dicomReferringPhysicianName = dicomJsonUtils.getValue<DicomPersonName>(
+        DICOM_TAG_KEYWORD_REGISTRY.ReferringPhysicianName.tag,
+    );
+    if (dicomReferringPhysicianName?.Alphabetic) {
+        const referringPhysicianName = new PersonNameEntity();
+        referringPhysicianName.alphabetic =
+            dicomReferringPhysicianName.Alphabetic;
+        study.referringPhysicianName = referringPhysicianName;
+    }
     study.json = JSON.stringify(
         dicomJsonUtils.getSelectionDicomJson([
             ...STUDY_TAGS_TO_STORE,
