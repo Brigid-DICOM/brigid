@@ -6,9 +6,9 @@ name: Auto Release
 # 3. 以 workflow_dispatch 明確派發 release.yaml（GitHub Release + SEA）與 docker-publish.yaml（Docker Hub）
 #
 # 遞迴防護：GITHUB_TOKEN 推送的 commit / tag 不會觸發任何 workflow（GitHub 反遞迴機制），
-# 第 2 步的三個推送都不會重跑本 workflow；job guard 與腳本的 tag==version 判斷作為雙重補強。
-# release commit 刻意不帶 [skip ci]：skip 關鍵字會連同 tag 一起被封鎖，導致 v1.4.0 那輪
-# release.yaml / docker-publish.yaml 完全沒被觸發（本次事故根因）。
+# 第 2 步的三個推送都不會重跑本 workflow；腳本內 tag==version 冪等判斷把關重跑情境。
+# release commit 刻意不帶 [skip ci]：skip 關鍵字會讓推送的 tag 一併被封鎖，
+# release.yaml / docker-publish.yaml 永遠不會觸發（v1.4.0 事故根因）。
 
 on:
   push:
@@ -26,8 +26,6 @@ jobs:
   version-and-tag:
     name: Version, Changelog and Tag
     runs-on: ubuntu-latest
-    # 自己產生的 release commit 不再走一輪發版
-    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -60,6 +58,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # GITHUB_TOKEN 推送的 commit / tag 不會觸發任何 workflow（GitHub 反遞迴機制），
+          # 文件指明 workflow_dispatch 是例外：用 gh 明確派發下游建置與發布
+          dispatch_downstream() {
+            gh workflow run release.yaml --ref "$1"
+            gh workflow run docker-publish.yaml --ref "$1"
+            echo "::notice::已派發 release.yaml 與 docker-publish.yaml（ref=$1）"
+          }
+
           LAST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
           LAST_VERSION=${LAST_TAG#v}
           CURRENT_VERSION=$(node -p "require('./package.json').version")
@@ -72,9 +78,16 @@ jobs:
             TARGET_VERSION=$CURRENT_VERSION
             git tag "v$TARGET_VERSION"
             git push origin "v$TARGET_VERSION"
+            dispatch_downstream "v$TARGET_VERSION"
           else
             # 沒有可發布的 conventional commits 就不發版，避免空版本與空 changelog
             if ! git log "$LOG_FROM..HEAD" --format='%s' | grep -qE '^(feat|fix|perf|revert|chore|docs|refactor|style|test|build|ci)(\([^)]+\))?!?:'; then
+              # HEAD 就是 release commit：上次执行已推完 commit/tag 但派發失敗（如觸發器
+              # 尚未註冊），重跑時補派發，不再重複發版
+              if git log -1 --format='%s' | grep -q '^chore(release):'; then
+                dispatch_downstream "v$CURRENT_VERSION"
+                exit 0
+              fi
               echo "::notice::$LOG_FROM..HEAD 沒有 conventional commits，跳過發版"
               exit 0
             fi
@@ -94,10 +107,5 @@ jobs:
               git tag "v$TARGET_VERSION"
               git push origin "v$TARGET_VERSION"
             fi
+            dispatch_downstream "v$TARGET_VERSION"
           fi
-
-          # GITHUB_TOKEN 推送的 commit / tag 不會觸發任何 workflow（GitHub 反遞迴機制），
-          # 文件指明 workflow_dispatch 是例外：用 gh 明確派發下游建置與發布
-          gh workflow run release.yaml --ref "v${TARGET_VERSION}"
-          gh workflow run docker-publish.yaml --ref "v${TARGET_VERSION}"
-          echo "::notice::已派發 release.yaml 與 docker-publish.yaml（ref=v${TARGET_VERSION}）"
